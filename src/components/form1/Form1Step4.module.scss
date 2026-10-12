@@ -32,6 +32,106 @@
   gap: var(--ontario-spacing-5, 1.5rem);
 }
 
+.summaryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--ontario-greyscale-20, #ccc);
+}
+
+.summaryItem {
+  margin: 0;
+  padding: var(--ontario-spacing-4, 1rem) 0;
+  border-bottom: 1px solid var(--ontario-greyscale-20, #ccc);
+}
+
+.summaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem) var(--ontario-spacing-5, 1.5rem);
+}
+
+.summaryMain {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.summaryTitle {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+.summaryDescription {
+  margin: var(--ontario-spacing-1, 0.25rem) 0 0;
+  font-size: var(--ontario-font-sizes-small, 0.875rem);
+  line-height: 1.5;
+  color: var(--ontario-greyscale-60, #666);
+}
+
+.summaryRemove {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
 .directorList {
   list-style: none;
   margin: 0;
@@ -188,6 +288,11 @@
   flex-wrap: wrap;
   gap: var(--ontario-spacing-5, 1.5rem);
   align-items: center;
+}
+
+.addActionsAlone {
+  padding-top: var(--ontario-spacing-4, 1rem);
+  border-top: 1px solid var(--ontario-greyscale-20, #ccc);
 }
 
 .addLink {

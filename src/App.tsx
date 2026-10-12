@@ -6,6 +6,7 @@ import { Form1Page } from './pages/Form1Page';
 import { Form1Step1Page } from './pages/Form1Step1Page';
 import { Form1Step2Page } from './pages/Form1Step2Page';
 import { Form1Step3Page } from './pages/Form1Step3Page';
+import { Form1DirectorSubflowPage } from './pages/Form1DirectorSubflowPage';
 import { Form1Step4Page } from './pages/Form1Step4Page';
 import { Form7DraftSummaryPage } from './pages/Form7DraftSummaryPage';
 import { Form7Page } from './pages/Form7Page';
@@ -30,6 +31,14 @@ function App() {
         <Route path="/form-1/step-2" element={<Form1Step2Page />} />
         <Route path="/form-1/step-3" element={<Form1Step3Page />} />
         <Route path="/form-1/step-4" element={<Form1Step4Page />} />
+        <Route
+          path="/form-1/step-4/directors/new"
+          element={<Form1DirectorSubflowPage />}
+        />
+        <Route
+          path="/form-1/step-4/directors/:directorId"
+          element={<Form1DirectorSubflowPage />}
+        />
         <Route path="/form-1/draft-summary" element={<Form1DraftSummaryPage />} />
         <Route path="/form-7" element={<Form7Page />} />
         <Route path="/form-7/step-1" element={<Form7Step1Page />} />

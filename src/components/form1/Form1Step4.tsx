@@ -2,13 +2,18 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioIconAdd,
+  OntarioIconAddAlt,
+  OntarioIconDelete,
   OntarioInput,
   OntarioPageAlert,
   OntarioRadioButtons,
   OntarioStepIndicator,
   OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
+import {
+  formatDirectorFullName,
+  formatDirectorListDescription,
+} from './Form1DirectorEditor';
 import { FieldErrorMessage } from './FieldErrorMessage';
 import {
   EMPTY_STEP1,
@@ -365,10 +370,19 @@ export function Form1Step4() {
     }
   }
 
-  /** Placeholder — director add subflow will be implemented later. */
   function startAddDirectorSubflow() {
     clearError('directors');
-    // TODO: open /form-1 director add subflow
+    navigate('/form-1/step-4/directors/new');
+  }
+
+  function editDirector(id: string) {
+    navigate(`/form-1/step-4/directors/${id}`);
+  }
+
+  function removeDirector(id: string) {
+    const nextDirectors = step4.directors.filter((entry) => entry.id !== id);
+    patchStep4({ directors: nextDirectors });
+    clearError('directors');
   }
 
   function handleSummaryLinkClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
@@ -553,14 +567,56 @@ export function Form1Step4() {
 
             <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>
               <FieldErrorMessage message={errors.directors} />
-              <div className={step4Styles.addActions}>
+
+              {step4.directors.length > 0 ? (
+                <ul className={step4Styles.summaryList}>
+                  {step4.directors.map((director) => {
+                    const name = formatDirectorFullName(director) || 'Director';
+                    return (
+                      <li key={director.id} className={step4Styles.summaryItem}>
+                        <div className={step4Styles.summaryRow}>
+                          <div className={step4Styles.summaryMain}>
+                            <button
+                              type="button"
+                              className={step4Styles.summaryTitle}
+                              onClick={() => editDirector(director.id)}
+                            >
+                              {name}
+                            </button>
+                            <p className={step4Styles.summaryDescription}>
+                              {formatDirectorListDescription(director)}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className={step4Styles.summaryRemove}
+                            onClick={() => removeDirector(director.id)}
+                            aria-label={`Remove ${name}`}
+                          >
+                            <OntarioIconDelete colour="blue" iconWidth={24} isDecorative />
+                            Remove
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+
+              <div
+                className={
+                  step4.directors.length === 0
+                    ? `${step4Styles.addActions} ${step4Styles.addActionsAlone}`
+                    : step4Styles.addActions
+                }
+              >
                 <button
                   type="button"
                   className={step4Styles.addLink}
                   onClick={startAddDirectorSubflow}
                 >
-                  <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
-                  Add another director
+                  <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
+                  Add director(s)
                 </button>
               </div>
             </div>

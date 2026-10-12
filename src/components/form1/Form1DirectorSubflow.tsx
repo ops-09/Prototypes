@@ -1,0 +1,122 @@
+import { useMemo, useState } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import {
+  OntarioPageAlert,
+  OntarioStepIndicator,
+} from '@ongov/ontario-design-system-component-library-react';
+import {
+  Form1DirectorBlock,
+  validateDirector,
+  type DirectorErrors,
+} from './Form1DirectorEditor';
+import {
+  createEmptyDirector,
+  EMPTY_STEP4,
+  readForm1Draft,
+  upsertForm1Step4,
+  type Form1Director,
+  type Form1Step4Data,
+} from './form1DraftStorage';
+import styles from './Form1Step1.module.scss';
+
+function readStep4(): Form1Step4Data {
+  const draft = readForm1Draft();
+  return { ...EMPTY_STEP4, ...(draft?.step4 ?? {}) };
+}
+
+export function Form1DirectorSubflow() {
+  const navigate = useNavigate();
+  const { directorId } = useParams<{ directorId: string }>();
+  const isNew = !directorId;
+
+  const initialDirector = useMemo(() => {
+    if (isNew) {
+      return createEmptyDirector();
+    }
+    const existing = readStep4().directors.find((entry) => entry.id === directorId);
+    return existing ? structuredClone(existing) : null;
+  }, [directorId, isNew]);
+
+  const [director, setDirector] = useState<Form1Director | null>(initialDirector);
+  const [errors, setErrors] = useState<DirectorErrors>({});
+  const [showErrorSummary, setShowErrorSummary] = useState(false);
+
+  if (!director) {
+    return <Navigate to="/form-1/step-4" replace />;
+  }
+
+  const current = director;
+
+  function handleSave() {
+    const fieldErrors = validateDirector(current);
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      setShowErrorSummary(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const step4 = readStep4();
+    const nextDirectors = isNew
+      ? [...step4.directors, current]
+      : step4.directors.map((entry) => (entry.id === current.id ? current : entry));
+
+    upsertForm1Step4({ ...step4, directors: nextDirectors }, 'continue', 3);
+    navigate('/form-1/step-4');
+  }
+
+  function handleCancel() {
+    navigate('/form-1/step-4');
+  }
+
+  const errorItems = Object.entries(errors).filter(([, message]) => Boolean(message));
+
+  return (
+    <>
+      <div className={styles.stepIndicator}>
+        <OntarioStepIndicator
+          showBackButton={false}
+          currentStep={5}
+          numberOfSteps={8}
+        />
+      </div>
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12 ontario-medium-8">
+          {showErrorSummary && errorItems.length > 0 ? (
+            <div className={styles.alert} tabIndex={-1}>
+              <OntarioPageAlert type="error" heading="There is a problem">
+                <p>Errors were found on this page:</p>
+                <ul>
+                  {errorItems.map(([key, message]) => (
+                    <li key={key}>{message}</li>
+                  ))}
+                </ul>
+              </OntarioPageAlert>
+            </div>
+          ) : null}
+
+          <h1 className={`ontario-h1 ${styles.pageTitle}`}>
+            {isNew ? 'Add director' : 'Edit director'}
+          </h1>
+
+          <div className={styles.formStack}>
+            <Form1DirectorBlock
+              director={current}
+              expanded
+              showChrome={false}
+              errors={errors}
+              onChange={(next) => {
+                setDirector(next);
+                setErrors({});
+                setShowErrorSummary(false);
+              }}
+              onSave={handleSave}
+              onCancel={handleCancel}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

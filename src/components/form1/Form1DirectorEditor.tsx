@@ -260,6 +260,28 @@ export function isDirectorComplete(director: Form1Director) {
   return Object.keys(validateDirector(director)).length === 0;
 }
 
+export function formatDirectorFullName(director: Form1Director): string {
+  return [director.firstName, director.middleName, director.lastName]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+}
+
+export function formatDirectorListDescription(director: Form1Director): string {
+  const email = director.email.trim();
+  const address = formatDirectorAddressLine(director);
+  if (email && address !== '—') {
+    return `${email} · ${address}`;
+  }
+  if (email) {
+    return email;
+  }
+  if (address !== '—') {
+    return address;
+  }
+  return 'Director details';
+}
+
 export function formatDirectorAddressLine(director: Form1Director): string {
   const { address } = director;
   if (address.addressType === 'canadian') {
@@ -309,21 +331,23 @@ function formatYesNo(value: YesNoAnswer | '') {
 
 type Form1DirectorBlockProps = {
   director: Form1Director;
-  index: number;
+  index?: number;
   errors?: DirectorErrors;
   expanded: boolean;
   onChange: (director: Form1Director) => void;
-  onRemove: () => void;
-  onEdit: () => void;
+  onRemove?: () => void;
+  onEdit?: () => void;
   onSave: () => void;
   onCancel: () => void;
-  canRemove: boolean;
+  canRemove?: boolean;
+  /** When false, render fields + Save/Cancel only (subflow page). */
+  showChrome?: boolean;
 };
 
-/** Inline repeatable director card — collapses to a summary when complete. */
+/** Director form — inline card or bare fields for the add/edit subflow. */
 export function Form1DirectorBlock({
   director,
-  index,
+  index = 0,
   errors = {},
   expanded,
   onChange,
@@ -331,7 +355,8 @@ export function Form1DirectorBlock({
   onEdit,
   onSave,
   onCancel,
-  canRemove,
+  canRemove = false,
+  showChrome = true,
 }: Form1DirectorBlockProps) {
   const prefix = `dir-${director.id}`;
   const needsConsent = director.alsoIncorporator === 'no';
@@ -382,16 +407,18 @@ export function Form1DirectorBlock({
             Director {index + 1}
           </h3>
           <div className={step4Styles.headerActions}>
-            <button
-              type="button"
-              className={step4Styles.editLink}
-              onClick={onEdit}
-              aria-label={`Edit director ${index + 1}`}
-            >
-              <OntarioIconEdit colour="blue" iconWidth={24} isDecorative />
-              Edit
-            </button>
-            {canRemove ? (
+            {onEdit ? (
+              <button
+                type="button"
+                className={step4Styles.editLink}
+                onClick={onEdit}
+                aria-label={`Edit director ${index + 1}`}
+              >
+                <OntarioIconEdit colour="blue" iconWidth={24} isDecorative />
+                Edit
+              </button>
+            ) : null}
+            {canRemove && onRemove ? (
               <button
                 type="button"
                 className={step4Styles.removeLink}
@@ -443,25 +470,7 @@ export function Form1DirectorBlock({
     );
   }
 
-  return (
-    <section className={step4Styles.directorBlock} aria-labelledby={`${prefix}-heading`}>
-      <div className={step4Styles.blockHeader}>
-        <h3 id={`${prefix}-heading`} className={`ontario-h3 ${step4Styles.blockTitle}`}>
-          Director {index + 1}
-        </h3>
-        {canRemove ? (
-          <button
-            type="button"
-            className={step4Styles.removeLink}
-            onClick={onRemove}
-            aria-label={`Remove director ${index + 1}`}
-          >
-            <OntarioIconDelete colour="inherit" iconWidth={24} isDecorative />
-            Remove
-          </button>
-        ) : null}
-      </div>
-
+  const fields = (
       <div className={step4Styles.blockFields}>
         <div className={step4Styles.nameRow}>
           <OntarioInput
@@ -902,15 +911,46 @@ export function Form1DirectorBlock({
 
         <div className={step4Styles.doneActions}>
           <div className={step4Styles.doneButtons}>
-            <OntarioButton type="primary" htmlType="button" onClick={onSave}>
-              Save
-            </OntarioButton>
-            <OntarioButton type="tertiary" htmlType="button" onClick={onCancel}>
-              Cancel
-            </OntarioButton>
+            <OntarioButton
+              type="primary"
+              htmlType="button"
+              label="Save"
+              onClick={onSave}
+            />
+            <OntarioButton
+              type="tertiary"
+              htmlType="button"
+              label="Cancel"
+              onClick={onCancel}
+            />
           </div>
         </div>
       </div>
+  );
+
+  if (!showChrome) {
+    return fields;
+  }
+
+  return (
+    <section className={step4Styles.directorBlock} aria-labelledby={`${prefix}-heading`}>
+      <div className={step4Styles.blockHeader}>
+        <h3 id={`${prefix}-heading`} className={`ontario-h3 ${step4Styles.blockTitle}`}>
+          Director {index + 1}
+        </h3>
+        {canRemove && onRemove ? (
+          <button
+            type="button"
+            className={step4Styles.removeLink}
+            onClick={onRemove}
+            aria-label={`Remove director ${index + 1}`}
+          >
+            <OntarioIconDelete colour="inherit" iconWidth={24} isDecorative />
+            Remove
+          </button>
+        ) : null}
+      </div>
+      {fields}
     </section>
   );
 }
