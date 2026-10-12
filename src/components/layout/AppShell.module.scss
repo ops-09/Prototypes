@@ -1,0 +1,76 @@
+.appShell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.sidebarColumn {
+  flex-shrink: 0;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  padding: var(--ontario-spacing-5, 1.5rem) var(--ontario-spacing-4, 1rem) 0;
+}
+
+.bodyDivider {
+  flex-shrink: 0;
+  width: 1px;
+  align-self: stretch;
+  background-color: var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
+.mainContent {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  padding: var(--ontario-spacing-6, 2rem) var(--ontario-spacing-6, 2rem) var(--ontario-spacing-8, 3rem);
+}
+
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-6, 2rem);
+}
+
+.pageHeading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-1, 0.25rem);
+}
+
+.pageTitle {
+  margin: 0;
+}
+
+.pageDescription {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+}
+
+.pageContainer {
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  padding: var(--ontario-spacing-6, 2rem);
+}
+
+.footerRegion {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.contentPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18rem;
+  border: 2px dashed var(--ontario-colour-accent-light-sky, #c5eefa);
+  background-color: var(--ontario-colour-accent-light-sky, #c5eefa);
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: 1.125rem;
+}

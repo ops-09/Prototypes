@@ -1,0 +1,27 @@
+# OPS-RBAC — Ontario Design System AI Catalog
+
+Read AGENTS.md first.
+
+## Project catalogs (single source of truth)
+
+- Component list: docs/ods/COMPONENT-INDEX.md
+- Component props: docs/ods/COMPONENT-API.md
+- Design tokens: docs/ods/TOKENS.md
+- Installed versions: docs/ods/VERSION.md
+
+## Project constraints
+
+- Stack: Vite + React 19 SPA
+- Asset base path: /assets/
+- Global styles: @ongov/ontario-design-system-global-styles/styles/css/compiled/ontario-theme.min.css (imported in src/main.tsx)
+- Import components from @ongov/ontario-design-system-component-library-react
+## Official package llms.txt copies
+
+- docs/ods/llms-package-ontario-design-system-component-library-react.txt
+- docs/ods/llms-package-ontario-design-system-global-styles.txt
+- docs/ods/llms-package-ontario-design-system-component-library.txt
+
+## Official links
+
+- https://designsystem.ontario.ca/developer-docs/
+- https://designsystem.ontario.ca/components/

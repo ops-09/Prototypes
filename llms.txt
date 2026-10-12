@@ -1,0 +1,14 @@
+# OPS-RBAC — Ontario Design System
+
+Read AGENTS.md first.
+
+Component list: docs/ods/COMPONENT-INDEX.md
+Component props: docs/ods/COMPONENT-API.md
+Design tokens: docs/ods/TOKENS.md
+Version: docs/ods/VERSION.md
+
+Project catalog index: docs/ods/llms.txt
+
+Official links:
+- https://designsystem.ontario.ca/developer-docs/
+- https://designsystem.ontario.ca/components/

@@ -1,0 +1,251 @@
+.sectionHeading {
+  margin: 0 0 var(--ontario-spacing-3, 0.75rem);
+}
+
+.sectionLead {
+  margin: 0 0 var(--ontario-spacing-4, 1rem);
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.countFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.nameRow {
+  display: grid;
+  gap: var(--ontario-spacing-4, 1rem);
+  grid-template-columns: 1fr;
+  align-items: end;
+
+  @media screen and (min-width: 40em) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.directorsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.directorList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.directorBlock {
+  background-color: var(--ontario-greyscale-5, #f2f2f2);
+  padding: var(--ontario-spacing-5, 1.5rem);
+}
+
+.directorBlockCollapsed {
+  .blockHeader {
+    margin-bottom: var(--ontario-spacing-3, 0.75rem);
+  }
+}
+
+.blockHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.editLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  line-height: 1.5;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+// Read-only fields stacked like form inputs: h5 label, body value below.
+.readOnlyFields {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.readOnlyField {
+  margin: 0;
+}
+
+.readOnlyLabel {
+  margin: 0 0 var(--ontario-spacing-2, 0.5rem);
+}
+
+.readOnlyValue {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.doneActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-top: var(--ontario-spacing-2, 0.5rem);
+}
+
+.doneButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-6, 2rem);
+}
+
+.blockTitle {
+  margin: 0;
+}
+
+.removeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-alert, #cd0000);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  line-height: 1.5;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    color: #6b0000;
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+.blockFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.addActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  align-items: center;
+}
+
+.addLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+.consentBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.consentLink {
+  margin: 0;
+
+  a {
+    color: var(--ontario-colour-link, #0066cc);
+  }
+}
+
+.consentNote {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.limitHint {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+}

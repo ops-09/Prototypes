@@ -1,0 +1,14 @@
+.errorMessaging {
+  display: flex;
+  align-items: flex-start;
+  margin: calc(var(--ontario-spacing-1, 0.25rem) * -1) 0 var(--ontario-spacing-2, 0.5rem);
+  color: var(--ontario-colour-dark-red, #b51d22);
+  max-width: 48rem;
+}
+
+.content {
+  margin-left: var(--ontario-spacing-2, 0.5rem);
+  margin-top: calc(var(--ontario-spacing-1, 0.25rem) / 2);
+  font-size: 1rem;
+  line-height: 1.5;
+}

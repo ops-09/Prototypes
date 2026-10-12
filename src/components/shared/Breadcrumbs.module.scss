@@ -1,0 +1,30 @@
+.breadcrumbs {
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: 0.875rem;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+}
+
+.link {
+  color: var(--ontario-colour-link, #0066cc);
+  text-decoration: underline;
+}
+
+.separator {
+  color: var(--ontario-colour-greyscale-greyscale40, #999999);
+}

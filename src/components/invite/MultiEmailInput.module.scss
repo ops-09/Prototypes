@@ -1,0 +1,102 @@
+.multiEmailInput {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.multiEmailActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.csvImportPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  padding: var(--ontario-spacing-4, 1rem);
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+}
+
+.emailChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.emailListSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.emailListLabel {
+  display: block;
+  color: var(--ontario-colour-greyscale-black);
+  font-family: var(--ontario-font-raleway-modified);
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold);
+  line-height: var(--ontario-font-line-heights-7);
+  margin: 0 0 var(--ontario-spacing-4) 0;
+  max-width: 38.75em;
+  width: 100%;
+  hyphens: auto;
+  white-space: normal;
+  cursor: default;
+}
+
+@media screen and (max-width: 40em) {
+  .emailListLabel {
+    font-size: 1.125rem;
+    line-height: var(--ontario-font-line-heights-8);
+  }
+}
+
+.emailListHint {
+  color: var(--ontario-colour-greyscale-greyscale60);
+  display: inline-block;
+  font-family: var(--ontario-font-open-sans);
+  font-size: var(--ontario-font-sizes-standard-body-text);
+  line-height: var(--ontario-font-line-heights-default);
+  margin: 0 0 var(--ontario-spacing-4) 0;
+  max-width: 48rem;
+  width: 100%;
+}
+
+.emailChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  padding: var(--ontario-spacing-1, 0.25rem) var(--ontario-spacing-2, 0.5rem);
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  font-size: 0.875rem;
+}
+
+.emailChipRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.emailChipRemove:focus-visible {
+  outline: 4px solid var(--ontario-colour-system-focus, #009adb);
+  outline-offset: 2px;
+}
+
+.emailCount {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+}

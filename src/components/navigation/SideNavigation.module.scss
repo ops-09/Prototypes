@@ -1,0 +1,171 @@
+.sideNav {
+  width: 17.375rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.contextSelector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  min-height: 4.125rem;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  border: 1px solid var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+  border-radius: 8px;
+  box-shadow: 0 1px 1px rgba(10, 13, 18, 0.05);
+  padding: var(--ontario-spacing-3, 0.75rem);
+  margin-bottom: var(--ontario-spacing-6, 2rem);
+}
+
+.contextSelectorText {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.contextSelectorActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ontario-spacing-1, 0.25rem);
+  flex-shrink: 0;
+}
+
+.menuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-1, 0.25rem);
+}
+
+.menuItem {
+  position: relative;
+}
+
+.menuItemExpanded {
+  isolation: isolate;
+}
+
+.subMenuTree {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 17.375rem;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.subMenuChevron {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.menuButton,
+.menuLink {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  width: 100%;
+  min-height: 3rem;
+  padding: var(--ontario-spacing-3, 0.75rem);
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.125rem;
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.2;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menuButton:hover,
+.menuLink:hover {
+  background-color: var(--ontario-colour-accent-button-colours-tertiary-hover, #e8e8e8);
+}
+
+.menuButtonActive,
+.menuLinkActive {
+  background-color: var(--ontario-colour-accent-button-colours-tertiary-active, #d1d1d1);
+}
+
+.menuIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuLabel {
+  flex: 1;
+  font: inherit;
+}
+
+.badgeWrap {
+  margin-left: auto;
+}
+
+.subMenuList {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.subMenuLink {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.625rem;
+  padding: var(--ontario-spacing-2, 0.5rem) var(--ontario-spacing-8, 3rem);
+  border-radius: 4px;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  text-decoration: none;
+}
+
+.subMenuLink:hover {
+  background-color: var(--ontario-colour-accent-button-colours-tertiary-hover, #e8e8e8);
+}
+
+.subMenuLinkActive {
+  background-color: var(--ontario-colour-accent-button-colours-tertiary-active, #d1d1d1);
+}
+
+.subMenuLabel {
+  position: relative;
+  z-index: 1;
+  display: block;
+}

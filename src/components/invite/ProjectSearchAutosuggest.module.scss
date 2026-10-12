@@ -1,0 +1,66 @@
+.projectSearchAutosuggest {
+  position: relative;
+  width: 100%;
+  height: var(--search-input-height, 3rem);
+}
+
+// Show only the SearchBox input row; label stays in DOM for assistive tech.
+.projectSearchInputClip {
+  position: relative;
+  width: 100%;
+  height: var(--search-input-height, 3rem);
+  overflow: hidden;
+}
+
+.projectSearchInputClip ontario-search-box {
+  position: absolute;
+  top: calc(-1 * var(--search-input-offset, 2.78125rem));
+  left: 0;
+  // ODS search form spans 6/12 columns; double host width so the field fills this clip.
+  width: 200%;
+  margin: 0;
+}
+
+.projectSearchSuggestions {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.projectSearchSuggestion {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: var(--ontario-spacing-3, 0.75rem) var(--ontario-spacing-4, 1rem);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  cursor: pointer;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.projectSearchSuggestion:hover,
+.projectSearchSuggestion:focus {
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+  outline: none;
+}
+
+.projectSearchSuggestion:focus-visible {
+  box-shadow: inset 0 0 0 4px var(--ontario-colour-system-focus, #009adb);
+}
+
+.projectSearchSuggestion[aria-selected='true'] {
+  background-color: var(--ontario-colour-accent-light-blue, #dbe9f5);
+}

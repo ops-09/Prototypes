@@ -1,0 +1,217 @@
+// Form page main: no top pad (step indicator sits under header); 80px above footer.
+.formMain {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  padding: 0 0 var(--ontario-spacing-10, 5rem);
+}
+
+// ODS step-indicator host defaults to inline-block; force full-width so Back / step label space apart.
+.stepIndicator {
+  display: block;
+  width: 100%;
+
+  :global(ontario-step-indicator) {
+    display: block;
+    width: 100%;
+  }
+}
+
+.alert {
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+// Slotted page-alert links are light DOM; ODS `.ontario-alert--error a` only
+// applies in shadow. Style summary anchors directly (ODS page-alerts.html).
+.errorSummaryLink {
+  color: var(--ontario-colour-alert, #cd0000);
+
+  &:hover,
+  &:focus {
+    // ODS page-alert $ontario-alert-link-focus — not in global tokens
+    color: #6b0000;
+  }
+
+  &:active {
+    // ODS page-alert $ontario-alert-link-active — not in global tokens
+    color: #280000;
+  }
+
+  &:visited {
+    color: var(--ontario-colour-alert, #cd0000);
+  }
+}
+
+.pageTitle {
+  margin-top: 0;
+}
+
+.lead {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+}
+
+.formStack > .lead {
+  // Spacing to the next field comes from .formStack gap (40px).
+  margin-bottom: 0;
+}
+
+.body {
+  margin: 0 0 var(--ontario-spacing-7, 2.5rem);
+}
+
+.formStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+}
+
+// ODS has no readOnly inputs — static OBR display composed with tokens.
+.obrField {
+  margin: 0;
+}
+
+.obrLabel {
+  margin: 0 0 var(--ontario-spacing-2, 0.5rem);
+}
+
+.obrValue {
+  margin: 0;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.registryCalloutBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.registryCalloutRow {
+  margin: 0;
+}
+
+.registryCalloutLabel {
+  margin: 0 0 var(--ontario-spacing-1, 0.25rem);
+  font-weight: 700;
+}
+
+.registryCalloutValue {
+  margin: 0;
+}
+
+.fieldError {
+  margin: 0 0 var(--ontario-spacing-2, 0.5rem);
+  color: var(--ontario-colour-alert, #cd0000);
+}
+
+// SearchBox locks caption+hint+field into a narrow offset form. Compose title and
+// hint at column width (like lead/body), then compensate SearchBox host offset only.
+.naicsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.naicsLabel {
+  margin: 0;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.requiredFlag {
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.naicsSearch {
+  width: 100%;
+}
+
+.naicsBlock :global(ontario-hint-expander) {
+  display: block;
+  clear: both;
+  // Field-to-field spacing is .formStack gap (40px / spacing-7); don't stack extra host margin.
+  margin-bottom: 0;
+}
+
+// DateInput caption is shadow DOM — compose label in light DOM for text-wrap: balance.
+// Unlike SearchBox, DateInput cannot disable its required flag, so clip the blank legend.
+.resolutionDateInputClip {
+  overflow: hidden;
+
+  :global(ontario-date-input) {
+    display: block;
+    margin-top: calc(
+      -1 * (var(--ontario-spacing-5, 1.5rem) + var(--ontario-spacing-4, 1rem))
+    );
+  }
+}
+
+.resolutionDateLabel {
+  margin: 0 0 var(--ontario-spacing-4, 1rem);
+  max-width: 100%;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+  text-wrap: balance;
+}
+
+// ODS has no standalone link component — compose action controls with link tokens.
+.actionLink {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ontario-colour-link, #0066cc);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover,
+  &:focus {
+    color: var(--ontario-colour-link--hover, #00478f);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-6, 2rem);
+  margin-top: var(--ontario-spacing-7, 2.5rem);
+}

@@ -1,0 +1,191 @@
+// Composed from ODS Summary List guidance (CSS pattern; React WC not in 8.1.0).
+// https://designsystem.ontario.ca/components/detail/summary-list.html
+
+.summaryList {
+  max-width: 100%;
+  // Vertical spacing between review sections comes from .formStack gap (40px / spacing-7).
+  margin: 0;
+}
+
+.headingContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ontario-spacing-6, 2rem);
+  padding-bottom: var(--ontario-spacing-3, 0.75rem);
+  border-bottom: 0.1875rem solid var(--ontario-colour-black, #1a1a1a);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.4375rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  letter-spacing: 0.02rem;
+  line-height: 1.39;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+@media screen and (min-width: 40em) {
+  .heading {
+    font-size: 1.75rem;
+    line-height: 1.43;
+  }
+}
+
+.headingButtons {
+  display: flex;
+  gap: var(--ontario-spacing-6, 2rem);
+  flex-shrink: 0;
+}
+
+.changeButton {
+  display: block;
+  padding: 0;
+  color: var(--ontario-colour-link, #0066cc);
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.container {
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: 0 !important;
+  padding: calc(var(--ontario-spacing-4, 1rem) + 0.1875rem) 0;
+  border-bottom: 0.0625rem solid var(--ontario-colour-greyscale-greyscale20, #ccc);
+}
+
+.key {
+  flex: 1;
+  margin: 0 !important;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.125rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  letter-spacing: 0.03rem;
+  line-height: 1.56;
+  color: var(--ontario-colour-black, #1a1a1a);
+  text-align: left;
+}
+
+@media screen and (min-width: 40em) {
+  .key {
+    font-size: 1.1875rem;
+    letter-spacing: 0.025rem;
+    line-height: 1.5;
+  }
+}
+
+.value {
+  flex: 1;
+  margin: 0 !important;
+  padding-left: var(--ontario-spacing-5, 1.5rem);
+  text-align: left;
+  color: var(--ontario-colour-black, #1a1a1a);
+  white-space: pre-wrap;
+}
+
+.ratio1_2 {
+  .key {
+    flex: 1;
+  }
+
+  .value {
+    flex: 2;
+  }
+}
+
+.ratio1_3 {
+  .key {
+    flex: 1;
+  }
+
+  .value {
+    flex: 3;
+  }
+}
+
+.ratio2_1 {
+  .key {
+    flex: 2;
+  }
+
+  .value {
+    flex: 1;
+  }
+}
+
+.ratio2_3 {
+  .key {
+    flex: 2;
+  }
+
+  .value {
+    flex: 3;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media screen and (max-width: 40em) {
+  .headingContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ontario-spacing-3, 0.75rem);
+  }
+
+  .row {
+    flex-direction: column;
+  }
+
+  .key {
+    padding-bottom: var(--ontario-spacing-1, 0.25rem);
+  }
+
+  .value {
+    flex: revert;
+    padding-left: 0;
+  }
+}

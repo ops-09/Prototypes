@@ -1,0 +1,157 @@
+.appHeader {
+  width: 100%;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ontario-spacing-1, 0.25rem) var(--ontario-spacing-6, 2rem);
+  background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.logoLink {
+  display: inline-flex;
+  flex-shrink: 0;
+
+  &:focus,
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-system-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+.logo {
+  display: block;
+  width: 6.25rem;
+  height: 1.5625rem;
+}
+
+.topBarActions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.languageToggle {
+  flex-shrink: 0;
+}
+
+.versionTogglerGroup {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+}
+
+// Matches OntarioLanguageToggle default size (ontario-language-toggler--default).
+.versionTogglerButton {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  margin: 0;
+  padding: var(--ontario-spacing-3, 0.75rem);
+  border: none;
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  color: var(--ontario-colour-greyscale-white, #ffffff);
+  font-family: var(--ontario-font-open-sans, 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif);
+  font-size: 1.125rem;
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5556;
+  text-align: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+    color: var(--ontario-colour-greyscale-white, #ffffff);
+  }
+
+  &:active {
+    background-color: var(--ontario-colour-greyscale-greyscale60, #666666);
+    color: var(--ontario-colour-greyscale-white, #ffffff);
+  }
+
+  &:focus,
+  &:focus-visible {
+    background-color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+    color: var(--ontario-colour-greyscale-white, #ffffff);
+    outline: 4px solid transparent;
+    box-shadow: 0 0 0 4px var(--ontario-colour-system-focus, #009adb);
+  }
+}
+
+.versionTogglerButton[aria-pressed='true'] {
+  background-color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+}
+
+.serviceBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ontario-spacing-5, 1.5rem) var(--ontario-spacing-6, 2rem);
+  background-color: var(--ontario-colour-accent-service-ontario-header-brand, #03713d);
+}
+
+.serviceTitleLink {
+  color: var(--ontario-colour-greyscale-white, #ffffff);
+  text-decoration: none;
+
+  &:hover,
+  &:active,
+  &:visited {
+    color: var(--ontario-colour-greyscale-white, #ffffff);
+    text-decoration: underline;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-accent-service-ontario-header-focus, #42c7ff);
+    outline-offset: 2px;
+  }
+}
+
+.serviceTitle {
+  margin: 0;
+  color: inherit;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-weight: var(--ontario-font-weights-bold, 700);
+}
+
+.accountButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--ontario-colour-accent-service-ontario-header-brand, #03713d);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--ontario-colour-accent-service-ontario-header-hover, #048b4b);
+  }
+
+  &:active {
+    background-color: var(--ontario-colour-accent-service-ontario-header-active, #024122);
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--ontario-colour-accent-service-ontario-header-focus, #42c7ff);
+  }
+}

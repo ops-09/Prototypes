@@ -1,0 +1,128 @@
+.autosuggest {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  // ODS focus ring: box-shadow 0 0 0 4px $ontario-colour-focus ($ontario-global-tokens-radius).
+  --search-focus-ring: var(--ontario-global-tokens-radius, 4px);
+}
+
+.autosuggest :global(ontario-hint-text) {
+  display: block;
+  // Spacing to the field comes from .autosuggest gap; avoid ODS hint margin stacking.
+  margin-bottom: 0;
+}
+
+// Keep error + input tight (ODS ontario-error-messaging sits directly above the control).
+.fieldControl {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+// Show only the SearchBox input row; blank caption stays in DOM for ODS required.
+// Negative margin + matching padding lets the ODS 4px focus ring paint without being cropped.
+.inputClip {
+  position: relative;
+  box-sizing: border-box;
+  width: calc(100% + 2 * var(--search-focus-ring));
+  height: calc(var(--search-input-height, 3rem) + 2 * var(--search-focus-ring));
+  margin: calc(-1 * var(--search-focus-ring));
+  padding: var(--search-focus-ring);
+  overflow: hidden;
+}
+
+.inputClip :global(ontario-search-box) {
+  position: absolute;
+  top: calc(var(--search-focus-ring) - var(--search-input-offset, 2.78125rem));
+  // Pull left to cancel .ontario-columns padding-left on the internal form.
+  left: calc(
+    var(--search-focus-ring) - var(--ontario-spacing-4, 1rem)
+  );
+  // ontario-small-10 (~10/12): scale host so the field fills the clip content box.
+  width: calc(120% + var(--ontario-spacing-4, 1rem));
+  margin: 0;
+}
+
+// Match ODS grid breakpoints (40.063em / 73.063em).
+@media screen and (min-width: 40.063em) and (max-width: 73.06249em) {
+  .inputClip :global(ontario-search-box) {
+    // ontario-medium-6 (50%) → 200% host fills clip; cancel ontario-medium-offset-3
+    // (25% of host = 50% of clip) plus columns padding-left.
+    width: calc(200% + var(--ontario-spacing-4, 1rem));
+    left: calc(
+      var(--search-focus-ring) - 50% - var(--ontario-spacing-4, 1rem)
+    );
+  }
+}
+
+@media screen and (min-width: 73.063em) {
+  .inputClip :global(ontario-search-box) {
+    // ontario-large-offset-0 + ontario-large-6
+    width: calc(200% + var(--ontario-spacing-4, 1rem));
+    left: calc(
+      var(--search-focus-ring) - var(--ontario-spacing-4, 1rem)
+    );
+  }
+}
+
+.suggestions {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: var(--ontario-global-tokens-radius, 4px);
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.suggestion {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: var(--ontario-spacing-3, 0.75rem) var(--ontario-spacing-4, 1rem);
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.6;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  cursor: pointer;
+}
+
+.suggestion:hover {
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+}
+
+.suggestion:focus {
+  outline: none;
+}
+
+// ODS focus: 4px system-focus ring (same as %ontario-focus).
+.suggestion:focus-visible {
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+  box-shadow: 0 0 0 var(--ontario-global-tokens-radius, 4px)
+    var(--ontario-colour-system-focus, #009adb);
+}
+
+.suggestion[aria-selected='true'] {
+  background-color: var(--ontario-colour-accent-light-blue, #dbe9f5);
+}
+
+.match {
+  font-weight: var(--ontario-font-weights-bold, 700);
+}

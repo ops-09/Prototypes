@@ -1,0 +1,26 @@
+.summaryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+  margin: var(--ontario-spacing-5, 1.5rem) 0 0;
+  padding: 0;
+
+  div {
+    margin: 0;
+  }
+
+  dt {
+    margin: 0;
+    font-weight: var(--ontario-font-weights-bold, 700);
+  }
+
+  dd {
+    margin: var(--ontario-spacing-1, 0.25rem) 0 0;
+  }
+}
+
+.homeLink {
+  color: var(--ontario-colour-link, #0066cc);
+  font-size: 1.125rem;
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+}

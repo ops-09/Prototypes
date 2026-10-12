@@ -1,0 +1,102 @@
+.listCard {
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  overflow: hidden;
+}
+
+.listCardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-4, 1rem);
+  padding: var(--ontario-spacing-4, 1rem) var(--ontario-spacing-5, 1.5rem);
+  border-bottom: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
+.listCardHeading {
+  margin: 0;
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-top: var(--ontario-spacing-4, 1rem);
+}
+
+.inviteAnotherActions {
+  margin-top: var(--ontario-spacing-3, 0.75rem);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-4, 1rem);
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+.toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.searchWrap {
+  flex: 1 1 18rem;
+  max-width: 28rem;
+}
+
+.section {
+  margin-bottom: var(--ontario-spacing-6, 2rem);
+}
+
+.sectionHeading {
+  margin-top: 0;
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+.managePanel {
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  padding: var(--ontario-spacing-5, 1.5rem);
+  margin-bottom: var(--ontario-spacing-6, 2rem);
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--ontario-spacing-4, 1rem);
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.manageActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-top: var(--ontario-spacing-4, 1rem);
+}
+
+.confirmPanel {
+  margin-top: var(--ontario-spacing-4, 1rem);
+}
+
+.roleMatrixWrap {
+  overflow-x: auto;
+}
+
+.hintText {
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  margin-top: 0;
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}

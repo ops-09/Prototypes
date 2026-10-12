@@ -1,0 +1,40 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--ontario-spacing-6, 2rem) var(--ontario-spacing-4, 1rem);
+  background-color: rgba(0, 0, 0, 0.45);
+  overflow-y: auto;
+}
+
+.panel {
+  width: min(100%, 56rem);
+  margin: auto;
+  padding: var(--ontario-spacing-5, 1.5rem);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.panelActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--ontario-spacing-4, 1rem);
+}

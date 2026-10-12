@@ -1,0 +1,361 @@
+import { validateCooperativeName } from '../form1/nameValidation';
+import {
+  validateCorporationName,
+  validateNfpCorporationName,
+} from './corpNameValidation';
+import {
+  affidavitsRequired,
+  type Form7Draft,
+  type NameNuansFields,
+  type SupportingDocMeta,
+} from './form7DraftStorage';
+import {
+  amendmentTypeLabel,
+  formatBytes,
+  formatIsoDateDisplay,
+  formatUploadedAt,
+  nameFormatLabel,
+} from './form7Labels';
+import { validateNameNuansFields } from './ProposedNameAndNuans';
+
+export type ReviewRow = {
+  name: string;
+  description: string;
+};
+
+export type ReviewSectionKey = 'coopDetails' | 'amendmentDetails' | 'supportingDocs';
+
+export type ReviewSection = {
+  key: ReviewSectionKey;
+  caption: string;
+  editHref: string;
+  complete: boolean;
+  rows: ReviewRow[];
+};
+
+function displayOrEmpty(value: string) {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : 'Not provided';
+}
+
+function yesNo(value: 'yes' | 'no' | '') {
+  if (value === 'yes') return 'Yes';
+  if (value === 'no') return 'No';
+  return 'Not provided';
+}
+
+function nuansRows(fields: NameNuansFields, prefix = ''): ReviewRow[] {
+  const labelPrefix = prefix ? `${prefix} ` : '';
+  const separate = fields.languageOption === 'english-french';
+  const rows: ReviewRow[] = [
+    {
+      name: `${labelPrefix}Name format`.trim(),
+      description: nameFormatLabel(fields.languageOption),
+    },
+  ];
+
+  if (separate) {
+    rows.push(
+      {
+        name: `${labelPrefix}Proposed English name`.trim(),
+        description: displayOrEmpty(fields.proposedNameEn),
+      },
+      {
+        name: `${labelPrefix}English NUANS report`.trim(),
+        description: fields.nuansFileEn?.name ?? 'Not provided',
+      },
+      {
+        name: `${labelPrefix}English NUANS report date`.trim(),
+        description: formatIsoDateDisplay(fields.nuansDateEn),
+      },
+      {
+        name: `${labelPrefix}Proposed French name`.trim(),
+        description: displayOrEmpty(fields.proposedNameFr),
+      },
+      {
+        name: `${labelPrefix}French NUANS report`.trim(),
+        description: fields.nuansFileFr?.name ?? 'Not provided',
+      },
+      {
+        name: `${labelPrefix}French NUANS report date`.trim(),
+        description: formatIsoDateDisplay(fields.nuansDateFr),
+      },
+    );
+    return rows;
+  }
+
+  rows.push(
+    {
+      name: `${labelPrefix}Proposed name`.trim(),
+      description: displayOrEmpty(fields.proposedName),
+    },
+    {
+      name: `${labelPrefix}NUANS report`.trim(),
+      description: fields.nuansFile?.name ?? 'Not provided',
+    },
+    {
+      name: `${labelPrefix}NUANS report date`.trim(),
+      description: formatIsoDateDisplay(fields.nuansDate),
+    },
+  );
+  return rows;
+}
+
+function isNameNuansComplete(
+  fields: NameNuansFields,
+  kind: 'cooperative' | 'corporation' | 'nfp',
+) {
+  const validateName =
+    kind === 'cooperative'
+      ? validateCooperativeName
+      : kind === 'nfp'
+        ? validateNfpCorporationName
+        : validateCorporationName;
+  return Object.keys(validateNameNuansFields(fields, kind, validateName)).length === 0;
+}
+
+function docRows(docs: SupportingDocMeta[], label: string): ReviewRow[] {
+  if (docs.length === 0) {
+    return [{ name: label, description: 'Not provided' }];
+  }
+  return docs.map((doc, index) => ({
+    name: docs.length > 1 ? `${label} (${index + 1})` : label,
+    description: `${doc.name} · ${formatUploadedAt(doc.uploadedAt)} · ${formatBytes(doc.size)}`,
+  }));
+}
+
+function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
+  const { step2 } = draft;
+  const type = step2.amendmentType;
+  const rows: ReviewRow[] = [
+    {
+      name: 'Amendment type',
+      description: amendmentTypeLabel(type),
+    },
+  ];
+
+  if (type === 'change-name') {
+    rows.push({
+      name: 'Change co-operative name',
+      description:
+        step2.changeCooperativeName === 'change'
+          ? 'Yes'
+          : step2.changeCooperativeName === 'no'
+            ? 'No'
+            : 'Not provided',
+    });
+    if (step2.changeCooperativeName === 'change') {
+      rows.push(...nuansRows(step2.nameNuans, 'Co-operative'));
+    }
+    return rows;
+  }
+
+  if (type === 'convert-business-corp') {
+    rows.push({
+      name: 'Number name',
+      description: yesNo(step2.hasNumberName),
+    });
+    if (step2.hasNumberName === 'yes') {
+      rows.push({
+        name: 'Legal element',
+        description: displayOrEmpty(step2.legalElement),
+      });
+    } else if (step2.hasNumberName === 'no') {
+      rows.push(...nuansRows(step2.nameNuans, 'Corporation'));
+    }
+    return rows;
+  }
+
+  if (type === 'convert-not-for-profit') {
+    rows.push({
+      name: 'Number name',
+      description: yesNo(step2.hasNumberName),
+    });
+    if (step2.hasNumberName === 'no') {
+      rows.push(...nuansRows(step2.nameNuans, 'Not-for-Profit'));
+    }
+    return rows;
+  }
+
+  if (type === 'reduction-capital') {
+    rows.push(
+      {
+        name: 'Revised authorized capital structure',
+        description: displayOrEmpty(step2.capitalReductionDescription),
+      },
+      {
+        name: 'Capital reduction details',
+        description: displayOrEmpty(step2.capitalReductionDetails),
+      },
+    );
+    return rows;
+  }
+
+  if (type === 'amend-other') {
+    rows.push({
+      name: 'Proposed amendment details',
+      description: displayOrEmpty(step2.otherAmendmentDetails),
+    });
+  }
+
+  return rows;
+}
+
+function isAmendmentComplete(draft: Form7Draft) {
+  const { step2 } = draft;
+  const type = step2.amendmentType;
+  if (!type) {
+    return false;
+  }
+
+  if (type === 'change-name') {
+    if (!step2.changeCooperativeName) {
+      return false;
+    }
+    if (step2.changeCooperativeName === 'no') {
+      return true;
+    }
+    return isNameNuansComplete(step2.nameNuans, 'cooperative');
+  }
+
+  if (type === 'convert-business-corp') {
+    if (!step2.hasNumberName) {
+      return false;
+    }
+    if (step2.hasNumberName === 'yes') {
+      return Boolean(step2.legalElement.trim());
+    }
+    return isNameNuansComplete(step2.nameNuans, 'corporation');
+  }
+
+  if (type === 'convert-not-for-profit') {
+    if (!step2.hasNumberName) {
+      return false;
+    }
+    if (step2.hasNumberName === 'yes') {
+      return true;
+    }
+    return isNameNuansComplete(step2.nameNuans, 'nfp');
+  }
+
+  if (type === 'reduction-capital') {
+    return Boolean(
+      step2.capitalReductionDescription.trim() || step2.capitalReductionDetails.trim(),
+    );
+  }
+
+  if (type === 'amend-other') {
+    return Boolean(step2.otherAmendmentDetails.trim());
+  }
+
+  return false;
+}
+
+function isSupportingDocsComplete(draft: Form7Draft) {
+  const needAffidavits = affidavitsRequired(
+    draft.step2.amendmentType,
+    draft.step2.changeCooperativeName,
+  );
+  if (draft.step3.authorizationSubsections.length === 0) {
+    return false;
+  }
+  if (draft.step3.certifiedResolution.length === 0) {
+    return false;
+  }
+  if (needAffidavits && draft.step3.affidavits.length === 0) {
+    return false;
+  }
+  if (!draft.step3.resolutionConfirmedDate) {
+    return false;
+  }
+  return true;
+}
+
+function isCoopDetailsComplete(draft: Form7Draft) {
+  const s = draft.step1;
+  return Boolean(
+    s.cooperativeName.trim() &&
+      s.ocn.trim() &&
+      s.cooperativeType.trim() &&
+      s.primaryActivity.trim() &&
+      s.email.trim() &&
+      draft.step2.amendmentType,
+  );
+}
+
+export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
+  const needAffidavits = affidavitsRequired(
+    draft.step2.amendmentType,
+    draft.step2.changeCooperativeName,
+  );
+
+  const supportingRows: ReviewRow[] = [
+    ...docRows(draft.step3.certifiedResolution, 'Certified copy of the resolution'),
+    {
+      name: 'Authorizing subsections (CCA s.151)',
+      description:
+        draft.step3.authorizationSubsections.length > 0
+          ? draft.step3.authorizationSubsections.join(', ')
+          : 'Not provided',
+    },
+    {
+      name: 'The resolution authorizing the amendment was confirmed by the members of the co-operative on',
+      description: formatIsoDateDisplay(draft.step3.resolutionConfirmedDate),
+    },
+  ];
+  if (needAffidavits) {
+    supportingRows.push(...docRows(draft.step3.affidavits, 'Affidavit of solvency'));
+  }
+  if (draft.step3.additional.length > 0) {
+    supportingRows.push(...docRows(draft.step3.additional, 'Additional document'));
+  }
+
+  return [
+    {
+      key: 'coopDetails',
+      caption: 'Co-operative details',
+      editHref: '/form-7/step-1',
+      complete: isCoopDetailsComplete(draft),
+      rows: [
+        {
+          name: 'Co-operative legal name',
+          description: displayOrEmpty(draft.step1.cooperativeName),
+        },
+        {
+          name: 'Ontario Corporation Number (OCN)',
+          description: displayOrEmpty(draft.step1.ocn),
+        },
+        {
+          name: 'Entity type',
+          description: displayOrEmpty(draft.step1.cooperativeType),
+        },
+        {
+          name: 'Amendment type',
+          description: amendmentTypeLabel(draft.step2.amendmentType),
+        },
+        {
+          name: 'NAICS (Primary activity)',
+          description: displayOrEmpty(draft.step1.primaryActivity),
+        },
+        {
+          name: 'Official email',
+          description: displayOrEmpty(draft.step1.email),
+        },
+      ],
+    },
+    {
+      key: 'amendmentDetails',
+      caption: 'Amendment details',
+      editHref: '/form-7/step-2',
+      complete: isAmendmentComplete(draft),
+      rows: buildAmendmentRows(draft),
+    },
+    {
+      key: 'supportingDocs',
+      caption: 'Supporting documents',
+      editHref: '/form-7/step-3',
+      complete: isSupportingDocsComplete(draft),
+      rows: supportingRows,
+    },
+  ];
+}

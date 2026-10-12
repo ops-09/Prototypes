@@ -1,0 +1,133 @@
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--ontario-spacing-4, 1rem);
+  border-bottom: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.columnHeader {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+  text-transform: none;
+}
+
+.checkboxColumnHeader {
+  text-align: center;
+}
+
+.tableCheckboxCell {
+  text-align: center;
+  vertical-align: middle;
+  width: 6rem;
+}
+
+.tableCheckbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.tableCheckboxInput {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.tableCheckboxIndicator {
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  border-radius: 4px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.125rem 1.125rem;
+  pointer-events: none;
+}
+
+.tableCheckboxInput:checked + .tableCheckboxIndicator {
+  background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.667 12.616l6.667 6.718 12-12.092-1.88-1.908L9.333 15.53l-4.787-4.8-1.88 1.894z' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+
+.tableCheckboxInput:focus-visible + .tableCheckboxIndicator {
+  box-shadow: 0 0 0 0.25rem var(--ontario-colour-system-focus, #009adb);
+  outline: 0.25rem solid transparent;
+}
+
+.cellText {
+  display: block;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background-color: var(--ontario-colour-accent-light-purple, #f0eefc);
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.userName {
+  display: block;
+  font-weight: 600;
+}
+
+.userEmail {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+}
+
+.actions {
+  display: flex;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.iconAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.iconAction:focus {
+  outline: 0.25rem solid var(--ontario-colour-system-focus, #009adb);
+  outline-offset: 0.125rem;
+}
