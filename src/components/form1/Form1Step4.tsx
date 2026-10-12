@@ -9,19 +9,8 @@ import {
   OntarioStepIndicator,
   OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
-import { contactFromSignedInProfile } from '../cover-letter/coverLetterContactStorage';
-import {
-  DIRECTOR_ERROR_FIELD_ORDER,
-  Form1DirectorBlock,
-  getDirectorFieldAnchor,
-  getDirectorFieldLabel,
-  isDirectorComplete,
-  validateDirector,
-  type DirectorErrors,
-} from './Form1DirectorEditor';
 import { FieldErrorMessage } from './FieldErrorMessage';
 import {
-  createEmptyDirector,
   EMPTY_STEP1,
   EMPTY_STEP2,
   EMPTY_STEP3,
@@ -32,7 +21,6 @@ import {
   saveForm1Draft,
   upsertForm1Step4,
   type DirectorCountMode,
-  type Form1Director,
   type Form1Draft,
   type Form1Step4Data,
   type YesNoAnswer,
@@ -159,28 +147,17 @@ function digitsOnly(value: string) {
 
 function fixedDirectorsMessage(fixed: number, addedCount: number) {
   if (addedCount < fixed) {
-    return `You set a fixed number of ${fixed} directors. Add another director, add yourself as a director, or change the fixed number of directors.`;
+    return `You set a fixed number of ${fixed} directors. Add another director, or change the fixed number of directors.`;
   }
   return `You set a fixed number of ${fixed} directors. Remove a director or change the fixed number of directors.`;
 }
 
 function minDirectorsMessage(minimum: number) {
-  return `You set a minimum of ${minimum} directors. Add another director, add yourself as a director, or change the minimum number of directors.`;
+  return `You set a minimum of ${minimum} directors. Add another director, or change the minimum number of directors.`;
 }
 
 function maxDirectorsMessage(maximum: number) {
   return `You set a maximum of ${maximum} directors. Remove a director or change the maximum number of directors.`;
-}
-
-function directorHasContent(director: Form1Director) {
-  return Boolean(
-    director.firstName.trim() ||
-      director.lastName.trim() ||
-      director.email.trim() ||
-      director.residentCanadian ||
-      director.alsoIncorporator ||
-      director.address.addressType,
-  );
 }
 
 /** Prototype deep-link: seed Steps 1–3 so /form-1/step-4 opens from the playground. */
@@ -196,8 +173,7 @@ function ensureStep4Draft(): Form1Draft {
       ...existing,
       step4: {
         ...step4,
-        directors:
-          step4.directors.length > 0 ? step4.directors : [createEmptyDirector()],
+        directors: step4.directors ?? [],
       },
     };
   }
@@ -241,10 +217,7 @@ function ensureStep4Draft(): Form1Draft {
     step4: {
       ...EMPTY_STEP4,
       ...(existing?.step4 ?? {}),
-      directors:
-        existing?.step4?.directors?.length
-          ? existing.step4.directors
-          : [createEmptyDirector()],
+      directors: existing?.step4?.directors ?? [],
     },
     savedAt: now,
     mode: 'continue',
@@ -263,131 +236,28 @@ export function Form1Step4() {
     const initial = { ...EMPTY_STEP4, ...(draft.step4 ?? {}) };
     return {
       ...initial,
-      directors:
-        initial.directors.length > 0 ? initial.directors : [createEmptyDirector()],
+      directors: initial.directors ?? [],
     };
   });
   const [errors, setErrors] = useState<PageErrors>({});
-  const [directorErrors, setDirectorErrors] = useState<Record<string, DirectorErrors>>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
   const [showContinueSuccess, setShowContinueSuccess] = useState(false);
-  /** IDs currently shown expanded. Complete directors collapse on Save / Cancel. */
-  const [expandedIds, setExpandedIds] = useState<string[]>(() =>
-    step4.directors
-      .filter((director) => !isDirectorComplete(director))
-      .map((director) => director.id),
+
+  const errorSummaryItems = useMemo(
+    () =>
+      FIELD_ORDER.flatMap((key) => {
+        const message = errors[key];
+        if (!message) {
+          return [];
+        }
+        return [{ key, message, href: `#${FIELD_ANCHORS[key]}` }];
+      }),
+    [errors],
   );
-  /** Snapshot taken when Edit opens a complete director — restored on Cancel. */
-  const [editSnapshots, setEditSnapshots] = useState<Record<string, Form1Director>>(
-    {},
-  );
-
-  const directorLimit = getDirectorLimit(step4);
-  const atDirectorLimit =
-    directorLimit !== null && step4.directors.length >= directorLimit;
-
-  const errorSummaryItems = useMemo(() => {
-    const pageItems = FIELD_ORDER.flatMap((key) => {
-      const message = errors[key];
-      if (!message) {
-        return [];
-      }
-      return [{ key, message, href: `#${FIELD_ANCHORS[key]}` }];
-    });
-
-    const directorItems = step4.directors.flatMap((director, index) => {
-      const fieldErrors = directorErrors[director.id];
-      if (!fieldErrors) {
-        return [];
-      }
-      const missingFields = DIRECTOR_ERROR_FIELD_ORDER.filter((field) =>
-        Boolean(fieldErrors[field]),
-      );
-      if (missingFields.length === 0) {
-        return [];
-      }
-      const labels = missingFields.map((field) => getDirectorFieldLabel(field));
-      const firstField = missingFields[0];
-      return [
-        {
-          key: `director-${director.id}`,
-          message: `Director ${index + 1} Required Field(s): ${labels.join(', ')}`,
-          href: `#${getDirectorFieldAnchor(director.id, firstField, director.address.addressType)}`,
-          directorId: director.id,
-        },
-      ];
-    });
-
-    return [...pageItems, ...directorItems];
-  }, [directorErrors, errors, step4.directors]);
 
   function patchStep4(partial: Partial<Form1Step4Data>) {
     setStep4((prev) => ({ ...prev, ...partial }));
     setShowContinueSuccess(false);
-  }
-
-  function isDirectorExpanded(director: Form1Director) {
-    // Incomplete directors always show the form; complete ones collapse only after Save.
-    if (!isDirectorComplete(director)) {
-      return true;
-    }
-    return expandedIds.includes(director.id);
-  }
-
-  function openDirector(id: string) {
-    setExpandedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-  }
-
-  function beginDirectorEdit(id: string) {
-    const director = step4.directors.find((entry) => entry.id === id);
-    if (director && isDirectorComplete(director) && !editSnapshots[id]) {
-      setEditSnapshots((prev) => ({
-        ...prev,
-        [id]: structuredClone(director),
-      }));
-    }
-    openDirector(id);
-  }
-
-  function collapseDirector(id: string) {
-    setExpandedIds((prev) => prev.filter((entry) => entry !== id));
-  }
-
-  function clearDirectorSnapshot(id: string) {
-    setEditSnapshots((prev) => {
-      if (!prev[id]) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-  }
-
-  function updateDirector(id: string, next: Form1Director) {
-    const previous = step4.directors.find((entry) => entry.id === id);
-    const wasComplete = previous ? isDirectorComplete(previous) : false;
-    const nowComplete = isDirectorComplete(next);
-
-    patchStep4({
-      directors: step4.directors.map((entry) => (entry.id === id ? next : entry)),
-    });
-    setDirectorErrors((prev) => {
-      if (!prev[id]) {
-        return prev;
-      }
-      const copy = { ...prev };
-      delete copy[id];
-      return copy;
-    });
-
-    // Stay open until Save. Do not re-open already-complete cards (blur after Save
-    // would otherwise expand them again).
-    if (!nowComplete || !wasComplete) {
-      openDirector(id);
-    }
-
-    clearError('directors');
   }
 
   function clearError(key: PageFieldKey) {
@@ -401,9 +271,8 @@ export function Form1Step4() {
     });
   }
 
-  function validatePage(): { page: PageErrors; byDirector: Record<string, DirectorErrors> } {
+  function validatePage(): PageErrors {
     const page: PageErrors = {};
-    const byDirector: Record<string, DirectorErrors> = {};
 
     if (!step4.countMode) {
       page.countMode = REQUIRED;
@@ -441,14 +310,6 @@ export function Form1Step4() {
       page.stakeholderDirectorsText = REQUIRED_RETRY;
     }
 
-    for (const director of step4.directors) {
-      const fieldErrors = validateDirector(director);
-      if (Object.keys(fieldErrors).length > 0) {
-        byDirector[director.id] = fieldErrors;
-      }
-    }
-
-    // Count errors use cards added, not completion — incomplete directors already get field errors.
     const addedCount = step4.directors.length;
     const minimum = getDirectorMinimum(step4);
     const maximum = getDirectorLimit(step4);
@@ -465,25 +326,16 @@ export function Form1Step4() {
       }
     }
 
-    return { page, byDirector };
+    return page;
   }
 
   function handleContinue() {
-    const { page, byDirector } = validatePage();
+    const page = validatePage();
     setErrors(page);
-    setDirectorErrors(byDirector);
-    const hasErrors =
-      Object.keys(page).length > 0 || Object.keys(byDirector).length > 0;
+    const hasErrors = Object.keys(page).length > 0;
     setShowErrorSummary(hasErrors);
 
     if (hasErrors) {
-      setExpandedIds((prev) => {
-        const next = new Set(prev);
-        for (const id of Object.keys(byDirector)) {
-          next.add(id);
-        }
-        return [...next];
-      });
       window.requestAnimationFrame(() => {
         errorSummaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -513,137 +365,15 @@ export function Form1Step4() {
     }
   }
 
-  function addDirector(prefillFromProfile: boolean) {
-    if (atDirectorLimit) {
-      return;
-    }
-    const next = createEmptyDirector();
-    if (prefillFromProfile) {
-      const profile = contactFromSignedInProfile();
-      next.firstName = profile.firstName;
-      next.middleName = profile.middleName;
-      next.lastName = profile.lastName;
-      next.email = profile.email;
-    }
-    // Collapse completed directors; keep the new card open.
-    setExpandedIds([
-      ...step4.directors
-        .filter((entry) => !isDirectorComplete(entry))
-        .map((entry) => entry.id),
-      next.id,
-    ]);
-    patchStep4({ directors: [...step4.directors, next] });
+  /** Placeholder — director add subflow will be implemented later. */
+  function startAddDirectorSubflow() {
     clearError('directors');
+    // TODO: open /form-1 director add subflow
   }
 
-  function removeDirector(id: string) {
-    if (step4.directors.length <= 1) {
-      // Keep one empty card — clear it instead of removing the last block.
-      const cleared = createEmptyDirector(id);
-      patchStep4({ directors: [cleared] });
-      setExpandedIds([cleared.id]);
-      setDirectorErrors((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      clearError('directors');
-      return;
-    }
-
-    patchStep4({
-      directors: step4.directors.filter((entry) => entry.id !== id),
-    });
-    collapseDirector(id);
-    setDirectorErrors((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-    clearError('directors');
-  }
-
-  function handleDirectorSave(id: string) {
-    const director = step4.directors.find((entry) => entry.id === id);
-    if (!director) {
-      return;
-    }
-    const fieldErrors = validateDirector(director);
-    if (Object.keys(fieldErrors).length > 0) {
-      setDirectorErrors((prev) => ({ ...prev, [id]: fieldErrors }));
-      openDirector(id);
-      const firstField = DIRECTOR_ERROR_FIELD_ORDER.find((field) => fieldErrors[field]);
-      if (firstField) {
-        window.requestAnimationFrame(() => {
-          focusField(getDirectorFieldAnchor(id, firstField, director.address.addressType));
-        });
-      }
-      return;
-    }
-    clearDirectorSnapshot(id);
-    setDirectorErrors((prev) => {
-      if (!prev[id]) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-    // Force collapsed summary (Edit) state for a valid director.
-    setExpandedIds((prev) => prev.filter((entry) => entry !== id));
-  }
-
-  function handleDirectorCancel(id: string) {
-    const snapshot = editSnapshots[id];
-    if (snapshot) {
-      patchStep4({
-        directors: step4.directors.map((entry) =>
-          entry.id === id ? structuredClone(snapshot) : entry,
-        ),
-      });
-      clearDirectorSnapshot(id);
-      setDirectorErrors((prev) => {
-        if (!prev[id]) {
-          return prev;
-        }
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
-      collapseDirector(id);
-      return;
-    }
-
-    setDirectorErrors((prev) => {
-      if (!prev[id]) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-
-    const director = step4.directors.find((entry) => entry.id === id);
-    if (director && isDirectorComplete(director)) {
-      collapseDirector(id);
-    }
-  }
-
-  function handleSummaryLinkClick(
-    event: MouseEvent<HTMLAnchorElement>,
-    href: string,
-    directorId?: string,
-  ) {
+  function handleSummaryLinkClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
     event.preventDefault();
-    if (directorId) {
-      openDirector(directorId);
-    }
-    // Wait for expanded director fields to paint, then focus the first error.
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        focusField(href.replace('#', ''));
-      });
-    });
+    focusField(href.replace('#', ''));
   }
 
   return (
@@ -669,13 +399,7 @@ export function Form1Step4() {
                       <a
                         className={styles.errorSummaryLink}
                         href={item.href}
-                        onClick={(event) =>
-                          handleSummaryLinkClick(
-                            event,
-                            item.href,
-                            'directorId' in item ? item.directorId : undefined,
-                          )
-                        }
+                        onClick={(event) => handleSummaryLinkClick(event, item.href)}
                       >
                         {item.message}
                       </a>
@@ -828,73 +552,17 @@ export function Form1Step4() {
             ) : null}
 
             <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>
-              <div>
-                <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>
-                  Who are the directors?
-                  <span className={styles.requiredFlag}> (required)</span>
-                </h2>
-                <p className={step4Styles.sectionLead}>
-                  Please add the information for each first director.
-                </p>
-                {directorLimit !== null ? (
-                  <p className={step4Styles.sectionLead}>
-                    {step4.directors.length} of {directorLimit} director
-                    {directorLimit === 1 ? '' : 's'} added
-                    {step4.countMode === 'minMax' && getDirectorMinimum(step4) !== null
-                      ? ` (minimum ${getDirectorMinimum(step4)})`
-                      : ''}
-                    .
-                  </p>
-                ) : null}
-              </div>
-
-              <ul className={step4Styles.directorList}>
-                {step4.directors.map((director, index) => (
-                  <li key={director.id}>
-                    <Form1DirectorBlock
-                      director={director}
-                      index={index}
-                      errors={directorErrors[director.id]}
-                      expanded={isDirectorExpanded(director)}
-                      canRemove={
-                        step4.directors.length > 1 || directorHasContent(director)
-                      }
-                      onChange={(next) => updateDirector(director.id, next)}
-                      onRemove={() => removeDirector(director.id)}
-                      onEdit={() => beginDirectorEdit(director.id)}
-                      onSave={() => handleDirectorSave(director.id)}
-                      onCancel={() => handleDirectorCancel(director.id)}
-                    />
-                  </li>
-                ))}
-              </ul>
-
               <FieldErrorMessage message={errors.directors} />
-
-              {atDirectorLimit ? (
-                <p className={step4Styles.limitHint}>
-                  The maximum number of first directors for this filing has been reached.
-                </p>
-              ) : (
-                <div className={step4Styles.addActions}>
-                  <button
-                    type="button"
-                    className={step4Styles.addLink}
-                    onClick={() => addDirector(false)}
-                  >
-                    <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
-                    Add another director
-                  </button>
-                  <button
-                    type="button"
-                    className={step4Styles.addLink}
-                    onClick={() => addDirector(true)}
-                  >
-                    <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
-                    Add Me as Director
-                  </button>
-                </div>
-              )}
+              <div className={step4Styles.addActions}>
+                <button
+                  type="button"
+                  className={step4Styles.addLink}
+                  onClick={startAddDirectorSubflow}
+                >
+                  <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
+                  Add another director
+                </button>
+              </div>
             </div>
           </div>
 
