@@ -1,0 +1,15 @@
+#!/bin/sh
+# Project-only: remove Cursor attribution from commit messages.
+MSG_FILE="$1"
+[ -f "$MSG_FILE" ] || exit 0
+tmp="$(mktemp)"
+# Strip Co-authored-by / Made-with / Generated-by Cursor trailers (any casing).
+sed -E \
+  -e '/^[[:space:]]*Co-authored-by:.*[Cc]ursor/Id' \
+  -e '/^[[:space:]]*Co-authored-by:.*cursoragent@/Id' \
+  -e '/^[[:space:]]*Made-with:[[:space:]]*[Cc]ursor/Id' \
+  -e '/^[[:space:]]*Made with Cursor/Id' \
+  -e '/^[[:space:]]*Generated-by:.*[Cc]ursor/Id' \
+  "$MSG_FILE" > "$tmp"
+mv "$tmp" "$MSG_FILE"
+exit 0

@@ -686,7 +686,7 @@ export function Form1Step4() {
             </div>
           ) : null}
 
-          <h1 className={`ontario-h1 ${styles.pageTitle}`}>How many directors</h1>
+          <h1 className={`ontario-h1 ${styles.pageTitle}`}>How many directors?</h1>
 
           {showContinueSuccess ? (
             <div className={styles.alert}>
