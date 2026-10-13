@@ -588,7 +588,7 @@ export function Form1Step4() {
 
             <div id={FIELD_ANCHORS.multiStakeholder}>
               <OntarioRadioButtons
-                caption="Is this multi-stakeholder co-operative?"
+                caption="Is this a multi-stakeholder co-operative?"
                 name="multi-stakeholder"
                 required
                 value={step4.multiStakeholder}
