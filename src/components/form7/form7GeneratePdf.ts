@@ -10,14 +10,33 @@ function escapeHtml(value: string) {
     .replace(/"/g, '&quot;');
 }
 
+function signatureBlockHtml() {
+  return `
+    <div class="signer">
+      <div class="field">
+        <div class="field-box"></div>
+        <span class="field-label">Name</span>
+      </div>
+      <div class="field">
+        <div class="field-box"></div>
+        <span class="field-label">Description of Office</span>
+      </div>
+      <div class="field">
+        <div class="field-box signature-box"></div>
+        <span class="field-label">Signature</span>
+      </div>
+    </div>`;
+}
+
 export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
   const { draft } = args;
-  const generatedAt = new Date().toLocaleString('en-CA');
   const sections = buildReviewSections(draft);
 
   const sectionHtml = sections
     .map((section) => {
       const rows = section.rows
+        // Official email stays on the review page; omit it from the printable PDF.
+        .filter((row) => row.name !== 'Official email')
         .map(
           (row) => `
           <tr>
@@ -48,54 +67,46 @@ export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
     th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.75rem 0.5rem 0; border-bottom: 1px solid #ccc; }
     th { width: 40%; font-weight: 700; }
     .meta { margin-bottom: 2rem; }
-    .signature-section { margin-top: 2rem; page-break-inside: avoid; }
-    .signature-box {
+    .signature-section { margin-top: 2.5rem; page-break-inside: avoid; }
+    .by-label { margin: 0 0 1rem; font-weight: 700; }
+    .signer {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      max-width: 24rem;
+    }
+    .field { width: 100%; }
+    .field-box {
       box-sizing: border-box;
       width: 100%;
-      min-height: 7rem;
-      margin: 0.75rem 0 1.5rem;
-      border: 2px solid #1a1a1a;
-      background: #fff;
+      height: 2rem;
+      border: 1px solid #1a1a1a;
+      background: #e8f4fc;
     }
-    .signature-fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem 2rem;
+    .signature-box {
+      height: 3rem;
     }
-    .signature-field {
-      border-bottom: 1px solid #1a1a1a;
-      padding-bottom: 0.25rem;
-      min-height: 2.5rem;
-    }
-    .signature-field-label {
+    .field-label {
       display: block;
       margin-top: 0.35rem;
       font-size: 0.875rem;
+      text-align: center;
     }
-    .signature-instruction { margin: 0 0 0.75rem; }
+    .signature-instruction { margin: 0 0 1rem; }
   </style>
 </head>
 <body>
   <h1>Articles of Amendment</h1>
-  <p class="meta">PDF generated: ${escapeHtml(generatedAt)}</p>
   <p class="meta">Amendment type: ${escapeHtml(amendmentTypeLabel(draft.step2.amendmentType))}</p>
   ${sectionHtml}
   <section class="signature-section">
-    <h2>Signature</h2>
     <p class="signature-instruction">
-      Sign in the box below. After signing, upload the signed PDF on the filing review page.
+      Complete the signature blocks below. After signing, upload the signed PDF on the filing review page.
     </p>
-    <div class="signature-box" aria-label="Signature area"></div>
-    <div class="signature-fields">
-      <div>
-        <div class="signature-field"></div>
-        <span class="signature-field-label">Print name</span>
-      </div>
-      <div>
-        <div class="signature-field"></div>
-        <span class="signature-field-label">Date</span>
-      </div>
-    </div>
+    <p class="by-label">By:</p>
+    ${signatureBlockHtml()}
+    ${signatureBlockHtml()}
   </section>
 </body>
 </html>`;
