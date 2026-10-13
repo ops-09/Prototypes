@@ -10,7 +10,7 @@ function escapeHtml(value: string) {
     .replace(/"/g, '&quot;');
 }
 
-function signatureRowHtml(name = '') {
+function signatureRowHtml(name = '', office = '') {
   return `
     <div class="signature-row">
       <div class="signature-col">
@@ -19,7 +19,11 @@ function signatureRowHtml(name = '') {
       </div>
       <div class="name-col">
         <div class="name-line">${escapeHtml(name)}</div>
-        <span class="field-label">Name of incorporator (or corporation name &amp; signatories name and office)</span>
+        <span class="field-label">Name</span>
+      </div>
+      <div class="office-col">
+        <div class="name-line">${escapeHtml(office)}</div>
+        <span class="field-label">Description of office</span>
       </div>
     </div>`;
 }
@@ -71,13 +75,14 @@ export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
     .signature-intro-detail { margin: 0 0 1.5rem; }
     .signature-row {
       display: grid;
-      grid-template-columns: 1fr 1.4fr;
-      gap: 1.5rem;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.25rem;
       align-items: end;
       margin-bottom: 1.75rem;
     }
     .signature-col,
-    .name-col {
+    .name-col,
+    .office-col {
       min-width: 0;
     }
     .signature-line {
@@ -144,7 +149,7 @@ export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
   <section class="signature-section">
     <p class="signature-intro">These articles are signed in duplicate.</p>
     <p class="signature-intro-detail">
-      Full name(s) and signature(s) of incorporator(s). In the case of a corporation set out the name of the corporation and the name and office of the person signing on behalf of the corporation
+      Signature, name, and description of office of the person(s) authorizing the amendment.
     </p>
     ${signatureRowsHtml}
   </section>
