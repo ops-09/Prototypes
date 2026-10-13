@@ -134,26 +134,10 @@ export function generateForm1ReviewPdf(args: { draft: Form1Draft }) {
     }
     .stamp-box {
       box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
       min-height: 12rem;
-      padding: 2rem 1rem;
       border: 2px dashed #1a1a1a;
       border-radius: 4px;
       background-color: #f2f2f2;
-      text-align: center;
-    }
-    .stamp-lead {
-      margin: 0;
-      font-weight: 700;
-    }
-    .stamp-hint {
-      margin: 0;
-      font-size: 0.875rem;
-      color: #666;
     }
   </style>
 </head>
@@ -168,12 +152,9 @@ export function generateForm1ReviewPdf(args: { draft: Form1Draft }) {
     </p>
     ${signatureRowsHtml}
   </section>
-  <section class="stamp-section" aria-label="Stamp area">
-    <h2 class="stamp-heading">Stamp</h2>
-    <div class="stamp-box">
-      <p class="stamp-lead">Official stamp area</p>
-      <p class="stamp-hint">For office use only</p>
-    </div>
+  <section class="stamp-section" aria-label="This space is for Ministry Use Only">
+    <h2 class="stamp-heading">This space is for Ministry Use Only</h2>
+    <div class="stamp-box"></div>
   </section>
 </body>
 </html>`;
