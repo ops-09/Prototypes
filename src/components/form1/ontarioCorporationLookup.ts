@@ -6,7 +6,8 @@ export type OntarioCorporationResult = {
   status: string;
 };
 
-const MOCK_CORPORATIONS: OntarioCorporationResult[] = [
+/** Example Ontario corporations for autosuggest (demo data). */
+export const ONTARIO_CORPORATION_EXAMPLES: readonly OntarioCorporationResult[] = [
   {
     ocn: '1001234',
     legalName: 'MAPLE WORKERS HOLDINGS INC.',
@@ -32,27 +33,55 @@ const MOCK_CORPORATIONS: OntarioCorporationResult[] = [
     legalName: 'GREEN INSTITUTE SERVICES INC.',
     status: 'Active',
   },
-];
+  {
+    ocn: '6001122',
+    legalName: 'TORONTO COMMUNITY HOUSING CO-OPERATIVE INC.',
+    status: 'Active',
+  },
+  {
+    ocn: '7003344',
+    legalName: 'OTTAWA RIVER ENERGY CO-OPERATIVE INC.',
+    status: 'Active',
+  },
+  {
+    ocn: '8005566',
+    legalName: 'HAMILTON WORKERS UNITED LTD.',
+    status: 'Active',
+  },
+] as const;
 
 function normalizeQuery(value: string) {
   return value.trim().toUpperCase().replace(/\s+/g, ' ');
 }
 
-/** Search Ontario corporations by legal name or OCN (digits). */
-export function searchOntarioCorporations(query: string): OntarioCorporationResult[] {
+export function formatCorporationSuggestion(entry: OntarioCorporationResult): string {
+  return `${entry.ocn} - ${entry.legalName}`;
+}
+
+/** Live filter for corporation / OCN autosuggest (same idea as NAICS examples). */
+export function filterCorporationExamples(
+  query: string,
+  limit = 8,
+): OntarioCorporationResult[] {
   const normalized = normalizeQuery(query);
   if (!normalized) {
     return [];
   }
 
   const digitsOnly = normalized.replace(/\D/g, '');
-  const isOcnSearch = digitsOnly.length >= 4 && digitsOnly === normalized.replace(/\s/g, '');
+  const isOcnQuery =
+    digitsOnly.length >= 2 && digitsOnly === normalized.replace(/\s/g, '');
 
-  if (isOcnSearch) {
-    return MOCK_CORPORATIONS.filter((entry) => entry.ocn.includes(digitsOnly));
-  }
+  return ONTARIO_CORPORATION_EXAMPLES.filter((entry) => {
+    if (isOcnQuery) {
+      return entry.ocn.includes(digitsOnly);
+    }
+    const haystack = `${entry.ocn} ${entry.legalName}`;
+    return haystack.includes(normalized);
+  }).slice(0, limit);
+}
 
-  return MOCK_CORPORATIONS.filter((entry) =>
-    entry.legalName.includes(normalized),
-  );
+/** Search Ontario corporations by legal name or OCN (digits). */
+export function searchOntarioCorporations(query: string): OntarioCorporationResult[] {
+  return filterCorporationExamples(query, 20);
 }

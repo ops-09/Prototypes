@@ -6,7 +6,6 @@ import {
   OntarioInput,
   OntarioPageAlert,
   OntarioRadioButtons,
-  OntarioSearchBox,
 } from '@ongov/ontario-design-system-component-library-react';
 import {
   FIND_POSTAL_CODE_URL,
@@ -27,9 +26,10 @@ import {
   type IncorporatorType,
 } from './form1DraftStorage';
 import {
-  searchOntarioCorporations,
+  formatCorporationSuggestion,
   type OntarioCorporationResult,
 } from './ontarioCorporationLookup';
+import { OntarioCorporationSearchAutosuggest } from './OntarioCorporationSearchAutosuggest';
 import { PostalCodeSearchAutosuggest } from './PostalCodeSearchAutosuggest';
 import styles from './Form1Step1.module.scss';
 import step3Styles from './Form1Step3.module.scss';
@@ -358,12 +358,16 @@ export function Form1IncorporatorBlock({
   const [typeSelection, setTypeSelection] = useState<IncorporatorType>(
     incorporator.type,
   );
-  const [searchQuery, setSearchQuery] = useState(incorporator.corporationName);
-  const [searchResults, setSearchResults] = useState<OntarioCorporationResult[]>(
-    [],
+  const [searchQuery, setSearchQuery] = useState(() =>
+    incorporator.ocn && incorporator.corporationName
+      ? formatCorporationSuggestion({
+          ocn: incorporator.ocn,
+          legalName: incorporator.corporationName,
+          status: 'Active',
+        })
+      : incorporator.corporationName,
   );
   const [searchError, setSearchError] = useState('');
-  const [searched, setSearched] = useState(false);
 
   function patch(partial: Partial<Form1Incorporator>) {
     onChange({ ...incorporator, ...partial });
@@ -378,9 +382,8 @@ export function Form1IncorporatorBlock({
 
   function handleTypeSelection(value: IncorporatorType) {
     setTypeSelection(value);
-    setSearchResults([]);
     setSearchError('');
-    setSearched(false);
+    setSearchQuery('');
 
     if (value === 'individual') {
       onChange({
@@ -416,15 +419,22 @@ export function Form1IncorporatorBlock({
     });
   }
 
-  async function performCorporationSearch(value?: string) {
-    const query = (value ?? searchQuery).trim();
-    setSearchQuery(query);
-    setSearched(true);
+  function selectedCorporationLabel() {
+    if (!incorporator.ocn || !incorporator.corporationName) {
+      return '';
+    }
+    return formatCorporationSuggestion({
+      ocn: incorporator.ocn,
+      legalName: incorporator.corporationName,
+      status: 'Active',
+    });
+  }
+
+  function handleCorporationQueryChange(value: string) {
+    setSearchQuery(value);
     setSearchError('');
-    const results = searchOntarioCorporations(query);
-    setSearchResults(results);
-    if (results.length === 0) {
-      setSearchError(CORP_NOT_FOUND);
+    const selectedLabel = selectedCorporationLabel();
+    if (selectedLabel && value !== selectedLabel) {
       patch({ corporationName: '', ocn: '' });
     }
   }
@@ -435,6 +445,7 @@ export function Form1IncorporatorBlock({
       return;
     }
     setSearchError('');
+    setSearchQuery(formatCorporationSuggestion(result));
     patch({
       corporationName: result.legalName,
       ocn: result.ocn,
@@ -906,52 +917,31 @@ export function Form1IncorporatorBlock({
         </>
       ) : (
         <>
-          <div id={`${prefix}-corporation-search`}>
-            <OntarioSearchBox
-              elementId={`${prefix}-corporation-search`}
-              caption="Corporation name or OCN"
-              hintText="Search Ontario corporations only. Enter a name or Ontario Corporation Number (OCN), then select a match."
-              required
-              value={searchQuery}
-              customOnInput={(event) => setSearchQuery(getEventValue(event))}
-              performSearch={performCorporationSearch}
-            />
-            {searchError || errors.corporation || errors.corporationSearch ? (
-              <p className={styles.fieldError} role="alert">
-                {searchError || errors.corporation || errors.corporationSearch}
-              </p>
-            ) : null}
-          </div>
-
-          {searched && searchResults.length > 0 ? (
-            <div>
-              <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>
-                Matching corporations
-              </h2>
-              <ul className={step4Styles.summaryList}>
-                {searchResults.map((result) => {
-                  const selected = incorporator.ocn === result.ocn;
-                  return (
-                    <li key={result.ocn} className={step4Styles.summaryItem}>
-                      <div className={step4Styles.summaryMain}>
-                        <button
-                          type="button"
-                          className={step4Styles.summaryTitle}
-                          onClick={() => selectCorporation(result)}
-                        >
-                          {result.legalName}
-                        </button>
-                        <div className={step4Styles.summaryDescription}>
-                          OCN {result.ocn}
-                          {selected ? ' · Selected' : ''}
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+          <div id={`${prefix}-corporation-search`} className={styles.naicsBlock}>
+            <label
+              className={styles.naicsLabel}
+              htmlFor={`${prefix}-corporation-search-input`}
+            >
+              Corporation name or OCN
+              <span className={styles.requiredFlag}> (required)</span>
+            </label>
+            <div className={styles.naicsSearch}>
+              <OntarioCorporationSearchAutosuggest
+                elementId={`${prefix}-corporation-search-input`}
+                value={searchQuery}
+                errorMessage={
+                  searchError || errors.corporation || errors.corporationSearch
+                }
+                hintText="Example: 1001234, maple, or GREEN INSTITUTE"
+                onChange={handleCorporationQueryChange}
+                onSelect={selectCorporation}
+                onNoResults={() => {
+                  setSearchError(CORP_NOT_FOUND);
+                  patch({ corporationName: '', ocn: '' });
+                }}
+              />
             </div>
-          ) : null}
+          </div>
 
           {incorporator.corporationName ? (
             <div className={step4Styles.readOnlyField}>
