@@ -11,9 +11,9 @@ export function Form1Page() {
       mainClassName={formStyles.formMain}
     >
       <ContactInformationForm
-        continueHref="/form-1/step-1"
+        continueHref="/form-1/step-2"
         currentStep={1}
-        numberOfSteps={8}
+        numberOfSteps={9}
         backButtonUrl="/"
         primaryButtonLabel="Continue"
       />

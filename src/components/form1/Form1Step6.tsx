@@ -1,0 +1,493 @@
+import { useMemo, useRef, useState, type MouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  OntarioButton,
+  OntarioPageAlert,
+  OntarioStepIndicator,
+  OntarioTextarea,
+} from '@ongov/ontario-design-system-component-library-react';
+import {
+  EMPTY_STEP1,
+  EMPTY_STEP2,
+  EMPTY_STEP3,
+  EMPTY_STEP4,
+  EMPTY_STEP5,
+  EMPTY_STEP6,
+  EMPTY_STEP7,
+  FORM1_RICH_TEXT_MAX_CHARS,
+  readForm1Draft,
+  saveForm1Draft,
+  syncIncorporatorsFromDirectors,
+  upsertForm1Step6,
+  type Form1Draft,
+  type Form1Step6Data,
+} from './form1DraftStorage';
+import styles from './Form1Step1.module.scss';
+import step5Styles from './Form1Step5.module.scss';
+
+const CURRENT_STEP = 7;
+const TOTAL_STEPS = 9;
+
+const MAX_LENGTH_ERROR =
+  'The text entered exceeds the maximum length of 900,000 characters.';
+const FIELD_REQUIRED =
+  'Enter the required information, or enter “Not applicable” if none.';
+const MEMBERSHIP_CLASSES_REQUIRED = 'The classes of membership must be entered.';
+const MEMBERSHIP_CLASS_TERMS_REQUIRED =
+  'The terms and conditions attaching to each class of membership must be entered.';
+const STAKEHOLDER_GROUPS_REQUIRED = 'The stakeholder groups must be entered.';
+const STAKEHOLDER_GROUP_TERMS_REQUIRED =
+  'The terms and conditions for membership in each stakeholder group must be entered.';
+
+type PageFieldKey =
+  | 'membershipClasses'
+  | 'membershipClassTerms'
+  | 'stakeholderGroups'
+  | 'stakeholderGroupTerms'
+  | 'specialProvisions';
+
+type PageErrors = Partial<Record<PageFieldKey, string>>;
+
+const FIELD_ANCHORS: Record<PageFieldKey, string> = {
+  membershipClasses: 'membership-classes',
+  membershipClassTerms: 'membership-class-terms',
+  stakeholderGroups: 'stakeholder-groups',
+  stakeholderGroupTerms: 'stakeholder-group-terms',
+  specialProvisions: 'special-provisions',
+};
+
+const FIELD_ORDER: PageFieldKey[] = [
+  'membershipClasses',
+  'membershipClassTerms',
+  'stakeholderGroups',
+  'stakeholderGroupTerms',
+  'specialProvisions',
+];
+
+const ODS_FOCUSABLE = 'ontario-textarea';
+
+function getEventValue(event: globalThis.Event) {
+  const target = event.target as HTMLTextAreaElement | HTMLInputElement | null;
+  return target?.value ?? '';
+}
+
+function focusShadowControl(host: HTMLElement) {
+  const nested = host.shadowRoot?.querySelector<HTMLElement>(
+    'textarea, input:not([type="hidden"])',
+  );
+  nested?.focus({ preventScroll: true });
+}
+
+function focusField(anchorId: string) {
+  const byId = document.getElementById(anchorId);
+  if (byId) {
+    byId.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const host = byId.matches(ODS_FOCUSABLE)
+      ? byId
+      : byId.querySelector<HTMLElement>(ODS_FOCUSABLE);
+    if (host) {
+      focusShadowControl(host);
+    }
+    return;
+  }
+
+  const byElementId = document.querySelector<HTMLElement>(
+    `[element-id="${CSS.escape(anchorId)}"]`,
+  );
+  if (byElementId) {
+    byElementId.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    focusShadowControl(byElementId);
+  }
+}
+
+function lengthErrorIfNeeded(value: string): string | undefined {
+  if (value.length > FORM1_RICH_TEXT_MAX_CHARS) {
+    return MAX_LENGTH_ERROR;
+  }
+  return undefined;
+}
+
+function hasContent(value: string) {
+  return value.trim().length > 0;
+}
+
+/** Prototype deep-link: seed Steps 1–5 so /form-1/step-7 opens from the playground. */
+function ensureStep6Draft(): Form1Draft {
+  const existing = readForm1Draft();
+  if (
+    existing?.step1.languageOption &&
+    existing.step2.cooperativeSubtype &&
+    existing.step3.streetNumber &&
+    existing.step4.directors.length > 0 &&
+    existing.step5.authorizedCapital.trim()
+  ) {
+    return {
+      ...existing,
+      step5: { ...EMPTY_STEP5, ...(existing.step5 ?? {}) },
+      step6: { ...EMPTY_STEP6, ...(existing.step6 ?? {}) },
+      step7: {
+        incorporators: syncIncorporatorsFromDirectors(
+          existing.step4.directors,
+          existing.step7?.incorporators ?? [],
+        ),
+      },
+    };
+  }
+
+  const now = new Date().toISOString();
+  const directors =
+    existing?.step4?.directors?.length
+      ? existing.step4.directors
+      : [
+          {
+            id: 'seed-director-1',
+            firstName: 'Alex',
+            middleName: '',
+            lastName: 'Rivera',
+            email: 'alex.rivera@example.com',
+            residentCanadian: 'yes',
+            alsoIncorporator: 'yes',
+            address: {
+              addressType: 'canadian' as const,
+              postalCodeLookup: '',
+              enterManually: true,
+              selectedAddressId: '',
+              unitNumber: '',
+              streetNumber: '100',
+              streetName: 'Queen',
+              streetNumberSuffix: '',
+              streetType: 'St',
+              streetDirection: 'W',
+              addressLine1: '',
+              addressLine2: '',
+              cityTown: 'Toronto',
+              provinceState: 'Ontario',
+              postalCode: 'M5H 2N2',
+              country: 'Canada',
+            },
+            consentConfirmed: false,
+            consentFile: null,
+          },
+        ];
+
+  const seeded: Form1Draft = {
+    step1: {
+      ...EMPTY_STEP1,
+      languageOption: 'english',
+      cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
+      nuansFile: {
+        name: 'NUANS-Green-Institute.pdf',
+        size: 184320,
+        type: 'application/pdf',
+      },
+      nuansDate: '2026-08-15',
+    },
+    step2: {
+      ...EMPTY_STEP2,
+      cooperativeSubtype: 'Worker Co-operative',
+      primaryActivity: '4521 - Department stores',
+      email: 'registry@greeninstitute.coop',
+      confirmEmail: 'registry@greeninstitute.coop',
+    },
+    step3: {
+      ...EMPTY_STEP3,
+      enterManually: true,
+      streetNumber: '100',
+      streetName: 'Queen',
+      streetType: 'St',
+      streetDirection: 'W',
+      cityTown: 'Toronto',
+      province: 'Ontario',
+      postalCode: 'M5H 2N2',
+      country: 'Canada',
+      municipalityStatus: 'City',
+      municipalityName: 'Toronto',
+      countyStatus: 'Regional Municipality',
+      countyName: 'Toronto',
+    },
+    step4: {
+      ...EMPTY_STEP4,
+      ...(existing?.step4 ?? {}),
+      countMode: existing?.step4?.countMode || 'fixed',
+      fixedNumber: existing?.step4?.fixedNumber || '1',
+      multiStakeholder: existing?.step4?.multiStakeholder || 'no',
+      directors,
+    },
+    step5: { ...EMPTY_STEP5, ...(existing?.step5 ?? {}) },
+    step6: { ...EMPTY_STEP6, ...(existing?.step6 ?? {}) },
+    step7: {
+      ...EMPTY_STEP7,
+      incorporators: syncIncorporatorsFromDirectors(
+        directors,
+        existing?.step7?.incorporators ?? [],
+      ),
+    },
+    savedAt: now,
+    mode: 'continue',
+    lastCompletedStep: 5,
+  };
+  saveForm1Draft(seeded);
+  return seeded;
+}
+
+export function Form1Step6() {
+  const navigate = useNavigate();
+  const draft = ensureStep6Draft();
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
+
+  const [step6, setStep6] = useState<Form1Step6Data>(() => ({
+    ...EMPTY_STEP6,
+    ...(draft.step6 ?? {}),
+  }));
+  const [errors, setErrors] = useState<PageErrors>({});
+  const [showErrorSummary, setShowErrorSummary] = useState(false);
+
+  const errorSummaryItems = useMemo(
+    () =>
+      FIELD_ORDER.flatMap((key) => {
+        const message = errors[key];
+        if (!message) {
+          return [];
+        }
+        return [{ key, message, href: `#${FIELD_ANCHORS[key]}` }];
+      }),
+    [errors],
+  );
+
+  function patchField(key: PageFieldKey, value: string) {
+    setStep6((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => {
+      if (!prev[key]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }
+
+  function validatePage(): PageErrors {
+    const page: PageErrors = {};
+
+    for (const key of FIELD_ORDER) {
+      const lengthError = lengthErrorIfNeeded(step6[key]);
+      if (lengthError) {
+        page[key] = lengthError;
+      }
+    }
+
+    if (
+      !page.membershipClassTerms &&
+      hasContent(step6.membershipClasses) &&
+      !hasContent(step6.membershipClassTerms)
+    ) {
+      page.membershipClassTerms = MEMBERSHIP_CLASS_TERMS_REQUIRED;
+    }
+    if (
+      !page.membershipClasses &&
+      hasContent(step6.membershipClassTerms) &&
+      !hasContent(step6.membershipClasses)
+    ) {
+      page.membershipClasses = MEMBERSHIP_CLASSES_REQUIRED;
+    }
+
+    if (
+      !page.stakeholderGroupTerms &&
+      hasContent(step6.stakeholderGroups) &&
+      !hasContent(step6.stakeholderGroupTerms)
+    ) {
+      page.stakeholderGroupTerms = STAKEHOLDER_GROUP_TERMS_REQUIRED;
+    }
+    if (
+      !page.stakeholderGroups &&
+      hasContent(step6.stakeholderGroupTerms) &&
+      !hasContent(step6.stakeholderGroups)
+    ) {
+      page.stakeholderGroups = STAKEHOLDER_GROUPS_REQUIRED;
+    }
+
+    for (const key of FIELD_ORDER) {
+      if (!page[key] && !hasContent(step6[key])) {
+        page[key] = FIELD_REQUIRED;
+      }
+    }
+
+    return page;
+  }
+
+  function handleContinue() {
+    const page = validatePage();
+    setErrors(page);
+    const hasErrors = Object.keys(page).length > 0;
+    setShowErrorSummary(hasErrors);
+
+    if (hasErrors) {
+      window.requestAnimationFrame(() => {
+        errorSummaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return;
+    }
+
+    upsertForm1Step6(step6, 'continue', 6);
+    navigate('/form-1/step-8');
+  }
+
+  function handleSaveAsDraft() {
+    upsertForm1Step6(
+      step6,
+      'draft',
+      draft.lastCompletedStep >= 6 ? 6 : draft.lastCompletedStep >= 5 ? 5 : 4,
+    );
+    navigate('/form-1/draft-summary');
+  }
+
+  function handleCancel() {
+    const leave = window.confirm(
+      'Leave this filing without saving further changes?',
+    );
+    if (leave) {
+      navigate('/');
+    }
+  }
+
+  function handleSummaryLinkClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
+    event.preventDefault();
+    focusField(href.replace('#', ''));
+  }
+
+  return (
+    <>
+      <div className={styles.stepIndicator}>
+        <OntarioStepIndicator
+          showBackButton
+          backButtonUrl="/form-1/step-6"
+          currentStep={CURRENT_STEP}
+          numberOfSteps={TOTAL_STEPS}
+        />
+      </div>
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12 ontario-medium-8">
+          {showErrorSummary && errorSummaryItems.length > 0 ? (
+            <div ref={errorSummaryRef} className={styles.alert} tabIndex={-1}>
+              <OntarioPageAlert type="error" heading="There is a problem">
+                <p>Errors were found on this page:</p>
+                <ul>
+                  {errorSummaryItems.map((item) => (
+                    <li key={item.key}>
+                      <a
+                        className={styles.errorSummaryLink}
+                        href={item.href}
+                        onClick={(event) => handleSummaryLinkClick(event, item.href)}
+                      >
+                        {item.message}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </OntarioPageAlert>
+            </div>
+          ) : null}
+
+          <h1 className={`ontario-h1 ${styles.pageTitle}`}>
+            Membership and provisions
+          </h1>
+
+          {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea + counts. */}
+          <div className={`${styles.formStack} ${step5Styles.fieldStack}`}>
+            <div id={FIELD_ANCHORS.membershipClasses}>
+              <OntarioTextarea
+                elementId={FIELD_ANCHORS.membershipClasses}
+                caption="Classes of membership, if any"
+                name={FIELD_ANCHORS.membershipClasses}
+                required
+                value={step6.membershipClasses}
+                errorMessage={errors.membershipClasses}
+                customOnInput={(event) =>
+                  patchField('membershipClasses', getEventValue(event))
+                }
+              />
+            </div>
+
+            <div id={FIELD_ANCHORS.membershipClassTerms}>
+              <OntarioTextarea
+                elementId={FIELD_ANCHORS.membershipClassTerms}
+                caption="Terms and conditions attaching to each class of membership"
+                name={FIELD_ANCHORS.membershipClassTerms}
+                required
+                value={step6.membershipClassTerms}
+                errorMessage={errors.membershipClassTerms}
+                customOnInput={(event) =>
+                  patchField('membershipClassTerms', getEventValue(event))
+                }
+              />
+            </div>
+
+            <div id={FIELD_ANCHORS.stakeholderGroups}>
+              <OntarioTextarea
+                elementId={FIELD_ANCHORS.stakeholderGroups}
+                caption="Stakeholder groups, if any"
+                name={FIELD_ANCHORS.stakeholderGroups}
+                required
+                value={step6.stakeholderGroups}
+                errorMessage={errors.stakeholderGroups}
+                customOnInput={(event) =>
+                  patchField('stakeholderGroups', getEventValue(event))
+                }
+              />
+            </div>
+
+            <div id={FIELD_ANCHORS.stakeholderGroupTerms}>
+              <OntarioTextarea
+                elementId={FIELD_ANCHORS.stakeholderGroupTerms}
+                caption="Terms and conditions for membership in each stakeholder group"
+                name={FIELD_ANCHORS.stakeholderGroupTerms}
+                required
+                value={step6.stakeholderGroupTerms}
+                errorMessage={errors.stakeholderGroupTerms}
+                customOnInput={(event) =>
+                  patchField('stakeholderGroupTerms', getEventValue(event))
+                }
+              />
+            </div>
+
+            <div id={FIELD_ANCHORS.specialProvisions}>
+              <OntarioTextarea
+                elementId={FIELD_ANCHORS.specialProvisions}
+                caption="Special provisions, if any"
+                name={FIELD_ANCHORS.specialProvisions}
+                required
+                value={step6.specialProvisions}
+                errorMessage={errors.specialProvisions}
+                customOnInput={(event) =>
+                  patchField('specialProvisions', getEventValue(event))
+                }
+              />
+            </div>
+          </div>
+
+          <div className={styles.buttonGroup}>
+            <OntarioButton
+              type="primary"
+              htmlType="button"
+              label="Continue"
+              onClick={handleContinue}
+            />
+            <OntarioButton
+              type="secondary"
+              htmlType="button"
+              label="Save as Draft"
+              onClick={handleSaveAsDraft}
+            />
+            <OntarioButton
+              type="tertiary"
+              htmlType="button"
+              label="Cancel/Exit"
+              onClick={handleCancel}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

@@ -28,7 +28,7 @@ import { validateNuansDate } from '../form7/nuansValidation';
 import styles from './Form1Step1.module.scss';
 
 const CURRENT_STEP = 2;
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 type FieldKey =
   | 'languageOption'
@@ -354,7 +354,7 @@ export function Form1Step1() {
     }
 
     upsertForm1Step1(buildStep1(), 'continue', 1);
-    navigate('/form-1/step-2');
+    navigate('/form-1/step-3');
   }
 
   function handleSaveAsDraft() {

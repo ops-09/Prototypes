@@ -24,6 +24,9 @@ import {
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
+  EMPTY_STEP5,
+  EMPTY_STEP6,
+  EMPTY_STEP7,
   HEAD_OFFICE_INFO,
   MUNICIPALITY_STATUS_OPTIONS,
   readForm1Draft,
@@ -40,7 +43,7 @@ import styles from './Form1Step1.module.scss';
 import step3Styles from './Form1Step3.module.scss';
 
 const CURRENT_STEP = 4;
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 const REQUIRED_FIELD_ERROR = 'Required Field. Please try again.';
 const HEAD_OFFICE_REQUIRED_ERROR = 'Head Office Address must be entered.';
@@ -168,7 +171,7 @@ function hasAddressContent(step3: Form1Step3Data) {
   );
 }
 
-/** Prototype deep-link: seed Steps 1–2 so /form-1/step-3 opens from the playground. */
+/** Prototype deep-link: seed Steps 1–2 so /form-1/step-4 opens from the playground. */
 function ensureStep3Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
@@ -181,6 +184,9 @@ function ensureStep3Draft(): Form1Draft {
       ...existing,
       step3: { ...EMPTY_STEP3, ...(existing.step3 ?? {}) },
       step4: existing.step4 ?? { ...EMPTY_STEP4 },
+      step5: existing.step5 ?? { ...EMPTY_STEP5 },
+      step6: existing.step6 ?? { ...EMPTY_STEP6 },
+      step7: existing.step7 ?? { ...EMPTY_STEP7 },
     };
   }
 
@@ -206,6 +212,9 @@ function ensureStep3Draft(): Form1Draft {
     },
     step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: existing?.step4 ?? { ...EMPTY_STEP4 },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
     savedAt: now,
     mode: 'continue',
     lastCompletedStep: 2,
@@ -380,7 +389,7 @@ export function Form1Step3() {
     }
 
     upsertForm1Step3(step3, 'continue', 3);
-    navigate('/form-1/step-4');
+    navigate('/form-1/step-5');
   }
 
   function handleSaveAsDraft() {
@@ -407,7 +416,7 @@ export function Form1Step3() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-1/step-2"
+          backButtonUrl="/form-1/step-3"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />

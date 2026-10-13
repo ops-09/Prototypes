@@ -8,6 +8,11 @@ import { Form1Step2Page } from './pages/Form1Step2Page';
 import { Form1Step3Page } from './pages/Form1Step3Page';
 import { Form1DirectorSubflowPage } from './pages/Form1DirectorSubflowPage';
 import { Form1Step4Page } from './pages/Form1Step4Page';
+import { Form1Step5Page } from './pages/Form1Step5Page';
+import { Form1Step6Page } from './pages/Form1Step6Page';
+import { Form1Step7Page } from './pages/Form1Step7Page';
+import { Form1Step8Page } from './pages/Form1Step8Page';
+import { Form1IncorporatorSubflowPage } from './pages/Form1IncorporatorSubflowPage';
 import { Form7DraftSummaryPage } from './pages/Form7DraftSummaryPage';
 import { Form7Page } from './pages/Form7Page';
 import { Form7Step1Page } from './pages/Form7Step1Page';
@@ -27,19 +32,33 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/cover-letter" element={<CoverLetterPage />} />
         <Route path="/form-1" element={<Form1Page />} />
-        <Route path="/form-1/step-1" element={<Form1Step1Page />} />
-        <Route path="/form-1/step-2" element={<Form1Step2Page />} />
-        <Route path="/form-1/step-3" element={<Form1Step3Page />} />
-        <Route path="/form-1/step-4" element={<Form1Step4Page />} />
+        {/* URLs match UI step numbers (cover = step 1 at /form-1). */}
+        <Route path="/form-1/step-2" element={<Form1Step1Page />} />
+        <Route path="/form-1/step-3" element={<Form1Step2Page />} />
+        <Route path="/form-1/step-4" element={<Form1Step3Page />} />
+        <Route path="/form-1/step-5" element={<Form1Step4Page />} />
         <Route
-          path="/form-1/step-4/directors/new"
+          path="/form-1/step-5/directors/new"
           element={<Form1DirectorSubflowPage />}
         />
         <Route
-          path="/form-1/step-4/directors/:directorId"
+          path="/form-1/step-5/directors/:directorId"
           element={<Form1DirectorSubflowPage />}
         />
+        <Route path="/form-1/step-6" element={<Form1Step5Page />} />
+        <Route path="/form-1/step-7" element={<Form1Step6Page />} />
+        <Route path="/form-1/step-8" element={<Form1Step7Page />} />
+        <Route
+          path="/form-1/step-8/incorporators/new"
+          element={<Form1IncorporatorSubflowPage />}
+        />
+        <Route
+          path="/form-1/step-8/incorporators/:incorporatorId"
+          element={<Form1IncorporatorSubflowPage />}
+        />
+        <Route path="/form-1/step-9" element={<Form1Step8Page />} />
         <Route path="/form-1/draft-summary" element={<Form1DraftSummaryPage />} />
+        <Route path="/form-1/step-1" element={<Navigate to="/form-1/step-2" replace />} />
         <Route path="/form-7" element={<Form7Page />} />
         <Route path="/form-7/step-1" element={<Form7Step1Page />} />
         <Route path="/form-7/step-2" element={<Form7Step2Page />} />

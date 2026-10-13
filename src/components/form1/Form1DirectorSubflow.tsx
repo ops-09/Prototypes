@@ -1,9 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import {
-  OntarioPageAlert,
-  OntarioStepIndicator,
-} from '@ongov/ontario-design-system-component-library-react';
+import { OntarioPageAlert } from '@ongov/ontario-design-system-component-library-react';
 import {
   Form1DirectorBlock,
   validateDirector,
@@ -12,6 +9,7 @@ import {
 import {
   createEmptyDirector,
   EMPTY_STEP4,
+  getDirectorLimit,
   readForm1Draft,
   upsertForm1Step4,
   type Form1Director,
@@ -42,7 +40,7 @@ export function Form1DirectorSubflow() {
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
   if (!director) {
-    return <Navigate to="/form-1/step-4" replace />;
+    return <Navigate to="/form-1/step-5" replace />;
   }
 
   const current = director;
@@ -57,66 +55,64 @@ export function Form1DirectorSubflow() {
     }
 
     const step4 = readStep4();
+    if (isNew) {
+      const limit = getDirectorLimit(step4);
+      if (limit !== null && step4.directors.length >= limit) {
+        navigate('/form-1/step-5');
+        return;
+      }
+    }
+
     const nextDirectors = isNew
       ? [...step4.directors, current]
       : step4.directors.map((entry) => (entry.id === current.id ? current : entry));
 
     upsertForm1Step4({ ...step4, directors: nextDirectors }, 'continue', 3);
-    navigate('/form-1/step-4');
+    navigate('/form-1/step-5');
   }
 
   function handleCancel() {
-    navigate('/form-1/step-4');
+    navigate('/form-1/step-5');
   }
 
   const errorItems = Object.entries(errors).filter(([, message]) => Boolean(message));
 
   return (
-    <>
-      <div className={styles.stepIndicator}>
-        <OntarioStepIndicator
-          showBackButton={false}
-          currentStep={5}
-          numberOfSteps={8}
-        />
-      </div>
-
-      <div className="ontario-row">
-        <div className="ontario-columns ontario-small-12 ontario-medium-8">
-          {showErrorSummary && errorItems.length > 0 ? (
-            <div className={styles.alert} tabIndex={-1}>
-              <OntarioPageAlert type="error" heading="There is a problem">
-                <p>Errors were found on this page:</p>
-                <ul>
-                  {errorItems.map(([key, message]) => (
-                    <li key={key}>{message}</li>
-                  ))}
-                </ul>
-              </OntarioPageAlert>
-            </div>
-          ) : null}
-
-          <h1 className={`ontario-h1 ${styles.pageTitle}`}>
-            {isNew ? 'Add director' : 'Edit director'}
-          </h1>
-
-          <div className={styles.formStack}>
-            <Form1DirectorBlock
-              director={current}
-              expanded
-              showChrome={false}
-              errors={errors}
-              onChange={(next) => {
-                setDirector(next);
-                setErrors({});
-                setShowErrorSummary(false);
-              }}
-              onSave={handleSave}
-              onCancel={handleCancel}
-            />
+    <div className="ontario-row">
+      <div className="ontario-columns ontario-small-12 ontario-medium-8">
+        {showErrorSummary && errorItems.length > 0 ? (
+          <div className={styles.alert} tabIndex={-1}>
+            <OntarioPageAlert type="error" heading="There is a problem">
+              <p>Errors were found on this page:</p>
+              <ul>
+                {errorItems.map(([key, message]) => (
+                  <li key={key}>{message}</li>
+                ))}
+              </ul>
+            </OntarioPageAlert>
           </div>
+        ) : null}
+
+        <h1 className={`ontario-h1 ${styles.subflowPageTitle}`}>
+          {isNew ? 'Add director' : 'Edit director'}
+        </h1>
+
+        <div className={styles.formStack}>
+          <Form1DirectorBlock
+            director={current}
+            expanded
+            showChrome={false}
+            errors={errors}
+            onChange={(next) => {
+              setDirector(next);
+              setErrors({});
+              setShowErrorSummary(false);
+            }}
+            onSave={handleSave}
+            onCancel={handleCancel}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }

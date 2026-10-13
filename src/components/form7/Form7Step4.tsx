@@ -300,7 +300,7 @@ export function Form7Step4() {
             </div>
           ) : null}
 
-          <h1 className={`ontario-h1 ${styles.pageTitle}`}>Review and validation</h1>
+          <h1 className={`ontario-h1 ${styles.pageTitle}`}>Review</h1>
           <p className={styles.lead}>
             Review the information you entered for this Articles of Amendment filing.
             Use Edit to correct a section, generate a PDF to sign, upload the signed copy,

@@ -326,7 +326,7 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
           description: displayOrEmpty(draft.step1.ocn),
         },
         {
-          name: 'Entity type',
+          name: 'Type of Co-operative',
           description: displayOrEmpty(draft.step1.cooperativeType),
         },
         {
@@ -334,7 +334,7 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
           description: amendmentTypeLabel(draft.step2.amendmentType),
         },
         {
-          name: 'NAICS (Primary activity)',
+          name: 'Primary Activity',
           description: displayOrEmpty(draft.step1.primaryActivity),
         },
         {

@@ -47,6 +47,11 @@
   margin-top: 0;
 }
 
+.subflowPageTitle {
+  margin-top: 0;
+  padding-top: var(--ontario-spacing-7, 2.5rem);
+}
+
 .lead {
   margin: 0 0 var(--ontario-spacing-5, 1.5rem);
 }
@@ -59,6 +64,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--ontario-spacing-6, 2rem);
+}
+
+// Cancel ODS page-alert outer margins, then apply page-layout vertical padding.
+.incorporatorInfoAlert {
+  margin-top: calc(-1 * var(--ontario-spacing-6, 2rem));
+  margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
+  padding-top: var(--ontario-spacing-5, 1.5rem);
+  padding-bottom: var(--ontario-spacing-5, 1.5rem);
 }
 
 .nuansSection {

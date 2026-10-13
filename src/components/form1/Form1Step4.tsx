@@ -20,6 +20,9 @@ import {
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
+  EMPTY_STEP5,
+  EMPTY_STEP6,
+  EMPTY_STEP7,
   getDirectorLimit,
   getDirectorMinimum,
   readForm1Draft,
@@ -34,12 +37,44 @@ import styles from './Form1Step1.module.scss';
 import step4Styles from './Form1Step4.module.scss';
 
 const CURRENT_STEP = 5;
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 const REQUIRED = 'Required Field.';
 const REQUIRED_RETRY = 'Required Field. Please try again.';
 const MIN_MAX_ORDER_ERROR =
   'The minimum number of directors cannot be greater than the maximum.';
+const FIXED_DIRECTORS_COUNT_ERROR =
+  'The number of directors added must match the fixed number of directors.';
+
+function minDirectorsCountError(minimum: number) {
+  return `At least ${minimum} directors must be added.`;
+}
+
+function maxDirectorsCountError(maximum: number) {
+  return `No more than ${maximum} directors may be added.`;
+}
+
+/** Count mismatch vs fixed / min / max — used on Continue and live when fields change. */
+function getDirectorsCountError(data: Form1Step4Data): string | undefined {
+  const addedCount = data.directors.length;
+  const minimum = getDirectorMinimum(data);
+  const maximum = getDirectorLimit(data);
+
+  if (data.countMode === 'fixed' && minimum !== null && addedCount !== minimum) {
+    return FIXED_DIRECTORS_COUNT_ERROR;
+  }
+
+  if (data.countMode === 'minMax' && minimum !== null) {
+    if (addedCount < minimum) {
+      return minDirectorsCountError(minimum);
+    }
+    if (maximum !== null && addedCount > maximum) {
+      return maxDirectorsCountError(maximum);
+    }
+  }
+
+  return undefined;
+}
 
 type PageFieldKey =
   | 'countMode'
@@ -150,22 +185,44 @@ function digitsOnly(value: string) {
   return value.replace(/\D/g, '');
 }
 
-function fixedDirectorsMessage(fixed: number, addedCount: number) {
-  if (addedCount < fixed) {
-    return `You set a fixed number of ${fixed} directors. Add another director, or change the fixed number of directors.`;
+/** True when count + multi-stakeholder questions (and their follow-ups) are filled. */
+function areDirectorQuestionsComplete(data: Form1Step4Data) {
+  if (!data.countMode || !data.multiStakeholder) {
+    return false;
   }
-  return `You set a fixed number of ${fixed} directors. Remove a director or change the fixed number of directors.`;
+
+  if (data.countMode === 'fixed' && !data.fixedNumber.trim()) {
+    return false;
+  }
+
+  if (data.countMode === 'minMax') {
+    if (!data.minimumNumber.trim() || !data.maximumNumber.trim()) {
+      return false;
+    }
+  }
+
+  if (data.multiStakeholder === 'yes' && !data.stakeholderDirectorsText.trim()) {
+    return false;
+  }
+
+  return true;
 }
 
-function minDirectorsMessage(minimum: number) {
-  return `You set a minimum of ${minimum} directors. Add another director, or change the minimum number of directors.`;
+function formatDirectorSelectionSummary(data: Form1Step4Data) {
+  const countPart =
+    data.countMode === 'fixed'
+      ? `You selected a fixed number of ${data.fixedNumber.trim()} directors.`
+      : `You selected a minimum of ${data.minimumNumber.trim()} and a maximum of ${data.maximumNumber.trim()} directors.`;
+
+  const stakeholderPart =
+    data.multiStakeholder === 'yes'
+      ? 'This is a multi-stakeholder co-operative.'
+      : 'This is not a multi-stakeholder co-operative.';
+
+  return `${countPart} ${stakeholderPart}`;
 }
 
-function maxDirectorsMessage(maximum: number) {
-  return `You set a maximum of ${maximum} directors. Remove a director or change the maximum number of directors.`;
-}
-
-/** Prototype deep-link: seed Steps 1–3 so /form-1/step-4 opens from the playground. */
+/** Prototype deep-link: seed Steps 1–3 so /form-1/step-5 opens from the playground. */
 function ensureStep4Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
@@ -180,6 +237,9 @@ function ensureStep4Draft(): Form1Draft {
         ...step4,
         directors: step4.directors ?? [],
       },
+      step5: existing.step5 ?? { ...EMPTY_STEP5 },
+      step6: existing.step6 ?? { ...EMPTY_STEP6 },
+      step7: existing.step7 ?? { ...EMPTY_STEP7 },
     };
   }
 
@@ -224,6 +284,9 @@ function ensureStep4Draft(): Form1Draft {
       ...(existing?.step4 ?? {}),
       directors: existing?.step4?.directors ?? [],
     },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
     savedAt: now,
     mode: 'continue',
     lastCompletedStep: 3,
@@ -246,7 +309,6 @@ export function Form1Step4() {
   });
   const [errors, setErrors] = useState<PageErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
-  const [showContinueSuccess, setShowContinueSuccess] = useState(false);
 
   const errorSummaryItems = useMemo(
     () =>
@@ -260,9 +322,12 @@ export function Form1Step4() {
     [errors],
   );
 
+  const directorLimit = getDirectorLimit(step4);
+  const atDirectorLimit =
+    directorLimit !== null && step4.directors.length >= directorLimit;
+
   function patchStep4(partial: Partial<Form1Step4Data>) {
     setStep4((prev) => ({ ...prev, ...partial }));
-    setShowContinueSuccess(false);
   }
 
   function clearError(key: PageFieldKey) {
@@ -315,20 +380,9 @@ export function Form1Step4() {
       page.stakeholderDirectorsText = REQUIRED_RETRY;
     }
 
-    const addedCount = step4.directors.length;
-    const minimum = getDirectorMinimum(step4);
-    const maximum = getDirectorLimit(step4);
-
-    if (step4.countMode === 'fixed' && minimum !== null && addedCount !== minimum) {
-      page.directors = fixedDirectorsMessage(minimum, addedCount);
-    }
-
-    if (step4.countMode === 'minMax' && minimum !== null) {
-      if (addedCount < minimum) {
-        page.directors = minDirectorsMessage(minimum);
-      } else if (maximum !== null && addedCount > maximum) {
-        page.directors = maxDirectorsMessage(maximum);
-      }
+    const directorsError = getDirectorsCountError(step4);
+    if (directorsError) {
+      page.directors = directorsError;
     }
 
     return page;
@@ -348,8 +402,7 @@ export function Form1Step4() {
     }
 
     upsertForm1Step4(step4, 'continue', 4);
-    setShowContinueSuccess(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate('/form-1/step-6');
   }
 
   function handleSaveAsDraft() {
@@ -370,18 +423,33 @@ export function Form1Step4() {
     }
   }
 
+  function persistStep4(next: Form1Step4Data) {
+    upsertForm1Step4(next, 'continue', 3);
+  }
+
   function startAddDirectorSubflow() {
+    if (atDirectorLimit) {
+      return;
+    }
     clearError('directors');
-    navigate('/form-1/step-4/directors/new');
+    persistStep4(step4);
+    navigate('/form-1/step-5/directors/new');
   }
 
   function editDirector(id: string) {
-    navigate(`/form-1/step-4/directors/${id}`);
+    persistStep4(step4);
+    navigate(`/form-1/step-5/directors/${id}`);
   }
 
   function removeDirector(id: string) {
-    const nextDirectors = step4.directors.filter((entry) => entry.id !== id);
-    patchStep4({ directors: nextDirectors });
+    setStep4((prev) => {
+      const next = {
+        ...prev,
+        directors: prev.directors.filter((entry) => entry.id !== id),
+      };
+      persistStep4(next);
+      return next;
+    });
     clearError('directors');
   }
 
@@ -395,7 +463,7 @@ export function Form1Step4() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-1/step-3"
+          backButtonUrl="/form-1/step-4"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
@@ -424,17 +492,7 @@ export function Form1Step4() {
             </div>
           ) : null}
 
-          <h1 className={`ontario-h1 ${styles.pageTitle}`}>How many directors?</h1>
-
-          {showContinueSuccess ? (
-            <div className={styles.alert}>
-              <OntarioPageAlert
-                type="success"
-                heading="Step 5 saved"
-                content="Your directors were saved. The next step is not available in this prototype yet."
-              />
-            </div>
-          ) : null}
+          <h1 className={`ontario-h1 ${styles.pageTitle}`}>Directors</h1>
 
           <div className={styles.formStack}>
             <div id={FIELD_ANCHORS.countMode}>
@@ -565,16 +623,25 @@ export function Form1Step4() {
               </div>
             ) : null}
 
-            <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>
-              <FieldErrorMessage message={errors.directors} />
+            {areDirectorQuestionsComplete(step4) || step4.directors.length > 0 ? (
+              <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>
+                <div>
+                  <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>Add directors</h2>
+                  {areDirectorQuestionsComplete(step4) ? (
+                    <p className={step4Styles.sectionLead}>
+                      {formatDirectorSelectionSummary(step4)}
+                    </p>
+                  ) : null}
+                </div>
 
-              {step4.directors.length > 0 ? (
-                <ul className={step4Styles.summaryList}>
-                  {step4.directors.map((director) => {
-                    const name = formatDirectorFullName(director) || 'Director';
-                    return (
-                      <li key={director.id} className={step4Styles.summaryItem}>
-                        <div className={step4Styles.summaryRow}>
+                <FieldErrorMessage message={errors.directors} />
+
+                {step4.directors.length > 0 ? (
+                  <ul className={step4Styles.summaryList}>
+                    {step4.directors.map((director) => {
+                      const name = formatDirectorFullName(director) || 'Director';
+                      return (
+                        <li key={director.id} className={step4Styles.summaryItem}>
                           <div className={step4Styles.summaryMain}>
                             <button
                               type="button"
@@ -583,9 +650,9 @@ export function Form1Step4() {
                             >
                               {name}
                             </button>
-                            <p className={step4Styles.summaryDescription}>
+                            <div className={step4Styles.summaryDescription}>
                               {formatDirectorListDescription(director)}
-                            </p>
+                            </div>
                           </div>
                           <button
                             type="button"
@@ -596,30 +663,32 @@ export function Form1Step4() {
                             <OntarioIconDelete colour="blue" iconWidth={24} isDecorative />
                             Remove
                           </button>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : null}
 
-              <div
-                className={
-                  step4.directors.length === 0
-                    ? `${step4Styles.addActions} ${step4Styles.addActionsAlone}`
-                    : step4Styles.addActions
-                }
-              >
-                <button
-                  type="button"
-                  className={step4Styles.addLink}
-                  onClick={startAddDirectorSubflow}
-                >
-                  <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
-                  Add director(s)
-                </button>
+                {!atDirectorLimit ? (
+                  <div
+                    className={
+                      step4.directors.length === 0
+                        ? `${step4Styles.addActions} ${step4Styles.addActionsAlone}`
+                        : step4Styles.addActions
+                    }
+                  >
+                    <button
+                      type="button"
+                      className={step4Styles.addLink}
+                      onClick={startAddDirectorSubflow}
+                    >
+                      <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
+                      Add director(s)
+                    </button>
+                  </div>
+                ) : null}
               </div>
-            </div>
+            ) : null}
           </div>
 
           <div className={styles.buttonGroup}>

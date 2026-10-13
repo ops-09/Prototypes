@@ -14,6 +14,9 @@ import {
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
+  EMPTY_STEP5,
+  EMPTY_STEP6,
+  EMPTY_STEP7,
   FORM1_COOPERATIVE_SUBTYPE_OPTIONS,
   OFFICIAL_EMAIL_INFO,
   readForm1Draft,
@@ -25,7 +28,7 @@ import {
 import styles from './Form1Step1.module.scss';
 
 const CURRENT_STEP = 3;
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 const REQUIRED_FIELD_ERROR = 'Required Field. Please try again.';
 const EMAIL_FORMAT_ERROR = 'Please enter a valid email address.';
@@ -87,7 +90,7 @@ function focusField(anchorId: string) {
   focusable?.focus({ preventScroll: true });
 }
 
-/** Prototype deep-link: seed Step 1 so /form-1/step-2 opens from the playground. */
+/** Prototype deep-link: seed Step 1 so /form-1/step-3 opens from the playground. */
 function ensureStep2Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (existing?.step1.languageOption) {
@@ -110,6 +113,9 @@ function ensureStep2Draft(): Form1Draft {
     step2: existing?.step2 ?? { ...EMPTY_STEP2 },
     step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: existing?.step4 ?? { ...EMPTY_STEP4 },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
     savedAt: now,
     mode: 'continue',
     lastCompletedStep: 1,
@@ -203,7 +209,7 @@ export function Form1Step2() {
     }
 
     upsertForm1Step2(step2, 'continue', 2);
-    navigate('/form-1/step-3');
+    navigate('/form-1/step-4');
   }
 
   function handleSaveAsDraft() {
@@ -230,7 +236,7 @@ export function Form1Step2() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-1/step-1"
+          backButtonUrl="/form-1/step-2"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />

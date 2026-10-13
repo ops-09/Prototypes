@@ -1,0 +1,15 @@
+.fieldStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+}
+
+.fieldStack > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldStack > div :global(ontario-hint-expander) {
+  display: block;
+  margin-top: var(--ontario-spacing-4, 1rem);
+}

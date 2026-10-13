@@ -10,20 +10,16 @@ function escapeHtml(value: string) {
     .replace(/"/g, '&quot;');
 }
 
-function signatureBlockHtml() {
+function signatureRowHtml(name = '') {
   return `
-    <div class="signer">
-      <div class="field">
-        <div class="field-box"></div>
-        <span class="field-label">Name</span>
-      </div>
-      <div class="field">
-        <div class="field-box"></div>
-        <span class="field-label">Description of Office</span>
-      </div>
-      <div class="field">
-        <div class="field-box signature-box"></div>
+    <div class="signature-row">
+      <div class="signature-col">
+        <div class="signature-line"></div>
         <span class="field-label">Signature</span>
+      </div>
+      <div class="name-col">
+        <div class="name-line">${escapeHtml(name)}</div>
+        <span class="field-label">Name of incorporator (or corporation name &amp; signatories name and office)</span>
       </div>
     </div>`;
 }
@@ -55,6 +51,9 @@ export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
     })
     .join('');
 
+  // Articles of Amendment typically require two authorizing signatures.
+  const signatureRowsHtml = `${signatureRowHtml()}${signatureRowHtml()}`;
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,32 +67,74 @@ export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
     th { width: 40%; font-weight: 700; }
     .meta { margin-bottom: 2rem; }
     .signature-section { margin-top: 2.5rem; page-break-inside: avoid; }
-    .by-label { margin: 0 0 1rem; font-weight: 700; }
-    .signer {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      max-width: 24rem;
+    .signature-intro { margin: 0 0 0.25rem; }
+    .signature-intro-detail { margin: 0 0 1.5rem; }
+    .signature-row {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 1.5rem;
+      align-items: end;
+      margin-bottom: 1.75rem;
     }
-    .field { width: 100%; }
-    .field-box {
+    .signature-col,
+    .name-col {
+      min-width: 0;
+    }
+    .signature-line {
       box-sizing: border-box;
       width: 100%;
-      height: 2rem;
-      border: 1px solid #1a1a1a;
-      background: #e8f4fc;
+      min-height: 2.5rem;
+      border-bottom: 1px solid #1a1a1a;
     }
-    .signature-box {
-      height: 3rem;
+    .name-line {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 2.5rem;
+      border-bottom: 1px solid #1a1a1a;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 0.25rem;
+      font-size: 1rem;
     }
     .field-label {
       display: block;
       margin-top: 0.35rem;
-      font-size: 0.875rem;
+      font-size: 0.75rem;
+      line-height: 1.3;
+      color: #1a1a1a;
+    }
+    .stamp-section {
+      margin-top: 2.5rem;
+      page-break-inside: avoid;
+    }
+    .stamp-heading {
+      margin: 0 0 0.75rem;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .stamp-box {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      min-height: 12rem;
+      padding: 2rem 1rem;
+      border: 2px dashed #1a1a1a;
+      border-radius: 4px;
+      background-color: #f2f2f2;
       text-align: center;
     }
-    .signature-instruction { margin: 0 0 1rem; }
+    .stamp-lead {
+      margin: 0;
+      font-weight: 700;
+    }
+    .stamp-hint {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -101,12 +142,18 @@ export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
   <p class="meta">Amendment type: ${escapeHtml(amendmentTypeLabel(draft.step2.amendmentType))}</p>
   ${sectionHtml}
   <section class="signature-section">
-    <p class="signature-instruction">
-      Complete the signature blocks below. After signing, upload the signed PDF on the filing review page.
+    <p class="signature-intro">These articles are signed in duplicate.</p>
+    <p class="signature-intro-detail">
+      Full name(s) and signature(s) of incorporator(s). In the case of a corporation set out the name of the corporation and the name and office of the person signing on behalf of the corporation
     </p>
-    <p class="by-label">By:</p>
-    ${signatureBlockHtml()}
-    ${signatureBlockHtml()}
+    ${signatureRowsHtml}
+  </section>
+  <section class="stamp-section" aria-label="Stamp area">
+    <h2 class="stamp-heading">Stamp</h2>
+    <div class="stamp-box">
+      <p class="stamp-lead">Official stamp area</p>
+      <p class="stamp-hint">For office use only</p>
+    </div>
   </section>
 </body>
 </html>`;

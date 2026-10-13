@@ -91,14 +91,65 @@ export type Form1Step4Data = {
   directors: Form1Director[];
 };
 
+/** Plain free-text share-structure article fields. */
+export type Form1Step5Data = {
+  businessPowersRestrictions: string;
+  authorizedCapital: string;
+  preferenceShareTerms: string;
+  shareTransferRestrictions: string;
+};
+
+export type IncorporatorType = 'individual' | 'corporation';
+
+export type Form1Incorporator = {
+  id: string;
+  type: IncorporatorType;
+  /** When set, name/address come from the linked first director. */
+  linkedDirectorId: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  address: DirectorResidentialAddress;
+  numberOfShares: string;
+  classDesignation: string;
+  amountToBePaid: string;
+  corporationName: string;
+  ocn: string;
+  signerPosition: string;
+};
+
+/** Membership classes, stakeholder groups, and special provisions. */
+export type Form1Step6Data = {
+  membershipClasses: string;
+  membershipClassTerms: string;
+  stakeholderGroups: string;
+  stakeholderGroupTerms: string;
+  specialProvisions: string;
+};
+
+export type Form1Step7Data = {
+  incorporators: Form1Incorporator[];
+};
+
+/** Review and validation (UI step 9) — authorization + signed PDF. */
+export type Form1Step8Data = {
+  authorizationConfirmed: boolean;
+  signedPdf: UploadedFileMeta | null;
+};
+
 export type Form1Draft = {
   step1: Form1Step1Data;
   step2: Form1Step2Data;
   step3: Form1Step3Data;
   step4: Form1Step4Data;
+  step5: Form1Step5Data;
+  step6: Form1Step6Data;
+  step7: Form1Step7Data;
+  step8: Form1Step8Data;
   savedAt: string;
-  mode: 'continue' | 'draft';
-  lastCompletedStep: 0 | 1 | 2 | 3 | 4;
+  mode: 'continue' | 'draft' | 'submitted';
+  lastCompletedStep: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  confirmationNumber?: string;
 };
 
 export const EMPTY_STEP1: Form1Step1Data = {
@@ -191,6 +242,117 @@ export const EMPTY_STEP4: Form1Step4Data = {
   stakeholderDirectorsText: '',
   directors: [],
 };
+
+export const EMPTY_STEP5: Form1Step5Data = {
+  businessPowersRestrictions: '',
+  authorizedCapital: '',
+  preferenceShareTerms: '',
+  shareTransferRestrictions: '',
+};
+
+export const EMPTY_STEP6: Form1Step6Data = {
+  membershipClasses: '',
+  membershipClassTerms: '',
+  stakeholderGroups: '',
+  stakeholderGroupTerms: '',
+  specialProvisions: '',
+};
+
+export const EMPTY_STEP7: Form1Step7Data = {
+  incorporators: [],
+};
+
+export const EMPTY_STEP8: Form1Step8Data = {
+  authorizationConfirmed: false,
+  signedPdf: null,
+};
+
+export const FORM1_RICH_TEXT_MAX_CHARS = 900_000;
+
+export const MEMBERSHIP_NOT_APPLICABLE_HINT =
+  'Enter the information required, or enter “Not applicable” if none.';
+
+export const INCORPORATOR_INFO =
+  'An incorporator is the person who signs or otherwise authorizes the articles of incorporation.';
+
+function newIncorporatorId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `incorporator-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function createEmptyIncorporator(
+  type: IncorporatorType = 'individual',
+  id = newIncorporatorId(),
+): Form1Incorporator {
+  return {
+    id,
+    type,
+    linkedDirectorId: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    address: { ...EMPTY_DIRECTOR_ADDRESS },
+    numberOfShares: '',
+    classDesignation: '',
+    amountToBePaid: '',
+    corporationName: '',
+    ocn: '',
+    signerPosition: '',
+  };
+}
+
+/** Prefill an incorporator from a first director (name + residential address). */
+export function incorporatorFromDirector(
+  director: Form1Director,
+  id?: string,
+): Form1Incorporator {
+  return {
+    ...createEmptyIncorporator('individual', id),
+    linkedDirectorId: director.id,
+    firstName: director.firstName,
+    middleName: director.middleName,
+    lastName: director.lastName,
+    address: structuredClone(director.address),
+  };
+}
+
+/**
+ * Refresh linked director-incorporators from Step 4.
+ * Does not auto-add directors — the filer chooses them on the add-incorporator step.
+ */
+export function syncIncorporatorsFromDirectors(
+  directors: Form1Director[],
+  incorporators: Form1Incorporator[],
+): Form1Incorporator[] {
+  const directorIds = new Set(directors.map((director) => director.id));
+
+  return incorporators
+    .filter((entry) => {
+      if (!entry.linkedDirectorId) {
+        return true;
+      }
+      return directorIds.has(entry.linkedDirectorId);
+    })
+    .map((entry) => {
+      if (!entry.linkedDirectorId) {
+        return entry;
+      }
+      const director = directors.find((item) => item.id === entry.linkedDirectorId);
+      if (!director) {
+        return entry;
+      }
+      return {
+        ...entry,
+        type: 'individual' as const,
+        firstName: director.firstName,
+        middleName: director.middleName,
+        lastName: director.lastName,
+        address: structuredClone(director.address),
+      };
+    });
+}
 
 export const CANADIAN_PROVINCE_OPTIONS = [
   { value: 'Alberta', label: 'Alberta' },
@@ -293,10 +455,27 @@ function isLegacyStep1Draft(value: unknown): value is Form1Step1Data & {
 }
 
 function normalizeLastCompletedStep(value: unknown): Form1Draft['lastCompletedStep'] {
-  if (value === 0 || value === 1 || value === 2 || value === 3 || value === 4) {
+  if (
+    value === 0 ||
+    value === 1 ||
+    value === 2 ||
+    value === 3 ||
+    value === 4 ||
+    value === 5 ||
+    value === 6 ||
+    value === 7 ||
+    value === 8
+  ) {
     return value;
   }
   return 0;
+}
+
+function normalizeStep5(raw: Partial<Form1Step5Data> | undefined): Form1Step5Data {
+  return {
+    ...EMPTY_STEP5,
+    ...(raw ?? {}),
+  };
 }
 
 function normalizeStep4(raw: Partial<Form1Step4Data> | undefined): Form1Step4Data {
@@ -318,6 +497,55 @@ function normalizeStep4(raw: Partial<Form1Step4Data> | undefined): Form1Step4Dat
   };
 }
 
+function normalizeStep6(raw: Partial<Form1Step6Data> | undefined): Form1Step6Data {
+  return {
+    ...EMPTY_STEP6,
+    ...(raw ?? {}),
+  };
+}
+
+function normalizeStep8(raw: Partial<Form1Step8Data> | undefined): Form1Step8Data {
+  return {
+    ...EMPTY_STEP8,
+    ...(raw ?? {}),
+    signedPdf: raw?.signedPdf ?? null,
+  };
+}
+
+function normalizeStep7(
+  raw: Partial<Form1Step7Data> | undefined,
+  directors: Form1Director[] = [],
+): Form1Step7Data {
+  const incorporators = Array.isArray(raw?.incorporators)
+    ? raw.incorporators.map((entry) => ({
+        ...createEmptyIncorporator(
+          entry.type === 'corporation' ? 'corporation' : 'individual',
+          entry.id || newIncorporatorId(),
+        ),
+        ...entry,
+        address: {
+          ...EMPTY_DIRECTOR_ADDRESS,
+          ...(entry.address ?? {}),
+        },
+      }))
+    : [];
+
+  return {
+    incorporators: syncIncorporatorsFromDirectors(directors, incorporators),
+  };
+}
+
+function isLegacyIncorporatorsStep6(
+  value: unknown,
+): value is { incorporators?: Form1Incorporator[] } {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'incorporators' in value &&
+      !('membershipClasses' in value),
+  );
+}
+
 export function saveForm1Draft(draft: Form1Draft) {
   sessionStorage.setItem(FORM1_DRAFT_STORAGE_KEY, JSON.stringify(draft));
   sessionStorage.removeItem(LEGACY_STEP1_STORAGE_KEY);
@@ -327,15 +555,38 @@ export function readForm1Draft(): Form1Draft | null {
   const raw = sessionStorage.getItem(FORM1_DRAFT_STORAGE_KEY);
   if (raw) {
     try {
-      const parsed = JSON.parse(raw) as Partial<Form1Draft>;
+      const parsed = JSON.parse(raw) as Partial<Form1Draft> & {
+        step6?: Partial<Form1Step6Data> & { incorporators?: Form1Incorporator[] };
+        step7?: Partial<Form1Step7Data>;
+      };
+      const step4 = normalizeStep4(parsed.step4);
+      const legacyIncorporators = isLegacyIncorporatorsStep6(parsed.step6);
+      const step6 = legacyIncorporators
+        ? { ...EMPTY_STEP6 }
+        : normalizeStep6(parsed.step6);
+      const step7 = normalizeStep7(
+        legacyIncorporators
+          ? { incorporators: parsed.step6?.incorporators }
+          : parsed.step7,
+        step4.directors,
+      );
+      let lastCompletedStep = normalizeLastCompletedStep(parsed.lastCompletedStep);
+      if (legacyIncorporators && lastCompletedStep === 6) {
+        lastCompletedStep = 7;
+      }
       return {
         step1: { ...EMPTY_STEP1, ...(parsed.step1 ?? {}) },
         step2: { ...EMPTY_STEP2, ...(parsed.step2 ?? {}) },
         step3: { ...EMPTY_STEP3, ...(parsed.step3 ?? {}) },
-        step4: normalizeStep4(parsed.step4),
+        step4,
+        step5: normalizeStep5(parsed.step5),
+        step6,
+        step7,
+        step8: normalizeStep8(parsed.step8),
         savedAt: parsed.savedAt ?? new Date().toISOString(),
         mode: parsed.mode ?? 'draft',
-        lastCompletedStep: normalizeLastCompletedStep(parsed.lastCompletedStep),
+        lastCompletedStep,
+        confirmationNumber: parsed.confirmationNumber,
       };
     } catch {
       return null;
@@ -358,6 +609,10 @@ export function readForm1Draft(): Form1Draft | null {
       step2: { ...EMPTY_STEP2 },
       step3: { ...EMPTY_STEP3 },
       step4: { ...EMPTY_STEP4 },
+      step5: { ...EMPTY_STEP5 },
+      step6: { ...EMPTY_STEP6 },
+      step7: { ...EMPTY_STEP7 },
+      step8: { ...EMPTY_STEP8 },
       savedAt: savedAt ?? new Date().toISOString(),
       mode: mode ?? 'draft',
       lastCompletedStep: mode === 'continue' ? 1 : 0,
@@ -392,6 +647,10 @@ export function upsertForm1Step1(
     step2: existing?.step2 ?? { ...EMPTY_STEP2 },
     step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: existing?.step4 ?? { ...EMPTY_STEP4 },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
     savedAt: new Date().toISOString(),
     mode,
     lastCompletedStep: maxStep(existing?.lastCompletedStep ?? 0, lastCompletedStep),
@@ -414,6 +673,10 @@ export function upsertForm1Step2(
     step2,
     step3: existing.step3 ?? { ...EMPTY_STEP3 },
     step4: existing.step4 ?? { ...EMPTY_STEP4 },
+    step5: existing.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing.step8 ?? { ...EMPTY_STEP8 },
     savedAt: new Date().toISOString(),
     mode,
     lastCompletedStep: maxStep(existing.lastCompletedStep, lastCompletedStep),
@@ -439,6 +702,10 @@ export function upsertForm1Step3(
       country: 'Canada',
     },
     step4: existing.step4 ?? { ...EMPTY_STEP4 },
+    step5: existing.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing.step8 ?? { ...EMPTY_STEP8 },
     savedAt: new Date().toISOString(),
     mode,
     lastCompletedStep: maxStep(existing.lastCompletedStep, lastCompletedStep),
@@ -480,12 +747,147 @@ export function upsertForm1Step4(
   const draft: Form1Draft = {
     ...existing,
     step4: normalized,
+    step5: existing.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing.step6 ?? { ...EMPTY_STEP6 },
+    step7: {
+      incorporators: syncIncorporatorsFromDirectors(
+        normalized.directors,
+        existing.step7?.incorporators ?? [],
+      ),
+    },
+    step8: existing.step8 ?? { ...EMPTY_STEP8 },
     savedAt: new Date().toISOString(),
     mode,
     lastCompletedStep: maxStep(existing.lastCompletedStep, lastCompletedStep),
   };
   saveForm1Draft(draft);
   return draft;
+}
+
+export function upsertForm1Step5(
+  step5: Form1Step5Data,
+  mode: Form1Draft['mode'],
+  lastCompletedStep: Form1Draft['lastCompletedStep'] = 5,
+): Form1Draft | null {
+  const existing = readForm1Draft();
+  if (
+    !existing?.step1.languageOption ||
+    !existing.step2.cooperativeSubtype ||
+    !existing.step3.streetNumber ||
+    !existing.step4.directors.length
+  ) {
+    return null;
+  }
+
+  const draft: Form1Draft = {
+    ...existing,
+    step5: normalizeStep5(step5),
+    step6: existing.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing.step8 ?? { ...EMPTY_STEP8 },
+    savedAt: new Date().toISOString(),
+    mode,
+    lastCompletedStep: maxStep(existing.lastCompletedStep, lastCompletedStep),
+  };
+  saveForm1Draft(draft);
+  return draft;
+}
+
+export function upsertForm1Step6(
+  step6: Form1Step6Data,
+  mode: Form1Draft['mode'],
+  lastCompletedStep: Form1Draft['lastCompletedStep'] = 6,
+): Form1Draft | null {
+  const existing = readForm1Draft();
+  if (
+    !existing?.step1.languageOption ||
+    !existing.step2.cooperativeSubtype ||
+    !existing.step3.streetNumber ||
+    !existing.step4.directors.length ||
+    !existing.step5.authorizedCapital.trim()
+  ) {
+    return null;
+  }
+
+  const draft: Form1Draft = {
+    ...existing,
+    step6: normalizeStep6(step6),
+    step7: existing.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing.step8 ?? { ...EMPTY_STEP8 },
+    savedAt: new Date().toISOString(),
+    mode,
+    lastCompletedStep: maxStep(existing.lastCompletedStep, lastCompletedStep),
+  };
+  saveForm1Draft(draft);
+  return draft;
+}
+
+export function upsertForm1Step7(
+  step7: Form1Step7Data,
+  mode: Form1Draft['mode'],
+  lastCompletedStep: Form1Draft['lastCompletedStep'] = 7,
+): Form1Draft | null {
+  const existing = readForm1Draft();
+  if (
+    !existing?.step1.languageOption ||
+    !existing.step2.cooperativeSubtype ||
+    !existing.step3.streetNumber ||
+    !existing.step4.directors.length ||
+    !existing.step5.authorizedCapital.trim()
+  ) {
+    return null;
+  }
+
+  const draft: Form1Draft = {
+    ...existing,
+    step6: existing.step6 ?? { ...EMPTY_STEP6 },
+    step7: normalizeStep7(step7, existing.step4.directors),
+    step8: existing.step8 ?? { ...EMPTY_STEP8 },
+    savedAt: new Date().toISOString(),
+    mode,
+    lastCompletedStep: maxStep(existing.lastCompletedStep, lastCompletedStep),
+  };
+  saveForm1Draft(draft);
+  return draft;
+}
+
+export function upsertForm1Step8(
+  step8: Form1Step8Data,
+  mode: Form1Draft['mode'],
+  lastCompletedStep: Form1Draft['lastCompletedStep'] = 8,
+  confirmationNumber?: string,
+): Form1Draft | null {
+  const existing = readForm1Draft();
+  if (
+    !existing?.step1.languageOption ||
+    !existing.step2.cooperativeSubtype ||
+    !existing.step3.streetNumber ||
+    !existing.step4.directors.length ||
+    !existing.step5.authorizedCapital.trim() ||
+    !existing.step7.incorporators.length
+  ) {
+    return null;
+  }
+
+  const draft: Form1Draft = {
+    ...existing,
+    step8: normalizeStep8(step8),
+    savedAt: new Date().toISOString(),
+    mode,
+    lastCompletedStep:
+      mode === 'submitted'
+        ? 8
+        : maxStep(existing.lastCompletedStep, lastCompletedStep),
+    confirmationNumber: confirmationNumber ?? existing.confirmationNumber,
+  };
+  saveForm1Draft(draft);
+  return draft;
+}
+
+export function createForm1ConfirmationNumber() {
+  const stamp = Date.now().toString(36).toUpperCase();
+  const rand = Math.floor(Math.random() * 9000 + 1000);
+  return `F1-${stamp}-${rand}`;
 }
 
 export function getDirectorLimit(step4: Form1Step4Data): number | null {

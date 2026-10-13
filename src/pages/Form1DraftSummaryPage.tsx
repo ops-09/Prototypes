@@ -8,6 +8,7 @@ import styles from './Form1DraftSummaryPage.module.scss';
 
 export function Form1DraftSummaryPage() {
   const draft = readForm1Draft();
+  const submitted = draft?.mode === 'submitted';
 
   return (
     <PlaygroundShell
@@ -17,10 +18,13 @@ export function Form1DraftSummaryPage() {
     >
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
-          <h1 className={`ontario-h1 ${formStyles.pageTitle}`}>Transaction summary</h1>
+          <h1 className={`ontario-h1 ${formStyles.pageTitle}`}>
+            {submitted ? 'Filing submitted' : 'Transaction summary'}
+          </h1>
           <p className={formStyles.lead}>
-            Prototype stub for story #68619 / #69284 — draft saved locally in this browser
-            session.
+            {submitted
+              ? 'Your Articles of Incorporation filing was submitted. A transaction summary was created for this browser session.'
+              : 'Prototype stub for story #68619 / #69284 — draft saved locally in this browser session.'}
           </p>
 
           {!draft ? (
@@ -33,8 +37,12 @@ export function Form1DraftSummaryPage() {
             <>
               <OntarioPageAlert
                 type="success"
-                heading="Draft saved"
-                content={`Saved at ${new Date(draft.savedAt).toLocaleString()} (mode: ${draft.mode}, last completed step: ${draft.lastCompletedStep}).`}
+                heading={submitted ? 'Submission recorded' : 'Draft saved'}
+                content={
+                  submitted && draft.confirmationNumber
+                    ? `Confirmation number ${draft.confirmationNumber}. Saved at ${new Date(draft.savedAt).toLocaleString()}.`
+                    : `Saved at ${new Date(draft.savedAt).toLocaleString()} (mode: ${draft.mode}, last completed step: ${draft.lastCompletedStep}).`
+                }
               />
 
               <h2 className="ontario-h3">Step 1 — Co-operative name</h2>
@@ -211,24 +219,134 @@ export function Form1DraftSummaryPage() {
                   </div>
                 ))}
               </dl>
+
+              <h2 className="ontario-h3">Step 5 — Share information</h2>
+              <dl className={styles.summaryList}>
+                <div>
+                  <dt>Business / powers restrictions</dt>
+                  <dd>
+                    {draft.step5?.businessPowersRestrictions
+                      ? `${draft.step5.businessPowersRestrictions.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Authorized capital</dt>
+                  <dd>
+                    {draft.step5?.authorizedCapital
+                      ? `${draft.step5.authorizedCapital.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Preference share terms</dt>
+                  <dd>
+                    {draft.step5?.preferenceShareTerms
+                      ? `${draft.step5.preferenceShareTerms.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Share transfer restrictions</dt>
+                  <dd>
+                    {draft.step5?.shareTransferRestrictions
+                      ? `${draft.step5.shareTransferRestrictions.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+              </dl>
+
+              <h2 className="ontario-h3">Step 6 — Membership and provisions</h2>
+              <dl className={styles.summaryList}>
+                <div>
+                  <dt>Classes of membership</dt>
+                  <dd>
+                    {draft.step6?.membershipClasses
+                      ? `${draft.step6.membershipClasses.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Membership class terms</dt>
+                  <dd>
+                    {draft.step6?.membershipClassTerms
+                      ? `${draft.step6.membershipClassTerms.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Stakeholder groups</dt>
+                  <dd>
+                    {draft.step6?.stakeholderGroups
+                      ? `${draft.step6.stakeholderGroups.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Stakeholder group terms</dt>
+                  <dd>
+                    {draft.step6?.stakeholderGroupTerms
+                      ? `${draft.step6.stakeholderGroupTerms.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Special provisions</dt>
+                  <dd>
+                    {draft.step6?.specialProvisions
+                      ? `${draft.step6.specialProvisions.length.toLocaleString()} characters`
+                      : '—'}
+                  </dd>
+                </div>
+              </dl>
+
+              <h2 className="ontario-h3">Step 7 — Incorporators</h2>
+              <dl className={styles.summaryList}>
+                <div>
+                  <dt>Incorporators added</dt>
+                  <dd>{draft.step7?.incorporators?.length ?? 0}</dd>
+                </div>
+                {(draft.step7?.incorporators ?? []).map((entry, index) => (
+                  <div key={entry.id}>
+                    <dt>Incorporator {index + 1}</dt>
+                    <dd>
+                      {entry.type === 'corporation'
+                        ? `${entry.corporationName || '—'} (OCN ${entry.ocn || '—'})`
+                        : [entry.firstName, entry.middleName, entry.lastName]
+                            .filter(Boolean)
+                            .join(' ') || '—'}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </>
           )}
 
           <div className={formStyles.buttonGroup}>
-            <OntarioButton
-              type="primary"
-              htmlType="button"
-              label="Return to Form 1"
-              href={
-                draft && draft.lastCompletedStep >= 3
-                  ? '/form-1/step-4'
-                  : draft && draft.lastCompletedStep >= 2
-                    ? '/form-1/step-3'
-                    : draft && draft.lastCompletedStep >= 1
-                      ? '/form-1/step-2'
-                      : '/form-1/step-1'
-              }
-            />
+            {!submitted ? (
+              <OntarioButton
+                type="primary"
+                htmlType="button"
+                label="Continue filing"
+                href={
+                  draft && draft.lastCompletedStep >= 7
+                    ? '/form-1/step-9'
+                    : draft && draft.lastCompletedStep >= 6
+                      ? '/form-1/step-7'
+                      : draft && draft.lastCompletedStep >= 5
+                        ? '/form-1/step-6'
+                        : draft && draft.lastCompletedStep >= 4
+                          ? '/form-1/step-5'
+                          : draft && draft.lastCompletedStep >= 3
+                            ? '/form-1/step-4'
+                            : draft && draft.lastCompletedStep >= 2
+                              ? '/form-1/step-3'
+                              : draft && draft.lastCompletedStep >= 1
+                                ? '/form-1/step-2'
+                                : '/form-1'
+                }
+              />
+            ) : null}
             <Link to="/" className={styles.homeLink}>
               Back to playground
             </Link>
