@@ -77,6 +77,9 @@ function ensureStep7Draft(): Form1Draft {
   seedDirector.email = 'alex.rivera@example.com';
   seedDirector.residentCanadian = 'yes';
   seedDirector.alsoIncorporator = 'yes';
+  seedDirector.numberOfShares = '100';
+  seedDirector.classDesignation = 'Common';
+  seedDirector.amountToBePaid = '1000.00';
   seedDirector.address = {
     addressType: 'canadian',
     postalCodeLookup: '',
@@ -348,15 +351,17 @@ export function Form1Step7() {
                             {formatIncorporatorListDescription(entry)}
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          className={step4Styles.summaryRemove}
-                          onClick={() => removeIncorporator(entry.id)}
-                          aria-label={`Remove ${name}`}
-                        >
-                          <OntarioIconDelete colour="blue" iconWidth={24} isDecorative />
-                          Remove
-                        </button>
+                        {!linked ? (
+                          <button
+                            type="button"
+                            className={step4Styles.summaryRemove}
+                            onClick={() => removeIncorporator(entry.id)}
+                            aria-label={`Remove ${name}`}
+                          >
+                            <OntarioIconDelete colour="blue" iconWidth={24} isDecorative />
+                            Remove
+                          </button>
+                        ) : null}
                       </li>
                     );
                   })}

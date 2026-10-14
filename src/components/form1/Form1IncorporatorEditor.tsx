@@ -459,7 +459,7 @@ export function Form1IncorporatorBlock({
           <OntarioPageAlert
             type="informational"
             heading="Director details"
-            content="Name and residential address are edited on the directors step. Enter the shares this incorporator will take below."
+            content="Name and residential address are edited on the directors step. Share details were collected there and can be updated below if needed."
           />
         </div>
       ) : null}

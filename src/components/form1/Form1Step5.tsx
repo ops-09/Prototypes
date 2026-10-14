@@ -170,6 +170,9 @@ function ensureStep5Draft(): Form1Draft {
                 email: 'alex.rivera@example.com',
                 residentCanadian: 'yes',
                 alsoIncorporator: 'yes',
+                numberOfShares: '100',
+                classDesignation: 'Common',
+                amountToBePaid: '1000.00',
                 address: {
                   addressType: 'canadian',
                   postalCodeLookup: '',

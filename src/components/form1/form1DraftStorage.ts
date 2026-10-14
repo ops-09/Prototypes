@@ -76,6 +76,10 @@ export type Form1Director = {
   email: string;
   residentCanadian: YesNoAnswer | '';
   alsoIncorporator: YesNoAnswer | '';
+  /** Share details when alsoIncorporator is yes — carried into Step 8. */
+  numberOfShares: string;
+  classDesignation: string;
+  amountToBePaid: string;
   address: DirectorResidentialAddress;
   consentConfirmed: boolean;
   consentFile: UploadedFileMeta | null;
@@ -227,6 +231,9 @@ export function createEmptyDirector(id = newDirectorId()): Form1Director {
     email: '',
     residentCanadian: '',
     alsoIncorporator: '',
+    numberOfShares: '',
+    classDesignation: '',
+    amountToBePaid: '',
     address: { ...EMPTY_DIRECTOR_ADDRESS },
     consentConfirmed: false,
     consentFile: null,
@@ -303,7 +310,7 @@ export function createEmptyIncorporator(
   };
 }
 
-/** Prefill an incorporator from a first director (name + residential address). */
+/** Prefill an incorporator from a first director (name, address, and shares). */
 export function incorporatorFromDirector(
   director: Form1Director,
   id?: string,
@@ -315,43 +322,57 @@ export function incorporatorFromDirector(
     middleName: director.middleName,
     lastName: director.lastName,
     address: structuredClone(director.address),
+    numberOfShares: director.numberOfShares,
+    classDesignation: director.classDesignation,
+    amountToBePaid: director.amountToBePaid,
   };
 }
 
 /**
- * Refresh linked director-incorporators from Step 4.
- * Does not auto-add directors — the filer chooses them on the add-incorporator step.
+ * Keep Step 8 in sync with first directors who are also incorporators.
+ * Auto-adds directors with alsoIncorporator = yes (including share fields),
+ * refreshes their name/address/shares, and drops links when the director
+ * is removed or answers no.
  */
 export function syncIncorporatorsFromDirectors(
   directors: Form1Director[],
   incorporators: Form1Incorporator[],
 ): Form1Incorporator[] {
-  const directorIds = new Set(directors.map((director) => director.id));
+  const alsoIncorporators = directors.filter(
+    (director) => director.alsoIncorporator === 'yes',
+  );
+  const alsoIds = new Set(alsoIncorporators.map((director) => director.id));
 
-  return incorporators
-    .filter((entry) => {
-      if (!entry.linkedDirectorId) {
-        return true;
-      }
-      return directorIds.has(entry.linkedDirectorId);
-    })
-    .map((entry) => {
-      if (!entry.linkedDirectorId) {
-        return entry;
-      }
-      const director = directors.find((item) => item.id === entry.linkedDirectorId);
-      if (!director) {
-        return entry;
-      }
-      return {
-        ...entry,
-        type: 'individual' as const,
-        firstName: director.firstName,
-        middleName: director.middleName,
-        lastName: director.lastName,
-        address: structuredClone(director.address),
-      };
-    });
+  const existingByDirectorId = new Map<string, Form1Incorporator>();
+  for (const entry of incorporators) {
+    if (entry.linkedDirectorId && alsoIds.has(entry.linkedDirectorId)) {
+      existingByDirectorId.set(entry.linkedDirectorId, entry);
+    }
+  }
+
+  const linked = alsoIncorporators.map((director) => {
+    const existing = existingByDirectorId.get(director.id);
+    return {
+      ...(existing
+        ? { ...existing, type: 'individual' as const }
+        : createEmptyIncorporator('individual')),
+      linkedDirectorId: director.id,
+      firstName: director.firstName,
+      middleName: director.middleName,
+      lastName: director.lastName,
+      address: structuredClone(director.address),
+      numberOfShares: director.numberOfShares,
+      classDesignation: director.classDesignation,
+      amountToBePaid: director.amountToBePaid,
+      corporationName: '',
+      ocn: '',
+      signerPosition: '',
+    };
+  });
+
+  const nonLinked = incorporators.filter((entry) => !entry.linkedDirectorId);
+
+  return [...linked, ...nonLinked];
 }
 
 export const CANADIAN_PROVINCE_OPTIONS = [
@@ -740,7 +761,12 @@ export function upsertForm1Step4(
           consentFile: null,
         };
       }
-      return director;
+      return {
+        ...director,
+        numberOfShares: '',
+        classDesignation: '',
+        amountToBePaid: '',
+      };
     }),
   };
 
@@ -838,10 +864,27 @@ export function upsertForm1Step7(
     return null;
   }
 
+  // Keep director share fields aligned when a linked incorporator is edited on Step 8.
+  const nextDirectors = existing.step4.directors.map((director) => {
+    const linked = step7.incorporators.find(
+      (entry) => entry.linkedDirectorId === director.id,
+    );
+    if (!linked || director.alsoIncorporator !== 'yes') {
+      return director;
+    }
+    return {
+      ...director,
+      numberOfShares: linked.numberOfShares,
+      classDesignation: linked.classDesignation,
+      amountToBePaid: linked.amountToBePaid,
+    };
+  });
+
   const draft: Form1Draft = {
     ...existing,
+    step4: { ...existing.step4, directors: nextDirectors },
     step6: existing.step6 ?? { ...EMPTY_STEP6 },
-    step7: normalizeStep7(step7, existing.step4.directors),
+    step7: normalizeStep7(step7, nextDirectors),
     step8: existing.step8 ?? { ...EMPTY_STEP8 },
     savedAt: new Date().toISOString(),
     mode,

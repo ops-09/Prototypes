@@ -34,6 +34,8 @@ import step4Styles from './Form1Step4.module.scss';
 
 const REQUIRED = 'Required Field.';
 const EMAIL_INVALID = 'Please enter a valid email address.';
+const SHARES_WHOLE_NUMBER = 'Please enter a whole number greater than zero.';
+const AMOUNT_INVALID = 'Please enter a valid amount.';
 const CONSENT_REQUIRED =
   'Confirm director consent or upload the completed consent form (PDF).';
 
@@ -43,6 +45,9 @@ export type DirectorFieldKey =
   | 'email'
   | 'residentCanadian'
   | 'alsoIncorporator'
+  | 'numberOfShares'
+  | 'classDesignation'
+  | 'amountToBePaid'
   | 'addressType'
   | 'postalCodeLookup'
   | 'streetNumber'
@@ -63,6 +68,9 @@ export const DIRECTOR_ERROR_FIELD_ORDER: DirectorFieldKey[] = [
   'email',
   'residentCanadian',
   'alsoIncorporator',
+  'numberOfShares',
+  'classDesignation',
+  'amountToBePaid',
   'consent',
   'addressType',
   'postalCodeLookup',
@@ -81,6 +89,9 @@ const DIRECTOR_FIELD_LABELS: Record<DirectorFieldKey, string> = {
   email: 'Email Address',
   residentCanadian: 'Resident Canadian',
   alsoIncorporator: 'Also an incorporator',
+  numberOfShares: 'Number of Shares',
+  classDesignation: 'Class/Designation',
+  amountToBePaid: 'Amount to be Paid',
   consent: 'Director consent',
   addressType: 'Residential Address',
   postalCodeLookup: 'Find the address using a postal code',
@@ -116,6 +127,12 @@ export function getDirectorFieldAnchor(
       return `${prefix}-resident-canadian`;
     case 'alsoIncorporator':
       return `${prefix}-also-incorporator`;
+    case 'numberOfShares':
+      return `${prefix}-shares`;
+    case 'classDesignation':
+      return `${prefix}-class`;
+    case 'amountToBePaid':
+      return `${prefix}-amount`;
     case 'consent':
       return `${prefix}-consent`;
     case 'addressType':
@@ -152,6 +169,22 @@ function getEventValue(event: globalThis.Event) {
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function isWholeNumberGreaterThanZero(value: string) {
+  if (!/^\d+$/.test(value.trim())) {
+    return false;
+  }
+  return Number.parseInt(value.trim(), 10) > 0;
+}
+
+/** Accepts dollars with optional commas and up to 2 decimal places. */
+function isValidDollarAmount(value: string) {
+  const trimmed = value.trim().replace(/[$,\s]/g, '');
+  if (!trimmed) {
+    return false;
+  }
+  return /^\d+(\.\d{1,2})?$/.test(trimmed);
 }
 
 function clearAddressForType(addressType: DirectorAddressType | ''): Form1Director['address'] {
@@ -203,6 +236,21 @@ export function validateDirector(director: Form1Director): DirectorErrors {
   }
   if (!director.alsoIncorporator) {
     next.alsoIncorporator = REQUIRED;
+  }
+  if (director.alsoIncorporator === 'yes') {
+    if (!director.numberOfShares.trim()) {
+      next.numberOfShares = REQUIRED;
+    } else if (!isWholeNumberGreaterThanZero(director.numberOfShares)) {
+      next.numberOfShares = SHARES_WHOLE_NUMBER;
+    }
+    if (!director.classDesignation.trim()) {
+      next.classDesignation = REQUIRED;
+    }
+    if (!director.amountToBePaid.trim()) {
+      next.amountToBePaid = REQUIRED;
+    } else if (!isValidDollarAmount(director.amountToBePaid)) {
+      next.amountToBePaid = AMOUNT_INVALID;
+    }
   }
   if (!director.address.addressType) {
     next.addressType = REQUIRED;
@@ -385,9 +433,17 @@ export function Form1DirectorBlock({
     onChange({
       ...director,
       alsoIncorporator: value,
-      ...(value === 'yes' ? { consentConfirmed: false, consentFile: null } : {}),
+      ...(value === 'yes'
+        ? { consentConfirmed: false, consentFile: null }
+        : {
+            numberOfShares: '',
+            classDesignation: '',
+            amountToBePaid: '',
+          }),
     });
   }
+
+  const isAlsoIncorporator = director.alsoIncorporator === 'yes';
 
   function setAddressType(value: DirectorAddressType) {
     onChange({
@@ -449,6 +505,28 @@ export function Form1DirectorBlock({
             <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Also an incorporator</h5>
             <p className={step4Styles.readOnlyValue}>{formatYesNo(director.alsoIncorporator)}</p>
           </div>
+          {director.alsoIncorporator === 'yes' ? (
+            <>
+              <div className={step4Styles.readOnlyField}>
+                <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Number of Shares</h5>
+                <p className={step4Styles.readOnlyValue}>
+                  {director.numberOfShares.trim() || '—'}
+                </p>
+              </div>
+              <div className={step4Styles.readOnlyField}>
+                <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Class/Designation</h5>
+                <p className={step4Styles.readOnlyValue}>
+                  {director.classDesignation.trim() || '—'}
+                </p>
+              </div>
+              <div className={step4Styles.readOnlyField}>
+                <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Amount to be Paid</h5>
+                <p className={step4Styles.readOnlyValue}>
+                  {director.amountToBePaid.trim() || '—'}
+                </p>
+              </div>
+            </>
+          ) : null}
           <div className={step4Styles.readOnlyField}>
             <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Residential address</h5>
             <p className={step4Styles.readOnlyValue}>{formatDirectorAddressLine(director)}</p>
@@ -552,6 +630,58 @@ export function Form1DirectorBlock({
             }
           />
         </div>
+
+        {isAlsoIncorporator ? (
+          <div className={step4Styles.consentBlock}>
+            <h4 className={`ontario-h4 ${step4Styles.sectionHeading}`}>
+              Shares taken as incorporator
+            </h4>
+            <p className={step4Styles.sectionLead}>
+              These details will appear on the Incorporators step so you do not need to
+              enter them again.
+            </p>
+            <OntarioInput
+              elementId={`${prefix}-shares`}
+              caption="Number of Shares"
+              name={`${prefix}-shares`}
+              type="text"
+              required
+              requiredValidationMessage={REQUIRED}
+              value={director.numberOfShares}
+              errorMessage={errors.numberOfShares}
+              customOnInput={(event) =>
+                patch({ numberOfShares: getEventValue(event).replace(/\D/g, '') })
+              }
+            />
+            <OntarioInput
+              elementId={`${prefix}-class`}
+              caption="Class/Designation"
+              name={`${prefix}-class`}
+              type="text"
+              required
+              requiredValidationMessage={REQUIRED}
+              value={director.classDesignation}
+              errorMessage={errors.classDesignation}
+              customOnInput={(event) =>
+                patch({ classDesignation: getEventValue(event) })
+              }
+            />
+            <OntarioInput
+              elementId={`${prefix}-amount`}
+              caption="Amount to be Paid"
+              name={`${prefix}-amount`}
+              type="text"
+              required
+              requiredValidationMessage={REQUIRED}
+              hintText="Enter a dollar amount, for example 1000.00"
+              value={director.amountToBePaid}
+              errorMessage={errors.amountToBePaid}
+              customOnInput={(event) =>
+                patch({ amountToBePaid: getEventValue(event) })
+              }
+            />
+          </div>
+        ) : null}
 
         {needsConsent ? (
           <div className={step4Styles.consentBlock}>

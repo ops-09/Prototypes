@@ -96,6 +96,9 @@ function ensureStep8Draft(): Form1Draft {
             email: 'alex.rivera@example.com',
             residentCanadian: 'yes' as const,
             alsoIncorporator: 'yes' as const,
+            numberOfShares: '100',
+            classDesignation: 'Common',
+            amountToBePaid: '1000.00',
             address: {
               addressType: 'canadian' as const,
               postalCodeLookup: '',
