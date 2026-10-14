@@ -64,7 +64,9 @@ export function Form7SummaryList({
             <dt className={styles.key}>{item.name}</dt>
             <dd className={styles.value}>
               <span className={styles.srOnly}>Your answer is: </span>
-              {item.description}
+              {item.description.split('\n').map((line, lineIndex) => (
+                <div key={`${item.name}-line-${lineIndex}`}>{line}</div>
+              ))}
             </dd>
           </div>
         ))}

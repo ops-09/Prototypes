@@ -114,7 +114,10 @@
   padding-left: var(--ontario-spacing-5, 1.5rem);
   text-align: left;
   color: var(--ontario-colour-black, #1a1a1a);
-  white-space: pre-wrap;
+
+  > div + div {
+    margin-top: var(--ontario-spacing-1, 0.25rem);
+  }
 }
 
 .ratio1_2 {

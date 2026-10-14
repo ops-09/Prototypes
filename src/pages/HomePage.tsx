@@ -31,9 +31,16 @@ export function HomePage() {
           <OntarioCard
             headingLevel="h2"
             label="Form 1"
-            description="Articles of Incorporation — starts with cover letter contact information, then co-operative name and NUANS."
+            description="Articles of Incorporation — Before you begin, then cover letter, name and NUANS, and remaining steps."
             cardLink={withBasePath('/form-1')}
             ariaLabelText="Open the Form 1 prototype"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 1 — Step 1"
+            description="Cover letter — contact information before the filing steps."
+            cardLink={withBasePath('/form-1/step-1')}
+            ariaLabelText="Open Form 1 Step 1 cover letter"
           />
           <OntarioCard
             headingLevel="h2"

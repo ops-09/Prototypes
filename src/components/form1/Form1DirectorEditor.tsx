@@ -327,19 +327,47 @@ export function formatDirectorFullName(director: Form1Director): string {
     .trim();
 }
 
-export function formatDirectorListDescription(director: Form1Director): string {
+export type DirectorListDescription = {
+  details: string;
+  address: string;
+};
+
+export function formatDirectorListDescription(
+  director: Form1Director,
+): DirectorListDescription {
   const email = director.email.trim();
-  const address = formatDirectorAddressLine(director);
-  if (email && address !== '—') {
-    return `${email} · ${address}`;
-  }
-  if (email) {
-    return email;
-  }
-  if (address !== '—') {
-    return address;
-  }
-  return 'Director details';
+  const addressLine = formatDirectorAddressLine(director);
+  const shares = director.numberOfShares.trim();
+  const className = director.classDesignation.trim();
+  const amount = director.amountToBePaid.trim();
+  const sharePart =
+    director.alsoIncorporator === 'yes' && (shares || className || amount)
+      ? [
+          shares ? `${shares} shares` : '',
+          className || '',
+          amount ? `$${amount.replace(/^\$/, '')}` : '',
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : '';
+
+  const details = [
+    email || '',
+    director.residentCanadian
+      ? `Resident Canadian: ${formatYesNo(director.residentCanadian)}`
+      : '',
+    director.alsoIncorporator
+      ? `Also an incorporator: ${formatYesNo(director.alsoIncorporator)}`
+      : '',
+    sharePart,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return {
+    details: details || 'Director details',
+    address: addressLine !== '—' ? addressLine : '',
+  };
 }
 
 export function formatDirectorAddressLine(director: Form1Director): string {

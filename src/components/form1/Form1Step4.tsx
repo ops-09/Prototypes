@@ -640,6 +640,7 @@ export function Form1Step4() {
                   <ul className={step4Styles.summaryList}>
                     {step4.directors.map((director) => {
                       const name = formatDirectorFullName(director) || 'Director';
+                      const description = formatDirectorListDescription(director);
                       return (
                         <li key={director.id} className={step4Styles.summaryItem}>
                           <div className={step4Styles.summaryMain}>
@@ -651,7 +652,10 @@ export function Form1Step4() {
                               {name}
                             </button>
                             <div className={step4Styles.summaryDescription}>
-                              {formatDirectorListDescription(director)}
+                              <div>{description.details}</div>
+                              {description.address ? (
+                                <div>{description.address}</div>
+                              ) : null}
                             </div>
                           </div>
                           <button

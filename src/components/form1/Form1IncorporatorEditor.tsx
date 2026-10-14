@@ -22,8 +22,10 @@ import {
   STREET_NUMBER_SUFFIX_OPTIONS,
   STREET_TYPE_OPTIONS,
   type DirectorAddressType,
+  type Form1Director,
   type Form1Incorporator,
   type IncorporatorType,
+  type YesNoAnswer,
 } from './form1DraftStorage';
 import {
   formatCorporationSuggestion,
@@ -290,9 +292,25 @@ export function formatIncorporatorAddressLine(
   );
 }
 
+function formatYesNo(value: YesNoAnswer | '') {
+  if (value === 'yes') {
+    return 'Yes';
+  }
+  if (value === 'no') {
+    return 'No';
+  }
+  return '—';
+}
+
+export type IncorporatorListDescription = {
+  details: string;
+  address: string;
+};
+
 export function formatIncorporatorListDescription(
   incorporator: Form1Incorporator,
-): string {
+  linkedDirector?: Form1Director | null,
+): IncorporatorListDescription {
   if (incorporator.type === 'corporation') {
     const signer = formatIncorporatorFullName(incorporator);
     const position = incorporator.signerPosition.trim();
@@ -300,10 +318,13 @@ export function formatIncorporatorListDescription(
       incorporator.ocn ? `OCN ${incorporator.ocn}` : '',
       signer && position ? `${signer}, ${position}` : signer || position,
     ].filter(Boolean);
-    return parts.join(' · ') || 'Corporation incorporator';
+    return {
+      details: parts.join(' · ') || 'Corporation incorporator',
+      address: '',
+    };
   }
 
-  const address = formatIncorporatorAddressLine(incorporator);
+  const addressLine = formatIncorporatorAddressLine(incorporator);
   const shares = incorporator.numberOfShares.trim();
   const className = incorporator.classDesignation.trim();
   const amount = incorporator.amountToBePaid.trim();
@@ -318,10 +339,23 @@ export function formatIncorporatorListDescription(
           .join(' · ')
       : 'Share details required';
 
-  if (address !== '—') {
-    return `${address} · ${sharePart}`;
-  }
-  return sharePart;
+  const director = linkedDirector ?? null;
+  const details = [
+    director?.residentCanadian
+      ? `Resident Canadian: ${formatYesNo(director.residentCanadian)}`
+      : '',
+    director?.alsoIncorporator
+      ? `Also an incorporator: ${formatYesNo(director.alsoIncorporator)}`
+      : '',
+    sharePart,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return {
+    details,
+    address: addressLine !== '—' ? addressLine : '',
+  };
 }
 
 type Form1IncorporatorBlockProps = {

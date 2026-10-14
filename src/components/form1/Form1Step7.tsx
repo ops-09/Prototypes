@@ -336,6 +336,21 @@ export function Form1Step7() {
                         ? entry.corporationName || 'Corporation'
                         : formatIncorporatorFullName(entry) || 'Incorporator';
                     const linked = Boolean(entry.linkedDirectorId);
+                    const linkedDirector = linked
+                      ? draft.step4.directors.find(
+                          (director) => director.id === entry.linkedDirectorId,
+                        )
+                      : null;
+                    const description = formatIncorporatorListDescription(
+                      entry,
+                      linkedDirector,
+                    );
+                    const detailsLine = [
+                      linked ? 'First director' : '',
+                      description.details,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ');
                     return (
                       <li key={entry.id} className={step4Styles.summaryItem}>
                         <div className={step4Styles.summaryMain}>
@@ -347,8 +362,10 @@ export function Form1Step7() {
                             {name}
                           </button>
                           <div className={step4Styles.summaryDescription}>
-                            {linked ? 'First director · ' : ''}
-                            {formatIncorporatorListDescription(entry)}
+                            <div>{detailsLine}</div>
+                            {description.address ? (
+                              <div>{description.address}</div>
+                            ) : null}
                           </div>
                         </div>
                         {!linked ? (

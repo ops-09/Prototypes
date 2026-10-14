@@ -4,7 +4,11 @@ import {
   type CoverLetterContact,
 } from '../cover-letter/coverLetterContactStorage';
 import { formatIsoDateDisplay } from '../form7/form7Labels';
-import { validateDirector, formatDirectorFullName } from './Form1DirectorEditor';
+import {
+  formatDirectorFullName,
+  formatDirectorListDescription,
+  validateDirector,
+} from './Form1DirectorEditor';
 import {
   formatIncorporatorFullName,
   formatIncorporatorListDescription,
@@ -356,12 +360,22 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
               },
             ]
           : []),
-        ...draft.step4.directors.map((director, index) => ({
-          name: `Director ${index + 1}`,
-          description:
+        ...draft.step4.directors.map((director, index) => {
+          const name =
             formatDirectorFullName(director) ||
-            `Director ${index + 1} (incomplete)`,
-        })),
+            `Director ${index + 1} (incomplete)`;
+          const listDescription = formatDirectorListDescription(director);
+          // Same two-line layout as Step 5: details, then address.
+          const details = [name, listDescription.details]
+            .filter(Boolean)
+            .join(' · ');
+          return {
+            name: `Director ${index + 1}`,
+            description: listDescription.address
+              ? `${details}\n${listDescription.address}`
+              : details,
+          };
+        }),
       ],
     },
     {
@@ -430,9 +444,27 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
                   ? entry.corporationName || `Incorporator ${index + 1}`
                   : formatIncorporatorFullName(entry) ||
                     `Incorporator ${index + 1}`;
+              const linkedDirector = entry.linkedDirectorId
+                ? draft.step4.directors.find(
+                    (director) => director.id === entry.linkedDirectorId,
+                  )
+                : null;
+              const description = formatIncorporatorListDescription(
+                entry,
+                linkedDirector,
+              );
+              const details = [
+                name,
+                entry.linkedDirectorId ? 'First director' : '',
+                description.details,
+              ]
+                .filter(Boolean)
+                .join(' · ');
               return {
                 name: `Incorporator ${index + 1}`,
-                description: `${name} · ${formatIncorporatorListDescription(entry)}`,
+                description: description.address
+                  ? `${details}\n${description.address}`
+                  : details,
               };
             }),
     },

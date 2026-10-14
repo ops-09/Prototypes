@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { CoverLetterPage } from './pages/CoverLetterPage';
+import { Form1BeforeYouBeginPage } from './pages/Form1BeforeYouBeginPage';
 import { Form1DraftSummaryPage } from './pages/Form1DraftSummaryPage';
 import { Form1Page } from './pages/Form1Page';
 import { Form1Step1Page } from './pages/Form1Step1Page';
@@ -31,8 +32,9 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/cover-letter" element={<CoverLetterPage />} />
-        <Route path="/form-1" element={<Form1Page />} />
-        {/* URLs match UI step numbers (cover = step 1 at /form-1). */}
+        <Route path="/form-1" element={<Form1BeforeYouBeginPage />} />
+        {/* Cover letter is step 1; Before you begin has no step number. */}
+        <Route path="/form-1/step-1" element={<Form1Page />} />
         <Route path="/form-1/step-2" element={<Form1Step1Page />} />
         <Route path="/form-1/step-3" element={<Form1Step2Page />} />
         <Route path="/form-1/step-4" element={<Form1Step3Page />} />
@@ -58,7 +60,6 @@ function App() {
         />
         <Route path="/form-1/step-9" element={<Form1Step8Page />} />
         <Route path="/form-1/draft-summary" element={<Form1DraftSummaryPage />} />
-        <Route path="/form-1/step-1" element={<Navigate to="/form-1/step-2" replace />} />
         <Route path="/form-7" element={<Form7Page />} />
         <Route path="/form-7/step-1" element={<Form7Step1Page />} />
         <Route path="/form-7/step-2" element={<Form7Step2Page />} />
