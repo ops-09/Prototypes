@@ -36,8 +36,10 @@ const REQUIRED = 'Required Field.';
 const EMAIL_INVALID = 'Please enter a valid email address.';
 const SHARES_WHOLE_NUMBER = 'Please enter a whole number greater than zero.';
 const AMOUNT_INVALID = 'Please enter a valid amount.';
-const CONSENT_REQUIRED =
-  'Confirm director consent or upload the completed consent form (PDF).';
+const CONSENT_CHECKBOX_REQUIRED =
+  'Confirm that this director has given consent to act as first director.';
+const CONSENT_FILE_REQUIRED =
+  'Upload the completed consent form (PDF).';
 
 export type DirectorFieldKey =
   | 'firstName'
@@ -57,7 +59,8 @@ export type DirectorFieldKey =
   | 'provinceState'
   | 'postalCode'
   | 'country'
-  | 'consent';
+  | 'consent'
+  | 'consentFile';
 
 export type DirectorErrors = Partial<Record<DirectorFieldKey, string>>;
 
@@ -72,6 +75,7 @@ export const DIRECTOR_ERROR_FIELD_ORDER: DirectorFieldKey[] = [
   'classDesignation',
   'amountToBePaid',
   'consent',
+  'consentFile',
   'addressType',
   'postalCodeLookup',
   'streetNumber',
@@ -93,6 +97,7 @@ const DIRECTOR_FIELD_LABELS: Record<DirectorFieldKey, string> = {
   classDesignation: 'Class/Designation',
   amountToBePaid: 'Amount to be Paid',
   consent: 'Director consent',
+  consentFile: 'Upload consent form',
   addressType: 'Residential Address',
   postalCodeLookup: 'Find the address using a postal code',
   streetNumber: 'Street number',
@@ -135,6 +140,8 @@ export function getDirectorFieldAnchor(
       return `${prefix}-amount`;
     case 'consent':
       return `${prefix}-consent`;
+    case 'consentFile':
+      return `${prefix}-consent-file`;
     case 'addressType':
       return `${prefix}-address-type`;
     case 'postalCodeLookup':
@@ -297,8 +304,13 @@ export function validateDirector(director: Form1Director): DirectorErrors {
     }
   }
 
-  if (needsConsent && !director.consentConfirmed && !director.consentFile) {
-    next.consent = CONSENT_REQUIRED;
+  if (needsConsent) {
+    if (!director.consentConfirmed) {
+      next.consent = CONSENT_CHECKBOX_REQUIRED;
+    }
+    if (!director.consentFile) {
+      next.consentFile = CONSENT_FILE_REQUIRED;
+    }
   }
 
   return next;
@@ -532,16 +544,24 @@ export function Form1DirectorBlock({
             <p className={step4Styles.readOnlyValue}>{formatDirectorAddressLine(director)}</p>
           </div>
           {needsConsent ? (
-            <div className={step4Styles.readOnlyField}>
-              <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Director consent</h5>
-              <p className={step4Styles.readOnlyValue}>
-                {director.consentConfirmed
-                  ? 'Consent confirmed'
-                  : director.consentFile
+            <>
+              <div className={step4Styles.readOnlyField}>
+                <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Director consent</h5>
+                <p className={step4Styles.readOnlyValue}>
+                  {director.consentConfirmed ? 'Consent confirmed' : '—'}
+                </p>
+              </div>
+              <div className={step4Styles.readOnlyField}>
+                <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
+                  Consent form upload
+                </h5>
+                <p className={step4Styles.readOnlyValue}>
+                  {director.consentFile
                     ? `Consent file: ${director.consentFile.name}`
                     : '—'}
-              </p>
-            </div>
+                </p>
+              </div>
+            </>
           ) : null}
         </div>
       </section>
@@ -691,6 +711,7 @@ export function Form1DirectorBlock({
                 caption="Director consent"
                 name={`${prefix}-consent`}
                 required
+                hintText="Confirm that consent has been given. You must still upload the completed consent form below."
                 value={director.consentConfirmed ? ['consent'] : []}
                 options={[
                   {
@@ -717,16 +738,17 @@ export function Form1DirectorBlock({
               This consent is required to be available for inspection at the head office address
               in accordance with the Act.
             </p>
-            {!director.consentConfirmed ? (
+            <div id={`${prefix}-consent-file`}>
               <FileUpload
-                inputId={`${prefix}-consent-file`}
+                inputId={`${prefix}-consent-file-input`}
                 label="Upload consent form (PDF)"
-                hintText="Upload the completed Consent to Act as a First Director (Form 3) if the checkbox above is not selected. PDF only, maximum 20 MB."
+                required
+                hintText="Upload the completed Consent to Act as a First Director (Form 3). PDF only, maximum 20 MB."
                 value={director.consentFile}
-                errorMessage={errors.consent && !director.consentFile ? errors.consent : undefined}
+                errorMessage={errors.consentFile}
                 onChange={(file) => patch({ consentFile: file })}
               />
-            ) : null}
+            </div>
           </div>
         ) : null}
 
