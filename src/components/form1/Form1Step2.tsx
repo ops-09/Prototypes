@@ -18,7 +18,6 @@ import {
   EMPTY_STEP6,
   EMPTY_STEP7,
   FORM1_COOPERATIVE_SUBTYPE_OPTIONS,
-  FORM1_SUBTYPE_OTHER,
   hasForm1Step1Data,
   OFFICIAL_EMAIL_INFO,
   readForm1Draft,
@@ -39,7 +38,6 @@ const EMAIL_MATCH_ERROR =
 
 type FieldKey =
   | 'cooperativeSubtype'
-  | 'cooperativeSubtypeOther'
   | 'primaryActivity'
   | 'email'
   | 'confirmEmail';
@@ -47,7 +45,6 @@ type FieldErrors = Partial<Record<FieldKey, string>>;
 
 const FIELD_ANCHORS: Record<FieldKey, string> = {
   cooperativeSubtype: 'cooperative-subtype',
-  cooperativeSubtypeOther: 'cooperative-subtype-other',
   primaryActivity: 'primary-activity',
   email: 'official-email',
   confirmEmail: 'confirm-official-email',
@@ -55,7 +52,6 @@ const FIELD_ANCHORS: Record<FieldKey, string> = {
 
 const FIELD_ORDER: FieldKey[] = [
   'cooperativeSubtype',
-  'cooperativeSubtypeOther',
   'primaryActivity',
   'email',
   'confirmEmail',
@@ -167,12 +163,6 @@ export function Form1Step2() {
   function validateAll(): FieldErrors {
     const next: FieldErrors = {};
 
-    if (
-      step2.cooperativeSubtype === FORM1_SUBTYPE_OTHER &&
-      !step2.cooperativeSubtypeOther.trim()
-    ) {
-      next.cooperativeSubtypeOther = 'Enter the co-operative sub-type.';
-    }
     if (!step2.primaryActivity.trim() || !isSelectedNaicsLabel(step2.primaryActivity)) {
       next.primaryActivity = REQUIRED_FIELD_ERROR;
     }
@@ -298,37 +288,11 @@ export function Form1Step2() {
                 options={[...FORM1_COOPERATIVE_SUBTYPE_OPTIONS]}
                 errorMessage={errors.cooperativeSubtype}
                 customOnChange={(event) => {
-                  const next = getEventValue(event);
-                  patchStep2({
-                    cooperativeSubtype: next,
-                    cooperativeSubtypeOther:
-                      next === FORM1_SUBTYPE_OTHER
-                        ? step2.cooperativeSubtypeOther
-                        : '',
-                  });
+                  patchStep2({ cooperativeSubtype: getEventValue(event) });
                   clearError('cooperativeSubtype');
-                  clearError('cooperativeSubtypeOther');
                 }}
               />
             </div>
-
-            {step2.cooperativeSubtype === FORM1_SUBTYPE_OTHER ? (
-              <div id={FIELD_ANCHORS.cooperativeSubtypeOther}>
-                <OntarioInput
-                  elementId={FIELD_ANCHORS.cooperativeSubtypeOther}
-                  caption="Describe the co-operative sub-type"
-                  name="cooperative-subtype-other"
-                  required
-                  requiredValidationMessage="Enter the co-operative sub-type."
-                  value={step2.cooperativeSubtypeOther}
-                  errorMessage={errors.cooperativeSubtypeOther}
-                  customOnInput={(event) => {
-                    patchStep2({ cooperativeSubtypeOther: getEventValue(event) });
-                    clearError('cooperativeSubtypeOther');
-                  }}
-                />
-              </div>
-            ) : null}
 
             <div id={FIELD_ANCHORS.primaryActivity} className={styles.naicsBlock}>
               <label

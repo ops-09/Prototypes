@@ -122,8 +122,6 @@ export function normalizeStep1(raw: unknown): Form1Step1Data {
 
 export type Form1Step2Data = {
   cooperativeSubtype: string;
-  /** Free-text sub-type when cooperativeSubtype is "Other". */
-  cooperativeSubtypeOther: string;
   primaryActivity: string;
   email: string;
   confirmEmail: string;
@@ -270,19 +268,12 @@ export const EMPTY_STEP1: Form1Step1Data = {
 
 export const EMPTY_STEP2: Form1Step2Data = {
   cooperativeSubtype: '',
-  cooperativeSubtypeOther: '',
   primaryActivity: '',
   email: '',
   confirmEmail: '',
 };
 
-export const FORM1_SUBTYPE_OTHER = 'Other';
-
 export function formatCooperativeSubtype(step2: Form1Step2Data) {
-  if (step2.cooperativeSubtype === FORM1_SUBTYPE_OTHER) {
-    const other = step2.cooperativeSubtypeOther.trim();
-    return other || FORM1_SUBTYPE_OTHER;
-  }
   return step2.cooperativeSubtype.trim();
 }
 

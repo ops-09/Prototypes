@@ -17,7 +17,6 @@ import {
 import {
   formatCooperativeSubtype,
   formatUnitLabel,
-  FORM1_SUBTYPE_OTHER,
   unitTypeRequiredError,
   type Form1Draft,
   type Form1Step1Data,
@@ -119,12 +118,6 @@ function isNameStepComplete(step1: Form1Step1Data) {
 
 function isTypeContactComplete(draft: Form1Draft) {
   const s = draft.step2;
-  if (
-    s.cooperativeSubtype === FORM1_SUBTYPE_OTHER &&
-    !s.cooperativeSubtypeOther.trim()
-  ) {
-    return false;
-  }
   return Boolean(
     s.primaryActivity.trim() &&
       s.email.trim() &&
@@ -191,8 +184,16 @@ function isMembershipComplete(draft: Form1Draft) {
 
 function isIncorporatorsComplete(draft: Form1Draft) {
   const list = draft.step7.incorporators;
-  if (list.length === 0) {
-    return false;
+  const subtype = draft.step2.cooperativeSubtype.trim();
+  if (!subtype) {
+    if (list.length === 0) {
+      return false;
+    }
+  } else {
+    const minimum = subtype === 'Worker Co-operative' ? 5 : 3;
+    if (list.length < minimum) {
+      return false;
+    }
   }
   return list.every(
     (entry) => Object.keys(validateIncorporator(entry)).length === 0,

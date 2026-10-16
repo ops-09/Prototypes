@@ -38,9 +38,33 @@ import step4Styles from './Form1Step4.module.scss';
 const CURRENT_STEP = 8;
 const TOTAL_STEPS = 9;
 
+const MIN_INCORPORATORS = 3;
+const MIN_WORKER_INCORPORATORS = 5;
+const WORKER_COOPERATIVE = 'Worker Co-operative';
+const INCORPORATOR_COUNT_INFO =
+  'All co-operative sub-types require at least 3 incorporators. The Worker Co-operative sub-type requires at least 5 incorporators.';
 const AT_LEAST_ONE = 'At least one incorporator must be added.';
 const INCOMPLETE_DETAILS =
   'Complete the required details for each incorporator before continuing.';
+
+/** Minimum count applies only when a co-operative sub-type was selected on step 3. */
+function incorporatorsCountError(
+  count: number,
+  cooperativeSubtype: string,
+): string | undefined {
+  const subtype = cooperativeSubtype.trim();
+  if (!subtype) {
+    return count === 0 ? AT_LEAST_ONE : undefined;
+  }
+  if (subtype === WORKER_COOPERATIVE) {
+    return count < MIN_WORKER_INCORPORATORS
+      ? 'At least 5 incorporators are required to incorporate a Worker Co-operative.'
+      : undefined;
+  }
+  return count < MIN_INCORPORATORS
+    ? 'At least 3 incorporators are required.'
+    : undefined;
+}
 
 type PageFieldKey = 'incorporators';
 type PageErrors = Partial<Record<PageFieldKey, string>>;
@@ -199,8 +223,12 @@ export function Form1Step7() {
 
   function validatePage(): PageErrors {
     const page: PageErrors = {};
-    if (step7.incorporators.length === 0) {
-      page.incorporators = AT_LEAST_ONE;
+    const countError = incorporatorsCountError(
+      step7.incorporators.length,
+      draft.step2.cooperativeSubtype,
+    );
+    if (countError) {
+      page.incorporators = countError;
       return page;
     }
 
@@ -315,6 +343,14 @@ export function Form1Step7() {
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Incorporators</h1>
           <p className={styles.lead}>{INCORPORATOR_INFO}</p>
+
+          <div className={styles.alert}>
+            <OntarioPageAlert
+              type="informational"
+              heading="Number of incorporators"
+              content={INCORPORATOR_COUNT_INFO}
+            />
+          </div>
 
           <div className={styles.formStack}>
             <div id={FIELD_ANCHORS.incorporators} className={step4Styles.directorsSection}>
