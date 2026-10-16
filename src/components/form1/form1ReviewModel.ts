@@ -174,9 +174,17 @@ function isMembershipComplete(draft: Form1Draft) {
   const groups = s.stakeholderGroups.trim();
   const groupTerms = s.stakeholderGroupTerms.trim();
   const special = s.specialProvisions.trim();
+  const stakeholderRequired = draft.step4.multiStakeholder === 'yes';
 
-  if (!classes || !classTerms || !groups || !groupTerms || !special) {
+  if (!classes || !classTerms || !special) {
     return false;
+  }
+  if (stakeholderRequired) {
+    return Boolean(groups && groupTerms);
+  }
+  // Optional when not multi-stakeholder; if one is entered, both are needed.
+  if (groups || groupTerms) {
+    return Boolean(groups && groupTerms);
   }
   return true;
 }

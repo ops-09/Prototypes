@@ -273,6 +273,7 @@ export function Form1Step6() {
   const navigate = useNavigate();
   const draft = ensureStep6Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const stakeholderFieldsRequired = draft.step4.multiStakeholder === 'yes';
 
   const [step6, setStep6] = useState<Form1Step6Data>(() => ({
     ...EMPTY_STEP6,
@@ -346,9 +347,16 @@ export function Form1Step6() {
     }
 
     for (const key of FIELD_ORDER) {
-      if (!page[key] && !hasContent(step6[key])) {
-        page[key] = FIELD_REQUIRED;
+      if (page[key] || hasContent(step6[key])) {
+        continue;
       }
+      if (
+        !stakeholderFieldsRequired &&
+        (key === 'stakeholderGroups' || key === 'stakeholderGroupTerms')
+      ) {
+        continue;
+      }
+      page[key] = FIELD_REQUIRED;
     }
 
     return page;
@@ -494,8 +502,12 @@ export function Form1Step6() {
                 elementId={FIELD_ANCHORS.stakeholderGroups}
                 caption="Stakeholder groups, if any"
                 name={FIELD_ANCHORS.stakeholderGroups}
-                required
-                hintText={NOT_APPLICABLE_HINT}
+                required={stakeholderFieldsRequired}
+                hintText={
+                  stakeholderFieldsRequired
+                    ? NOT_APPLICABLE_HINT
+                    : 'Optional. Only required if this is a multi-stakeholder co-operative.'
+                }
                 value={step6.stakeholderGroups}
                 errorMessage={errors.stakeholderGroups}
                 customOnInput={(event) =>
@@ -509,8 +521,12 @@ export function Form1Step6() {
                 elementId={FIELD_ANCHORS.stakeholderGroupTerms}
                 caption="Terms and conditions for membership in each stakeholder group"
                 name={FIELD_ANCHORS.stakeholderGroupTerms}
-                required
-                hintText={NOT_APPLICABLE_HINT}
+                required={stakeholderFieldsRequired}
+                hintText={
+                  stakeholderFieldsRequired
+                    ? NOT_APPLICABLE_HINT
+                    : 'Optional. Only required if this is a multi-stakeholder co-operative.'
+                }
                 value={step6.stakeholderGroupTerms}
                 errorMessage={errors.stakeholderGroupTerms}
                 customOnInput={(event) =>
