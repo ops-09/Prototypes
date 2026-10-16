@@ -4,10 +4,15 @@
 export const BYB_FORM_TITLE_LINES = [
   'Articles of Incorporation of a',
   'Co-operative without Share Capital',
-  'Form 2 Co-operative Corporations Act',
+  'Form 2',
 ] as const;
 
-export const BYB_FORM_TITLE = BYB_FORM_TITLE_LINES.join(' ');
+/** Act line — body text under the page title, not part of the h1. */
+export const BYB_FORM_ACT_LINE = 'Co-operative Corporations Act';
+
+export const BYB_FORM_TITLE = [...BYB_FORM_TITLE_LINES, BYB_FORM_ACT_LINE].join(
+  ' ',
+);
 
 export const BYB_INTRO =
   'Please review the following information before starting your Articles of Incorporation filing.';

@@ -90,8 +90,8 @@ export function Form7DraftSummaryPage() {
                 label="Continue filing"
                 href={
                   draft && draft.lastCompletedStep >= 3
-                    ? '/form-7/step-4'
-                    : '/form-7/step-3'
+                    ? '/form-7/step-5'
+                    : '/form-7/step-4'
                 }
               />
             ) : null}

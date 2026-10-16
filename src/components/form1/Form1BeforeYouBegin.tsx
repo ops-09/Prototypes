@@ -13,6 +13,7 @@ import {
   BYB_DOCUMENTS_INTRO,
   BYB_ESTIMATED_TIME,
   BYB_ESTIMATED_TIME_HEADING,
+  BYB_FORM_ACT_LINE,
   BYB_FORM_TITLE_LINES,
   BYB_FORM3_INSTRUCTION,
   BYB_INSTRUCTIONS_HEADING,
@@ -49,9 +50,13 @@ export function Form1BeforeYouBegin() {
     <div className="ontario-row">
       <div className="ontario-columns ontario-small-12 ontario-medium-8">
         <h1 className={`ontario-h1 ${styles.pageTitle}`}>
-          <span className={styles.pageTitleLine}>{BYB_FORM_TITLE_LINES[0]}</span>
-          <span className={styles.pageTitleLine}>{BYB_FORM_TITLE_LINES[1]}</span>
+          {BYB_FORM_TITLE_LINES.map((line) => (
+            <span key={line} className={styles.pageTitleLine}>
+              {line}
+            </span>
+          ))}
         </h1>
+        <p className={styles.formAct}>{BYB_FORM_ACT_LINE}</p>
         <p className={styles.lead}>{BYB_INTRO}</p>
 
         <div className={styles.stack}>

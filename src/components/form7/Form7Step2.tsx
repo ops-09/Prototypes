@@ -236,7 +236,7 @@ export function Form7Step2() {
   }, [errors, idPrefix, step2.nameNuans.nuansReports]);
 
   if (!draft?.step1.cooperativeName) {
-    return <Navigate to="/form-7" replace />;
+    return <Navigate to="/form-7/step-2" replace />;
   }
 
   function clearError(key: keyof Step2Errors | string) {
@@ -361,7 +361,7 @@ export function Form7Step2() {
     }
 
     upsertForm7Step2(step2, 'continue', 2);
-    navigate('/form-7/step-3');
+    navigate('/form-7/step-4');
   }
 
   function handleSaveAsDraft() {
@@ -399,7 +399,7 @@ export function Form7Step2() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-7/step-1"
+          backButtonUrl="/form-7/step-2"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />

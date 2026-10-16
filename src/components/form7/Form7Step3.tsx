@@ -93,7 +93,7 @@ function ensureStep3Draft() {
     return existing;
   }
 
-  // Prototype deep-link: seed Steps 1–2 so /form-7/step-3 opens from the playground.
+  // Prototype deep-link: seed Steps 1–2 so /form-7/step-4 opens from the playground.
   const now = new Date().toISOString();
   const seeded = {
     step1: { ...OBR_STEP1_DEFAULTS },
@@ -170,7 +170,7 @@ export function Form7Step3() {
   }, [errors]);
 
   if (!draft.step1.cooperativeName || !amendmentType) {
-    return <Navigate to="/form-7" replace />;
+    return <Navigate to="/form-7/step-2" replace />;
   }
 
   function clearError(key: FieldKey) {
@@ -264,7 +264,7 @@ export function Form7Step3() {
     }
 
     upsertForm7Step3(step3, 'continue', 3);
-    navigate('/form-7/step-4');
+    navigate('/form-7/step-5');
   }
 
   function handleSaveAsDraft() {
@@ -293,7 +293,7 @@ export function Form7Step3() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-7/step-2"
+          backButtonUrl="/form-7/step-3"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />

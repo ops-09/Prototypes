@@ -1,0 +1,200 @@
+.formMain {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  padding: var(--ontario-spacing-7, 2.5rem) 0 var(--ontario-spacing-10, 5rem);
+}
+
+.pageTitle {
+  margin-top: 0;
+  margin-bottom: var(--ontario-spacing-2, 0.5rem);
+}
+
+.pageTitleLine {
+  display: block;
+}
+
+.formAct {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.lead {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-6, 2rem);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.sectionHeading {
+  margin: 0;
+}
+
+.sectionIntro {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+// Offset OntarioCallout default vertical margins without piercing shadow DOM.
+.timeEstimateCallout {
+  :global(ontario-callout) {
+    display: block;
+    width: 100%;
+    margin-top: calc(-1 * var(--ontario-spacing-6, 2rem));
+    margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
+  }
+}
+
+.timeEstimateBody {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.timeEstimateText {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+// ODS catalog gap: no numbered vertical timeline — compose with an ordered list + tokens.
+// Visual: light fill + outlined circles with grey connectors (design reference).
+// 60px marker: spacing-8 (3rem) + spacing-3 (0.75rem).
+$byb-marker-size: calc(
+  var(--ontario-spacing-8, 3rem) + var(--ontario-spacing-3, 0.75rem)
+);
+
+.stepsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  counter-reset: byb-step;
+  position: relative;
+}
+
+// Continuous spine centered on the marker column behind the circles.
+.stepsList::before {
+  content: '';
+  position: absolute;
+  top: calc(
+    (
+        var(--ontario-spacing-8, 3rem) + var(--ontario-spacing-3, 0.75rem)
+      ) /
+      2
+  );
+  bottom: calc(
+    (
+        var(--ontario-spacing-8, 3rem) + var(--ontario-spacing-3, 0.75rem)
+      ) /
+      2
+  );
+  left: 0;
+  width: $byb-marker-size;
+  background-image: linear-gradient(
+    var(--ontario-greyscale-20, #cccccc),
+    var(--ontario-greyscale-20, #cccccc)
+  );
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: var(--ontario-global-tokens-border-size, 2px) 100%;
+  z-index: 0;
+}
+
+.stepItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--ontario-spacing-4, 1rem);
+  align-items: start;
+  counter-increment: byb-step;
+}
+
+.stepMarker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: $byb-marker-size;
+  position: relative;
+  z-index: 1;
+}
+
+.stepNumber {
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: $byb-marker-size;
+  height: $byb-marker-size;
+  margin: 0;
+  max-width: none;
+  border-radius: 50%;
+  border: calc(var(--ontario-global-tokens-border-size, 2px) * 2) solid
+    var(--ontario-colour-information, #1080a6);
+  background-color: var(--ontario-colour-information-light, #e2f0f4);
+  color: var(--ontario-colour-information, #1080a6);
+  line-height: 1;
+
+  &::before {
+    content: counter(byb-step);
+  }
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-1, 0.25rem);
+  min-width: 0;
+  padding-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+.stepItem:last-child .stepBody {
+  padding-bottom: 0;
+}
+
+.stepTitle {
+  margin: 0;
+}
+
+.stepDescription {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.bulletList {
+  margin: 0;
+  padding-left: var(--ontario-spacing-5, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-2, 0.5rem);
+}
+
+.bulletList li {
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-6, 2rem);
+  margin-top: var(--ontario-spacing-2, 0.5rem);
+}

@@ -171,22 +171,29 @@ export function HomePage() {
           <OntarioCard
             headingLevel="h2"
             label="Form 7"
-            description="Articles of Amendment — starts with cover letter contact information, then co-operative details."
+            description="Articles of Amendment — Before you begin, then cover letter and filing steps."
             cardLink={withBasePath('/form-7')}
             ariaLabelText="Open the Form 7 Articles of Amendment prototype"
           />
           <OntarioCard
             headingLevel="h2"
+            label="Form 7 — Step 1"
+            description="Cover letter — contact information before the filing steps."
+            cardLink={withBasePath('/form-7/step-1')}
+            ariaLabelText="Open Form 7 Step 1 cover letter"
+          />
+          <OntarioCard
+            headingLevel="h2"
             label="Form 7 — Step 4"
             description="Supporting documents upload for Articles of Amendment."
-            cardLink={withBasePath('/form-7/step-3')}
+            cardLink={withBasePath('/form-7/step-4')}
             ariaLabelText="Open Form 7 Step 4 Supporting documents"
           />
           <OntarioCard
             headingLevel="h2"
             label="Form 7 — Step 5"
             description="Review and validation — summary, authorization, and submit."
-            cardLink={withBasePath('/form-7/step-4')}
+            cardLink={withBasePath('/form-7/step-5')}
             ariaLabelText="Open Form 7 Step 5 Review and validation"
           />
         </OntarioCardCollection>

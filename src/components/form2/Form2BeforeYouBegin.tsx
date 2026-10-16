@@ -13,6 +13,7 @@ import {
   BYB_DOCUMENTS_INTRO,
   BYB_ESTIMATED_TIME,
   BYB_ESTIMATED_TIME_HEADING,
+  BYB_FORM_ACT_LINE,
   BYB_FORM_TITLE_LINES,
   BYB_FORM3_INSTRUCTION,
   BYB_INSTRUCTIONS_HEADING,
@@ -55,6 +56,7 @@ export function Form2BeforeYouBegin() {
             </span>
           ))}
         </h1>
+        <p className={styles.formAct}>{BYB_FORM_ACT_LINE}</p>
         <p className={styles.lead}>{BYB_INTRO}</p>
 
         <div className={styles.stack}>

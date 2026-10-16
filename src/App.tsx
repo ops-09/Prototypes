@@ -27,6 +27,7 @@ import { Form2Step6Page } from './pages/Form2Step6Page';
 import { Form2Step7Page } from './pages/Form2Step7Page';
 import { Form2Step8Page } from './pages/Form2Step8Page';
 import { Form2IncorporatorSubflowPage } from './pages/Form2IncorporatorSubflowPage';
+import { Form7BeforeYouBeginPage } from './pages/Form7BeforeYouBeginPage';
 import { Form7DraftSummaryPage } from './pages/Form7DraftSummaryPage';
 import { Form7Page } from './pages/Form7Page';
 import { Form7Step1Page } from './pages/Form7Step1Page';
@@ -100,11 +101,13 @@ function App() {
         />
         <Route path="/form-2/step-9" element={<Form2Step8Page />} />
         <Route path="/form-2/draft-summary" element={<Form2DraftSummaryPage />} />
-        <Route path="/form-7" element={<Form7Page />} />
-        <Route path="/form-7/step-1" element={<Form7Step1Page />} />
-        <Route path="/form-7/step-2" element={<Form7Step2Page />} />
-        <Route path="/form-7/step-3" element={<Form7Step3Page />} />
-        <Route path="/form-7/step-4" element={<Form7Step4Page />} />
+        <Route path="/form-7" element={<Form7BeforeYouBeginPage />} />
+        {/* Cover letter is step 1; Before you begin has no step number. */}
+        <Route path="/form-7/step-1" element={<Form7Page />} />
+        <Route path="/form-7/step-2" element={<Form7Step1Page />} />
+        <Route path="/form-7/step-3" element={<Form7Step2Page />} />
+        <Route path="/form-7/step-4" element={<Form7Step3Page />} />
+        <Route path="/form-7/step-5" element={<Form7Step4Page />} />
         <Route path="/form-7/draft-summary" element={<Form7DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />

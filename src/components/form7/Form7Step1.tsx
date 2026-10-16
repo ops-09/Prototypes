@@ -213,7 +213,7 @@ export function Form7Step1() {
     }
 
     upsertForm7Step1(buildStep1(), 'continue');
-    navigate('/form-7/step-2');
+    navigate('/form-7/step-3');
   }
 
   function handleSaveAsDraft() {
@@ -236,7 +236,7 @@ export function Form7Step1() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-7"
+          backButtonUrl="/form-7/step-1"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />

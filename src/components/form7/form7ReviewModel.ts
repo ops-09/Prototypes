@@ -297,7 +297,7 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
     {
       key: 'coopDetails',
       caption: 'Co-operative details',
-      editHref: '/form-7/step-1',
+      editHref: '/form-7/step-2',
       complete: isCoopDetailsComplete(draft),
       rows: [
         {
@@ -329,14 +329,14 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
     {
       key: 'amendmentDetails',
       caption: 'Amendment details',
-      editHref: '/form-7/step-2',
+      editHref: '/form-7/step-3',
       complete: isAmendmentComplete(draft),
       rows: buildAmendmentRows(draft),
     },
     {
       key: 'supportingDocs',
       caption: 'Supporting documents',
-      editHref: '/form-7/step-3',
+      editHref: '/form-7/step-4',
       complete: isSupportingDocsComplete(draft),
       rows: supportingRows,
     },
