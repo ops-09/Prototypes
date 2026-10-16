@@ -1,0 +1,81 @@
+.sectionHeading {
+  margin: 0;
+}
+
+.lookupBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.postalCodeHint {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+
+  a {
+    color: var(--ontario-colour-link, #0066cc);
+  }
+}
+
+.manualToggle {
+  // Hide the checkbox group legend — pattern shows a single option only.
+  :global(ontario-checkboxes) {
+    display: block;
+  }
+}
+
+.addressFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.addressGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  // Bottom-align paired fields so inputs line up when one column has hint text.
+  align-items: end;
+
+  @media screen and (min-width: 40em) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.gridHalf {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+// ODS has no readOnly inputs — locked province/country composed with tokens.
+.lockedField {
+  margin: 0;
+}
+
+.lockedLabel {
+  margin: 0 0 var(--ontario-spacing-2, 0.5rem);
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.lockedValue {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}

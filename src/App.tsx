@@ -14,6 +14,19 @@ import { Form1Step6Page } from './pages/Form1Step6Page';
 import { Form1Step7Page } from './pages/Form1Step7Page';
 import { Form1Step8Page } from './pages/Form1Step8Page';
 import { Form1IncorporatorSubflowPage } from './pages/Form1IncorporatorSubflowPage';
+import { Form2BeforeYouBeginPage } from './pages/Form2BeforeYouBeginPage';
+import { Form2DraftSummaryPage } from './pages/Form2DraftSummaryPage';
+import { Form2Page } from './pages/Form2Page';
+import { Form2Step1Page } from './pages/Form2Step1Page';
+import { Form2Step2Page } from './pages/Form2Step2Page';
+import { Form2Step3Page } from './pages/Form2Step3Page';
+import { Form2DirectorSubflowPage } from './pages/Form2DirectorSubflowPage';
+import { Form2Step4Page } from './pages/Form2Step4Page';
+import { Form2Step5Page } from './pages/Form2Step5Page';
+import { Form2Step6Page } from './pages/Form2Step6Page';
+import { Form2Step7Page } from './pages/Form2Step7Page';
+import { Form2Step8Page } from './pages/Form2Step8Page';
+import { Form2IncorporatorSubflowPage } from './pages/Form2IncorporatorSubflowPage';
 import { Form7DraftSummaryPage } from './pages/Form7DraftSummaryPage';
 import { Form7Page } from './pages/Form7Page';
 import { Form7Step1Page } from './pages/Form7Step1Page';
@@ -60,6 +73,33 @@ function App() {
         />
         <Route path="/form-1/step-9" element={<Form1Step8Page />} />
         <Route path="/form-1/draft-summary" element={<Form1DraftSummaryPage />} />
+        <Route path="/form-2" element={<Form2BeforeYouBeginPage />} />
+        <Route path="/form-2/step-1" element={<Form2Page />} />
+        <Route path="/form-2/step-2" element={<Form2Step1Page />} />
+        <Route path="/form-2/step-3" element={<Form2Step2Page />} />
+        <Route path="/form-2/step-4" element={<Form2Step3Page />} />
+        <Route path="/form-2/step-5" element={<Form2Step4Page />} />
+        <Route
+          path="/form-2/step-5/directors/new"
+          element={<Form2DirectorSubflowPage />}
+        />
+        <Route
+          path="/form-2/step-5/directors/:directorId"
+          element={<Form2DirectorSubflowPage />}
+        />
+        <Route path="/form-2/step-6" element={<Form2Step5Page />} />
+        <Route path="/form-2/step-7" element={<Form2Step6Page />} />
+        <Route path="/form-2/step-8" element={<Form2Step7Page />} />
+        <Route
+          path="/form-2/step-8/incorporators/new"
+          element={<Form2IncorporatorSubflowPage />}
+        />
+        <Route
+          path="/form-2/step-8/incorporators/:incorporatorId"
+          element={<Form2IncorporatorSubflowPage />}
+        />
+        <Route path="/form-2/step-9" element={<Form2Step8Page />} />
+        <Route path="/form-2/draft-summary" element={<Form2DraftSummaryPage />} />
         <Route path="/form-7" element={<Form7Page />} />
         <Route path="/form-7/step-1" element={<Form7Step1Page />} />
         <Route path="/form-7/step-2" element={<Form7Step2Page />} />

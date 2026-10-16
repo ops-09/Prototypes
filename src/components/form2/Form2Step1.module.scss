@@ -1,0 +1,256 @@
+// Form page main: no top pad (step indicator sits under header); 80px above footer.
+.formMain {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  padding: 0 0 var(--ontario-spacing-10, 5rem);
+}
+
+// ODS step-indicator host defaults to inline-block; force full-width so Back / step label space apart.
+.stepIndicator {
+  display: block;
+  width: 100%;
+
+  :global(ontario-step-indicator) {
+    display: block;
+    width: 100%;
+  }
+}
+
+.alert {
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+// Slotted page-alert links are light DOM; ODS `.ontario-alert--error a` only
+// applies in shadow. Host `type` is not reflected as an attribute from React,
+// so style the summary anchors directly (ODS page-alerts.html).
+.errorSummaryLink {
+  color: var(--ontario-colour-alert, #cd0000);
+
+  &:hover,
+  &:focus {
+    // ODS page-alert $ontario-alert-link-focus — not in global tokens
+    color: #6b0000;
+  }
+
+  &:active {
+    // ODS page-alert $ontario-alert-link-active — not in global tokens
+    color: #280000;
+  }
+
+  &:visited {
+    color: var(--ontario-colour-alert, #cd0000);
+  }
+}
+
+.pageTitle {
+  margin-top: 0;
+}
+
+.subflowPageTitle {
+  margin-top: 0;
+  padding-top: var(--ontario-spacing-7, 2.5rem);
+}
+
+.lead {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+}
+
+.body {
+  margin: 0 0 var(--ontario-spacing-4, 1rem);
+}
+
+.body + .body {
+  margin-bottom: var(--ontario-spacing-7, 2.5rem);
+}
+
+.formStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-6, 2rem);
+}
+
+// Cancel ODS page-alert outer margins, then apply page-layout vertical padding.
+.incorporatorInfoAlert {
+  margin-top: calc(-1 * var(--ontario-spacing-6, 2rem));
+  margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
+  padding-top: var(--ontario-spacing-5, 1.5rem);
+  padding-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+.nuansSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.nuansReportBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.nuansReportHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.nuansReportHeading {
+  margin: 0;
+}
+
+.addActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  align-items: center;
+}
+
+.addLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: var(--ontario-global-tokens-border-size, 4px) solid
+      var(--ontario-colour-focus, #009adb);
+    outline-offset: var(--ontario-global-tokens-border-size, 4px);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.removeLink {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ontario-colour-link, #0066cc);
+  font: inherit;
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    color: var(--ontario-colour-link--hover, #00478f);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.nuansMaxNote {
+  margin: 0;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-6, 2rem);
+  margin-top: var(--ontario-spacing-7, 2.5rem);
+}
+
+// SearchBox locks caption+hint+field into a narrow offset form. Compose title and
+// hint at column width, then compensate SearchBox host offset only.
+.naicsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.naicsLabel {
+  margin: 0;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.requiredFlag {
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.naicsSearch {
+  width: 100%;
+}
+
+.fieldError {
+  margin: 0;
+  color: var(--ontario-colour-alert, #cd0000);
+}
+
+.emailField {
+  display: flex;
+  flex-direction: column;
+}
+
+.emailField :global(ontario-hint-expander) {
+  display: block;
+  margin-top: var(--ontario-spacing-4, 1rem);
+}
+
+.naicsSelected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.naicsSelectedValue {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}

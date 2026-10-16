@@ -1,0 +1,22 @@
+import { ContactInformationForm } from '../components/cover-letter/ContactInformationForm';
+import formStyles from '../components/cover-letter/ContactInformationForm.module.scss';
+import { PlaygroundShell } from '../components/layout/PlaygroundShell';
+
+/** Form 1 cover letter / contact information (step 1 of 9). */
+export function Form2Page() {
+  return (
+    <PlaygroundShell
+      serviceTitle="For Business"
+      serviceHref="/"
+      mainClassName={formStyles.formMain}
+    >
+      <ContactInformationForm
+        continueHref="/form-2/step-2"
+        currentStep={1}
+        numberOfSteps={9}
+        backButtonUrl="/form-2"
+        primaryButtonLabel="Continue"
+      />
+    </PlaygroundShell>
+  );
+}
