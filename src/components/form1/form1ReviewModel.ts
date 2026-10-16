@@ -14,13 +14,18 @@ import {
   formatIncorporatorListDescription,
   validateIncorporator,
 } from './Form1IncorporatorEditor';
-import type {
-  Form1Draft,
-  Form1Step1Data,
-  Form1Step3Data,
-  Form1Step4Data,
+import {
+  formatCooperativeSubtype,
+  formatUnitLabel,
+  FORM1_SUBTYPE_OTHER,
+  unitTypeRequiredError,
+  type Form1Draft,
+  type Form1Step1Data,
+  type Form1Step3Data,
+  type Form1Step4Data,
 } from './form1DraftStorage';
-import type { NameLanguageOption } from './nameValidation';
+import { validateNuansDate } from '../form7/nuansValidation';
+import { validateCooperativeName } from './nameValidation';
 
 export type ReviewRow = {
   name: string;
@@ -61,21 +66,6 @@ function textPreview(value: string, max = 160) {
   return `${trimmed.slice(0, max).trimEnd()}…`;
 }
 
-function nameFormatLabel(option: NameLanguageOption | '') {
-  switch (option) {
-    case 'english':
-      return 'English';
-    case 'french':
-      return 'French';
-    case 'combined':
-      return 'Combined English and French';
-    case 'separate':
-      return 'Separate English and French';
-    default:
-      return 'Not provided';
-  }
-}
-
 function yesNo(value: string) {
   if (value === 'yes') return 'Yes';
   if (value === 'no') return 'No';
@@ -84,7 +74,7 @@ function yesNo(value: string) {
 
 function formatHeadOffice(step3: Form1Step3Data) {
   const street = [
-    step3.roomNumber ? `Room ${step3.roomNumber}` : '',
+    formatUnitLabel(step3.unitType, step3.roomNumber),
     [
       step3.streetNumber,
       step3.streetNumberSuffix,
@@ -115,27 +105,28 @@ function formatDirectorCount(step4: Form1Step4Data) {
 }
 
 function isNameStepComplete(step1: Form1Step1Data) {
-  if (!step1.languageOption) {
+  if (validateCooperativeName(step1.cooperativeName)) {
     return false;
   }
-  if (step1.languageOption === 'separate') {
-    return Boolean(
-      step1.englishName.trim() &&
-        step1.frenchName.trim() &&
-        step1.nuansFileEn &&
-        step1.nuansDateEn &&
-        step1.nuansFileFr &&
-        step1.nuansDateFr,
-    );
+  const reports = step1.nuansReports ?? [];
+  if (reports.length === 0) {
+    return false;
   }
-  return Boolean(step1.cooperativeName.trim() && step1.nuansFile && step1.nuansDate);
+  return reports.every(
+    (report) => Boolean(report.file) && !validateNuansDate(report.date),
+  );
 }
 
 function isTypeContactComplete(draft: Form1Draft) {
   const s = draft.step2;
+  if (
+    s.cooperativeSubtype === FORM1_SUBTYPE_OTHER &&
+    !s.cooperativeSubtypeOther.trim()
+  ) {
+    return false;
+  }
   return Boolean(
-    s.cooperativeSubtype.trim() &&
-      s.primaryActivity.trim() &&
+    s.primaryActivity.trim() &&
       s.email.trim() &&
       s.confirmEmail.trim() &&
       s.email.trim().toLowerCase() === s.confirmEmail.trim().toLowerCase(),
@@ -143,6 +134,9 @@ function isTypeContactComplete(draft: Form1Draft) {
 }
 
 function isHeadOfficeComplete(step3: Form1Step3Data) {
+  if (unitTypeRequiredError(step3.roomNumber, step3.unitType)) {
+    return false;
+  }
   return Boolean(
     step3.streetNumber.trim() &&
       step3.streetName.trim() &&
@@ -164,9 +158,12 @@ function isDirectorsComplete(step4: Form1Step4Data) {
 }
 
 function isShareComplete(draft: Form1Draft) {
+  const s = draft.step5;
   return Boolean(
-    draft.step5.authorizedCapital.trim() &&
-      draft.step5.shareTransferRestrictions.trim(),
+    s.businessPowersRestrictions.trim() &&
+      s.authorizedCapital.trim() &&
+      s.preferenceShareTerms.trim() &&
+      s.shareTransferRestrictions.trim(),
   );
 }
 
@@ -207,55 +204,40 @@ function isContactComplete(contact: CoverLetterContact) {
 function buildNameRows(step1: Form1Step1Data): ReviewRow[] {
   const rows: ReviewRow[] = [
     {
-      name: 'Name format',
-      description: nameFormatLabel(step1.languageOption),
+      name: 'Co-operative name',
+      description: displayOrEmpty(step1.cooperativeName),
     },
   ];
 
-  if (step1.languageOption === 'separate') {
+  const reports = step1.nuansReports ?? [];
+  if (reports.length === 0) {
     rows.push(
       {
-        name: 'English co-operative name',
-        description: displayOrEmpty(step1.englishName),
+        name: 'NUANS report',
+        description: 'Not provided',
       },
       {
-        name: 'English NUANS report',
-        description: step1.nuansFileEn?.name ?? 'Not provided',
-      },
-      {
-        name: 'English NUANS report date',
-        description: formatIsoDateDisplay(step1.nuansDateEn),
-      },
-      {
-        name: 'French co-operative name',
-        description: displayOrEmpty(step1.frenchName),
-      },
-      {
-        name: 'French NUANS report',
-        description: step1.nuansFileFr?.name ?? 'Not provided',
-      },
-      {
-        name: 'French NUANS report date',
-        description: formatIsoDateDisplay(step1.nuansDateFr),
+        name: 'NUANS report date',
+        description: 'Not provided',
       },
     );
     return rows;
   }
 
-  rows.push(
-    {
-      name: 'Co-operative name',
-      description: displayOrEmpty(step1.cooperativeName),
-    },
-    {
-      name: 'NUANS report',
-      description: step1.nuansFile?.name ?? 'Not provided',
-    },
-    {
-      name: 'NUANS report date',
-      description: formatIsoDateDisplay(step1.nuansDate),
-    },
-  );
+  reports.forEach((report, index) => {
+    const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
+    rows.push(
+      {
+        name: `NUANS report${ordinal}`,
+        description: report.file?.name ?? 'Not provided',
+      },
+      {
+        name: `NUANS report${ordinal} date`,
+        description: formatIsoDateDisplay(report.date),
+      },
+    );
+  });
+
   return rows;
 }
 
@@ -302,7 +284,7 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       rows: [
         {
           name: 'Type of Co-operative',
-          description: displayOrEmpty(draft.step2.cooperativeSubtype),
+          description: displayOrEmpty(formatCooperativeSubtype(draft.step2)),
         },
         {
           name: 'Primary Activity',

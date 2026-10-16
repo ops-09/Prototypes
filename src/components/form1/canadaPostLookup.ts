@@ -4,6 +4,7 @@ export type AddressLookupResult = {
   id: string;
   /** One-line label shown in the results list. */
   label: string;
+  unitType: string;
   roomNumber: string;
   streetNumber: string;
   streetName: string;
@@ -61,6 +62,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'm5h-1',
     label: '100 Queen St W, Toronto, ON M5H 2N2',
+    unitType: '',
     roomNumber: '',
     streetNumber: '100',
     streetName: 'Queen',
@@ -75,8 +77,26 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
     countyName: 'Toronto',
   },
   {
+    id: 'm5h-suite',
+    label: 'Suite 400, 123 King St W, Toronto, ON M5H 1A1',
+    unitType: 'Suite',
+    roomNumber: '400',
+    streetNumber: '123',
+    streetName: 'King',
+    streetNumberSuffix: '',
+    streetType: 'St',
+    streetDirection: 'W',
+    cityTown: 'Toronto',
+    postalCode: 'M5H 1A1',
+    municipalityStatus: 'City',
+    municipalityName: 'Toronto',
+    countyStatus: 'Regional Municipality',
+    countyName: 'Toronto',
+  },
+  {
     id: 'm5j-1',
     label: '200 Bay St, Toronto, ON M5J 2J2',
+    unitType: '',
     roomNumber: '',
     streetNumber: '200',
     streetName: 'Bay',
@@ -93,6 +113,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'm5v-1',
     label: '250 Fort York Blvd, Toronto, ON M5V 3K9',
+    unitType: '',
     roomNumber: '',
     streetNumber: '250',
     streetName: 'Fort York',
@@ -109,6 +130,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'k1a-1',
     label: '111 Wellington St, Ottawa, ON K1A 0A6',
+    unitType: '',
     roomNumber: '',
     streetNumber: '111',
     streetName: 'Wellington',
@@ -125,6 +147,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'k1p-1',
     label: '90 Sparks St, Ottawa, ON K1P 5B4',
+    unitType: '',
     roomNumber: '',
     streetNumber: '90',
     streetName: 'Sparks',
@@ -141,6 +164,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'l5b-1',
     label: '300 City Centre Dr, Mississauga, ON L5B 3C1',
+    unitType: '',
     roomNumber: '',
     streetNumber: '300',
     streetName: 'City Centre',
@@ -157,6 +181,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'n2g-1',
     label: '200 King St E, Kitchener, ON N2G 2L1',
+    unitType: '',
     roomNumber: '',
     streetNumber: '200',
     streetName: 'King',
@@ -173,6 +198,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'p3e-1',
     label: '200 Brady St, Sudbury, ON P3E 3L9',
+    unitType: '',
     roomNumber: '',
     streetNumber: '200',
     streetName: 'Brady',
@@ -190,6 +216,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'v6b-1',
     label: '401 W Georgia St, Vancouver, BC V6B 5A1',
+    unitType: '',
     roomNumber: '',
     streetNumber: '401',
     streetName: 'Georgia',
@@ -206,6 +233,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'h3b-1',
     label: '1000 Rue De La Gauchetière O, Montréal, QC H3B 4W5',
+    unitType: '',
     roomNumber: '',
     streetNumber: '1000',
     streetName: 'De La Gauchetière',
@@ -222,6 +250,7 @@ export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 't2p-1',
     label: '308 4 Ave SW, Calgary, AB T2P 0H7',
+    unitType: '',
     roomNumber: '',
     streetNumber: '308',
     streetName: '4',

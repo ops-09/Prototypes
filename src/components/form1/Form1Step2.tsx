@@ -10,7 +10,7 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import { NaicsSearchAutosuggest } from '../form7/NaicsSearchAutosuggest';
 import {
-  EMPTY_STEP1,
+  createSeedStep1,
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
@@ -18,6 +18,8 @@ import {
   EMPTY_STEP6,
   EMPTY_STEP7,
   FORM1_COOPERATIVE_SUBTYPE_OPTIONS,
+  FORM1_SUBTYPE_OTHER,
+  hasForm1Step1Data,
   OFFICIAL_EMAIL_INFO,
   readForm1Draft,
   saveForm1Draft,
@@ -35,11 +37,17 @@ const EMAIL_FORMAT_ERROR = 'Please enter a valid email address.';
 const EMAIL_MATCH_ERROR =
   'The email addresses you entered do not match. Please try again.';
 
-type FieldKey = 'cooperativeSubtype' | 'primaryActivity' | 'email' | 'confirmEmail';
+type FieldKey =
+  | 'cooperativeSubtype'
+  | 'cooperativeSubtypeOther'
+  | 'primaryActivity'
+  | 'email'
+  | 'confirmEmail';
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
 const FIELD_ANCHORS: Record<FieldKey, string> = {
   cooperativeSubtype: 'cooperative-subtype',
+  cooperativeSubtypeOther: 'cooperative-subtype-other',
   primaryActivity: 'primary-activity',
   email: 'official-email',
   confirmEmail: 'confirm-official-email',
@@ -47,6 +55,7 @@ const FIELD_ANCHORS: Record<FieldKey, string> = {
 
 const FIELD_ORDER: FieldKey[] = [
   'cooperativeSubtype',
+  'cooperativeSubtypeOther',
   'primaryActivity',
   'email',
   'confirmEmail',
@@ -93,23 +102,13 @@ function focusField(anchorId: string) {
 /** Prototype deep-link: seed Step 1 so /form-1/step-3 opens from the playground. */
 function ensureStep2Draft(): Form1Draft {
   const existing = readForm1Draft();
-  if (existing?.step1.languageOption) {
+  if (hasForm1Step1Data(existing?.step1)) {
     return existing;
   }
 
   const now = new Date().toISOString();
   const seeded: Form1Draft = {
-    step1: {
-      ...EMPTY_STEP1,
-      languageOption: 'english',
-      cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
-      nuansFile: {
-        name: 'NUANS-Green-Institute.pdf',
-        size: 184320,
-        type: 'application/pdf',
-      },
-      nuansDate: '2026-08-15',
-    },
+    step1: createSeedStep1(),
     step2: existing?.step2 ?? { ...EMPTY_STEP2 },
     step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: existing?.step4 ?? { ...EMPTY_STEP4 },
@@ -168,8 +167,11 @@ export function Form1Step2() {
   function validateAll(): FieldErrors {
     const next: FieldErrors = {};
 
-    if (!step2.cooperativeSubtype.trim()) {
-      next.cooperativeSubtype = REQUIRED_FIELD_ERROR;
+    if (
+      step2.cooperativeSubtype === FORM1_SUBTYPE_OTHER &&
+      !step2.cooperativeSubtypeOther.trim()
+    ) {
+      next.cooperativeSubtypeOther = 'Enter the co-operative sub-type.';
     }
     if (!step2.primaryActivity.trim() || !isSelectedNaicsLabel(step2.primaryActivity)) {
       next.primaryActivity = REQUIRED_FIELD_ERROR;
@@ -270,8 +272,8 @@ export function Form1Step2() {
           </h1>
 
           <p className={styles.lead}>
-            Select the co-operative sub-type, choose the primary business activity (NAICS),
-            and provide the official email address where the co-operative will receive
+            Optionally select the co-operative sub-type, choose the primary business activity
+            (NAICS), and provide the official email address where the co-operative will receive
             official documents and notices.
           </p>
 
@@ -291,17 +293,42 @@ export function Form1Step2() {
                 elementId={FIELD_ANCHORS.cooperativeSubtype}
                 caption="Co-operative sub-type"
                 name="cooperative-subtype"
-                required
                 isEmptyStartOption
                 value={step2.cooperativeSubtype}
                 options={[...FORM1_COOPERATIVE_SUBTYPE_OPTIONS]}
                 errorMessage={errors.cooperativeSubtype}
                 customOnChange={(event) => {
-                  patchStep2({ cooperativeSubtype: getEventValue(event) });
+                  const next = getEventValue(event);
+                  patchStep2({
+                    cooperativeSubtype: next,
+                    cooperativeSubtypeOther:
+                      next === FORM1_SUBTYPE_OTHER
+                        ? step2.cooperativeSubtypeOther
+                        : '',
+                  });
                   clearError('cooperativeSubtype');
+                  clearError('cooperativeSubtypeOther');
                 }}
               />
             </div>
+
+            {step2.cooperativeSubtype === FORM1_SUBTYPE_OTHER ? (
+              <div id={FIELD_ANCHORS.cooperativeSubtypeOther}>
+                <OntarioInput
+                  elementId={FIELD_ANCHORS.cooperativeSubtypeOther}
+                  caption="Describe the co-operative sub-type"
+                  name="cooperative-subtype-other"
+                  required
+                  requiredValidationMessage="Enter the co-operative sub-type."
+                  value={step2.cooperativeSubtypeOther}
+                  errorMessage={errors.cooperativeSubtypeOther}
+                  customOnInput={(event) => {
+                    patchStep2({ cooperativeSubtypeOther: getEventValue(event) });
+                    clearError('cooperativeSubtypeOther');
+                  }}
+                />
+              </div>
+            ) : null}
 
             <div id={FIELD_ANCHORS.primaryActivity} className={styles.naicsBlock}>
               <label

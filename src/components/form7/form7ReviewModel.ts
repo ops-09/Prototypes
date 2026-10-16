@@ -14,7 +14,6 @@ import {
   formatBytes,
   formatIsoDateDisplay,
   formatUploadedAt,
-  nameFormatLabel,
 } from './form7Labels';
 import { validateNameNuansFields } from './ProposedNameAndNuans';
 
@@ -46,58 +45,42 @@ function yesNo(value: 'yes' | 'no' | '') {
 
 function nuansRows(fields: NameNuansFields, prefix = ''): ReviewRow[] {
   const labelPrefix = prefix ? `${prefix} ` : '';
-  const separate = fields.languageOption === 'english-french';
   const rows: ReviewRow[] = [
     {
-      name: `${labelPrefix}Name format`.trim(),
-      description: nameFormatLabel(fields.languageOption),
+      name: `${labelPrefix}Proposed name`.trim(),
+      description: displayOrEmpty(fields.proposedName),
     },
   ];
 
-  if (separate) {
+  const reports = fields.nuansReports ?? [];
+  if (reports.length === 0) {
     rows.push(
       {
-        name: `${labelPrefix}Proposed English name`.trim(),
-        description: displayOrEmpty(fields.proposedNameEn),
+        name: `${labelPrefix}NUANS report`.trim(),
+        description: 'Not provided',
       },
       {
-        name: `${labelPrefix}English NUANS report`.trim(),
-        description: fields.nuansFileEn?.name ?? 'Not provided',
-      },
-      {
-        name: `${labelPrefix}English NUANS report date`.trim(),
-        description: formatIsoDateDisplay(fields.nuansDateEn),
-      },
-      {
-        name: `${labelPrefix}Proposed French name`.trim(),
-        description: displayOrEmpty(fields.proposedNameFr),
-      },
-      {
-        name: `${labelPrefix}French NUANS report`.trim(),
-        description: fields.nuansFileFr?.name ?? 'Not provided',
-      },
-      {
-        name: `${labelPrefix}French NUANS report date`.trim(),
-        description: formatIsoDateDisplay(fields.nuansDateFr),
+        name: `${labelPrefix}NUANS report date`.trim(),
+        description: 'Not provided',
       },
     );
     return rows;
   }
 
-  rows.push(
-    {
-      name: `${labelPrefix}Proposed name`.trim(),
-      description: displayOrEmpty(fields.proposedName),
-    },
-    {
-      name: `${labelPrefix}NUANS report`.trim(),
-      description: fields.nuansFile?.name ?? 'Not provided',
-    },
-    {
-      name: `${labelPrefix}NUANS report date`.trim(),
-      description: formatIsoDateDisplay(fields.nuansDate),
-    },
-  );
+  reports.forEach((report, index) => {
+    const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
+    rows.push(
+      {
+        name: `${labelPrefix}NUANS report${ordinal}`.trim(),
+        description: report.file?.name ?? 'Not provided',
+      },
+      {
+        name: `${labelPrefix}NUANS report${ordinal} date`.trim(),
+        description: formatIsoDateDisplay(report.date),
+      },
+    );
+  });
+
   return rows;
 }
 

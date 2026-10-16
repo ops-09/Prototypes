@@ -1,4 +1,10 @@
-import { useMemo, useRef, useState, type MouseEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
@@ -7,7 +13,7 @@ import {
   OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
 import {
-  EMPTY_STEP1,
+  createSeedStep1,
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
@@ -15,12 +21,14 @@ import {
   EMPTY_STEP6,
   EMPTY_STEP7,
   FORM1_RICH_TEXT_MAX_CHARS,
+  hasForm1Step1Data,
   readForm1Draft,
   saveForm1Draft,
   syncIncorporatorsFromDirectors,
   upsertForm1Step6,
   type Form1Draft,
   type Form1Step6Data,
+  hasForm1Step2Data,
 } from './form1DraftStorage';
 import styles from './Form1Step1.module.scss';
 import step5Styles from './Form1Step5.module.scss';
@@ -63,6 +71,44 @@ const FIELD_ORDER: PageFieldKey[] = [
   'stakeholderGroupTerms',
   'specialProvisions',
 ];
+
+const NOT_APPLICABLE_VALUE = 'Not applicable';
+const FILL_NOT_APPLICABLE_ATTR = 'data-fill-not-applicable';
+
+/**
+ * ODS parses hintText via JSON when passed as a string (constructHintTextObject).
+ * HTML lives in shadow DOM, so fill clicks use a document composedPath listener.
+ */
+const NOT_APPLICABLE_HINT = JSON.stringify({
+  hint: `Enter <a href="#" ${FILL_NOT_APPLICABLE_ATTR}>“Not applicable”</a> if none.`,
+  hintContentType: 'html',
+});
+
+const ANCHOR_TO_FIELD = Object.fromEntries(
+  (Object.entries(FIELD_ANCHORS) as [PageFieldKey, string][]).map(
+    ([key, anchor]) => [anchor, key],
+  ),
+) as Record<string, PageFieldKey>;
+
+function fieldKeyFromComposedPath(path: EventTarget[]): PageFieldKey | null {
+  for (const node of path) {
+    if (!(node instanceof Element)) {
+      continue;
+    }
+    const hostElementId = (node as HTMLElement & { elementId?: string }).elementId;
+    const candidates = [
+      hostElementId,
+      node.getAttribute('element-id'),
+      node.id || null,
+    ];
+    for (const candidate of candidates) {
+      if (candidate && ANCHOR_TO_FIELD[candidate]) {
+        return ANCHOR_TO_FIELD[candidate];
+      }
+    }
+  }
+  return null;
+}
 
 const ODS_FOCUSABLE = 'ontario-textarea';
 
@@ -115,8 +161,8 @@ function hasContent(value: string) {
 function ensureStep6Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
-    existing?.step1.languageOption &&
-    existing.step2.cooperativeSubtype &&
+    hasForm1Step1Data(existing?.step1) &&
+    hasForm1Step2Data(existing.step2) &&
     existing.step3.streetNumber &&
     existing.step4.directors.length > 0 &&
     existing.step5.authorizedCapital.trim()
@@ -174,17 +220,7 @@ function ensureStep6Draft(): Form1Draft {
         ];
 
   const seeded: Form1Draft = {
-    step1: {
-      ...EMPTY_STEP1,
-      languageOption: 'english',
-      cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
-      nuansFile: {
-        name: 'NUANS-Green-Institute.pdf',
-        size: 184320,
-        type: 'application/pdf',
-      },
-      nuansDate: '2026-08-15',
-    },
+    step1: createSeedStep1(),
     step2: {
       ...EMPTY_STEP2,
       cooperativeSubtype: 'Worker Co-operative',
@@ -358,6 +394,31 @@ export function Form1Step6() {
     focusField(href.replace('#', ''));
   }
 
+  useEffect(() => {
+    function handleDocumentClick(event: globalThis.MouseEvent) {
+      const path = event.composedPath();
+      const hit = path.find(
+        (node): node is Element =>
+          node instanceof Element && node.hasAttribute(FILL_NOT_APPLICABLE_ATTR),
+      );
+      if (!hit) {
+        return;
+      }
+      const fieldKey = fieldKeyFromComposedPath(path);
+      if (!fieldKey) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      patchField(fieldKey, NOT_APPLICABLE_VALUE);
+    }
+
+    document.addEventListener('click', handleDocumentClick, true);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true);
+    };
+  }, []);
+
   return (
     <>
       <div className={styles.stepIndicator}>
@@ -404,6 +465,7 @@ export function Form1Step6() {
                 caption="Classes of membership, if any"
                 name={FIELD_ANCHORS.membershipClasses}
                 required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step6.membershipClasses}
                 errorMessage={errors.membershipClasses}
                 customOnInput={(event) =>
@@ -418,6 +480,7 @@ export function Form1Step6() {
                 caption="Terms and conditions attaching to each class of membership"
                 name={FIELD_ANCHORS.membershipClassTerms}
                 required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step6.membershipClassTerms}
                 errorMessage={errors.membershipClassTerms}
                 customOnInput={(event) =>
@@ -432,6 +495,7 @@ export function Form1Step6() {
                 caption="Stakeholder groups, if any"
                 name={FIELD_ANCHORS.stakeholderGroups}
                 required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step6.stakeholderGroups}
                 errorMessage={errors.stakeholderGroups}
                 customOnInput={(event) =>
@@ -446,6 +510,7 @@ export function Form1Step6() {
                 caption="Terms and conditions for membership in each stakeholder group"
                 name={FIELD_ANCHORS.stakeholderGroupTerms}
                 required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step6.stakeholderGroupTerms}
                 errorMessage={errors.stakeholderGroupTerms}
                 customOnInput={(event) =>
@@ -460,6 +525,7 @@ export function Form1Step6() {
                 caption="Special provisions, if any"
                 name={FIELD_ANCHORS.specialProvisions}
                 required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step6.specialProvisions}
                 errorMessage={errors.specialProvisions}
                 customOnInput={(event) =>

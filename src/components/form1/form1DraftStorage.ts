@@ -1,25 +1,129 @@
-import type { NameLanguageOption } from './nameValidation';
 import type { UploadedFileMeta } from './FileUpload';
 
 export const FORM1_DRAFT_STORAGE_KEY = 'ops-rbac.form1.draft';
 /** @deprecated legacy key — migrated on read */
 const LEGACY_STEP1_STORAGE_KEY = 'ops-rbac.form1.step1.draft';
 
-export type Form1Step1Data = {
-  languageOption: NameLanguageOption | '';
-  cooperativeName: string;
-  englishName: string;
-  frenchName: string;
-  nuansDate: string;
-  nuansDateEn: string;
-  nuansDateFr: string;
-  nuansFile: UploadedFileMeta | null;
-  nuansFileEn: UploadedFileMeta | null;
-  nuansFileFr: UploadedFileMeta | null;
+/** Maximum NUANS reports a filer can attach for a proposed name. */
+export const MAX_NUANS_REPORTS = 5;
+
+export type NuansReportEntry = {
+  id: string;
+  file: UploadedFileMeta | null;
+  date: string;
 };
+
+export type Form1Step1Data = {
+  cooperativeName: string;
+  nuansReports: NuansReportEntry[];
+};
+
+export function createEmptyNuansReport(): NuansReportEntry {
+  return {
+    id: crypto.randomUUID(),
+    file: null,
+    date: '',
+  };
+}
+
+export function emptyStep1(): Form1Step1Data {
+  return {
+    cooperativeName: '',
+    nuansReports: [createEmptyNuansReport()],
+  };
+}
+
+/** Prototype seed for deep-linked later steps. */
+export function createSeedStep1(): Form1Step1Data {
+  return {
+    cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
+    nuansReports: [
+      {
+        ...createEmptyNuansReport(),
+        file: {
+          name: 'NUANS-Green-Institute.pdf',
+          size: 184320,
+          type: 'application/pdf',
+        },
+        date: '2026-08-15',
+      },
+    ],
+  };
+}
+
+export function hasForm1Step1Data(step1: Form1Step1Data | undefined | null) {
+  return Boolean(step1?.cooperativeName.trim());
+}
+
+type LegacyForm1Step1Data = {
+  languageOption?: string;
+  cooperativeName?: string;
+  englishName?: string;
+  frenchName?: string;
+  nuansDate?: string;
+  nuansDateEn?: string;
+  nuansDateFr?: string;
+  nuansFile?: UploadedFileMeta | null;
+  nuansFileEn?: UploadedFileMeta | null;
+  nuansFileFr?: UploadedFileMeta | null;
+  nuansReports?: NuansReportEntry[];
+};
+
+/** Normalize current or legacy Step 1 shapes into name + NUANS report list. */
+export function normalizeStep1(raw: unknown): Form1Step1Data {
+  if (!raw || typeof raw !== 'object') {
+    return emptyStep1();
+  }
+
+  const value = raw as LegacyForm1Step1Data;
+
+  if (Array.isArray(value.nuansReports) && value.nuansReports.length > 0) {
+    return {
+      cooperativeName: value.cooperativeName ?? '',
+      nuansReports: value.nuansReports.map((report) => ({
+        id: report.id || crypto.randomUUID(),
+        file: report.file ?? null,
+        date: report.date ?? '',
+      })),
+    };
+  }
+
+  const reports: NuansReportEntry[] = [];
+  const separate = value.languageOption === 'separate';
+
+  if (separate) {
+    reports.push({
+      id: crypto.randomUUID(),
+      file: value.nuansFileEn ?? null,
+      date: value.nuansDateEn ?? '',
+    });
+    reports.push({
+      id: crypto.randomUUID(),
+      file: value.nuansFileFr ?? null,
+      date: value.nuansDateFr ?? '',
+    });
+  } else if (value.nuansFile || value.nuansDate) {
+    reports.push({
+      id: crypto.randomUUID(),
+      file: value.nuansFile ?? null,
+      date: value.nuansDate ?? '',
+    });
+  }
+
+  return {
+    cooperativeName:
+      value.cooperativeName?.trim() ||
+      value.englishName?.trim() ||
+      value.frenchName?.trim() ||
+      '',
+    nuansReports: reports.length > 0 ? reports : [createEmptyNuansReport()],
+  };
+}
 
 export type Form1Step2Data = {
   cooperativeSubtype: string;
+  /** Free-text sub-type when cooperativeSubtype is "Other". */
+  cooperativeSubtypeOther: string;
   primaryActivity: string;
   email: string;
   confirmEmail: string;
@@ -29,6 +133,7 @@ export type Form1Step3Data = {
   postalCodeLookup: string;
   enterManually: boolean;
   selectedAddressId: string;
+  unitType: string;
   roomNumber: string;
   streetNumber: string;
   streetName: string;
@@ -54,6 +159,7 @@ export type DirectorResidentialAddress = {
   postalCodeLookup: string;
   enterManually: boolean;
   selectedAddressId: string;
+  unitType: string;
   unitNumber: string;
   streetNumber: string;
   streetName: string;
@@ -156,30 +262,39 @@ export type Form1Draft = {
   confirmationNumber?: string;
 };
 
+/** Prefer `emptyStep1()` when resetting so each report gets a fresh id. */
 export const EMPTY_STEP1: Form1Step1Data = {
-  languageOption: '',
   cooperativeName: '',
-  englishName: '',
-  frenchName: '',
-  nuansDate: '',
-  nuansDateEn: '',
-  nuansDateFr: '',
-  nuansFile: null,
-  nuansFileEn: null,
-  nuansFileFr: null,
+  nuansReports: [],
 };
 
 export const EMPTY_STEP2: Form1Step2Data = {
   cooperativeSubtype: '',
+  cooperativeSubtypeOther: '',
   primaryActivity: '',
   email: '',
   confirmEmail: '',
 };
 
+export const FORM1_SUBTYPE_OTHER = 'Other';
+
+export function formatCooperativeSubtype(step2: Form1Step2Data) {
+  if (step2.cooperativeSubtype === FORM1_SUBTYPE_OTHER) {
+    const other = step2.cooperativeSubtypeOther.trim();
+    return other || FORM1_SUBTYPE_OTHER;
+  }
+  return step2.cooperativeSubtype.trim();
+}
+
+export function hasForm1Step2Data(step2: Form1Step2Data | undefined | null) {
+  return Boolean(step2?.email.trim() && step2?.primaryActivity.trim());
+}
+
 export const EMPTY_STEP3: Form1Step3Data = {
   postalCodeLookup: '',
   enterManually: false,
   selectedAddressId: '',
+  unitType: '',
   roomNumber: '',
   streetNumber: '',
   streetName: '',
@@ -201,6 +316,7 @@ export const EMPTY_DIRECTOR_ADDRESS: DirectorResidentialAddress = {
   postalCodeLookup: '',
   enterManually: false,
   selectedAddressId: '',
+  unitType: '',
   unitNumber: '',
   streetNumber: '',
   streetName: '',
@@ -422,6 +538,16 @@ export const OFFICIAL_EMAIL_INFO =
 export const HEAD_OFFICE_INFO =
   'The head office of a co-operative must be located in Ontario. The address must be set out in full. A post office box alone is not an acceptable address.';
 
+/** Unit / suite designator shown beside unit number on Canadian addresses. */
+export const UNIT_TYPE_OPTIONS = [
+  { value: 'Apt', label: 'Apt' },
+  { value: 'Suite', label: 'Suite' },
+  { value: 'Unit', label: 'Unit' },
+  { value: 'Floor', label: 'Floor' },
+  { value: 'Rm', label: 'Rm' },
+  { value: 'PH', label: 'PH' },
+];
+
 export const STREET_NUMBER_SUFFIX_OPTIONS = [
   { value: '1/2', label: '1/2' },
   { value: '1/4', label: '1/4' },
@@ -430,6 +556,23 @@ export const STREET_NUMBER_SUFFIX_OPTIONS = [
   { value: 'B', label: 'B' },
   { value: 'C', label: 'C' },
 ];
+
+/** Unit type is required whenever a unit/suite number is present. */
+export function unitTypeRequiredError(unitNumber: string, unitType: string) {
+  if (unitNumber.trim() && !unitType.trim()) {
+    return 'Select a unit type.';
+  }
+  return undefined;
+}
+
+export function formatUnitLabel(unitType: string, unitNumber: string) {
+  const number = unitNumber.trim();
+  if (!number) {
+    return '';
+  }
+  const type = unitType.trim();
+  return type ? `${type} ${number}` : `Unit ${number}`;
+}
 
 export const STREET_TYPE_OPTIONS = [
   { value: 'Ave', label: 'Ave' },
@@ -468,11 +611,17 @@ export const COUNTY_STATUS_OPTIONS = [
   { value: 'Regional Municipality', label: 'Regional Municipality' },
 ];
 
-function isLegacyStep1Draft(value: unknown): value is Form1Step1Data & {
+function isLegacyStep1Draft(value: unknown): value is LegacyForm1Step1Data & {
   savedAt?: string;
   mode?: 'continue' | 'draft';
 } {
-  return Boolean(value && typeof value === 'object' && 'languageOption' in value);
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      ('languageOption' in value ||
+        'cooperativeName' in value ||
+        'nuansReports' in value),
+  );
 }
 
 function normalizeLastCompletedStep(value: unknown): Form1Draft['lastCompletedStep'] {
@@ -596,7 +745,7 @@ export function readForm1Draft(): Form1Draft | null {
         lastCompletedStep = 7;
       }
       return {
-        step1: { ...EMPTY_STEP1, ...(parsed.step1 ?? {}) },
+        step1: normalizeStep1(parsed.step1),
         step2: { ...EMPTY_STEP2, ...(parsed.step2 ?? {}) },
         step3: { ...EMPTY_STEP3, ...(parsed.step3 ?? {}) },
         step4,
@@ -626,7 +775,7 @@ export function readForm1Draft(): Form1Draft | null {
     }
     const { savedAt, mode, ...step1Fields } = legacy;
     const migrated: Form1Draft = {
-      step1: { ...EMPTY_STEP1, ...step1Fields },
+      step1: normalizeStep1(step1Fields),
       step2: { ...EMPTY_STEP2 },
       step3: { ...EMPTY_STEP3 },
       step4: { ...EMPTY_STEP4 },
@@ -686,7 +835,7 @@ export function upsertForm1Step2(
   lastCompletedStep: Form1Draft['lastCompletedStep'] = 2,
 ): Form1Draft | null {
   const existing = readForm1Draft();
-  if (!existing?.step1.languageOption) {
+  if (!hasForm1Step1Data(existing?.step1)) {
     return null;
   }
   const draft: Form1Draft = {
@@ -712,7 +861,7 @@ export function upsertForm1Step3(
   lastCompletedStep: Form1Draft['lastCompletedStep'] = 3,
 ): Form1Draft | null {
   const existing = readForm1Draft();
-  if (!existing?.step1.languageOption || !existing.step2.cooperativeSubtype) {
+  if (!hasForm1Step1Data(existing?.step1) || !hasForm1Step2Data(existing.step2)) {
     return null;
   }
   const draft: Form1Draft = {
@@ -742,8 +891,8 @@ export function upsertForm1Step4(
 ): Form1Draft | null {
   const existing = readForm1Draft();
   if (
-    !existing?.step1.languageOption ||
-    !existing.step2.cooperativeSubtype ||
+    !hasForm1Step1Data(existing?.step1) ||
+    !hasForm1Step2Data(existing.step2) ||
     !existing.step3.streetNumber
   ) {
     return null;
@@ -797,8 +946,8 @@ export function upsertForm1Step5(
 ): Form1Draft | null {
   const existing = readForm1Draft();
   if (
-    !existing?.step1.languageOption ||
-    !existing.step2.cooperativeSubtype ||
+    !hasForm1Step1Data(existing?.step1) ||
+    !hasForm1Step2Data(existing.step2) ||
     !existing.step3.streetNumber ||
     !existing.step4.directors.length
   ) {
@@ -826,8 +975,8 @@ export function upsertForm1Step6(
 ): Form1Draft | null {
   const existing = readForm1Draft();
   if (
-    !existing?.step1.languageOption ||
-    !existing.step2.cooperativeSubtype ||
+    !hasForm1Step1Data(existing?.step1) ||
+    !hasForm1Step2Data(existing.step2) ||
     !existing.step3.streetNumber ||
     !existing.step4.directors.length ||
     !existing.step5.authorizedCapital.trim()
@@ -855,8 +1004,8 @@ export function upsertForm1Step7(
 ): Form1Draft | null {
   const existing = readForm1Draft();
   if (
-    !existing?.step1.languageOption ||
-    !existing.step2.cooperativeSubtype ||
+    !hasForm1Step1Data(existing?.step1) ||
+    !hasForm1Step2Data(existing.step2) ||
     !existing.step3.streetNumber ||
     !existing.step4.directors.length ||
     !existing.step5.authorizedCapital.trim()
@@ -902,8 +1051,8 @@ export function upsertForm1Step8(
 ): Form1Draft | null {
   const existing = readForm1Draft();
   if (
-    !existing?.step1.languageOption ||
-    !existing.step2.cooperativeSubtype ||
+    !hasForm1Step1Data(existing?.step1) ||
+    !hasForm1Step2Data(existing.step2) ||
     !existing.step3.streetNumber ||
     !existing.step4.directors.length ||
     !existing.step5.authorizedCapital.trim() ||

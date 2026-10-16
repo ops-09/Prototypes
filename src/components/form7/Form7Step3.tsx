@@ -15,7 +15,7 @@ import {
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
-  EMPTY_NAME_NUANS,
+  emptyNameNuans,
   OBR_STEP1_DEFAULTS,
   readForm7Draft,
   saveForm7Draft,
@@ -99,7 +99,7 @@ function ensureStep3Draft() {
     step1: { ...OBR_STEP1_DEFAULTS },
     step2: {
       ...EMPTY_STEP2,
-      nameNuans: { ...EMPTY_NAME_NUANS },
+      nameNuans: emptyNameNuans(),
       amendmentType: 'change-name' as const,
       changeCooperativeName: 'change' as const,
     },

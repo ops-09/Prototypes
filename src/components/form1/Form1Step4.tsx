@@ -16,7 +16,7 @@ import {
 } from './Form1DirectorEditor';
 import { FieldErrorMessage } from './FieldErrorMessage';
 import {
-  EMPTY_STEP1,
+  createSeedStep1,
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
@@ -25,6 +25,7 @@ import {
   EMPTY_STEP7,
   getDirectorLimit,
   getDirectorMinimum,
+  hasForm1Step1Data,
   readForm1Draft,
   saveForm1Draft,
   upsertForm1Step4,
@@ -32,6 +33,7 @@ import {
   type Form1Draft,
   type Form1Step4Data,
   type YesNoAnswer,
+  hasForm1Step2Data,
 } from './form1DraftStorage';
 import styles from './Form1Step1.module.scss';
 import step4Styles from './Form1Step4.module.scss';
@@ -41,6 +43,9 @@ const TOTAL_STEPS = 9;
 
 const REQUIRED = 'Required Field.';
 const REQUIRED_RETRY = 'Required Field. Please try again.';
+const MIN_DIRECTORS_ALLOWED = 3;
+const DIRECTORS_AT_LEAST_THREE_ERROR =
+  'The number of directors must be at least 3.';
 const MIN_MAX_ORDER_ERROR =
   'The minimum number of directors cannot be greater than the maximum.';
 const FIXED_DIRECTORS_COUNT_ERROR =
@@ -185,20 +190,54 @@ function digitsOnly(value: string) {
   return value.replace(/\D/g, '');
 }
 
-/** True when count + multi-stakeholder questions (and their follow-ups) are filled. */
+function parseDirectorCount(value: string) {
+  if (!value.trim()) {
+    return null;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** Fixed / minimum director counts must be at least 3 (and min ≤ max for range). */
+function areDirectorCountFieldsValid(data: Form1Step4Data) {
+  if (data.countMode === 'fixed') {
+    const fixed = parseDirectorCount(data.fixedNumber);
+    return fixed !== null && fixed >= MIN_DIRECTORS_ALLOWED;
+  }
+
+  if (data.countMode === 'minMax') {
+    const min = parseDirectorCount(data.minimumNumber);
+    const max = parseDirectorCount(data.maximumNumber);
+    return (
+      min !== null &&
+      max !== null &&
+      min >= MIN_DIRECTORS_ALLOWED &&
+      min <= max
+    );
+  }
+
+  return false;
+}
+
+function directorCountFieldError(value: string): string | undefined {
+  if (!value.trim()) {
+    return undefined;
+  }
+  const parsed = parseDirectorCount(value);
+  if (parsed === null || parsed < MIN_DIRECTORS_ALLOWED) {
+    return DIRECTORS_AT_LEAST_THREE_ERROR;
+  }
+  return undefined;
+}
+
+/** True when count + multi-stakeholder questions (and their follow-ups) are filled and valid. */
 function areDirectorQuestionsComplete(data: Form1Step4Data) {
   if (!data.countMode || !data.multiStakeholder) {
     return false;
   }
 
-  if (data.countMode === 'fixed' && !data.fixedNumber.trim()) {
+  if (!areDirectorCountFieldsValid(data)) {
     return false;
-  }
-
-  if (data.countMode === 'minMax') {
-    if (!data.minimumNumber.trim() || !data.maximumNumber.trim()) {
-      return false;
-    }
   }
 
   if (data.multiStakeholder === 'yes' && !data.stakeholderDirectorsText.trim()) {
@@ -226,8 +265,8 @@ function formatDirectorSelectionSummary(data: Form1Step4Data) {
 function ensureStep4Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
-    existing?.step1.languageOption &&
-    existing.step2.cooperativeSubtype &&
+    hasForm1Step1Data(existing?.step1) &&
+    hasForm1Step2Data(existing.step2) &&
     existing.step3.streetNumber
   ) {
     const step4 = { ...EMPTY_STEP4, ...(existing.step4 ?? {}) };
@@ -245,17 +284,7 @@ function ensureStep4Draft(): Form1Draft {
 
   const now = new Date().toISOString();
   const seeded: Form1Draft = {
-    step1: {
-      ...EMPTY_STEP1,
-      languageOption: 'english',
-      cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
-      nuansFile: {
-        name: 'NUANS-Green-Institute.pdf',
-        size: 184320,
-        type: 'application/pdf',
-      },
-      nuansDate: '2026-08-15',
-    },
+    step1: createSeedStep1(),
     step2: {
       ...EMPTY_STEP2,
       cooperativeSubtype: 'Worker Co-operative',
@@ -341,6 +370,24 @@ export function Form1Step4() {
     });
   }
 
+  /** Live field errors for min/max counts (at least 3, and min ≤ max). */
+  function syncLiveMinMaxCountErrors(data: Form1Step4Data) {
+    const countError = directorCountFieldError(data.minimumNumber);
+    if (countError) {
+      setErrors((prev) => ({ ...prev, minimumNumber: countError }));
+      return;
+    }
+
+    const min = parseDirectorCount(data.minimumNumber);
+    const max = parseDirectorCount(data.maximumNumber);
+    if (min !== null && max !== null && min > max) {
+      setErrors((prev) => ({ ...prev, minimumNumber: MIN_MAX_ORDER_ERROR }));
+      return;
+    }
+
+    clearError('minimumNumber');
+  }
+
   function validatePage(): PageErrors {
     const page: PageErrors = {};
 
@@ -348,13 +395,25 @@ export function Form1Step4() {
       page.countMode = REQUIRED;
     }
 
-    if (step4.countMode === 'fixed' && !step4.fixedNumber.trim()) {
-      page.fixedNumber = REQUIRED;
+    if (step4.countMode === 'fixed') {
+      if (!step4.fixedNumber.trim()) {
+        page.fixedNumber = REQUIRED;
+      } else {
+        const fixed = Number.parseInt(step4.fixedNumber, 10);
+        if (!Number.isFinite(fixed) || fixed < MIN_DIRECTORS_ALLOWED) {
+          page.fixedNumber = DIRECTORS_AT_LEAST_THREE_ERROR;
+        }
+      }
     }
 
     if (step4.countMode === 'minMax') {
       if (!step4.minimumNumber.trim()) {
         page.minimumNumber = REQUIRED;
+      } else {
+        const min = Number.parseInt(step4.minimumNumber, 10);
+        if (!Number.isFinite(min) || min < MIN_DIRECTORS_ALLOWED) {
+          page.minimumNumber = DIRECTORS_AT_LEAST_THREE_ERROR;
+        }
       }
       if (!step4.maximumNumber.trim()) {
         page.maximumNumber = REQUIRED;
@@ -366,6 +425,7 @@ export function Form1Step4() {
         step4.maximumNumber.trim() &&
         Number.isFinite(min) &&
         Number.isFinite(max) &&
+        min >= MIN_DIRECTORS_ALLOWED &&
         min > max
       ) {
         page.minimumNumber = MIN_MAX_ORDER_ERROR;
@@ -530,14 +590,20 @@ export function Form1Step4() {
                   type="text"
                   required
                   requiredValidationMessage={REQUIRED}
-                  hintText="Please enter the fixed number of directors."
+                  hintText="Enter the fixed number of directors. The number must be at least 3."
                   inputWidth="5-char-width"
                   value={step4.fixedNumber}
                   errorMessage={errors.fixedNumber}
                   customOnInput={(event) => {
-                    patchStep4({ fixedNumber: digitsOnly(getEventValue(event)) });
-                    clearError('fixedNumber');
+                    const fixedNumber = digitsOnly(getEventValue(event));
+                    patchStep4({ fixedNumber });
                     clearError('directors');
+                    const countError = directorCountFieldError(fixedNumber);
+                    if (countError) {
+                      setErrors((prev) => ({ ...prev, fixedNumber: countError }));
+                    } else {
+                      clearError('fixedNumber');
+                    }
                   }}
                 />
               </div>
@@ -553,14 +619,16 @@ export function Form1Step4() {
                     type="text"
                     required
                     requiredValidationMessage={REQUIRED}
-                    hintText="Please enter the minimum number of directors."
+                    hintText="Enter the minimum number of directors. The number must be at least 3."
                     inputWidth="5-char-width"
                     value={step4.minimumNumber}
                     errorMessage={errors.minimumNumber}
                     customOnInput={(event) => {
-                      patchStep4({ minimumNumber: digitsOnly(getEventValue(event)) });
-                      clearError('minimumNumber');
+                      const minimumNumber = digitsOnly(getEventValue(event));
+                      const next = { ...step4, minimumNumber };
+                      patchStep4({ minimumNumber });
                       clearError('directors');
+                      syncLiveMinMaxCountErrors(next);
                     }}
                   />
                 </div>
@@ -577,9 +645,12 @@ export function Form1Step4() {
                     value={step4.maximumNumber}
                     errorMessage={errors.maximumNumber}
                     customOnInput={(event) => {
-                      patchStep4({ maximumNumber: digitsOnly(getEventValue(event)) });
+                      const maximumNumber = digitsOnly(getEventValue(event));
+                      const next = { ...step4, maximumNumber };
+                      patchStep4({ maximumNumber });
                       clearError('maximumNumber');
                       clearError('directors');
+                      syncLiveMinMaxCountErrors(next);
                     }}
                   />
                 </div>
@@ -623,7 +694,7 @@ export function Form1Step4() {
               </div>
             ) : null}
 
-            {areDirectorQuestionsComplete(step4) || step4.directors.length > 0 ? (
+            {areDirectorQuestionsComplete(step4) ? (
               <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>
                 <div>
                   <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>Add directors</h2>

@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { OntarioButton, OntarioPageAlert } from '@ongov/ontario-design-system-component-library-react';
-import { isSeparateLanguage } from '../components/form1/nameValidation';
-import { readForm1Draft } from '../components/form1/form1DraftStorage';
+import { formatIsoDateDisplay } from '../components/form7/form7Labels';
+import {
+  formatCooperativeSubtype,
+  readForm1Draft,
+} from '../components/form1/form1DraftStorage';
 import formStyles from '../components/form1/Form1Step1.module.scss';
 import { PlaygroundShell } from '../components/layout/PlaygroundShell';
 import styles from './Form1DraftSummaryPage.module.scss';
@@ -48,69 +51,34 @@ export function Form1DraftSummaryPage() {
               <h2 className="ontario-h3">Step 1 — Co-operative name</h2>
               <dl className={styles.summaryList}>
                 <div>
-                  <dt>Name language</dt>
-                  <dd>{draft.step1.languageOption || '—'}</dd>
+                  <dt>Co-operative name</dt>
+                  <dd>{draft.step1.cooperativeName || '—'}</dd>
                 </div>
-                {isSeparateLanguage(draft.step1.languageOption) ? (
-                  <>
-                    <div>
-                      <dt>English name</dt>
-                      <dd>{draft.step1.englishName || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>French name</dt>
-                      <dd>{draft.step1.frenchName || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>English NUANS file</dt>
-                      <dd>{draft.step1.nuansFileEn?.name || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>French NUANS file</dt>
-                      <dd>{draft.step1.nuansFileFr?.name || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>English NUANS date</dt>
+                {(draft.step1.nuansReports?.length
+                  ? draft.step1.nuansReports
+                  : [{ id: 'empty', file: null, date: '' }]
+                ).flatMap((report, index, list) => {
+                  const ordinal = list.length > 1 ? ` ${index + 1}` : '';
+                  return [
+                    <div key={`${report.id}-file`}>
+                      <dt>NUANS file{ordinal}</dt>
+                      <dd>{report.file?.name || '—'}</dd>
+                    </div>,
+                    <div key={`${report.id}-date`}>
+                      <dt>NUANS date{ordinal}</dt>
                       <dd>
-                        {draft.step1.nuansDateEn
-                          ? draft.step1.nuansDateEn.slice(0, 10)
-                          : '—'}
+                        {report.date ? formatIsoDateDisplay(report.date) : '—'}
                       </dd>
-                    </div>
-                    <div>
-                      <dt>French NUANS date</dt>
-                      <dd>
-                        {draft.step1.nuansDateFr
-                          ? draft.step1.nuansDateFr.slice(0, 10)
-                          : '—'}
-                      </dd>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <dt>Co-operative name</dt>
-                      <dd>{draft.step1.cooperativeName || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>NUANS file</dt>
-                      <dd>{draft.step1.nuansFile?.name || '—'}</dd>
-                    </div>
-                    <div>
-                      <dt>NUANS date</dt>
-                      <dd>
-                        {draft.step1.nuansDate ? draft.step1.nuansDate.slice(0, 10) : '—'}
-                      </dd>
-                    </div>
-                  </>
-                )}
+                    </div>,
+                  ];
+                })}
               </dl>
 
               <h2 className="ontario-h3">Step 2 — Type and contact</h2>
               <dl className={styles.summaryList}>
                 <div>
                   <dt>Co-operative sub-type</dt>
-                  <dd>{draft.step2.cooperativeSubtype || '—'}</dd>
+                  <dd>{formatCooperativeSubtype(draft.step2) || '—'}</dd>
                 </div>
                 <div>
                   <dt>Primary activity</dt>
@@ -124,6 +92,10 @@ export function Form1DraftSummaryPage() {
 
               <h2 className="ontario-h3">Step 3 — Head office address</h2>
               <dl className={styles.summaryList}>
+                <div>
+                  <dt>Unit type</dt>
+                  <dd>{draft.step3.unitType || '—'}</dd>
+                </div>
                 <div>
                   <dt>Unit number</dt>
                   <dd>{draft.step3.roomNumber || '—'}</dd>

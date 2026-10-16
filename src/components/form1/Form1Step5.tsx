@@ -1,4 +1,10 @@
-import { useMemo, useRef, useState, type MouseEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
@@ -7,7 +13,7 @@ import {
   OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
 import {
-  EMPTY_STEP1,
+  createSeedStep1,
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
@@ -15,11 +21,13 @@ import {
   EMPTY_STEP6,
   EMPTY_STEP7,
   FORM1_RICH_TEXT_MAX_CHARS,
+  hasForm1Step1Data,
   readForm1Draft,
   saveForm1Draft,
   upsertForm1Step5,
   type Form1Draft,
   type Form1Step5Data,
+  hasForm1Step2Data,
 } from './form1DraftStorage';
 import styles from './Form1Step1.module.scss';
 import step5Styles from './Form1Step5.module.scss';
@@ -29,8 +37,12 @@ const TOTAL_STEPS = 9;
 
 const MAX_LENGTH_ERROR =
   'The text entered exceeds the maximum length of 900,000 characters.';
+const BUSINESS_POWERS_REQUIRED =
+  'Restrictions on the business or powers of the co-operative must be entered.';
 const AUTHORIZED_CAPITAL_REQUIRED =
   'The authorized capital for each class of share must be entered.';
+const PREFERENCE_SHARE_TERMS_REQUIRED =
+  'The designations, preferences, rights, conditions, restrictions, limitations or prohibitions attaching to the preference shares must be entered.';
 const SHARE_TRANSFER_REQUIRED =
   'The restrictions on the allotment, issue or transfer of shares must be entered.';
 
@@ -55,6 +67,51 @@ const FIELD_ORDER: PageFieldKey[] = [
   'preferenceShareTerms',
   'shareTransferRestrictions',
 ];
+
+const FIELD_REQUIRED_MESSAGES: Record<PageFieldKey, string> = {
+  businessPowersRestrictions: BUSINESS_POWERS_REQUIRED,
+  authorizedCapital: AUTHORIZED_CAPITAL_REQUIRED,
+  preferenceShareTerms: PREFERENCE_SHARE_TERMS_REQUIRED,
+  shareTransferRestrictions: SHARE_TRANSFER_REQUIRED,
+};
+
+const NOT_APPLICABLE_VALUE = 'Not applicable';
+const FILL_NOT_APPLICABLE_ATTR = 'data-fill-not-applicable';
+
+/**
+ * ODS parses hintText via JSON when passed as a string (constructHintTextObject).
+ * HTML lives in shadow DOM, so fill clicks use a document composedPath listener.
+ */
+const NOT_APPLICABLE_HINT = JSON.stringify({
+  hint: `Enter <a href="#" ${FILL_NOT_APPLICABLE_ATTR}>“Not applicable”</a> if none.`,
+  hintContentType: 'html',
+});
+
+const ANCHOR_TO_FIELD = Object.fromEntries(
+  (Object.entries(FIELD_ANCHORS) as [PageFieldKey, string][]).map(
+    ([key, anchor]) => [anchor, key],
+  ),
+) as Record<string, PageFieldKey>;
+
+function fieldKeyFromComposedPath(path: EventTarget[]): PageFieldKey | null {
+  for (const node of path) {
+    if (!(node instanceof Element)) {
+      continue;
+    }
+    const hostElementId = (node as HTMLElement & { elementId?: string }).elementId;
+    const candidates = [
+      hostElementId,
+      node.getAttribute('element-id'),
+      node.id || null,
+    ];
+    for (const candidate of candidates) {
+      if (candidate && ANCHOR_TO_FIELD[candidate]) {
+        return ANCHOR_TO_FIELD[candidate];
+      }
+    }
+  }
+  return null;
+}
 
 const ODS_FOCUSABLE = 'ontario-textarea';
 
@@ -103,8 +160,8 @@ function lengthErrorIfNeeded(value: string): string | undefined {
 function ensureStep5Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
-    existing?.step1.languageOption &&
-    existing.step2.cooperativeSubtype &&
+    hasForm1Step1Data(existing?.step1) &&
+    hasForm1Step2Data(existing.step2) &&
     existing.step3.streetNumber &&
     existing.step4.directors.length > 0
   ) {
@@ -118,17 +175,7 @@ function ensureStep5Draft(): Form1Draft {
 
   const now = new Date().toISOString();
   const seeded: Form1Draft = {
-    step1: {
-      ...EMPTY_STEP1,
-      languageOption: 'english',
-      cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
-      nuansFile: {
-        name: 'NUANS-Green-Institute.pdf',
-        size: 184320,
-        type: 'application/pdf',
-      },
-      nuansDate: '2026-08-15',
-    },
+    step1: createSeedStep1(),
     step2: {
       ...EMPTY_STEP2,
       cooperativeSubtype: 'Worker Co-operative',
@@ -250,18 +297,11 @@ export function Form1Step5() {
       const lengthError = lengthErrorIfNeeded(step5[key]);
       if (lengthError) {
         page[key] = lengthError;
+        continue;
       }
-    }
-
-    if (!page.authorizedCapital && !step5.authorizedCapital.trim()) {
-      page.authorizedCapital = AUTHORIZED_CAPITAL_REQUIRED;
-    }
-
-    if (
-      !page.shareTransferRestrictions &&
-      !step5.shareTransferRestrictions.trim()
-    ) {
-      page.shareTransferRestrictions = SHARE_TRANSFER_REQUIRED;
+      if (!step5[key].trim()) {
+        page[key] = FIELD_REQUIRED_MESSAGES[key];
+      }
     }
 
     return page;
@@ -302,10 +342,38 @@ export function Form1Step5() {
     }
   }
 
-  function handleSummaryLinkClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
+  function handleSummaryLinkClick(
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) {
     event.preventDefault();
     focusField(href.replace('#', ''));
   }
+
+  useEffect(() => {
+    function handleDocumentClick(event: MouseEvent) {
+      const path = event.composedPath();
+      const hit = path.find(
+        (node): node is Element =>
+          node instanceof Element && node.hasAttribute(FILL_NOT_APPLICABLE_ATTR),
+      );
+      if (!hit) {
+        return;
+      }
+      const fieldKey = fieldKeyFromComposedPath(path);
+      if (!fieldKey) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      patchField(fieldKey, NOT_APPLICABLE_VALUE);
+    }
+
+    document.addEventListener('click', handleDocumentClick, true);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick, true);
+    };
+  }, []);
 
   return (
     <>
@@ -349,7 +417,8 @@ export function Form1Step5() {
                 elementId={FIELD_ANCHORS.businessPowersRestrictions}
                 caption="Restrictions on the business the co-operative may carry on or on the powers the co-operative may exercise, if any"
                 name={FIELD_ANCHORS.businessPowersRestrictions}
-                required={false}
+                required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step5.businessPowersRestrictions}
                 errorMessage={errors.businessPowersRestrictions}
                 customOnInput={(event) =>
@@ -364,6 +433,7 @@ export function Form1Step5() {
                 caption="Authorized capital for each class of share"
                 name={FIELD_ANCHORS.authorizedCapital}
                 required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step5.authorizedCapital}
                 errorMessage={errors.authorizedCapital}
                 customOnInput={(event) =>
@@ -377,7 +447,8 @@ export function Form1Step5() {
                 elementId={FIELD_ANCHORS.preferenceShareTerms}
                 caption="Designations, preferences, rights, conditions, restrictions, limitations or prohibitions attaching to the preference shares, if any"
                 name={FIELD_ANCHORS.preferenceShareTerms}
-                required={false}
+                required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step5.preferenceShareTerms}
                 errorMessage={errors.preferenceShareTerms}
                 customOnInput={(event) =>
@@ -392,6 +463,7 @@ export function Form1Step5() {
                 caption="Restrictions on the allotment, issue or transfer of shares"
                 name={FIELD_ANCHORS.shareTransferRestrictions}
                 required
+                hintText={NOT_APPLICABLE_HINT}
                 value={step5.shareTransferRestrictions}
                 errorMessage={errors.shareTransferRestrictions}
                 customOnInput={(event) =>

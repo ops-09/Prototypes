@@ -1,10 +1,12 @@
 import type { UploadedFileMeta } from '../form1/FileUpload';
-import type { NameLanguageOption } from '../form1/nameValidation';
 
 const STORAGE_KEY = 'ops-rbac-form7-draft';
 
 /** Configurable maximum supporting-document size (prototype default 20 MB). */
 export const MAX_SUPPORTING_DOC_BYTES = 20 * 1024 * 1024;
+
+/** Maximum NUANS reports a filer can attach for a proposed name. */
+export const MAX_NUANS_REPORTS = 5;
 
 export type AmendmentType =
   | 'change-name'
@@ -23,18 +25,98 @@ export type Form7Step1Data = {
   incorporationDate: string;
 };
 
-export type NameNuansFields = {
-  languageOption: NameLanguageOption | '';
-  proposedName: string;
-  proposedNameEn: string;
-  proposedNameFr: string;
-  nuansFile: UploadedFileMeta | null;
-  nuansFileEn: UploadedFileMeta | null;
-  nuansFileFr: UploadedFileMeta | null;
-  nuansDate: string;
-  nuansDateEn: string;
-  nuansDateFr: string;
+export type NuansReportEntry = {
+  id: string;
+  file: UploadedFileMeta | null;
+  date: string;
 };
+
+export type NameNuansFields = {
+  proposedName: string;
+  nuansReports: NuansReportEntry[];
+};
+
+export function createEmptyNuansReport(): NuansReportEntry {
+  return {
+    id: crypto.randomUUID(),
+    file: null,
+    date: '',
+  };
+}
+
+export function emptyNameNuans(): NameNuansFields {
+  return {
+    proposedName: '',
+    nuansReports: [createEmptyNuansReport()],
+  };
+}
+
+type LegacyNameNuansFields = {
+  languageOption?: string;
+  proposedName?: string;
+  proposedNameEn?: string;
+  proposedNameFr?: string;
+  nuansFile?: UploadedFileMeta | null;
+  nuansFileEn?: UploadedFileMeta | null;
+  nuansFileFr?: UploadedFileMeta | null;
+  nuansDate?: string;
+  nuansDateEn?: string;
+  nuansDateFr?: string;
+  nuansReports?: NuansReportEntry[];
+};
+
+/** Normalize current or legacy draft shapes into proposed name + NUANS report list. */
+export function normalizeNameNuans(raw: unknown): NameNuansFields {
+  if (!raw || typeof raw !== 'object') {
+    return emptyNameNuans();
+  }
+
+  const value = raw as LegacyNameNuansFields;
+
+  if (Array.isArray(value.nuansReports) && value.nuansReports.length > 0) {
+    return {
+      proposedName: value.proposedName ?? '',
+      nuansReports: value.nuansReports.map((report) => ({
+        id: report.id || crypto.randomUUID(),
+        file: report.file ?? null,
+        date: report.date ?? '',
+      })),
+    };
+  }
+
+  const reports: NuansReportEntry[] = [];
+  const separate =
+    value.languageOption === 'separate' ||
+    value.languageOption === 'english-french';
+
+  if (separate) {
+    reports.push({
+      id: crypto.randomUUID(),
+      file: value.nuansFileEn ?? null,
+      date: value.nuansDateEn ?? '',
+    });
+    reports.push({
+      id: crypto.randomUUID(),
+      file: value.nuansFileFr ?? null,
+      date: value.nuansDateFr ?? '',
+    });
+  } else if (value.nuansFile || value.nuansDate) {
+    reports.push({
+      id: crypto.randomUUID(),
+      file: value.nuansFile ?? null,
+      date: value.nuansDate ?? '',
+    });
+  }
+
+  return {
+    proposedName:
+      value.proposedName?.trim() ||
+      value.proposedNameEn?.trim() ||
+      value.proposedNameFr?.trim() ||
+      '',
+    nuansReports: reports.length > 0 ? reports : [createEmptyNuansReport()],
+  };
+}
 
 export type Form7Step2Data = {
   amendmentType: AmendmentType | '';
@@ -84,23 +166,16 @@ export type Form7Draft = {
   confirmationNumber?: string;
 };
 
+/** Prefer `emptyNameNuans()` when resetting so each report gets a fresh id. */
 export const EMPTY_NAME_NUANS: NameNuansFields = {
-  languageOption: '',
   proposedName: '',
-  proposedNameEn: '',
-  proposedNameFr: '',
-  nuansFile: null,
-  nuansFileEn: null,
-  nuansFileFr: null,
-  nuansDate: '',
-  nuansDateEn: '',
-  nuansDateFr: '',
+  nuansReports: [],
 };
 
 export const EMPTY_STEP2: Form7Step2Data = {
   amendmentType: '',
   changeCooperativeName: '',
-  nameNuans: { ...EMPTY_NAME_NUANS },
+  nameNuans: emptyNameNuans(),
   hasNumberName: '',
   legalElement: '',
   numberNameNuansFile: null,
@@ -185,6 +260,11 @@ export function readForm7Draft(): Form7Draft | null {
             ? ''
             : (parsed.step1?.primaryActivity ?? ''),
       },
+      step2: {
+        ...EMPTY_STEP2,
+        ...(parsed.step2 ?? {}),
+        nameNuans: normalizeNameNuans(parsed.step2?.nameNuans),
+      },
       step3: {
         ...EMPTY_STEP3,
         ...(parsed.step3 ?? {}),
@@ -227,7 +307,7 @@ export function upsertForm7Step1(
   const existing = readForm7Draft();
   const draft: Form7Draft = {
     step1,
-    step2: existing?.step2 ?? { ...EMPTY_STEP2, nameNuans: { ...EMPTY_NAME_NUANS } },
+    step2: existing?.step2 ?? { ...EMPTY_STEP2, nameNuans: emptyNameNuans() },
     step3: existing?.step3 ?? emptyStep3(),
     step4: existing?.step4 ?? emptyStep4(),
     savedAs,

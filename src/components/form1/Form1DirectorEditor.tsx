@@ -5,6 +5,7 @@ import {
   OntarioIconDelete,
   OntarioIconEdit,
   OntarioInput,
+  OntarioPageAlert,
   OntarioRadioButtons,
 } from '@ongov/ontario-design-system-component-library-react';
 import {
@@ -20,9 +21,12 @@ import {
   CANADIAN_PROVINCE_OPTIONS,
   DIRECTOR_CONSENT_FORM_URL,
   EMPTY_DIRECTOR_ADDRESS,
+  formatUnitLabel,
   STREET_DIRECTION_OPTIONS,
   STREET_NUMBER_SUFFIX_OPTIONS,
   STREET_TYPE_OPTIONS,
+  UNIT_TYPE_OPTIONS,
+  unitTypeRequiredError,
   type DirectorAddressType,
   type Form1Director,
   type YesNoAnswer,
@@ -52,6 +56,7 @@ export type DirectorFieldKey =
   | 'amountToBePaid'
   | 'addressType'
   | 'postalCodeLookup'
+  | 'unitType'
   | 'streetNumber'
   | 'streetName'
   | 'addressLine1'
@@ -78,6 +83,7 @@ export const DIRECTOR_ERROR_FIELD_ORDER: DirectorFieldKey[] = [
   'consentFile',
   'addressType',
   'postalCodeLookup',
+  'unitType',
   'streetNumber',
   'streetName',
   'addressLine1',
@@ -100,6 +106,7 @@ const DIRECTOR_FIELD_LABELS: Record<DirectorFieldKey, string> = {
   consentFile: 'Upload consent form',
   addressType: 'Residential Address',
   postalCodeLookup: 'Find the address using a postal code',
+  unitType: 'Unit type',
   streetNumber: 'Street number',
   streetName: 'Street name',
   addressLine1: 'Address line 1',
@@ -146,6 +153,8 @@ export function getDirectorFieldAnchor(
       return `${prefix}-address-type`;
     case 'postalCodeLookup':
       return `${prefix}-postal-lookup`;
+    case 'unitType':
+      return `${prefix}-unit-type`;
     case 'streetNumber':
       return `${prefix}-street-number`;
     case 'streetName':
@@ -212,6 +221,7 @@ function applyCanadianLookup(
   return {
     ...prev,
     selectedAddressId: result.id,
+    unitType: result.unitType,
     unitNumber: result.roomNumber,
     streetNumber: result.streetNumber,
     streetName: result.streetName,
@@ -266,6 +276,13 @@ export function validateDirector(director: Form1Director): DirectorErrors {
   if (director.address.addressType === 'canadian') {
     if (!director.address.enterManually && !director.address.selectedAddressId) {
       next.postalCodeLookup = REQUIRED;
+    }
+    const unitTypeError = unitTypeRequiredError(
+      director.address.unitNumber,
+      director.address.unitType,
+    );
+    if (unitTypeError) {
+      next.unitType = unitTypeError;
     }
     if (!director.address.streetNumber.trim()) {
       next.streetNumber = REQUIRED;
@@ -375,7 +392,7 @@ export function formatDirectorAddressLine(director: Form1Director): string {
   if (address.addressType === 'canadian') {
     return (
       [
-        address.unitNumber ? `Unit ${address.unitNumber}` : '',
+        formatUnitLabel(address.unitType, address.unitNumber),
         [
           address.streetNumber,
           address.streetNumberSuffix,
@@ -662,6 +679,16 @@ export function Form1DirectorBlock({
           />
         </div>
 
+        {director.residentCanadian === 'yes' ? (
+          <div className={step4Styles.residentCanadianAlert}>
+            <OntarioPageAlert
+              type="informational"
+              heading="Resident Canadian requirement"
+              content="The requirement for at least 50 per cent of the directors to be resident Canadian under the Co-operative Corporations Act. Indication of resident Canadian status (yes or no) is still required for all corporation types."
+            />
+          </div>
+        ) : null}
+
         <div id={`${prefix}-also-incorporator`}>
           <OntarioRadioButtons
             caption="Also an incorporator"
@@ -862,18 +889,43 @@ export function Form1DirectorBlock({
 
             {showCanadianFields ? (
               <>
-                <OntarioInput
-                  elementId={`${prefix}-unit`}
-                  caption="Unit number"
-                  name={`${prefix}-unit`}
-                  type="text"
-                  required={false}
-                  requiredValidationMessage=""
-                  value={director.address.unitNumber}
-                  customOnInput={(event) =>
-                    patchAddress({ unitNumber: getEventValue(event) })
-                  }
-                />
+                <div className={step3Styles.addressGrid}>
+                  <div className={step3Styles.gridHalf}>
+                    <OntarioDropdownList
+                      elementId={`${prefix}-unit-type`}
+                      caption="Unit type"
+                      name={`${prefix}-unit-type`}
+                      required={Boolean(director.address.unitNumber.trim())}
+                      isEmptyStartOption
+                      value={director.address.unitType}
+                      options={UNIT_TYPE_OPTIONS}
+                      errorMessage={errors.unitType}
+                      customOnChange={(event) =>
+                        patchAddress({ unitType: getEventValue(event) })
+                      }
+                    />
+                  </div>
+                  <div className={step3Styles.gridHalf}>
+                    <OntarioInput
+                      elementId={`${prefix}-unit`}
+                      caption="Unit number"
+                      name={`${prefix}-unit`}
+                      type="text"
+                      required={false}
+                      requiredValidationMessage=""
+                      value={director.address.unitNumber}
+                      customOnInput={(event) => {
+                        const unitNumber = getEventValue(event);
+                        patchAddress({
+                          unitNumber,
+                          unitType: unitNumber.trim()
+                            ? director.address.unitType
+                            : '',
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
                 <div className={step3Styles.addressGrid}>
                   <div className={step3Styles.gridHalf}>
                     <OntarioInput

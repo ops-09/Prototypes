@@ -15,8 +15,9 @@ import {
 } from './corpNameValidation';
 import { syncDateFieldByAnchor } from './dateErrorSync';
 import {
-  EMPTY_NAME_NUANS,
+  emptyNameNuans,
   EMPTY_STEP2,
+  normalizeNameNuans,
   OBR_INCORPORATION_DATE,
   OBR_OCN,
   readForm7Draft,
@@ -27,6 +28,7 @@ import {
 } from './form7DraftStorage';
 import { Form7RegistryCallout } from './Form7RegistryCallout';
 import {
+  nuansDateErrorKey,
   ProposedNameAndNuans,
   validateNameNuansFields,
   type NameNuansErrors,
@@ -42,7 +44,8 @@ type Step2Errors = NameNuansErrors &
     changeCooperativeName: string;
     hasNumberName: string;
     legalElement: string;
-  }>;
+  }> &
+  Record<string, string | undefined>;
 
 function getEventValue(event: globalThis.Event) {
   const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
@@ -63,19 +66,25 @@ function focusField(anchorId: string) {
   focusable?.focus({ preventScroll: true });
 }
 
-function nameNuansErrorAnchors(idPrefix: string): Record<keyof NameNuansErrors, string> {
-  return {
-    languageOption: `${idPrefix}-language`,
-    proposedName: `${idPrefix}-proposed-name`,
-    proposedNameEn: `${idPrefix}-proposed-name-en`,
-    proposedNameFr: `${idPrefix}-proposed-name-fr`,
-    nuansFile: `${idPrefix}-nuans-file`,
-    nuansFileEn: `${idPrefix}-nuans-file-en`,
-    nuansFileFr: `${idPrefix}-nuans-file-fr`,
-    nuansDate: `${idPrefix}-nuans-date`,
-    nuansDateEn: `${idPrefix}-nuans-date-en`,
-    nuansDateFr: `${idPrefix}-nuans-date-fr`,
-  };
+function nameNuansErrorHref(
+  idPrefix: string,
+  key: string,
+  reports: NameNuansFields['nuansReports'],
+) {
+  if (key === 'proposedName') {
+    return `#${idPrefix}-proposed-name`;
+  }
+  if (key.startsWith('nuansFile:')) {
+    const reportId = key.slice('nuansFile:'.length);
+    return `#${idPrefix}-nuans-file-${reportId}`;
+  }
+  if (key.startsWith('nuansDate:')) {
+    const reportId = key.slice('nuansDate:'.length);
+    return `#${idPrefix}-nuans-date-${reportId}`;
+  }
+  // Fallback: first report date block if present.
+  const firstId = reports[0]?.id;
+  return firstId ? `#${idPrefix}-nuans-date-${firstId}` : `#${idPrefix}-proposed-name`;
 }
 
 export function Form7Step2() {
@@ -88,7 +97,7 @@ export function Form7Step2() {
   const [step2, setStep2] = useState<Form7Step2Data>(() => ({
     ...EMPTY_STEP2,
     ...(draft?.step2 ?? {}),
-    nameNuans: { ...EMPTY_NAME_NUANS, ...(draft?.step2?.nameNuans ?? {}) },
+    nameNuans: normalizeNameNuans(draft?.step2?.nameNuans),
     changeCooperativeName: draft?.step2?.changeCooperativeName ?? '',
   }));
   const [errors, setErrors] = useState<Step2Errors>({});
@@ -106,7 +115,7 @@ export function Form7Step2() {
       setStep2({
         ...EMPTY_STEP2,
         ...draft.step2,
-        nameNuans: { ...EMPTY_NAME_NUANS, ...draft.step2.nameNuans },
+        nameNuans: normalizeNameNuans(draft.step2.nameNuans),
         changeCooperativeName: draft.step2.changeCooperativeName ?? '',
       });
     }
@@ -115,7 +124,6 @@ export function Form7Step2() {
   }, []);
 
   const idPrefix = 'form7-step2';
-  const nameAnchors = nameNuansErrorAnchors(idPrefix);
 
   const amendmentOptions = useMemo(
     () => [
@@ -182,47 +190,66 @@ export function Form7Step2() {
   );
 
   const errorSummaryItems = useMemo(() => {
-    const order: Array<{ key: keyof Step2Errors; href: string }> = [
+    const fixedOrder: Array<{ key: keyof Step2Errors; href: string }> = [
       { key: 'amendmentType', href: '#amendment-type' },
       { key: 'changeCooperativeName', href: '#change-cooperative-name' },
       { key: 'hasNumberName', href: '#corp-has-name' },
       { key: 'legalElement', href: '#legal-element' },
-      { key: 'languageOption', href: `#${nameAnchors.languageOption}` },
-      { key: 'proposedName', href: `#${nameAnchors.proposedName}` },
-      { key: 'proposedNameEn', href: `#${nameAnchors.proposedNameEn}` },
-      { key: 'proposedNameFr', href: `#${nameAnchors.proposedNameFr}` },
-      { key: 'nuansFile', href: `#${nameAnchors.nuansFile}` },
-      { key: 'nuansDate', href: `#${nameAnchors.nuansDate}` },
-      { key: 'nuansFileEn', href: `#${nameAnchors.nuansFileEn}` },
-      { key: 'nuansDateEn', href: `#${nameAnchors.nuansDateEn}` },
-      { key: 'nuansFileFr', href: `#${nameAnchors.nuansFileFr}` },
-      { key: 'nuansDateFr', href: `#${nameAnchors.nuansDateFr}` },
+      {
+        key: 'proposedName',
+        href: nameNuansErrorHref(idPrefix, 'proposedName', step2.nameNuans.nuansReports),
+      },
     ];
 
-    return order.flatMap(({ key, href }) => {
+    const fixedItems = fixedOrder.flatMap(({ key, href }) => {
       const message = errors[key];
       if (!message) {
         return [];
       }
-      return [{ key, message, href }];
+      return [{ key: String(key), message, href }];
     });
-  }, [errors, nameAnchors]);
+
+    const reportItems = step2.nameNuans.nuansReports.flatMap((report) => {
+      const fileKey = `nuansFile:${report.id}` as const;
+      const dateKey = `nuansDate:${report.id}` as const;
+      const items: Array<{ key: string; message: string; href: string }> = [];
+      const fileMessage = errors[fileKey];
+      if (fileMessage) {
+        items.push({
+          key: fileKey,
+          message: fileMessage,
+          href: nameNuansErrorHref(idPrefix, fileKey, step2.nameNuans.nuansReports),
+        });
+      }
+      const dateMessage = errors[dateKey];
+      if (dateMessage) {
+        items.push({
+          key: dateKey,
+          message: dateMessage,
+          href: nameNuansErrorHref(idPrefix, dateKey, step2.nameNuans.nuansReports),
+        });
+      }
+      return items;
+    });
+
+    return [...fixedItems, ...reportItems];
+  }, [errors, idPrefix, step2.nameNuans.nuansReports]);
 
   if (!draft?.step1.cooperativeName) {
     return <Navigate to="/form-7" replace />;
   }
 
-  function clearError(key: keyof Step2Errors) {
+  function clearError(key: keyof Step2Errors | string) {
     setErrors((prev) => {
-      if (!prev[key]) {
+      if (!prev[key as keyof Step2Errors]) {
         return prev;
       }
       const next = { ...prev };
-      delete next[key];
+      delete next[key as keyof Step2Errors];
       // Keep dateValidator in sync immediately; also clear forced ODS shadow styles
       // (OntarioDateInput has no errorMessage prop — submit injects borders via sync).
       dateErrorsRef.current = next;
-      if (key === 'nuansDate' || key === 'nuansDateEn' || key === 'nuansDateFr') {
+      if (String(key).startsWith('nuansDate:')) {
         window.requestAnimationFrame(() => syncDateErrors(next));
       }
       return next;
@@ -237,9 +264,9 @@ export function Form7Step2() {
     patchStep2({ nameNuans: next });
   }
 
-  function dateValidatorFor(key: 'nuansDate' | 'nuansDateEn' | 'nuansDateFr') {
+  function dateValidatorFor(reportId: string) {
     return (_day: string, _month: string, _year: string) => {
-      const message = dateErrorsRef.current[key];
+      const message = dateErrorsRef.current[nuansDateErrorKey(reportId)];
       // Match Form1: set day/month/yearInvalid so ODS resetErrorState can clear on typing.
       if (message) {
         return {
@@ -309,9 +336,10 @@ export function Form7Step2() {
   }
 
   function syncDateErrors(nextErrors: Step2Errors) {
-    syncDateFieldByAnchor(`${idPrefix}-nuans-date`, nextErrors.nuansDate);
-    syncDateFieldByAnchor(`${idPrefix}-nuans-date-en`, nextErrors.nuansDateEn);
-    syncDateFieldByAnchor(`${idPrefix}-nuans-date-fr`, nextErrors.nuansDateFr);
+    for (const report of step2.nameNuans.nuansReports) {
+      const key = nuansDateErrorKey(report.id);
+      syncDateFieldByAnchor(`${idPrefix}-nuans-date-${report.id}`, nextErrors[key]);
+    }
   }
 
   function handleContinue() {
@@ -358,7 +386,7 @@ export function Form7Step2() {
       legalElement: '',
       numberNameNuansFile: null,
       numberNameNuansDate: '',
-      nameNuans: { ...EMPTY_NAME_NUANS },
+      nameNuans: emptyNameNuans(),
     });
     setErrors({});
     dateErrorsRef.current = {};
@@ -450,22 +478,17 @@ export function Form7Step2() {
                       patchStep2({
                         changeCooperativeName: value,
                         nameNuans:
-                          value === 'no' ? { ...EMPTY_NAME_NUANS } : step2.nameNuans,
+                          value === 'no' ? emptyNameNuans() : step2.nameNuans,
                       });
                       clearError('changeCooperativeName');
                       if (value === 'no') {
                         setErrors((prev) => {
-                          const next = { ...prev };
-                          delete next.languageOption;
-                          delete next.proposedName;
-                          delete next.proposedNameEn;
-                          delete next.proposedNameFr;
-                          delete next.nuansFile;
-                          delete next.nuansFileEn;
-                          delete next.nuansFileFr;
-                          delete next.nuansDate;
-                          delete next.nuansDateEn;
-                          delete next.nuansDateFr;
+                          const next: Step2Errors = {
+                            amendmentType: prev.amendmentType,
+                            changeCooperativeName: prev.changeCooperativeName,
+                            hasNumberName: prev.hasNumberName,
+                            legalElement: prev.legalElement,
+                          };
                           return next;
                         });
                       }
@@ -477,7 +500,10 @@ export function Form7Step2() {
                   <ProposedNameAndNuans
                     idPrefix={idPrefix}
                     nameKind="cooperative"
-                    leadText="Every co-operative must have a name. You need a NUANS report for the proposed name."
+                    leadText={[
+                      'An Ontario NUANS name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report.',
+                      'The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the name. The name of the co-operative must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “LIMITED”, “LIMITÉE”, “INC.”, “CORP.”, “LTD.” or “LTÉE”.',
+                    ]}
                     value={step2.nameNuans}
                     errors={errors}
                     dateValidatorFor={dateValidatorFor}
@@ -508,7 +534,7 @@ export function Form7Step2() {
                         legalElement: value === 'yes' ? step2.legalElement : '',
                         numberNameNuansFile: null,
                         numberNameNuansDate: '',
-                        nameNuans: value === 'no' ? step2.nameNuans : { ...EMPTY_NAME_NUANS },
+                        nameNuans: value === 'no' ? step2.nameNuans : emptyNameNuans(),
                       });
                       clearError('hasNumberName');
                       if (value !== 'yes') {
@@ -572,7 +598,7 @@ export function Form7Step2() {
                         legalElement: '',
                         numberNameNuansFile: null,
                         numberNameNuansDate: '',
-                        nameNuans: value === 'no' ? step2.nameNuans : { ...EMPTY_NAME_NUANS },
+                        nameNuans: value === 'no' ? step2.nameNuans : emptyNameNuans(),
                       });
                       clearError('hasNumberName');
                     }}

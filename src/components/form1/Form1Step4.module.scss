@@ -305,6 +305,14 @@
   padding-bottom: 0;
 }
 
+/* Cancel ODS page-alert outer margins so spacing comes from the form stack. */
+.residentCanadianAlert {
+  margin-top: calc(-1 * var(--ontario-spacing-6, 2rem));
+  margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .addActions {
   display: flex;
   flex-wrap: wrap;

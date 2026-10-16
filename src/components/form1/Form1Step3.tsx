@@ -20,13 +20,14 @@ import {
 } from './canadaPostLookup';
 import {
   COUNTY_STATUS_OPTIONS,
-  EMPTY_STEP1,
+  createSeedStep1,
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
   EMPTY_STEP5,
   EMPTY_STEP6,
   EMPTY_STEP7,
+  hasForm1Step1Data,
   HEAD_OFFICE_INFO,
   MUNICIPALITY_STATUS_OPTIONS,
   readForm1Draft,
@@ -34,9 +35,12 @@ import {
   STREET_DIRECTION_OPTIONS,
   STREET_NUMBER_SUFFIX_OPTIONS,
   STREET_TYPE_OPTIONS,
+  UNIT_TYPE_OPTIONS,
+  unitTypeRequiredError,
   upsertForm1Step3,
   type Form1Draft,
   type Form1Step3Data,
+  hasForm1Step2Data,
 } from './form1DraftStorage';
 import { PostalCodeSearchAutosuggest } from './PostalCodeSearchAutosuggest';
 import styles from './Form1Step1.module.scss';
@@ -50,6 +54,7 @@ const HEAD_OFFICE_REQUIRED_ERROR = 'Head Office Address must be entered.';
 
 type FieldKey =
   | 'postalCodeLookup'
+  | 'unitType'
   | 'streetNumber'
   | 'streetName'
   | 'cityTown'
@@ -64,6 +69,7 @@ type FieldErrors = Partial<Record<FieldKey, string>>;
 
 const FIELD_ANCHORS: Record<FieldKey, string> = {
   postalCodeLookup: 'postal-code-lookup',
+  unitType: 'unit-type',
   streetNumber: 'street-number',
   streetName: 'street-name',
   cityTown: 'city-town',
@@ -78,6 +84,7 @@ const FIELD_ANCHORS: Record<FieldKey, string> = {
 const FIELD_ORDER: FieldKey[] = [
   'postalCodeLookup',
   'headOffice',
+  'unitType',
   'streetNumber',
   'streetName',
   'cityTown',
@@ -121,6 +128,7 @@ function clearAddressFields(prev: Form1Step3Data): Form1Step3Data {
   return {
     ...prev,
     selectedAddressId: '',
+    unitType: '',
     roomNumber: '',
     streetNumber: '',
     streetName: '',
@@ -145,6 +153,7 @@ function applyLookupResult(
   return {
     ...prev,
     selectedAddressId: result.id,
+    unitType: result.unitType,
     roomNumber: result.roomNumber,
     streetNumber: result.streetNumber,
     streetName: result.streetName,
@@ -175,8 +184,8 @@ function hasAddressContent(step3: Form1Step3Data) {
 function ensureStep3Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
-    existing?.step1.languageOption &&
-    existing.step2.cooperativeSubtype &&
+    hasForm1Step1Data(existing?.step1) &&
+    hasForm1Step2Data(existing.step2) &&
     existing.step2.primaryActivity &&
     existing.step2.email
   ) {
@@ -192,17 +201,7 @@ function ensureStep3Draft(): Form1Draft {
 
   const now = new Date().toISOString();
   const seeded: Form1Draft = {
-    step1: {
-      ...EMPTY_STEP1,
-      languageOption: 'english',
-      cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
-      nuansFile: {
-        name: 'NUANS-Green-Institute.pdf',
-        size: 184320,
-        type: 'application/pdf',
-      },
-      nuansDate: '2026-08-15',
-    },
+    step1: createSeedStep1(),
     step2: {
       ...EMPTY_STEP2,
       cooperativeSubtype: 'Worker Co-operative',
@@ -291,6 +290,7 @@ export function Form1Step3() {
     clearError(
       'postalCodeLookup',
       'headOffice',
+      'unitType',
       'streetNumber',
       'streetName',
       'cityTown',
@@ -357,6 +357,11 @@ export function Form1Step3() {
       next.postalCode = POSTAL_CODE_FORMAT_ERROR;
     } else if (step3.postalCode.trim() && !isOntarioPostalCode(step3.postalCode)) {
       next.postalCode = POSTAL_CODE_ONTARIO_ERROR;
+    }
+
+    const unitTypeError = unitTypeRequiredError(step3.roomNumber, step3.unitType);
+    if (unitTypeError) {
+      next.unitType = unitTypeError;
     }
 
     if (!step3.municipalityStatus.trim()) {
@@ -513,6 +518,22 @@ export function Form1Step3() {
             {showAddressFields ? (
               <div className={step3Styles.addressFields}>
                 <div className={step3Styles.addressGrid}>
+                  <div className={step3Styles.gridHalf} id={FIELD_ANCHORS.unitType}>
+                    <OntarioDropdownList
+                      elementId={FIELD_ANCHORS.unitType}
+                      caption="Unit type"
+                      name="unit-type"
+                      required={Boolean(step3.roomNumber.trim())}
+                      isEmptyStartOption
+                      value={step3.unitType}
+                      options={[...UNIT_TYPE_OPTIONS]}
+                      errorMessage={errors.unitType}
+                      customOnChange={(event) => {
+                        patchStep3({ unitType: getEventValue(event) });
+                        clearError('unitType');
+                      }}
+                    />
+                  </div>
                   <div className={step3Styles.gridHalf}>
                     <OntarioInput
                       elementId="unit-number"
@@ -523,9 +544,16 @@ export function Form1Step3() {
                       required={false}
                       requiredValidationMessage=""
                       value={step3.roomNumber}
-                      customOnInput={(event) =>
-                        patchStep3({ roomNumber: getEventValue(event) })
-                      }
+                      customOnInput={(event) => {
+                        const roomNumber = getEventValue(event);
+                        patchStep3({
+                          roomNumber,
+                          unitType: roomNumber.trim() ? step3.unitType : '',
+                        });
+                        if (!roomNumber.trim()) {
+                          clearError('unitType');
+                        }
+                      }}
                     />
                   </div>
                   <div className={step3Styles.gridHalf} id={FIELD_ANCHORS.streetNumber}>

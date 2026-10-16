@@ -3,25 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioDateInput,
+  OntarioIconAddAlt,
   OntarioInput,
   OntarioPageAlert,
-  OntarioRadioButtons,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
 import { FileUpload, type UploadedFileMeta } from './FileUpload';
 import {
-  EMPTY_STEP1,
+  createEmptyNuansReport,
+  emptyStep1,
+  MAX_NUANS_REPORTS,
+  normalizeStep1,
   readForm1Draft,
   upsertForm1Step1,
   type Form1Step1Data,
+  type NuansReportEntry,
 } from './form1DraftStorage';
 import {
   COOPERATIVE_NAME_REQUIRED_ERROR,
-  isSeparateLanguage,
-  SECOND_NUANS_ERROR,
   toBlockCapitals,
   validateCooperativeName,
-  type NameLanguageOption,
 } from './nameValidation';
 import { aggregateDateFromEvent } from '../form7/dateErrorSync';
 import { validateNuansDate } from '../form7/nuansValidation';
@@ -30,48 +31,18 @@ import styles from './Form1Step1.module.scss';
 const CURRENT_STEP = 2;
 const TOTAL_STEPS = 9;
 
-type FieldKey =
-  | 'languageOption'
-  | 'cooperativeName'
-  | 'englishName'
-  | 'frenchName'
-  | 'nuansFile'
-  | 'nuansFileEn'
-  | 'nuansFileFr'
-  | 'nuansDate'
-  | 'nuansDateEn'
-  | 'nuansDateFr';
+type FieldErrors = Partial<{
+  cooperativeName: string;
+}> &
+  Record<string, string | undefined>;
 
-type FieldErrors = Partial<Record<FieldKey, string>>;
+function nuansFileErrorKey(reportId: string) {
+  return `nuansFile:${reportId}`;
+}
 
-const FIELD_ANCHORS: Record<FieldKey, string> = {
-  languageOption: 'coop-name-language',
-  cooperativeName: 'cooperative-name',
-  englishName: 'cooperative-name-en',
-  frenchName: 'cooperative-name-fr',
-  nuansFile: 'nuans-file',
-  nuansFileEn: 'nuans-file-en',
-  nuansFileFr: 'nuans-file-fr',
-  nuansDate: 'nuans-date',
-  nuansDateEn: 'nuans-date-en',
-  nuansDateFr: 'nuans-date-fr',
-};
-
-/** Stable display order for the error summary list. */
-const FIELD_ORDER: FieldKey[] = [
-  'languageOption',
-  'cooperativeName',
-  'englishName',
-  'frenchName',
-  'nuansFile',
-  'nuansDate',
-  'nuansFileEn',
-  'nuansDateEn',
-  'nuansFileFr',
-  'nuansDateFr',
-];
-
-const DATE_FIELD_KEYS: FieldKey[] = ['nuansDate', 'nuansDateEn', 'nuansDateFr'];
+function nuansDateErrorKey(reportId: string) {
+  return `nuansDate:${reportId}`;
+}
 
 function getEventValue(event: globalThis.Event) {
   const target = event.target as HTMLInputElement | null;
@@ -128,16 +99,16 @@ function syncOntarioDateInputError(host: HTMLElement | null, message?: string) {
   }
 }
 
-function syncDateFieldErrors(nextErrors: FieldErrors) {
-  DATE_FIELD_KEYS.forEach((key) => {
+function syncDateFieldErrors(nextErrors: FieldErrors, reports: NuansReportEntry[]) {
+  for (const report of reports) {
     const host = document
-      .getElementById(FIELD_ANCHORS[key])
+      .getElementById(`nuans-date-${report.id}`)
       ?.querySelector<HTMLElement>('ontario-date-input');
     if (!host) {
-      return;
+      continue;
     }
-    syncOntarioDateInputError(host, nextErrors[key]);
-  });
+    syncOntarioDateInputError(host, nextErrors[nuansDateErrorKey(report.id)]);
+  }
 }
 
 export function Form1Step1() {
@@ -146,76 +117,87 @@ export function Form1Step1() {
   const dateErrorsRef = useRef<FieldErrors>({});
   const existing = readForm1Draft();
 
-  const [languageOption, setLanguageOption] = useState<NameLanguageOption | ''>(
-    () => existing?.step1.languageOption ?? '',
+  const [step1, setStep1] = useState<Form1Step1Data>(() =>
+    normalizeStep1(existing?.step1 ?? emptyStep1()),
   );
-  const [cooperativeName, setCooperativeName] = useState(
-    () => existing?.step1.cooperativeName ?? '',
-  );
-  const [englishName, setEnglishName] = useState(() => existing?.step1.englishName ?? '');
-  const [frenchName, setFrenchName] = useState(() => existing?.step1.frenchName ?? '');
-  const [nuansFile, setNuansFile] = useState<UploadedFileMeta | null>(
-    () => existing?.step1.nuansFile ?? null,
-  );
-  const [nuansFileEn, setNuansFileEn] = useState<UploadedFileMeta | null>(
-    () => existing?.step1.nuansFileEn ?? null,
-  );
-  const [nuansFileFr, setNuansFileFr] = useState<UploadedFileMeta | null>(
-    () => existing?.step1.nuansFileFr ?? null,
-  );
-  const [nuansDate, setNuansDate] = useState(() => existing?.step1.nuansDate ?? '');
-  const [nuansDateEn, setNuansDateEn] = useState(() => existing?.step1.nuansDateEn ?? '');
-  const [nuansDateFr, setNuansDateFr] = useState(() => existing?.step1.nuansDateFr ?? '');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
   dateErrorsRef.current = errors;
 
-  const separate = isSeparateLanguage(languageOption);
+  const reports =
+    step1.nuansReports.length > 0 ? step1.nuansReports : [createEmptyNuansReport()];
 
-  const languageOptions = useMemo(
-    () => [
-      {
-        value: 'english',
-        elementId: 'coop-name-english',
-        label: 'an English name (example: "Green Institute Co-operative Inc.")',
-      },
-      {
-        value: 'french',
-        elementId: 'coop-name-french',
-        label: 'a French name (example: "Institut Green Coopérative Inc.")',
-      },
-      {
-        value: 'combined',
-        elementId: 'coop-name-combined',
-        label:
-          'a combination English and French name (example: "Institut Green Institute Co-operative Inc.")',
-      },
-      {
-        value: 'separate',
-        elementId: 'coop-name-separate',
-        label:
-          'an English and a French name that are equivalent but used separately (example: "Green Institute Co-operative Inc./Institut Green Coopérative Inc."). This option requires two separate NUANS reports.',
-      },
-    ],
-    [],
-  );
+  const errorSummaryItems = useMemo(() => {
+    const items: Array<{ key: string; message: string; href: string }> = [];
+    if (errors.cooperativeName) {
+      items.push({
+        key: 'cooperativeName',
+        message: errors.cooperativeName,
+        href: '#cooperative-name',
+      });
+    }
+    for (const report of reports) {
+      const fileKey = nuansFileErrorKey(report.id);
+      const dateKey = nuansDateErrorKey(report.id);
+      if (errors[fileKey]) {
+        items.push({
+          key: fileKey,
+          message: errors[fileKey]!,
+          href: `#nuans-file-${report.id}`,
+        });
+      }
+      if (errors[dateKey]) {
+        items.push({
+          key: dateKey,
+          message: errors[dateKey]!,
+          href: `#nuans-date-${report.id}`,
+        });
+      }
+    }
+    return items;
+  }, [errors, reports]);
 
-  const errorSummaryItems = useMemo(
-    () =>
-      FIELD_ORDER.flatMap((key) => {
-        const message = errors[key];
-        if (!message) {
-          return [];
-        }
-        return [{ key, message, href: `#${FIELD_ANCHORS[key]}` }];
-      }),
-    [errors],
-  );
+  function patchStep1(partial: Partial<Form1Step1Data>) {
+    setStep1((prev) => ({
+      ...prev,
+      nuansReports: reports,
+      ...partial,
+    }));
+  }
 
-  function makeDateValidator(fieldKey: FieldKey) {
+  function updateReport(reportId: string, partial: Partial<NuansReportEntry>) {
+    patchStep1({
+      nuansReports: reports.map((report) =>
+        report.id === reportId ? { ...report, ...partial } : report,
+      ),
+    });
+  }
+
+  function setReportFile(reportId: string, meta: UploadedFileMeta | null) {
+    updateReport(reportId, { file: meta });
+    clearError(nuansFileErrorKey(reportId));
+  }
+
+  function addReport() {
+    if (reports.length >= MAX_NUANS_REPORTS) {
+      return;
+    }
+    patchStep1({ nuansReports: [...reports, createEmptyNuansReport()] });
+  }
+
+  function removeReport(reportId: string) {
+    if (reports.length <= 1) {
+      return;
+    }
+    patchStep1({ nuansReports: reports.filter((report) => report.id !== reportId) });
+    clearError(nuansFileErrorKey(reportId));
+    clearError(nuansDateErrorKey(reportId));
+  }
+
+  function makeDateValidator(reportId: string) {
     return (_day: string, _month: string, _year: string) => {
-      const message = dateErrorsRef.current[fieldKey];
+      const message = dateErrorsRef.current[nuansDateErrorKey(reportId)];
       if (message) {
         return {
           errorMessage: message,
@@ -234,31 +216,7 @@ export function Form1Step1() {
     };
   }
 
-  function clearOppositeBranch(next: NameLanguageOption) {
-    if (next === 'separate') {
-      setCooperativeName('');
-      setNuansFile(null);
-      setNuansDate('');
-    } else {
-      setEnglishName('');
-      setFrenchName('');
-      setNuansFileEn(null);
-      setNuansFileFr(null);
-      setNuansDateEn('');
-      setNuansDateFr('');
-    }
-  }
-
-  function handleLanguageChange(value: string) {
-    const next = value as NameLanguageOption;
-    setLanguageOption(next);
-    clearOppositeBranch(next);
-    setErrors({});
-    dateErrorsRef.current = {};
-    setShowErrorSummary(false);
-  }
-
-  function clearError(key: FieldKey) {
+  function clearError(key: string) {
     setErrors((prev) => {
       if (!prev[key]) {
         return prev;
@@ -266,8 +224,8 @@ export function Form1Step1() {
       const next = { ...prev };
       delete next[key];
       dateErrorsRef.current = next;
-      if (DATE_FIELD_KEYS.includes(key)) {
-        window.requestAnimationFrame(() => syncDateFieldErrors(next));
+      if (key.startsWith('nuansDate:')) {
+        window.requestAnimationFrame(() => syncDateFieldErrors(next, reports));
       }
       return next;
     });
@@ -275,47 +233,18 @@ export function Form1Step1() {
 
   function validateAll(): FieldErrors {
     const next: FieldErrors = {};
-
-    if (!languageOption) {
-      next.languageOption = 'Select how the co-operative name will appear.';
+    const nameError = validateCooperativeName(step1.cooperativeName);
+    if (nameError) {
+      next.cooperativeName = nameError;
     }
 
-    if (separate) {
-      const enError = validateCooperativeName(englishName);
-      const frError = validateCooperativeName(frenchName);
-      if (enError) {
-        next.englishName = enError;
+    for (const report of reports) {
+      if (!report.file) {
+        next[nuansFileErrorKey(report.id)] = 'Upload a NUANS report.';
       }
-      if (frError) {
-        next.frenchName = frError;
-      }
-      if (!nuansFileEn) {
-        next.nuansFileEn = 'Upload the English NUANS report.';
-      }
-      if (!nuansFileFr) {
-        next.nuansFileFr = nuansFileEn
-          ? SECOND_NUANS_ERROR
-          : 'Upload the French NUANS report.';
-      }
-      const enDateError = validateNuansDate(nuansDateEn);
-      if (enDateError) {
-        next.nuansDateEn = enDateError;
-      }
-      const frDateError = validateNuansDate(nuansDateFr);
-      if (frDateError) {
-        next.nuansDateFr = frDateError;
-      }
-    } else if (languageOption) {
-      const nameError = validateCooperativeName(cooperativeName);
-      if (nameError) {
-        next.cooperativeName = nameError;
-      }
-      if (!nuansFile) {
-        next.nuansFile = 'Upload the NUANS report.';
-      }
-      const dateError = validateNuansDate(nuansDate);
+      const dateError = validateNuansDate(report.date);
       if (dateError) {
-        next.nuansDate = dateError;
+        next[nuansDateErrorKey(report.id)] = dateError;
       }
     }
 
@@ -324,17 +253,8 @@ export function Form1Step1() {
 
   function buildStep1(): Form1Step1Data {
     return {
-      ...EMPTY_STEP1,
-      languageOption,
-      cooperativeName,
-      englishName,
-      frenchName,
-      nuansDate,
-      nuansDateEn,
-      nuansDateFr,
-      nuansFile,
-      nuansFileEn,
-      nuansFileFr,
+      cooperativeName: step1.cooperativeName,
+      nuansReports: reports,
     };
   }
 
@@ -347,7 +267,7 @@ export function Form1Step1() {
 
     if (hasErrors) {
       window.requestAnimationFrame(() => {
-        syncDateFieldErrors(nextErrors);
+        syncDateFieldErrors(nextErrors, reports);
         errorSummaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       return;
@@ -420,197 +340,117 @@ export function Form1Step1() {
           </p>
 
           <p className={styles.body}>
-            First select how the co-operative&apos;s name will appear. That choice determines
-            whether you enter one name and one NUANS report, or two names and two NUANS
-            reports.
+            An Ontario NUANS name search report for the proposed name of the co-operative. The
+            search report must be submitted with the application within 90 days of the
+            production of the report.
+          </p>
+          <p className={styles.body}>
+            The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the
+            name. The name of the co-operative must end with one of the following legal
+            elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “LIMITED”, “LIMITÉE”,
+            “INC.”, “CORP.”, “LTD.” or “LTÉE”.
           </p>
 
           <div className={styles.formStack}>
-            <div id={FIELD_ANCHORS.languageOption}>
-              <OntarioRadioButtons
-                caption={{
-                  captionText: "The co-operative's name will have:",
-                  captionType: 'default',
-                }}
-                name="coop-name-language"
-                required
-                value={languageOption}
-                options={languageOptions}
-                errorMessage={errors.languageOption}
-                customOnChange={(event) => handleLanguageChange(getEventValue(event))}
-              />
-            </div>
+            <OntarioInput
+              elementId="cooperative-name"
+              caption="Co-operative name (proposed)"
+              name="cooperative-name"
+              required
+              requiredValidationMessage={COOPERATIVE_NAME_REQUIRED_ERROR}
+              hintText="Enter the name in block capital letters, as it should appear on the official record. Example: GREEN INSTITUTE CO-OPERATIVE INC."
+              value={step1.cooperativeName}
+              errorMessage={errors.cooperativeName}
+              customOnInput={(event) => {
+                patchStep1({ cooperativeName: getEventValue(event) });
+                clearError('cooperativeName');
+              }}
+              customOnBlur={(event) =>
+                patchStep1({ cooperativeName: toBlockCapitals(getEventValue(event)) })
+              }
+            />
 
-            {languageOption && !separate ? (
-              <OntarioInput
-                elementId={FIELD_ANCHORS.cooperativeName}
-                caption="Co-operative name (proposed)"
-                name="cooperative-name"
-                required
-                requiredValidationMessage={COOPERATIVE_NAME_REQUIRED_ERROR}
-                hintText="Enter the name in block capital letters, as it should appear on the official record. Example: GREEN INSTITUTE CO-OPERATIVE INC."
-                value={cooperativeName}
-                errorMessage={errors.cooperativeName}
-                customOnInput={(event) => {
-                  setCooperativeName(getEventValue(event));
-                  clearError('cooperativeName');
-                }}
-                customOnBlur={(event) => setCooperativeName(toBlockCapitals(getEventValue(event)))}
-              />
-            ) : null}
+            {reports.map((report, index) => {
+              const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
+              const fileKey = nuansFileErrorKey(report.id);
+              const dateKey = nuansDateErrorKey(report.id);
 
-            {separate ? (
-              <>
-                <OntarioInput
-                  elementId={FIELD_ANCHORS.englishName}
-                  caption="English name (proposed)"
-                  name="cooperative-name-en"
-                  required
-                  requiredValidationMessage="Enter the English co-operative name. Example: GREEN INSTITUTE CO-OPERATIVE INC."
-                  hintText="Enter the name in block capital letters, as it should appear on the official record. Example: GREEN INSTITUTE CO-OPERATIVE INC."
-                  value={englishName}
-                  errorMessage={errors.englishName}
-                  customOnInput={(event) => {
-                    setEnglishName(getEventValue(event));
-                    clearError('englishName');
-                  }}
-                  customOnBlur={(event) => setEnglishName(toBlockCapitals(getEventValue(event)))}
-                />
-                <OntarioInput
-                  elementId={FIELD_ANCHORS.frenchName}
-                  caption="French name (proposed)"
-                  name="cooperative-name-fr"
-                  required
-                  requiredValidationMessage="Enter the French co-operative name. Example: INSTITUT GREEN COOPÉRATIVE INC."
-                  hintText="Enter the name in block capital letters, as it should appear on the official record. Example: INSTITUT GREEN COOPÉRATIVE INC."
-                  value={frenchName}
-                  errorMessage={errors.frenchName}
-                  customOnInput={(event) => {
-                    setFrenchName(getEventValue(event));
-                    clearError('frenchName');
-                  }}
-                  customOnBlur={(event) => setFrenchName(toBlockCapitals(getEventValue(event)))}
-                />
-              </>
-            ) : null}
-
-            {languageOption ? (
-              <div className={styles.nuansSection}>
-                {!separate ? (
-                  <>
-                    <FileUpload
-                      label="Upload NUANS report"
-                      required
-                      hintText="Upload the NUANS report that confirms the proposed name is available."
-                      value={nuansFile}
-                      errorMessage={errors.nuansFile}
-                      onChange={(meta) => {
-                        setNuansFile(meta);
-                        clearError('nuansFile');
-                      }}
-                      inputId={FIELD_ANCHORS.nuansFile}
-                    />
-                    <div id={FIELD_ANCHORS.nuansDate}>
-                      <OntarioDateInput
-                        elementId={`${FIELD_ANCHORS.nuansDate}-input`}
-                        caption="NUANS report date"
-                        required
-                        value={nuansDate || undefined}
-                        dateValidator={makeDateValidator('nuansDate')}
-                        onInputOnInput={(event) => {
-                          const next = aggregateDateFromEvent(event);
-                          if (next !== null) {
-                            setNuansDate(next);
-                          }
-                          clearError('nuansDate');
-                        }}
-                        onInputOnChange={(event) => {
-                          const next = aggregateDateFromEvent(event);
-                          if (next !== null) {
-                            setNuansDate(next);
-                          }
-                          clearError('nuansDate');
-                        }}
-                      />
+              return (
+                <div key={report.id} className={styles.nuansReportBlock}>
+                  {reports.length > 1 ? (
+                    <div className={styles.nuansReportHeader}>
+                      <h2 className={`ontario-h4 ${styles.nuansReportHeading}`}>
+                        NUANS report{ordinal}
+                      </h2>
+                      <button
+                        type="button"
+                        className={styles.removeLink}
+                        onClick={() => removeReport(report.id)}
+                        aria-label={`Remove NUANS report ${index + 1}`}
+                      >
+                        Remove
+                      </button>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <FileUpload
-                      label="Upload English NUANS report"
-                      required
-                      hintText="Upload the NUANS report for the English name."
-                      value={nuansFileEn}
-                      errorMessage={errors.nuansFileEn}
-                      onChange={(meta) => {
-                        setNuansFileEn(meta);
-                        clearError('nuansFileEn');
-                      }}
-                      inputId={FIELD_ANCHORS.nuansFileEn}
-                    />
-                    <div id={FIELD_ANCHORS.nuansDateEn}>
-                      <OntarioDateInput
-                        elementId={`${FIELD_ANCHORS.nuansDateEn}-input`}
-                        caption="English NUANS report date"
-                        required
-                        value={nuansDateEn || undefined}
-                        dateValidator={makeDateValidator('nuansDateEn')}
-                        onInputOnInput={(event) => {
-                          const next = aggregateDateFromEvent(event);
-                          if (next !== null) {
-                            setNuansDateEn(next);
-                          }
-                          clearError('nuansDateEn');
-                        }}
-                        onInputOnChange={(event) => {
-                          const next = aggregateDateFromEvent(event);
-                          if (next !== null) {
-                            setNuansDateEn(next);
-                          }
-                          clearError('nuansDateEn');
-                        }}
-                      />
-                    </div>
+                  ) : null}
 
-                    <FileUpload
-                      label="Upload French NUANS report"
+                  <FileUpload
+                    label={
+                      reports.length > 1
+                        ? `Upload NUANS report${ordinal}`
+                        : 'Upload NUANS report'
+                    }
+                    required
+                    hintText="Upload the NUANS report that confirms the proposed name is available."
+                    value={report.file}
+                    errorMessage={errors[fileKey]}
+                    onChange={(meta) => setReportFile(report.id, meta)}
+                    inputId={`nuans-file-${report.id}`}
+                  />
+
+                  <div id={`nuans-date-${report.id}`}>
+                    <OntarioDateInput
+                      elementId={`nuans-date-${report.id}-input`}
+                      caption={
+                        reports.length > 1
+                          ? `NUANS report${ordinal} date`
+                          : 'NUANS report date'
+                      }
                       required
-                      hintText="Upload the NUANS report for the French name."
-                      value={nuansFileFr}
-                      errorMessage={errors.nuansFileFr}
-                      onChange={(meta) => {
-                        setNuansFileFr(meta);
-                        clearError('nuansFileFr');
+                      value={report.date || undefined}
+                      dateValidator={makeDateValidator(report.id)}
+                      onInputOnInput={(event) => {
+                        const next = aggregateDateFromEvent(event);
+                        if (next !== null) {
+                          updateReport(report.id, { date: next });
+                        }
+                        clearError(dateKey);
                       }}
-                      inputId={FIELD_ANCHORS.nuansFileFr}
+                      onInputOnChange={(event) => {
+                        const next = aggregateDateFromEvent(event);
+                        if (next !== null) {
+                          updateReport(report.id, { date: next });
+                        }
+                        clearError(dateKey);
+                      }}
                     />
-                    <div id={FIELD_ANCHORS.nuansDateFr}>
-                      <OntarioDateInput
-                        elementId={`${FIELD_ANCHORS.nuansDateFr}-input`}
-                        caption="French NUANS report date"
-                        required
-                        value={nuansDateFr || undefined}
-                        dateValidator={makeDateValidator('nuansDateFr')}
-                        onInputOnInput={(event) => {
-                          const next = aggregateDateFromEvent(event);
-                          if (next !== null) {
-                            setNuansDateFr(next);
-                          }
-                          clearError('nuansDateFr');
-                        }}
-                        onInputOnChange={(event) => {
-                          const next = aggregateDateFromEvent(event);
-                          if (next !== null) {
-                            setNuansDateFr(next);
-                          }
-                          clearError('nuansDateFr');
-                        }}
-                      />
-                    </div>
-                  </>
-                )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {reports.length < MAX_NUANS_REPORTS ? (
+              <div className={styles.addActions}>
+                <button type="button" className={styles.addLink} onClick={addReport}>
+                  <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
+                  Add another NUANS report
+                </button>
               </div>
-            ) : null}
+            ) : (
+              <p className={styles.nuansMaxNote}>
+                You can upload up to {MAX_NUANS_REPORTS} NUANS reports. Remove a report to
+                add another.
+              </p>
+            )}
           </div>
 
           <div className={styles.buttonGroup}>

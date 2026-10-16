@@ -46,11 +46,18 @@
   margin-top: 0;
 }
 
+.leadGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
 .lead {
   margin: 0 0 var(--ontario-spacing-5, 1.5rem);
 }
 
-.formStack > .lead {
+.formStack > .lead,
+.formStack > .leadGroup .lead {
   // Spacing to the next field comes from .formStack gap (40px).
   margin-bottom: 0;
 }
@@ -214,4 +221,95 @@
   align-items: center;
   gap: var(--ontario-spacing-6, 2rem);
   margin-top: var(--ontario-spacing-7, 2.5rem);
+}
+
+.nuansReportBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+}
+
+.nuansReportHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.nuansReportHeading {
+  margin: 0;
+}
+
+.addActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  align-items: center;
+}
+
+.addLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: var(--ontario-global-tokens-border-size, 4px) solid
+      var(--ontario-colour-focus, #009adb);
+    outline-offset: var(--ontario-global-tokens-border-size, 4px);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.removeLink {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ontario-colour-link, #0066cc);
+  font: inherit;
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    color: var(--ontario-colour-link--hover, #00478f);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.nuansMaxNote {
+  margin: 0;
+  color: var(--ontario-colour-black, #1a1a1a);
 }

@@ -1,5 +1,4 @@
 import type { AmendmentType } from './form7DraftStorage';
-import type { NameLanguageOption } from '../form1/nameValidation';
 
 export const AMENDMENT_TYPE_LABELS: Record<AmendmentType, string> = {
   'change-name': 'Articles of Amendment',
@@ -16,19 +15,6 @@ export function amendmentTypeLabel(type: AmendmentType | '') {
     return 'Not provided';
   }
   return AMENDMENT_TYPE_LABELS[type];
-}
-
-export function nameFormatLabel(option: NameLanguageOption | '') {
-  switch (option) {
-    case 'english':
-      return 'English';
-    case 'french':
-      return 'French';
-    case 'english-french':
-      return 'English and French';
-    default:
-      return 'Not provided';
-  }
 }
 
 export function formatIsoDateDisplay(value: string) {

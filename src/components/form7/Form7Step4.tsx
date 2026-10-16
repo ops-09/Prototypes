@@ -10,7 +10,7 @@ import { FileUpload } from '../form1/FileUpload';
 import { isIsoDateComplete } from '../form1/nameValidation';
 import {
   createForm7ConfirmationNumber,
-  EMPTY_NAME_NUANS,
+  createEmptyNuansReport,
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
@@ -59,15 +59,18 @@ function ensureStep4Draft() {
     step2: {
       ...EMPTY_STEP2,
       nameNuans: {
-        ...EMPTY_NAME_NUANS,
-        languageOption: 'english' as const,
         proposedName: 'MAPLE LEAF WORKERS CO-OPERATIVE INC.',
-        nuansFile: {
-          name: 'NUANS-Maple-Leaf.pdf',
-          size: 245760,
-          type: 'application/pdf',
-        },
-        nuansDate: '2026-08-15',
+        nuansReports: [
+          {
+            ...createEmptyNuansReport(),
+            file: {
+              name: 'NUANS-Maple-Leaf.pdf',
+              size: 245760,
+              type: 'application/pdf',
+            },
+            date: '2026-08-15',
+          },
+        ],
       },
       amendmentType: 'change-name' as const,
       changeCooperativeName: 'change' as const,

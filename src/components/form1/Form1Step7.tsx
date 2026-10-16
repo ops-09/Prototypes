@@ -15,13 +15,14 @@ import {
 import { FieldErrorMessage } from './FieldErrorMessage';
 import {
   createEmptyDirector,
-  EMPTY_STEP1,
+  createSeedStep1,
   EMPTY_STEP2,
   EMPTY_STEP3,
   EMPTY_STEP4,
   EMPTY_STEP5,
   EMPTY_STEP6,
   EMPTY_STEP7,
+  hasForm1Step1Data,
   INCORPORATOR_INFO,
   readForm1Draft,
   saveForm1Draft,
@@ -29,6 +30,7 @@ import {
   upsertForm1Step7,
   type Form1Draft,
   type Form1Step7Data,
+  hasForm1Step2Data,
 } from './form1DraftStorage';
 import styles from './Form1Step1.module.scss';
 import step4Styles from './Form1Step4.module.scss';
@@ -51,8 +53,8 @@ const FIELD_ANCHORS: Record<PageFieldKey, string> = {
 function ensureStep7Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
-    existing?.step1.languageOption &&
-    existing.step2.cooperativeSubtype &&
+    hasForm1Step1Data(existing?.step1) &&
+    hasForm1Step2Data(existing.step2) &&
     existing.step3.streetNumber &&
     existing.step4.directors.length > 0 &&
     existing.step5.authorizedCapital.trim()
@@ -104,17 +106,7 @@ function ensureStep7Draft(): Form1Draft {
 
   const now = new Date().toISOString();
   const seeded: Form1Draft = {
-    step1: {
-      ...EMPTY_STEP1,
-      languageOption: 'english',
-      cooperativeName: 'GREEN INSTITUTE CO-OPERATIVE INC.',
-      nuansFile: {
-        name: 'NUANS-Green-Institute.pdf',
-        size: 184320,
-        type: 'application/pdf',
-      },
-      nuansDate: '2026-08-15',
-    },
+    step1: createSeedStep1(),
     step2: {
       ...EMPTY_STEP2,
       cooperativeSubtype: 'Worker Co-operative',

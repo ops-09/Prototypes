@@ -37,17 +37,18 @@ function signatureRowHtml(name: string) {
 export function generateForm1ReviewPdf(args: { draft: Form1Draft }) {
   const { draft } = args;
   const sections = buildReviewSections(draft);
-  const coopName =
-    draft.step1.languageOption === 'separate'
-      ? draft.step1.englishName || draft.step1.frenchName
-      : draft.step1.cooperativeName;
+  const coopName = draft.step1.cooperativeName;
 
   const sectionHtml = sections
     // Cover letter contact stays on the review page; omit it from the printable PDF.
     .filter((section) => section.key !== 'contact')
     .map((section) => {
       const rows = section.rows
-        .filter((row) => row.name !== 'Official email')
+        // Official email and primary activity stay on the review page; omit from PDF.
+        .filter(
+          (row) =>
+            row.name !== 'Official email' && row.name !== 'Primary Activity',
+        )
         .map(
           (row) => `
           <tr>

@@ -35,8 +35,11 @@ export function generateForm7ReviewPdf(args: { draft: Form7Draft }) {
   const sectionHtml = sections
     .map((section) => {
       const rows = section.rows
-        // Official email stays on the review page; omit it from the printable PDF.
-        .filter((row) => row.name !== 'Official email')
+        // Official email and primary activity stay on the review page; omit from PDF.
+        .filter(
+          (row) =>
+            row.name !== 'Official email' && row.name !== 'Primary Activity',
+        )
         .map(
           (row) => `
           <tr>

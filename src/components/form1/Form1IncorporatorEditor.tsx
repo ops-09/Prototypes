@@ -18,9 +18,12 @@ import {
 import {
   CANADIAN_PROVINCE_OPTIONS,
   EMPTY_DIRECTOR_ADDRESS,
+  formatUnitLabel,
   STREET_DIRECTION_OPTIONS,
   STREET_NUMBER_SUFFIX_OPTIONS,
   STREET_TYPE_OPTIONS,
+  UNIT_TYPE_OPTIONS,
+  unitTypeRequiredError,
   type DirectorAddressType,
   type Form1Director,
   type Form1Incorporator,
@@ -40,9 +43,18 @@ import step4Styles from './Form1Step4.module.scss';
 const REQUIRED_RETRY = 'Required Field. Please try again.';
 const SHARES_WHOLE_NUMBER = 'Please enter a whole number greater than zero.';
 const AMOUNT_INVALID = 'Please enter a valid amount.';
-const CORP_NOT_FOUND =
-  'No corporation was found. Please check the name or number and try again.';
+const CORP_NOT_FOUND_ALERT =
+  'No corporation was found for that search. Enter the corporation name and OCN below, or try a different search.';
 const CORP_DUPLICATE = 'This corporation has already been added.';
+
+function isOcnLikeQuery(query: string) {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return false;
+  }
+  const digits = trimmed.replace(/\D/g, '');
+  return digits.length >= 2 && digits === trimmed.replace(/\s/g, '');
+}
 
 export type IncorporatorFieldKey =
   | 'type'
@@ -50,6 +62,7 @@ export type IncorporatorFieldKey =
   | 'lastName'
   | 'addressType'
   | 'postalCodeLookup'
+  | 'unitType'
   | 'streetNumber'
   | 'streetName'
   | 'addressLine1'
@@ -102,6 +115,7 @@ function applyCanadianLookup(
   return {
     ...prev,
     selectedAddressId: result.id,
+    unitType: result.unitType,
     unitNumber: result.roomNumber,
     streetNumber: result.streetNumber,
     streetName: result.streetName,
@@ -142,6 +156,10 @@ function validateAddress(
   if (address.addressType === 'canadian') {
     if (!address.enterManually && !address.selectedAddressId) {
       next.postalCodeLookup = REQUIRED_RETRY;
+    }
+    const unitTypeError = unitTypeRequiredError(address.unitNumber, address.unitType);
+    if (unitTypeError) {
+      next.unitType = unitTypeError;
     }
     if (!address.streetNumber.trim()) {
       next.streetNumber = REQUIRED_RETRY;
@@ -223,14 +241,17 @@ export function validateIncorporator(
     return next;
   }
 
-  if (!incorporator.corporationName.trim() || !incorporator.ocn.trim()) {
+  if (!incorporator.corporationName.trim()) {
     next.corporation = REQUIRED_RETRY;
+  }
+  if (!incorporator.ocn.trim()) {
+    next.corporationSearch = REQUIRED_RETRY;
   } else if (
     options.existingOcns?.some(
       (ocn) => ocn === incorporator.ocn && ocn.length > 0,
     )
   ) {
-    next.corporation = CORP_DUPLICATE;
+    next.corporationSearch = CORP_DUPLICATE;
   }
 
   if (!incorporator.firstName.trim()) {
@@ -260,7 +281,7 @@ export function formatIncorporatorAddressLine(
   if (address.addressType === 'canadian') {
     return (
       [
-        address.unitNumber ? `Unit ${address.unitNumber}` : '',
+        formatUnitLabel(address.unitType, address.unitNumber),
         [
           address.streetNumber,
           address.streetNumberSuffix,
@@ -402,6 +423,8 @@ export function Form1IncorporatorBlock({
       : incorporator.corporationName,
   );
   const [searchError, setSearchError] = useState('');
+  const [enterCorporationManually, setEnterCorporationManually] = useState(false);
+  const [showCorporationNotFound, setShowCorporationNotFound] = useState(false);
 
   function patch(partial: Partial<Form1Incorporator>) {
     onChange({ ...incorporator, ...partial });
@@ -418,6 +441,8 @@ export function Form1IncorporatorBlock({
     setTypeSelection(value);
     setSearchError('');
     setSearchQuery('');
+    setEnterCorporationManually(false);
+    setShowCorporationNotFound(false);
 
     if (value === 'individual') {
       onChange({
@@ -467,8 +492,9 @@ export function Form1IncorporatorBlock({
   function handleCorporationQueryChange(value: string) {
     setSearchQuery(value);
     setSearchError('');
+    setShowCorporationNotFound(false);
     const selectedLabel = selectedCorporationLabel();
-    if (selectedLabel && value !== selectedLabel) {
+    if (selectedLabel && value !== selectedLabel && !enterCorporationManually) {
       patch({ corporationName: '', ocn: '' });
     }
   }
@@ -479,11 +505,43 @@ export function Form1IncorporatorBlock({
       return;
     }
     setSearchError('');
+    setShowCorporationNotFound(false);
+    setEnterCorporationManually(false);
     setSearchQuery(formatCorporationSuggestion(result));
     patch({
       corporationName: result.legalName,
       ocn: result.ocn,
     });
+  }
+
+  function handleCorporationNoResults(query: string) {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      return;
+    }
+    setSearchError('');
+    setShowCorporationNotFound(true);
+    setEnterCorporationManually(true);
+    if (isOcnLikeQuery(trimmed)) {
+      patch({
+        ocn: trimmed.replace(/\s/g, ''),
+        corporationName: incorporator.corporationName,
+      });
+      return;
+    }
+    patch({
+      corporationName: trimmed,
+      ocn: incorporator.ocn,
+    });
+  }
+
+  function handleEnterCorporationManually(checked: boolean) {
+    setEnterCorporationManually(checked);
+    if (!checked) {
+      setShowCorporationNotFound(false);
+      return;
+    }
+    setSearchError('');
   }
 
   return (
@@ -653,18 +711,43 @@ export function Form1IncorporatorBlock({
 
                   {showCanadianFields ? (
                     <>
-                      <OntarioInput
-                        elementId={`${prefix}-unit`}
-                        caption="Unit number"
-                        name={`${prefix}-unit`}
-                        type="text"
-                        required={false}
-                        requiredValidationMessage=""
-                        value={incorporator.address.unitNumber}
-                        customOnInput={(event) =>
-                          patchAddress({ unitNumber: getEventValue(event) })
-                        }
-                      />
+                      <div className={step3Styles.addressGrid}>
+                        <div className={step3Styles.gridHalf}>
+                          <OntarioDropdownList
+                            elementId={`${prefix}-unit-type`}
+                            caption="Unit type"
+                            name={`${prefix}-unit-type`}
+                            required={Boolean(incorporator.address.unitNumber.trim())}
+                            isEmptyStartOption
+                            value={incorporator.address.unitType}
+                            options={UNIT_TYPE_OPTIONS}
+                            errorMessage={errors.unitType}
+                            customOnChange={(event) =>
+                              patchAddress({ unitType: getEventValue(event) })
+                            }
+                          />
+                        </div>
+                        <div className={step3Styles.gridHalf}>
+                          <OntarioInput
+                            elementId={`${prefix}-unit`}
+                            caption="Unit number"
+                            name={`${prefix}-unit`}
+                            type="text"
+                            required={false}
+                            requiredValidationMessage=""
+                            value={incorporator.address.unitNumber}
+                            customOnInput={(event) => {
+                              const unitNumber = getEventValue(event);
+                              patchAddress({
+                                unitNumber,
+                                unitType: unitNumber.trim()
+                                  ? incorporator.address.unitType
+                                  : '',
+                              });
+                            }}
+                          />
+                        </div>
+                      </div>
                       <div className={step3Styles.addressGrid}>
                         <div className={step3Styles.gridHalf}>
                           <OntarioInput
@@ -964,20 +1047,87 @@ export function Form1IncorporatorBlock({
                 elementId={`${prefix}-corporation-search-input`}
                 value={searchQuery}
                 errorMessage={
-                  searchError || errors.corporation || errors.corporationSearch
+                  enterCorporationManually
+                    ? undefined
+                    : searchError || errors.corporation || errors.corporationSearch
                 }
-                hintText="Example: 1001234, maple, or GREEN INSTITUTE"
+                hintText="Example: 1001234, maple, or GREEN INSTITUTE. If you cannot find the corporation, select “Enter the corporation name and OCN manually” below."
                 onChange={handleCorporationQueryChange}
                 onSelect={selectCorporation}
-                onNoResults={() => {
-                  setSearchError(CORP_NOT_FOUND);
-                  patch({ corporationName: '', ocn: '' });
+                onNoResults={handleCorporationNoResults}
+              />
+            </div>
+
+            <div className={step3Styles.manualToggle}>
+              <OntarioCheckboxes
+                caption="Manual corporation entry"
+                name={`${prefix}-enter-corporation-manually`}
+                value={enterCorporationManually ? ['manual'] : []}
+                options={[
+                  {
+                    value: 'manual',
+                    elementId: `${prefix}-enter-corporation-manually`,
+                    label: 'Enter the corporation name and OCN manually',
+                  },
+                ]}
+                customOnChange={(event) => {
+                  const target = event.target as HTMLInputElement | null;
+                  handleEnterCorporationManually(Boolean(target?.checked));
                 }}
               />
             </div>
           </div>
 
-          {incorporator.corporationName ? (
+          {showCorporationNotFound ? (
+            <div className={step4Styles.linkedDirectorAlert}>
+              <OntarioPageAlert
+                type="informational"
+                heading="Corporation not found"
+                content={CORP_NOT_FOUND_ALERT}
+              />
+            </div>
+          ) : null}
+
+          {enterCorporationManually ? (
+            <>
+              <OntarioInput
+                elementId={`${prefix}-corporation-name`}
+                caption="Corporation name"
+                name={`${prefix}-corporation-name`}
+                type="text"
+                required
+                requiredValidationMessage={REQUIRED_RETRY}
+                hintText="Enter the legal name of the corporation."
+                value={incorporator.corporationName}
+                errorMessage={errors.corporation}
+                customOnInput={(event) =>
+                  patch({ corporationName: getEventValue(event) })
+                }
+              />
+              <OntarioInput
+                elementId={`${prefix}-ocn`}
+                caption="Ontario Corporation Number (OCN)"
+                name={`${prefix}-ocn`}
+                type="text"
+                required
+                requiredValidationMessage={REQUIRED_RETRY}
+                hintText="Enter the Ontario corporation number."
+                value={incorporator.ocn}
+                errorMessage={searchError || errors.corporationSearch}
+                customOnInput={(event) => {
+                  const nextOcn = getEventValue(event).trim();
+                  if (nextOcn && existingOcns.some((ocn) => ocn === nextOcn)) {
+                    setSearchError(CORP_DUPLICATE);
+                  } else {
+                    setSearchError('');
+                  }
+                  patch({ ocn: getEventValue(event) });
+                }}
+              />
+            </>
+          ) : null}
+
+          {!enterCorporationManually && incorporator.corporationName ? (
             <div className={step4Styles.readOnlyField}>
               <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
                 Selected corporation
