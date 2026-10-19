@@ -10,14 +10,10 @@ import { FileUpload } from '../form1/FileUpload';
 import { Form7SummaryList } from '../form7/Form7SummaryList';
 import {
   createForm10ConfirmationNumber,
-  createSeedAmalgamatingCooperatives,
-  emptyDocsForCooperatives,
   EMPTY_STEP4,
   OBR_FILER_FIRST_NAME,
   OBR_FILER_LAST_NAME,
-  OBR_STEP1_DEFAULTS,
   readForm10Draft,
-  saveForm10Draft,
   upsertForm10Step4,
   type Form10Step4Data,
 } from './form10DraftStorage';
@@ -39,85 +35,26 @@ type ReviewErrors = Partial<{
 const SIGNED_PDF_REQUIRED =
   'Upload the signed PDF before submitting this filing.';
 
-function ensureStep4Draft() {
+function isStep4Ready() {
   const existing = readForm10Draft();
-  if (
+  return Boolean(
     existing?.step1.cooperativeName &&
-    existing.step2.amalgamatingCooperatives.length >= 2 &&
-    existing.step2.agreementApproved &&
-    existing.lastCompletedStep >= 3
-  ) {
-    return existing;
-  }
-
-  const now = new Date().toISOString();
-  const coops = createSeedAmalgamatingCooperatives();
-  const seededDocs = emptyDocsForCooperatives(coops).map((row, index) => ({
-    ...row,
-    certifiedAgreement: [
-      {
-        id: `seed-agreement-${index}`,
-        name: `Amalgamation-Agreement-${index + 1}.pdf`,
-        size: 184320,
-        type: 'application/pdf',
-        uploadedAt: now,
-      },
-    ],
-    affidavits: [
-      {
-        id: `seed-affidavit-${index}-1`,
-        name: `Affidavit-of-Solvency-${index + 1}a.pdf`,
-        size: 102400,
-        type: 'application/pdf',
-        uploadedAt: now,
-      },
-      {
-        id: `seed-affidavit-${index}-2`,
-        name: `Affidavit-of-Solvency-${index + 1}b.pdf`,
-        size: 98304,
-        type: 'application/pdf',
-        uploadedAt: now,
-      },
-    ],
-  }));
-
-  const seeded = {
-    step1: {
-      ...OBR_STEP1_DEFAULTS,
-      primaryActivity:
-        existing?.step1.primaryActivity || '4521 - Department stores',
-      email: existing?.step1.email || OBR_STEP1_DEFAULTS.email,
-      cooperativeType:
-        existing?.step1.cooperativeType || OBR_STEP1_DEFAULTS.cooperativeType,
-    },
-    step2: {
-      amalgamatingCooperatives: coops,
-      agreementApproved: true,
-    },
-    step3: {
-      documentsByCooperative: seededDocs,
-    },
-    step4: {
-      ...EMPTY_STEP4,
-      ...(existing?.step4 ?? {}),
-    },
-    savedAs: 'continue' as const,
-    savedAt: now,
-    lastCompletedStep: 3 as const,
-  };
-  saveForm10Draft(seeded);
-  return seeded;
+      existing.step2.amalgamatingCooperatives.length >= 2 &&
+      existing.step2.agreementApproved &&
+      existing.lastCompletedStep >= 3,
+  );
 }
 
 export function Form10Step4() {
   const navigate = useNavigate();
-  const draft = ensureStep4Draft();
+  const draft = readForm10Draft();
+  const ready = isStep4Ready();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const [step4, setStep4] = useState<Form10Step4Data>(() => ({
     ...EMPTY_STEP4,
-    ...(draft.step4 ?? {}),
-    signedPdf: draft.step4?.signedPdf ?? null,
+    ...(draft?.step4 ?? {}),
+    signedPdf: draft?.step4?.signedPdf ?? null,
   }));
   const [errors, setErrors] = useState<ReviewErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
@@ -125,7 +62,10 @@ export function Form10Step4() {
   const [pdfGenerated, setPdfGenerated] = useState(false);
 
   const filerName = `${OBR_FILER_FIRST_NAME} ${OBR_FILER_LAST_NAME}`;
-  const sections = useMemo(() => buildReviewSections(draft), [draft]);
+  const sections = useMemo(
+    () => (draft && ready ? buildReviewSections(draft) : []),
+    [draft, ready],
+  );
   const incompleteKeys = useMemo(
     () =>
       new Set(
@@ -144,8 +84,8 @@ export function Form10Step4() {
     [filerName],
   );
 
-  if (!draft.step1.cooperativeName) {
-    return <Navigate to="/form-10/step-2" replace />;
+  if (!ready || !draft) {
+    return <Navigate to="/form-10/step-3" replace />;
   }
 
   function clearError(key: keyof ReviewErrors) {
@@ -208,6 +148,9 @@ export function Form10Step4() {
   }
 
   function handleGeneratePdf() {
+    if (!draft) {
+      return;
+    }
     const opened = generateForm10ReviewPdf({ draft });
     setPdfBlocked(!opened);
     if (opened) {

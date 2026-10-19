@@ -46,6 +46,11 @@
   margin-top: 0;
 }
 
+.subflowPageTitle {
+  margin-top: 0;
+  padding-top: var(--ontario-spacing-7, 2.5rem);
+}
+
 .coopDocsIdentity {
   display: flex;
   flex-direction: column;
@@ -98,6 +103,23 @@
   gap: var(--ontario-spacing-7, 2.5rem);
 }
 
+.coopBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+}
+
+h2.coopHeading {
+  margin: 0;
+}
+
+// 24px (spacing-5) between the H2 and the name/OCN label; other fields keep stack gap.
+.coopHeading + * {
+  margin-top: calc(
+    var(--ontario-spacing-5, 1.5rem) - var(--ontario-spacing-7, 2.5rem)
+  );
+}
+
 // ODS has no readOnly inputs — static OBR display composed with tokens.
 .obrField {
   margin: 0;
@@ -110,25 +132,6 @@
 .obrValue {
   margin: 0;
   color: var(--ontario-colour-black, #1a1a1a);
-}
-
-.registryCalloutBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ontario-spacing-4, 1rem);
-}
-
-.registryCalloutRow {
-  margin: 0;
-}
-
-.registryCalloutLabel {
-  margin: 0 0 var(--ontario-spacing-1, 0.25rem);
-  font-weight: 700;
-}
-
-.registryCalloutValue {
-  margin: 0;
 }
 
 .fieldError {
@@ -249,6 +252,10 @@
   margin-top: var(--ontario-spacing-7, 2.5rem);
 }
 
+.editorActions {
+  margin-top: var(--ontario-spacing-7, 2.5rem);
+}
+
 .nuansReportBlock {
   display: flex;
   flex-direction: column;
@@ -272,6 +279,12 @@
   flex-wrap: wrap;
   gap: var(--ontario-spacing-5, 1.5rem);
   align-items: center;
+}
+
+.addActionsAlone {
+  padding-top: var(--ontario-spacing-4, 1rem);
+  border-top: var(--ontario-global-tokens-border-size, 2px) solid
+    var(--ontario-greyscale-20, #ccc);
 }
 
 .addLink {
@@ -337,5 +350,27 @@
 
 .nuansMaxNote {
   margin: 0;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+// Corporation search (same pattern as Form 1 incorporator corporation search).
+.manualToggle {
+  :global(ontario-checkboxes) {
+    display: block;
+  }
+}
+
+.selectedCoop {
+  margin: 0;
+}
+
+.selectedCoopLabel {
+  margin: 0 0 var(--ontario-spacing-2, 0.5rem);
+}
+
+.selectedCoopValue {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
   color: var(--ontario-colour-black, #1a1a1a);
 }

@@ -8,12 +8,8 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
 import {
-  createSeedAmalgamatingCooperatives,
   emptyDocsForCooperatives,
-  EMPTY_STEP4,
-  OBR_STEP1_DEFAULTS,
   readForm10Draft,
-  saveForm10Draft,
   upsertForm10Step3,
   type AmalgamatingCoopDocuments,
   type Form10Step3Data,
@@ -54,43 +50,13 @@ function focusField(anchorId: string) {
   focusable?.focus({ preventScroll: true });
 }
 
-function ensureStep3Draft() {
+function isStep3Ready() {
   const existing = readForm10Draft();
-  if (
+  return Boolean(
     existing?.step1.cooperativeName &&
-    existing.step2.amalgamatingCooperatives.length >= 2 &&
-    existing.step2.agreementApproved
-  ) {
-    return existing;
-  }
-
-  const coops = createSeedAmalgamatingCooperatives();
-  const now = new Date().toISOString();
-  const seeded = {
-    step1: {
-      ...OBR_STEP1_DEFAULTS,
-      primaryActivity: existing?.step1.primaryActivity || '4521 - Department stores',
-      email: existing?.step1.email || OBR_STEP1_DEFAULTS.email,
-      cooperativeType:
-        existing?.step1.cooperativeType || OBR_STEP1_DEFAULTS.cooperativeType,
-    },
-    step2: {
-      amalgamatingCooperatives: coops,
-      agreementApproved: true,
-    },
-    step3: {
-      documentsByCooperative: emptyDocsForCooperatives(
-        coops,
-        existing?.step3.documentsByCooperative,
-      ),
-    },
-    step4: { ...EMPTY_STEP4, ...(existing?.step4 ?? {}) },
-    savedAs: 'continue' as const,
-    savedAt: now,
-    lastCompletedStep: 2 as const,
-  };
-  saveForm10Draft(seeded);
-  return seeded;
+      existing.step2.amalgamatingCooperatives.length >= 2 &&
+      existing.step2.agreementApproved,
+  );
 }
 
 function toForm7Docs(files: SupportingDocMeta[]) {
@@ -99,23 +65,29 @@ function toForm7Docs(files: SupportingDocMeta[]) {
 
 export function Form10Step3() {
   const navigate = useNavigate();
-  const draft = ensureStep3Draft();
+  const draft = readForm10Draft();
+  const ready = isStep3Ready();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
-  const cooperatives = draft.step2.amalgamatingCooperatives;
+  const cooperatives = draft?.step2.amalgamatingCooperatives ?? [];
 
   const [step3, setStep3] = useState<Form10Step3Data>(() => ({
     documentsByCooperative: emptyDocsForCooperatives(
       cooperatives,
-      draft.step3.documentsByCooperative,
+      draft?.step3.documentsByCooperative,
     ),
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
+  const lastCompletedStep = draft?.lastCompletedStep ?? 0;
+
   useEffect(() => {
-    upsertForm10Step3(step3, 'draft', draft.lastCompletedStep >= 3 ? 3 : 2);
-  }, [draft.lastCompletedStep, step3]);
+    if (!ready) {
+      return;
+    }
+    upsertForm10Step3(step3, 'draft', lastCompletedStep >= 3 ? 3 : 2);
+  }, [lastCompletedStep, ready, step3]);
 
   const errorSummaryItems = useMemo(() => {
     const items: { key: string; message: string; href: string }[] = [];
@@ -140,8 +112,8 @@ export function Form10Step3() {
     return items;
   }, [cooperatives, errors]);
 
-  if (!draft?.step1.cooperativeName) {
-    return <Navigate to="/form-10/step-2" replace />;
+  if (!ready || !draft) {
+    return <Navigate to="/form-10/step-3" replace />;
   }
 
   function clearError(key: FieldKey) {

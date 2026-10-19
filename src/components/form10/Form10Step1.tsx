@@ -19,7 +19,6 @@ import {
   readForm10Draft,
   upsertForm10Step1,
 } from './form10DraftStorage';
-import { Form10RegistryCallout } from './Form10RegistryCallout';
 import styles from './Form10Step1.module.scss';
 
 const CURRENT_STEP = 2;
@@ -268,17 +267,9 @@ export function Form10Step1() {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Business details</h1>
 
           <p className={styles.lead}>
-            Review the co-operative&apos;s registry details, update primary activity, official
-            email, and type of co-operative as needed, then continue.
+            Update the primary activity, official email, and type of co-operative as needed,
+            then continue.
           </p>
-
-          <div className={styles.alert}>
-            <Form10RegistryCallout
-              cooperativeName={cooperativeName}
-              ocn={ocn}
-              incorporationDate={incorporationDate}
-            />
-          </div>
 
           <div className={styles.formStack}>
             <div id={FIELD_ANCHORS.primaryActivity} className={styles.naicsBlock}>

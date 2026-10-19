@@ -369,8 +369,7 @@ export function Form2Step1() {
           <p className={styles.body}>
             The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the
             name. The name of the co-operative must end with one of the following legal
-            elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “LIMITED”, “LIMITÉE”,
-            “INC.”, “CORP.”, “LTD.” or “LTÉE”.
+            elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “INC.” or “CORP.”.
           </p>
 
           <div className={styles.formStack}>

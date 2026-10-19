@@ -38,6 +38,7 @@ import { Form10BeforeYouBeginPage } from './pages/Form10BeforeYouBeginPage';
 import { Form10DraftSummaryPage } from './pages/Form10DraftSummaryPage';
 import { Form10Page } from './pages/Form10Page';
 import { Form10Step1Page } from './pages/Form10Step1Page';
+import { Form10CooperativeSubflowPage } from './pages/Form10CooperativeSubflowPage';
 import { Form10Step2Page } from './pages/Form10Step2Page';
 import { Form10Step3Page } from './pages/Form10Step3Page';
 import { Form10Step4Page } from './pages/Form10Step4Page';
@@ -121,6 +122,14 @@ function App() {
         <Route path="/form-10/step-1" element={<Form10Page />} />
         <Route path="/form-10/step-2" element={<Form10Step1Page />} />
         <Route path="/form-10/step-3" element={<Form10Step2Page />} />
+        <Route
+          path="/form-10/step-3/cooperatives/new"
+          element={<Form10CooperativeSubflowPage />}
+        />
+        <Route
+          path="/form-10/step-3/cooperatives/:cooperativeId"
+          element={<Form10CooperativeSubflowPage />}
+        />
         <Route path="/form-10/step-4" element={<Form10Step3Page />} />
         <Route path="/form-10/step-5" element={<Form10Step4Page />} />
         <Route path="/form-10/draft-summary" element={<Form10DraftSummaryPage />} />

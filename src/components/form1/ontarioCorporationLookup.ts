@@ -48,6 +48,16 @@ export const ONTARIO_CORPORATION_EXAMPLES: readonly OntarioCorporationResult[] =
     legalName: 'HAMILTON WORKERS UNITED LTD.',
     status: 'Active',
   },
+  {
+    ocn: '100003456',
+    legalName: 'MAPLE LEAF WORKERS CO-OPERATIVE INC.',
+    status: 'Active',
+  },
+  {
+    ocn: '100009876',
+    legalName: 'NORTHERN SUPPLY CO-OPERATIVE INC.',
+    status: 'Active',
+  },
 ] as const;
 
 function normalizeQuery(value: string) {

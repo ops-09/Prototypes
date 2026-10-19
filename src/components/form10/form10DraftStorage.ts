@@ -110,11 +110,10 @@ export function createSeedAmalgamatingCooperatives(): AmalgamatingCooperative[] 
   ];
 }
 
+export const MIN_AMALGAMATING_COOPS = 2;
+
 export const EMPTY_STEP2: Form10Step2Data = {
-  amalgamatingCooperatives: [
-    createEmptyAmalgamatingCooperative(),
-    createEmptyAmalgamatingCooperative(),
-  ],
+  amalgamatingCooperatives: [],
   agreementApproved: false,
 };
 
@@ -220,13 +219,7 @@ export function upsertForm10Step1(
   const existing = readForm10Draft();
   const draft: Form10Draft = {
     step1,
-    step2: existing?.step2 ?? {
-      ...EMPTY_STEP2,
-      amalgamatingCooperatives: [
-        createEmptyAmalgamatingCooperative(),
-        createEmptyAmalgamatingCooperative(),
-      ],
-    },
+    step2: existing?.step2 ?? { ...EMPTY_STEP2 },
     step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: existing?.step4 ?? { ...EMPTY_STEP4 },
     savedAs,

@@ -1,5 +1,9 @@
 import { formatBytes, formatIsoDateDisplay } from '../form7/form7Labels';
-import type { Form10Draft, SupportingDocMeta } from './form10DraftStorage';
+import {
+  MIN_AMALGAMATING_COOPS,
+  type Form10Draft,
+  type SupportingDocMeta,
+} from './form10DraftStorage';
 
 export type ReviewRow = {
   name: string;
@@ -49,7 +53,7 @@ function isCoopDetailsComplete(draft: Form10Draft) {
 function isAmalgamatingComplete(draft: Form10Draft) {
   return (
     draft.step2.agreementApproved &&
-    draft.step2.amalgamatingCooperatives.length >= 2 &&
+    draft.step2.amalgamatingCooperatives.length >= MIN_AMALGAMATING_COOPS &&
     draft.step2.amalgamatingCooperatives.every(
       (coop) =>
         coop.legalName.trim() &&

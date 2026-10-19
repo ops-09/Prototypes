@@ -4,17 +4,13 @@ export const PERMITTED_LEGAL_ELEMENTS = [
   'INCORPORATED',
   'INCORPORÉE',
   'CORPORATION',
-  'LIMITED',
-  'LIMITÉE',
   'INC.',
   'CORP.',
-  'LTD.',
-  'LTÉE',
 ] as const;
 
 /** Shown on field + error-summary when the proposed co-operative name is missing or invalid. */
 export const NAME_VALIDATION_ERROR =
-  'The co-operative name must include "CO-OPERATIVE" or "COOPÉRATIVE" and end with one of the permitted legal elements — INCORPORATED, INCORPORÉE, CORPORATION, LIMITED, LIMITÉE, INC., CORP., LTD., or LTÉE. Example: GREEN INSTITUTE CO-OPERATIVE INC.';
+  'The co-operative name must include "CO-OPERATIVE" or "COOPÉRATIVE" and end with one of the permitted legal elements — INCORPORATED, INCORPORÉE, CORPORATION, INC., or CORP. Example: GREEN INSTITUTE CO-OPERATIVE INC.';
 
 export const COOPERATIVE_NAME_REQUIRED_ERROR = NAME_VALIDATION_ERROR;
 
