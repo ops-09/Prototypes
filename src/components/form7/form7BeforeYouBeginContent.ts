@@ -84,9 +84,9 @@ export const BYB_COST_INTRO =
   'A filing fee is required to submit Articles of Amendment. The fee depends on the amendment type.';
 
 export const BYB_COST_ITEMS: readonly string[] = [
-  'Name change or other amendment: $155.',
-  'Conversion to a Business Corporations Act or Not-for-Profit Corporations Act corporation: $330.',
-  'Reduction of authorized capital: $155.',
+  'Name change or other amendment: $100.',
+  'Convert a co-op to a business corporation under the Business Corporations Act - $200',
+  'Convert a co-op to a not-for-profit corporation under the Not-for-Profit Corporations Act, 2010 - $100',
   'A valid payment method available.',
 ];
 

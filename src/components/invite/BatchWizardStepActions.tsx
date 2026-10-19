@@ -1,6 +1,6 @@
 import {
   OntarioButton,
-  OntarioIconAddAlt,
+  OntarioIconAdd,
   OntarioIconChevronLeft,
   OntarioIconChevronRight,
 } from '@ongov/ontario-design-system-component-library-react';
@@ -86,7 +86,7 @@ export function BatchWizardStepActions({
             label={`Send ${inviteCount} invitation${inviteCount === 1 ? '' : 's'}`}
             onClick={() => void onSubmit()}
           >
-            <OntarioIconAddAlt colour="white" />
+            <OntarioIconAdd colour="white" />
           </OntarioButton>
           <OntarioButton
             key="batch-review-back"

@@ -1,6 +1,6 @@
 import {
   OntarioIconAccount,
-  OntarioIconAddAlt,
+  OntarioIconAdd,
   OntarioIconGrid,
   OntarioIconNotification,
   OntarioIconSettings,
@@ -48,6 +48,6 @@ export const sideNavigationItems: NavItem[] = [
     id: 'add-business-profile',
     label: 'Add business profile',
     href: '/add-business-profile',
-    icon: OntarioIconAddAlt,
+    icon: OntarioIconAdd,
   },
 ];

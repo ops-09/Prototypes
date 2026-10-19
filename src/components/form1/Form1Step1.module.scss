@@ -90,10 +90,19 @@
   gap: var(--ontario-spacing-5, 1.5rem);
 }
 
+// Stack gap (2rem) above + margin-top, block gap (1.5rem) below + margin-bottom: ~3rem each side.
+.nuansReportDivider {
+  width: 100%;
+  margin: var(--ontario-spacing-4, 1rem) 0 var(--ontario-spacing-5, 1.5rem);
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
 .nuansReportHeader {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--ontario-spacing-4, 1rem);
 }
@@ -149,24 +158,37 @@
 }
 
 .removeLink {
-  display: inline;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
   margin: 0;
   padding: 0;
   border: 0;
-  background: none;
+  background: transparent;
   color: var(--ontario-colour-link, #0066cc);
-  font: inherit;
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   font-weight: var(--ontario-font-weights-semi-bold, 600);
-  text-decoration: underline;
+  line-height: 1.5;
+  text-decoration: none;
   cursor: pointer;
+  flex: 0 0 auto;
 
-  &:hover,
-  &:focus {
+  &:hover {
     color: var(--ontario-colour-link--hover, #00478f);
+    text-decoration: underline;
   }
 
-  &:active {
-    color: var(--ontario-colour-link--active, #002142);
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
   }
 }
 

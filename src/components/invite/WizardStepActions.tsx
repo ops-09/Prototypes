@@ -1,6 +1,6 @@
 import {
   OntarioButton,
-  OntarioIconAddAlt,
+  OntarioIconAdd,
   OntarioIconChevronLeft,
   OntarioIconChevronRight,
 } from '@ongov/ontario-design-system-component-library-react';
@@ -127,7 +127,7 @@ export function WizardStepActions({
           label="Add user"
           onClick={() => void onSubmit()}
         >
-          <OntarioIconAddAlt colour="white" />
+          <OntarioIconAdd colour="white" />
         </OntarioButton>
         <OntarioButton
           key={`review-back-${reviewBackLabel}`}

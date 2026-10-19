@@ -34,6 +34,13 @@ import { Form7Step1Page } from './pages/Form7Step1Page';
 import { Form7Step2Page } from './pages/Form7Step2Page';
 import { Form7Step3Page } from './pages/Form7Step3Page';
 import { Form7Step4Page } from './pages/Form7Step4Page';
+import { Form10BeforeYouBeginPage } from './pages/Form10BeforeYouBeginPage';
+import { Form10DraftSummaryPage } from './pages/Form10DraftSummaryPage';
+import { Form10Page } from './pages/Form10Page';
+import { Form10Step1Page } from './pages/Form10Step1Page';
+import { Form10Step2Page } from './pages/Form10Step2Page';
+import { Form10Step3Page } from './pages/Form10Step3Page';
+import { Form10Step4Page } from './pages/Form10Step4Page';
 import { HomePage } from './pages/HomePage';
 import { InviteUserPage } from './pages/InviteUserPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
@@ -109,6 +116,14 @@ function App() {
         <Route path="/form-7/step-4" element={<Form7Step3Page />} />
         <Route path="/form-7/step-5" element={<Form7Step4Page />} />
         <Route path="/form-7/draft-summary" element={<Form7DraftSummaryPage />} />
+        <Route path="/form-10" element={<Form10BeforeYouBeginPage />} />
+        {/* Cover letter is step 1; Before you begin has no step number. */}
+        <Route path="/form-10/step-1" element={<Form10Page />} />
+        <Route path="/form-10/step-2" element={<Form10Step1Page />} />
+        <Route path="/form-10/step-3" element={<Form10Step2Page />} />
+        <Route path="/form-10/step-4" element={<Form10Step3Page />} />
+        <Route path="/form-10/step-5" element={<Form10Step4Page />} />
+        <Route path="/form-10/draft-summary" element={<Form10DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/user-management/invite" element={<InviteUserPage />} />

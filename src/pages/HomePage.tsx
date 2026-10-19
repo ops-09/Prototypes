@@ -196,6 +196,48 @@ export function HomePage() {
             cardLink={withBasePath('/form-7/step-5')}
             ariaLabelText="Open Form 7 Step 5 Review and validation"
           />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 10"
+            description="Articles of Amalgamation — Before you begin, then cover letter."
+            cardLink={withBasePath('/form-10')}
+            ariaLabelText="Open the Form 10 Articles of Amalgamation prototype"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 10 — Step 1"
+            description="Cover letter — contact information before the filing steps."
+            cardLink={withBasePath('/form-10/step-1')}
+            ariaLabelText="Open Form 10 Step 1 cover letter"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 10 — Step 2"
+            description="Business details — primary activity, official email, and type of co-operative."
+            cardLink={withBasePath('/form-10/step-2')}
+            ariaLabelText="Open Form 10 Step 2 business details"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 10 — Step 3"
+            description="Amalgamation details — amalgamating co-operatives and section 156 confirmation."
+            cardLink={withBasePath('/form-10/step-3')}
+            ariaLabelText="Open Form 10 Step 3 amalgamation details"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 10 — Step 4"
+            description="Supporting documents — amalgamation agreements and affidavits of solvency."
+            cardLink={withBasePath('/form-10/step-4')}
+            ariaLabelText="Open Form 10 Step 4 supporting documents"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 10 — Step 5"
+            description="Review and validation — summary, generate PDF, authorize, and submit."
+            cardLink={withBasePath('/form-10/step-5')}
+            ariaLabelText="Open Form 10 Step 5 review and validation"
+          />
         </OntarioCardCollection>
       </PageBoilerplate>
     </PlaygroundShell>

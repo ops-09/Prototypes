@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioDateInput,
-  OntarioIconAddAlt,
+  OntarioIconAdd,
+  OntarioIconDelete,
   OntarioInput,
   OntarioPageAlert,
   OntarioStepIndicator,
@@ -377,6 +378,7 @@ export function Form1Step1() {
 
               return (
                 <div key={report.id} className={styles.nuansReportBlock}>
+                  {index > 0 ? <hr className={styles.nuansReportDivider} /> : null}
                   {reports.length > 1 ? (
                     <div className={styles.nuansReportHeader}>
                       <h2 className={`ontario-h4 ${styles.nuansReportHeading}`}>
@@ -388,6 +390,7 @@ export function Form1Step1() {
                         onClick={() => removeReport(report.id)}
                         aria-label={`Remove NUANS report ${index + 1}`}
                       >
+                        <OntarioIconDelete colour="blue" iconWidth={24} isDecorative />
                         Remove
                       </button>
                     </div>
@@ -441,7 +444,7 @@ export function Form1Step1() {
             {reports.length < MAX_NUANS_REPORTS ? (
               <div className={styles.addActions}>
                 <button type="button" className={styles.addLink} onClick={addReport}>
-                  <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
+                  <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
                   Add another NUANS report
                 </button>
               </div>

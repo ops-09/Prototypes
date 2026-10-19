@@ -2,7 +2,7 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioIconAddAlt,
+  OntarioIconAdd,
   OntarioIconDelete,
   OntarioInput,
   OntarioPageAlert,
@@ -757,7 +757,7 @@ export function Form1Step4() {
                       className={step4Styles.addLink}
                       onClick={startAddDirectorSubflow}
                     >
-                      <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
+                      <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
                       Add director(s)
                     </button>
                   </div>

@@ -2,7 +2,7 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioIconAddAlt,
+  OntarioIconAdd,
   OntarioIconDelete,
   OntarioPageAlert,
   OntarioStepIndicator,
@@ -425,7 +425,7 @@ export function Form2Step7() {
                   className={step4Styles.addLink}
                   onClick={startAddSubflow}
                 >
-                  <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
+                  <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
                   Add an Incorporator
                 </button>
               </div>

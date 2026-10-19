@@ -1,6 +1,7 @@
 import {
   OntarioDateInput,
-  OntarioIconAddAlt,
+  OntarioIconAdd,
+  OntarioIconDelete,
   OntarioInput,
 } from '@ongov/ontario-design-system-component-library-react';
 import { FileUpload, type UploadedFileMeta } from '../form1/FileUpload';
@@ -173,6 +174,7 @@ export function ProposedNameAndNuans({
 
         return (
           <div key={report.id} className={styles.nuansReportBlock}>
+            {index > 0 ? <hr className={styles.nuansReportDivider} /> : null}
             {reports.length > 1 ? (
               <div className={styles.nuansReportHeader}>
                 <h3 className={`ontario-h4 ${styles.nuansReportHeading}`}>
@@ -184,6 +186,7 @@ export function ProposedNameAndNuans({
                   onClick={() => removeReport(report.id)}
                   aria-label={`Remove NUANS report ${index + 1}`}
                 >
+                  <OntarioIconDelete colour="blue" iconWidth={24} isDecorative />
                   Remove
                 </button>
               </div>
@@ -237,7 +240,7 @@ export function ProposedNameAndNuans({
       {reports.length < MAX_NUANS_REPORTS ? (
         <div className={styles.addActions}>
           <button type="button" className={styles.addLink} onClick={addReport}>
-            <OntarioIconAddAlt colour="blue" iconWidth={24} isDecorative />
+            <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
             Add another NUANS report
           </button>
         </div>
