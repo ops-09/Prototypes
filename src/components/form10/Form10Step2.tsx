@@ -12,8 +12,10 @@ import { FieldErrorMessage } from '../form1/FieldErrorMessage';
 import step4Styles from '../form1/Form1Step4.module.scss';
 import { formatIsoDateDisplay } from '../form7/form7Labels';
 import {
+  EMPTY_NAME_CHANGE,
   EMPTY_STEP2,
   EMPTY_STEP4,
+  FORM10_TOTAL_STEPS,
   MIN_AMALGAMATING_COOPS,
   OBR_STEP1_DEFAULTS,
   readForm10Draft,
@@ -24,7 +26,6 @@ import {
 import styles from './Form10Step1.module.scss';
 
 const CURRENT_STEP = 3;
-const TOTAL_STEPS = 5;
 
 type FieldKey = 'cooperatives' | 'agreementApproved';
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -53,7 +54,9 @@ function ensureStep2Draft() {
   const seeded = {
     step1: { ...OBR_STEP1_DEFAULTS, primaryActivity: '4521 - Department stores' },
     step2: { ...EMPTY_STEP2 },
+    nameChange: { ...EMPTY_NAME_CHANGE },
     step3: {
+      certifiedAgreement: [],
       documentsByCooperative: [],
     },
     step4: { ...EMPTY_STEP4 },
@@ -193,7 +196,7 @@ export function Form10Step2() {
           showBackButton
           backButtonUrl="/form-10/step-2"
           currentStep={CURRENT_STEP}
-          numberOfSteps={TOTAL_STEPS}
+          numberOfSteps={FORM10_TOTAL_STEPS}
         />
       </div>
 

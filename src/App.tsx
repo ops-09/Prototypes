@@ -39,6 +39,7 @@ import { Form10DraftSummaryPage } from './pages/Form10DraftSummaryPage';
 import { Form10Page } from './pages/Form10Page';
 import { Form10Step1Page } from './pages/Form10Step1Page';
 import { Form10CooperativeSubflowPage } from './pages/Form10CooperativeSubflowPage';
+import { Form10NameChangePage } from './pages/Form10NameChangePage';
 import { Form10Step2Page } from './pages/Form10Step2Page';
 import { Form10Step3Page } from './pages/Form10Step3Page';
 import { Form10Step4Page } from './pages/Form10Step4Page';
@@ -130,8 +131,9 @@ function App() {
           path="/form-10/step-3/cooperatives/:cooperativeId"
           element={<Form10CooperativeSubflowPage />}
         />
-        <Route path="/form-10/step-4" element={<Form10Step3Page />} />
-        <Route path="/form-10/step-5" element={<Form10Step4Page />} />
+        <Route path="/form-10/step-4" element={<Form10NameChangePage />} />
+        <Route path="/form-10/step-5" element={<Form10Step3Page />} />
+        <Route path="/form-10/step-6" element={<Form10Step4Page />} />
         <Route path="/form-10/draft-summary" element={<Form10DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />

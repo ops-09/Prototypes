@@ -1,4 +1,9 @@
 import type { UploadedFileMeta } from '../form1/FileUpload';
+import {
+  emptyNameNuans,
+  normalizeNameNuans,
+  type NameNuansFields,
+} from '../form7/form7DraftStorage';
 
 const STORAGE_KEY = 'ops-rbac.form10.draft';
 
@@ -28,6 +33,12 @@ export type Form10Step2Data = {
   agreementApproved: boolean;
 };
 
+/** Whether the amalgamated co-operative will use a new name (Form 7 name-change flow). */
+export type Form10NameChangeData = {
+  changeCooperativeName: 'change' | 'no' | '';
+  nameNuans: NameNuansFields;
+};
+
 export type SupportingDocMeta = {
   id: string;
   name: string;
@@ -38,11 +49,12 @@ export type SupportingDocMeta = {
 
 export type AmalgamatingCoopDocuments = {
   cooperativeId: string;
-  certifiedAgreement: SupportingDocMeta[];
   affidavits: SupportingDocMeta[];
 };
 
 export type Form10Step3Data = {
+  /** One certified amalgamation agreement covering all amalgamating co-operatives. */
+  certifiedAgreement: SupportingDocMeta[];
   documentsByCooperative: AmalgamatingCoopDocuments[];
 };
 
@@ -55,13 +67,17 @@ export type Form10Step4Data = {
 export type Form10Draft = {
   step1: Form10Step1Data;
   step2: Form10Step2Data;
+  nameChange: Form10NameChangeData;
   step3: Form10Step3Data;
   step4: Form10Step4Data;
   savedAs: 'draft' | 'continue' | 'submitted';
   savedAt: string;
-  lastCompletedStep: 0 | 1 | 2 | 3 | 4;
+  lastCompletedStep: 0 | 1 | 2 | 3 | 4 | 5;
   confirmationNumber?: string;
 };
+
+/** Cover (1) → business (2) → amalgamation (3) → name (4) → documents (5) → review (6). */
+export const FORM10_TOTAL_STEPS = 6;
 
 /** Sample OBR registry values for this Articles of Amalgamation prototype. */
 export const OBR_COOPERATIVE_NAME = 'MAPLE LEAF WORKERS CO-OPERATIVE INC.';
@@ -117,7 +133,13 @@ export const EMPTY_STEP2: Form10Step2Data = {
   agreementApproved: false,
 };
 
+export const EMPTY_NAME_CHANGE: Form10NameChangeData = {
+  changeCooperativeName: '',
+  nameNuans: emptyNameNuans(),
+};
+
 export const EMPTY_STEP3: Form10Step3Data = {
+  certifiedAgreement: [],
   documentsByCooperative: [],
 };
 
@@ -134,7 +156,6 @@ export function emptyDocsForCooperatives(
     const prior = existing?.find((row) => row.cooperativeId === coop.id);
     return {
       cooperativeId: coop.id,
-      certifiedAgreement: prior?.certifiedAgreement ?? [],
       affidavits: prior?.affidavits ?? [],
     };
   });
@@ -155,11 +176,19 @@ export function saveForm10Draft(draft: Form10Draft) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
 }
 
-function normalizeLastCompletedStep(value: unknown): Form10Draft['lastCompletedStep'] {
-  if (value === 1 || value === 2 || value === 3 || value === 4) {
-    return value;
+function normalizeLastCompletedStep(
+  value: unknown,
+  nameChangeAnswer: Form10NameChangeData['changeCooperativeName'],
+): Form10Draft['lastCompletedStep'] {
+  const step =
+    value === 1 || value === 2 || value === 3 || value === 4 || value === 5
+      ? value
+      : 0;
+  // Legacy drafts used 3 = supporting docs and 4 = review, with no name-change answer.
+  if (!nameChangeAnswer && step >= 3) {
+    return 2;
   }
-  return 0;
+  return step;
 }
 
 export function readForm10Draft(): Form10Draft | null {
@@ -177,6 +206,10 @@ export function readForm10Draft(): Form10Draft | null {
         : EMPTY_STEP2.amalgamatingCooperatives.map(normalizeAmalgamatingCooperative),
     };
     const step3Existing = parsed.step3;
+    const nameChange: Form10NameChangeData = {
+      changeCooperativeName: parsed.nameChange?.changeCooperativeName ?? '',
+      nameNuans: normalizeNameNuans(parsed.nameChange?.nameNuans),
+    };
     return {
       step1: {
         ...OBR_STEP1_DEFAULTS,
@@ -187,7 +220,17 @@ export function readForm10Draft(): Form10Draft | null {
             : (parsed.step1?.primaryActivity ?? ''),
       },
       step2,
+      nameChange,
       step3: {
+        certifiedAgreement:
+          step3Existing?.certifiedAgreement?.length
+            ? step3Existing.certifiedAgreement
+            : (
+                step3Existing?.documentsByCooperative as
+                  | Array<{ certifiedAgreement?: SupportingDocMeta[] }>
+                  | undefined
+              )?.find((row) => row.certifiedAgreement?.length)?.certifiedAgreement ??
+              [],
         documentsByCooperative: emptyDocsForCooperatives(
           step2.amalgamatingCooperatives,
           step3Existing?.documentsByCooperative,
@@ -200,7 +243,10 @@ export function readForm10Draft(): Form10Draft | null {
       },
       savedAs: parsed.savedAs ?? 'draft',
       savedAt: parsed.savedAt ?? new Date().toISOString(),
-      lastCompletedStep: normalizeLastCompletedStep(parsed.lastCompletedStep),
+      lastCompletedStep: normalizeLastCompletedStep(
+        parsed.lastCompletedStep,
+        nameChange.changeCooperativeName,
+      ),
       confirmationNumber: parsed.confirmationNumber,
     };
   } catch {
@@ -220,6 +266,7 @@ export function upsertForm10Step1(
   const draft: Form10Draft = {
     step1,
     step2: existing?.step2 ?? { ...EMPTY_STEP2 },
+    nameChange: existing?.nameChange ?? { ...EMPTY_NAME_CHANGE, nameNuans: emptyNameNuans() },
     step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: existing?.step4 ?? { ...EMPTY_STEP4 },
     savedAs,
@@ -244,6 +291,7 @@ export function upsertForm10Step2(
     ...existing,
     step2,
     step3: {
+      certifiedAgreement: existing.step3?.certifiedAgreement ?? [],
       documentsByCooperative: emptyDocsForCooperatives(
         step2.amalgamatingCooperatives,
         existing.step3?.documentsByCooperative,
@@ -258,8 +306,8 @@ export function upsertForm10Step2(
   return draft;
 }
 
-export function upsertForm10Step3(
-  step3: Form10Step3Data,
+export function upsertForm10NameChange(
+  nameChange: Form10NameChangeData,
   savedAs: Form10Draft['savedAs'],
   lastCompletedStep: Form10Draft['lastCompletedStep'] = 3,
 ): Form10Draft | null {
@@ -269,7 +317,28 @@ export function upsertForm10Step3(
   }
   const draft: Form10Draft = {
     ...existing,
+    nameChange,
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep,
+  };
+  saveForm10Draft(draft);
+  return draft;
+}
+
+export function upsertForm10Step3(
+  step3: Form10Step3Data,
+  savedAs: Form10Draft['savedAs'],
+  lastCompletedStep: Form10Draft['lastCompletedStep'] = 4,
+): Form10Draft | null {
+  const existing = readForm10Draft();
+  if (!existing?.step1.cooperativeName || !existing.step2.amalgamatingCooperatives.length) {
+    return null;
+  }
+  const draft: Form10Draft = {
+    ...existing,
     step3: {
+      certifiedAgreement: step3.certifiedAgreement ?? [],
       documentsByCooperative: emptyDocsForCooperatives(
         existing.step2.amalgamatingCooperatives,
         step3.documentsByCooperative,
@@ -287,7 +356,7 @@ export function upsertForm10Step3(
 export function upsertForm10Step4(
   step4: Form10Step4Data,
   savedAs: Form10Draft['savedAs'],
-  lastCompletedStep: Form10Draft['lastCompletedStep'] = 4,
+  lastCompletedStep: Form10Draft['lastCompletedStep'] = 5,
   confirmationNumber?: string,
 ): Form10Draft | null {
   const existing = readForm10Draft();

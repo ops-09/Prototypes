@@ -1,4 +1,6 @@
 import { formatBytes, formatIsoDateDisplay } from '../form7/form7Labels';
+import { validateCooperativeName } from '../form1/nameValidation';
+import { validateNameNuansFields } from '../form7/ProposedNameAndNuans';
 import {
   MIN_AMALGAMATING_COOPS,
   type Form10Draft,
@@ -13,6 +15,7 @@ export type ReviewRow = {
 export type ReviewSectionKey =
   | 'coopDetails'
   | 'amalgamatingCooperatives'
+  | 'nameChange'
   | 'supportingDocs';
 
 export type ReviewSection = {
@@ -63,15 +66,33 @@ function isAmalgamatingComplete(draft: Form10Draft) {
   );
 }
 
+function isNameChangeComplete(draft: Form10Draft) {
+  if (!draft.nameChange.changeCooperativeName) {
+    return false;
+  }
+  if (draft.nameChange.changeCooperativeName === 'no') {
+    return true;
+  }
+  return (
+    Object.keys(
+      validateNameNuansFields(
+        draft.nameChange.nameNuans,
+        'cooperative',
+        validateCooperativeName,
+      ),
+    ).length === 0
+  );
+}
+
 function isSupportingDocsComplete(draft: Form10Draft) {
+  if (draft.step3.certifiedAgreement.length !== 1) {
+    return false;
+  }
   return draft.step2.amalgamatingCooperatives.every((coop) => {
     const row = draft.step3.documentsByCooperative.find(
       (doc) => doc.cooperativeId === coop.id,
     );
-    return (
-      (row?.certifiedAgreement.length ?? 0) === 1 &&
-      (row?.affidavits.length ?? 0) === 2
-    );
+    return (row?.affidavits.length ?? 0) === 2;
   });
 }
 
@@ -108,16 +129,17 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     );
   });
 
-  const supportingRows: ReviewRow[] = [];
+  const supportingRows: ReviewRow[] = [
+    {
+      name: 'Certified Copy of the Amalgamation Agreement',
+      description: docLabel(draft.step3.certifiedAgreement, 'Not uploaded'),
+    },
+  ];
   draft.step2.amalgamatingCooperatives.forEach((coop, index) => {
     const row = draft.step3.documentsByCooperative.find(
       (doc) => doc.cooperativeId === coop.id,
     );
     const label = coop.legalName.trim() || `Co-operative ${index + 1}`;
-    supportingRows.push({
-      name: `${label} — Certified Copy of the Amalgamation Agreement`,
-      description: docLabel(row?.certifiedAgreement ?? [], 'Not uploaded'),
-    });
     supportingRows.push({
       name: `${label} — Affidavit of Solvency #1`,
       description: row?.affidavits[0]
@@ -169,9 +191,45 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
       rows: amalgamatingRows,
     },
     {
+      key: 'nameChange',
+      caption: 'Co-operative name',
+      editHref: '/form-10/step-4',
+      complete: isNameChangeComplete(draft),
+      rows:
+        draft.nameChange.changeCooperativeName === 'change'
+          ? [
+              {
+                name: 'Change co-operative name',
+                description: 'Yes',
+              },
+              {
+                name: 'New co-operative name (proposed)',
+                description: displayOrEmpty(draft.nameChange.nameNuans.proposedName),
+              },
+              ...draft.nameChange.nameNuans.nuansReports.map((report, index) => ({
+                name:
+                  draft.nameChange.nameNuans.nuansReports.length > 1
+                    ? `NUANS report ${index + 1}`
+                    : 'NUANS report',
+                description: report.file
+                  ? `${report.file.name}${
+                      report.date ? ` (${formatIsoDateDisplay(report.date)})` : ''
+                    }`
+                  : 'Not uploaded',
+              })),
+            ]
+          : [
+              {
+                name: 'Change co-operative name',
+                description:
+                  draft.nameChange.changeCooperativeName === 'no' ? 'No' : 'Not provided',
+              },
+            ],
+    },
+    {
       key: 'supportingDocs',
       caption: 'Supporting documents',
-      editHref: '/form-10/step-4',
+      editHref: '/form-10/step-5',
       complete: isSupportingDocsComplete(draft),
       rows: supportingRows,
     },

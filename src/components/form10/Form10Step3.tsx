@@ -9,6 +9,7 @@ import {
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
 import {
   emptyDocsForCooperatives,
+  FORM10_TOTAL_STEPS,
   readForm10Draft,
   upsertForm10Step3,
   type AmalgamatingCoopDocuments,
@@ -17,8 +18,7 @@ import {
 } from './form10DraftStorage';
 import styles from './Form10Step1.module.scss';
 
-const CURRENT_STEP = 4;
-const TOTAL_STEPS = 5;
+const CURRENT_STEP = 5;
 
 const AGREEMENT_HINT =
   'A certified copy of the amalgamation agreement approved by each of the amalgamating co-operatives. The effective date of the amalgamation agreement must be within six (6) months of the submission of the Articles of Amalgamation.';
@@ -27,12 +27,12 @@ const AFFIDAVIT_HINT =
   'Affidavits of Solvency (Amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated.';
 
 const AGREEMENT_REQUIRED_ERROR =
-  'A Certified Copy of the Amalgamation Agreement is required for each amalgamating co-operative.';
+  'A Certified Copy of the Amalgamation Agreement is required.';
 
 const AFFIDAVITS_REQUIRED_ERROR =
   'Two Affidavits of Solvency are required for each amalgamating co-operative.';
 
-type FieldKey = `agreement-${string}` | `affidavits-${string}`;
+type FieldKey = 'agreement' | `affidavits-${string}`;
 
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
@@ -55,7 +55,9 @@ function isStep3Ready() {
   return Boolean(
     existing?.step1.cooperativeName &&
       existing.step2.amalgamatingCooperatives.length >= 2 &&
-      existing.step2.agreementApproved,
+      existing.step2.agreementApproved &&
+      existing.nameChange.changeCooperativeName &&
+      existing.lastCompletedStep >= 3,
   );
 }
 
@@ -72,6 +74,7 @@ export function Form10Step3() {
   const cooperatives = draft?.step2.amalgamatingCooperatives ?? [];
 
   const [step3, setStep3] = useState<Form10Step3Data>(() => ({
+    certifiedAgreement: draft?.step3.certifiedAgreement ?? [],
     documentsByCooperative: emptyDocsForCooperatives(
       cooperatives,
       draft?.step3.documentsByCooperative,
@@ -86,21 +89,20 @@ export function Form10Step3() {
     if (!ready) {
       return;
     }
-    upsertForm10Step3(step3, 'draft', lastCompletedStep >= 3 ? 3 : 2);
+    upsertForm10Step3(step3, 'draft', lastCompletedStep >= 4 ? 4 : 3);
   }, [lastCompletedStep, ready, step3]);
 
   const errorSummaryItems = useMemo(() => {
     const items: { key: string; message: string; href: string }[] = [];
+    if (errors.agreement) {
+      items.push({
+        key: 'agreement',
+        message: errors.agreement,
+        href: '#agreement',
+      });
+    }
     cooperatives.forEach((coop, index) => {
-      const agreementKey = `agreement-${coop.id}` as const;
       const affidavitsKey = `affidavits-${coop.id}` as const;
-      if (errors[agreementKey]) {
-        items.push({
-          key: agreementKey,
-          message: `Co-operative ${index + 1}: ${errors[agreementKey]}`,
-          href: `#${agreementKey}`,
-        });
-      }
       if (errors[affidavitsKey]) {
         items.push({
           key: affidavitsKey,
@@ -113,7 +115,7 @@ export function Form10Step3() {
   }, [cooperatives, errors]);
 
   if (!ready || !draft) {
-    return <Navigate to="/form-10/step-3" replace />;
+    return <Navigate to="/form-10/step-4" replace />;
   }
 
   function clearError(key: FieldKey) {
@@ -143,14 +145,14 @@ export function Form10Step3() {
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
+    if (step3.certifiedAgreement.length !== 1) {
+      next.agreement = AGREEMENT_REQUIRED_ERROR;
+    }
     cooperatives.forEach((coop) => {
       const row = step3.documentsByCooperative.find(
         (doc) => doc.cooperativeId === coop.id,
-      ) ?? { cooperativeId: coop.id, certifiedAgreement: [], affidavits: [] };
+      ) ?? { cooperativeId: coop.id, affidavits: [] };
 
-      if (row.certifiedAgreement.length !== 1) {
-        next[`agreement-${coop.id}`] = AGREEMENT_REQUIRED_ERROR;
-      }
       if (row.affidavits.length !== 2) {
         next[`affidavits-${coop.id}`] = AFFIDAVITS_REQUIRED_ERROR;
       }
@@ -172,12 +174,12 @@ export function Form10Step3() {
       return;
     }
 
-    upsertForm10Step3(step3, 'continue', 3);
-    navigate('/form-10/step-5');
+    upsertForm10Step3(step3, 'continue', 4);
+    navigate('/form-10/step-6');
   }
 
   function handleSaveAsDraft() {
-    upsertForm10Step3(step3, 'draft', 2);
+    upsertForm10Step3(step3, 'draft', 3);
     navigate('/form-10/draft-summary');
   }
 
@@ -200,9 +202,9 @@ export function Form10Step3() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-10/step-3"
+          backButtonUrl="/form-10/step-4"
           currentStep={CURRENT_STEP}
-          numberOfSteps={TOTAL_STEPS}
+          numberOfSteps={FORM10_TOTAL_STEPS}
         />
       </div>
 
@@ -231,9 +233,8 @@ export function Form10Step3() {
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Supporting documents</h1>
           <p className={styles.lead}>
-            Upload documentation required to support this Articles of Amalgamation filing.
-            Required uploads are based on the {cooperatives.length} amalgamating
-            co-operative{cooperatives.length === 1 ? '' : 's'} entered in the previous step.
+            Upload one certified amalgamation agreement for this filing, and two Affidavits
+            of Solvency for each amalgamating co-operative.
           </p>
 
           <div className={styles.formStack}>
@@ -241,7 +242,23 @@ export function Form10Step3() {
               <OntarioCallout
                 headingContentType="string"
                 headingContent="Required for this amalgamation"
-                content={`For each amalgamating co-operative: one Certified Copy of the Amalgamation Agreement and two Affidavits of Solvency (Amalgamation). PDF only, maximum 20 MB per file.`}
+                content="One Certified Copy of the Amalgamation Agreement for this filing, and two Affidavits of Solvency (Amalgamation) for each amalgamating co-operative. PDF only, maximum 20 MB per file."
+              />
+            </div>
+
+            <div id="agreement">
+              <SupportingDocumentsUpload
+                label="Certified Copy of the Amalgamation Agreement"
+                required
+                maxFiles={1}
+                hintText={AGREEMENT_HINT}
+                value={toForm7Docs(step3.certifiedAgreement)}
+                errorMessage={errors.agreement}
+                onChange={(files) => {
+                  setStep3((prev) => ({ ...prev, certifiedAgreement: files }));
+                  clearError('agreement');
+                }}
+                inputId="agreement-upload"
               />
             </div>
 
@@ -251,10 +268,8 @@ export function Form10Step3() {
                   (doc) => doc.cooperativeId === coop.id,
                 ) ?? {
                   cooperativeId: coop.id,
-                  certifiedAgreement: [],
                   affidavits: [],
                 };
-              const agreementKey = `agreement-${coop.id}` as const;
               const affidavitsKey = `affidavits-${coop.id}` as const;
 
               return (
@@ -271,25 +286,6 @@ export function Form10Step3() {
                       {coop.legalName || `Amalgamating co-operative ${index + 1}`}
                     </h2>
                     <p className={styles.coopDocsOcn}>OCN {coop.ocn || '—'}</p>
-                  </div>
-
-                  <div id={agreementKey}>
-                    <SupportingDocumentsUpload
-                      label="Certified Copy of the Amalgamation Agreement"
-                      required
-                      maxFiles={1}
-                      hintText={AGREEMENT_HINT}
-                      value={toForm7Docs(row.certifiedAgreement)}
-                      errorMessage={errors[agreementKey]}
-                      onChange={(files) =>
-                        patchCoopDocs(
-                          coop.id,
-                          { certifiedAgreement: files },
-                          agreementKey,
-                        )
-                      }
-                      inputId={`agreement-upload-${coop.id}`}
-                    />
                   </div>
 
                   <div id={affidavitsKey}>

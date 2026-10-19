@@ -9,11 +9,7 @@ export function Form10DraftSummaryPage() {
   const draft = readForm10Draft();
   const submitted = draft?.savedAs === 'submitted';
   const coopCount = draft?.step2.amalgamatingCooperatives.length ?? 0;
-  const agreementCount =
-    draft?.step3.documentsByCooperative.reduce(
-      (sum, row) => sum + row.certifiedAgreement.length,
-      0,
-    ) ?? 0;
+  const agreementCount = draft?.step3.certifiedAgreement.length ?? 0;
   const affidavitCount =
     draft?.step3.documentsByCooperative.reduce(
       (sum, row) => sum + row.affidavits.length,
@@ -21,11 +17,13 @@ export function Form10DraftSummaryPage() {
     ) ?? 0;
 
   const continueHref =
-    draft && draft.lastCompletedStep >= 3
-      ? '/form-10/step-5'
-      : draft && draft.lastCompletedStep >= 2
-        ? '/form-10/step-4'
-        : '/form-10/step-3';
+    draft && draft.lastCompletedStep >= 4
+      ? '/form-10/step-6'
+      : draft && draft.lastCompletedStep >= 3
+        ? '/form-10/step-5'
+        : draft && draft.lastCompletedStep >= 2
+          ? '/form-10/step-4'
+          : '/form-10/step-3';
 
   return (
     <PlaygroundShell
@@ -82,7 +80,7 @@ export function Form10DraftSummaryPage() {
                   <dd>{coopCount}</dd>
                 </div>
                 <div>
-                  <dt>Certified amalgamation agreements</dt>
+                  <dt>Certified amalgamation agreement</dt>
                   <dd>{agreementCount}</dd>
                 </div>
                 <div>

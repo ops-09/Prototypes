@@ -10,6 +10,7 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import { NaicsSearchAutosuggest } from '../form7/NaicsSearchAutosuggest';
 import {
+  FORM10_TOTAL_STEPS,
   OBR_COOPERATIVE_NAME,
   OBR_COOPERATIVE_TYPE,
   OBR_INCORPORATION_DATE,
@@ -22,7 +23,6 @@ import {
 import styles from './Form10Step1.module.scss';
 
 const CURRENT_STEP = 2;
-const TOTAL_STEPS = 5;
 
 const COOPERATIVE_TYPE_LABELS = [
   'Child-Care Co-operative',
@@ -237,7 +237,7 @@ export function Form10Step1() {
           showBackButton
           backButtonUrl="/form-10/step-1"
           currentStep={CURRENT_STEP}
-          numberOfSteps={TOTAL_STEPS}
+          numberOfSteps={FORM10_TOTAL_STEPS}
         />
       </div>
 

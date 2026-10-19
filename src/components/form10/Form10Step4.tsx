@@ -11,6 +11,7 @@ import { Form7SummaryList } from '../form7/Form7SummaryList';
 import {
   createForm10ConfirmationNumber,
   EMPTY_STEP4,
+  FORM10_TOTAL_STEPS,
   OBR_FILER_FIRST_NAME,
   OBR_FILER_LAST_NAME,
   readForm10Draft,
@@ -22,8 +23,7 @@ import { buildReviewSections, type ReviewSectionKey } from './form10ReviewModel'
 import styles from './Form10Step1.module.scss';
 import reviewStyles from './Form10Step4.module.scss';
 
-const CURRENT_STEP = 5;
-const TOTAL_STEPS = 5;
+const CURRENT_STEP = 6;
 const AUTH_OPTION_VALUE = 'authorized';
 
 type ReviewErrors = Partial<{
@@ -41,7 +41,8 @@ function isStep4Ready() {
     existing?.step1.cooperativeName &&
       existing.step2.amalgamatingCooperatives.length >= 2 &&
       existing.step2.agreementApproved &&
-      existing.lastCompletedStep >= 3,
+      existing.nameChange.changeCooperativeName &&
+      existing.lastCompletedStep >= 4,
   );
 }
 
@@ -85,7 +86,7 @@ export function Form10Step4() {
   );
 
   if (!ready || !draft) {
-    return <Navigate to="/form-10/step-3" replace />;
+    return <Navigate to="/form-10/step-5" replace />;
   }
 
   function clearError(key: keyof ReviewErrors) {
@@ -129,12 +130,12 @@ export function Form10Step4() {
     }
 
     const confirmationNumber = createForm10ConfirmationNumber();
-    upsertForm10Step4(step4, 'submitted', 4, confirmationNumber);
+    upsertForm10Step4(step4, 'submitted', 5, confirmationNumber);
     navigate('/form-10/draft-summary');
   }
 
   function handleSaveAsDraft() {
-    upsertForm10Step4(step4, 'draft', 3);
+    upsertForm10Step4(step4, 'draft', 4);
     navigate('/form-10/draft-summary');
   }
 
@@ -164,7 +165,7 @@ export function Form10Step4() {
 
   const firstIncompleteKey =
     (
-      ['coopDetails', 'amalgamatingCooperatives', 'supportingDocs'] as const
+      ['coopDetails', 'amalgamatingCooperatives', 'nameChange', 'supportingDocs'] as const
     ).find((key) => incompleteKeys.has(key)) ?? 'coopDetails';
 
   function handleSummaryLinkClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
@@ -180,9 +181,9 @@ export function Form10Step4() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-10/step-4"
+          backButtonUrl="/form-10/step-5"
           currentStep={CURRENT_STEP}
-          numberOfSteps={TOTAL_STEPS}
+          numberOfSteps={FORM10_TOTAL_STEPS}
         />
       </div>
 

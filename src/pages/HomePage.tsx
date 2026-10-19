@@ -227,16 +227,23 @@ export function HomePage() {
           <OntarioCard
             headingLevel="h2"
             label="Form 10 — Step 4"
-            description="Supporting documents — amalgamation agreements and affidavits of solvency."
+            description="Co-operative name — change the amalgamated name and upload NUANS if needed."
             cardLink={withBasePath('/form-10/step-4')}
-            ariaLabelText="Open Form 10 Step 4 supporting documents"
+            ariaLabelText="Open Form 10 Step 4 co-operative name"
           />
           <OntarioCard
             headingLevel="h2"
             label="Form 10 — Step 5"
-            description="Review and validation — summary, generate PDF, authorize, and submit."
+            description="Supporting documents — amalgamation agreements and affidavits of solvency."
             cardLink={withBasePath('/form-10/step-5')}
-            ariaLabelText="Open Form 10 Step 5 review and validation"
+            ariaLabelText="Open Form 10 Step 5 supporting documents"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 10 — Step 6"
+            description="Review and validation — summary, generate PDF, authorize, and submit."
+            cardLink={withBasePath('/form-10/step-6')}
+            ariaLabelText="Open Form 10 Step 6 review and validation"
           />
         </OntarioCardCollection>
       </PageBoilerplate>
