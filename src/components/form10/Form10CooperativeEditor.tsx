@@ -166,7 +166,7 @@ export function Form10CooperativeEditor({
             className={styles.naicsLabel}
             htmlFor={`${cooperative.id}-corporation-search-input`}
           >
-            Co-operative name or OCN
+            Ontario Corporation Number search
             <span className={styles.requiredFlag}> (required)</span>
           </label>
           <div className={styles.naicsSearch}>

@@ -37,6 +37,8 @@ export type Form10Step2Data = {
 export type Form10NameChangeData = {
   changeCooperativeName: 'change' | 'no' | '';
   nameNuans: NameNuansFields;
+  /** When keeping an existing name, the amalgamating co-operative whose name is used. */
+  selectedAmalgamatedCooperativeId: string;
 };
 
 export type SupportingDocMeta = {
@@ -136,6 +138,7 @@ export const EMPTY_STEP2: Form10Step2Data = {
 export const EMPTY_NAME_CHANGE: Form10NameChangeData = {
   changeCooperativeName: '',
   nameNuans: emptyNameNuans(),
+  selectedAmalgamatedCooperativeId: '',
 };
 
 export const EMPTY_STEP3: Form10Step3Data = {
@@ -209,6 +212,8 @@ export function readForm10Draft(): Form10Draft | null {
     const nameChange: Form10NameChangeData = {
       changeCooperativeName: parsed.nameChange?.changeCooperativeName ?? '',
       nameNuans: normalizeNameNuans(parsed.nameChange?.nameNuans),
+      selectedAmalgamatedCooperativeId:
+        parsed.nameChange?.selectedAmalgamatedCooperativeId ?? '',
     };
     return {
       step1: {
@@ -287,9 +292,17 @@ export function upsertForm10Step2(
   if (!existing?.step1.cooperativeName) {
     return null;
   }
+  const selectedId = existing.nameChange?.selectedAmalgamatedCooperativeId ?? '';
+  const selectedStillPresent = step2.amalgamatingCooperatives.some(
+    (coop) => coop.id === selectedId,
+  );
   const draft: Form10Draft = {
     ...existing,
     step2,
+    nameChange: {
+      ...existing.nameChange,
+      selectedAmalgamatedCooperativeId: selectedStillPresent ? selectedId : '',
+    },
     step3: {
       certifiedAgreement: existing.step3?.certifiedAgreement ?? [],
       documentsByCooperative: emptyDocsForCooperatives(

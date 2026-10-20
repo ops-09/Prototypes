@@ -66,12 +66,30 @@ function isAmalgamatingComplete(draft: Form10Draft) {
   );
 }
 
+function selectedAmalgamatedCooperativeName(draft: Form10Draft) {
+  return (
+    draft.step2.amalgamatingCooperatives.find(
+      (coop) => coop.id === draft.nameChange.selectedAmalgamatedCooperativeId,
+    )?.legalName.trim() ?? ''
+  );
+}
+
+function amalgamatedCooperativeName(draft: Form10Draft) {
+  if (draft.nameChange.changeCooperativeName === 'change') {
+    return draft.nameChange.nameNuans.proposedName.trim();
+  }
+  if (draft.nameChange.changeCooperativeName === 'no') {
+    return selectedAmalgamatedCooperativeName(draft);
+  }
+  return '';
+}
+
 function isNameChangeComplete(draft: Form10Draft) {
   if (!draft.nameChange.changeCooperativeName) {
     return false;
   }
   if (draft.nameChange.changeCooperativeName === 'no') {
-    return true;
+    return Boolean(selectedAmalgamatedCooperativeName(draft));
   }
   return (
     Object.keys(
@@ -106,7 +124,7 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     },
     {
       name: 'Amalgamated co-operative name',
-      description: displayOrEmpty(draft.step1.cooperativeName),
+      description: displayOrEmpty(amalgamatedCooperativeName(draft)),
     },
   ];
 
@@ -224,6 +242,16 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
                 description:
                   draft.nameChange.changeCooperativeName === 'no' ? 'No' : 'Not provided',
               },
+              ...(draft.nameChange.changeCooperativeName === 'no'
+                ? [
+                    {
+                      name: 'Amalgamated co-operative name',
+                      description: displayOrEmpty(
+                        selectedAmalgamatedCooperativeName(draft),
+                      ),
+                    },
+                  ]
+                : []),
             ],
     },
     {

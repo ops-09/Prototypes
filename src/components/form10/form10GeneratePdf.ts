@@ -39,7 +39,12 @@ export function generateForm10ReviewPdf(args: { draft: Form10Draft }) {
   const sectionHtml = sections
     .map((section) => {
       const rows = section.rows
-        .filter((row) => row.name !== 'Official email')
+        .filter(
+          (row) =>
+            row.name !== 'Official email' &&
+            row.name !== 'Primary activity' &&
+            row.name !== 'Type of co-operative',
+        )
         .map(
           (row) => `
           <tr>

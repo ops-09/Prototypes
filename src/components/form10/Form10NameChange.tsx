@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
+  OntarioDropdownList,
   OntarioPageAlert,
   OntarioRadioButtons,
   OntarioStepIndicator,
@@ -34,6 +35,7 @@ const ID_PREFIX = 'form10-name';
 type FieldErrors = NameNuansErrors &
   Partial<{
     changeCooperativeName: string;
+    selectedAmalgamatedCooperativeId: string;
   }>;
 
 function getEventValue(event: globalThis.Event) {
@@ -92,6 +94,8 @@ export function Form10NameChange() {
     ...draft?.nameChange,
     changeCooperativeName: draft?.nameChange.changeCooperativeName ?? '',
     nameNuans: draft?.nameChange.nameNuans ?? emptyNameNuans(),
+    selectedAmalgamatedCooperativeId:
+      draft?.nameChange.selectedAmalgamatedCooperativeId ?? '',
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
@@ -114,6 +118,17 @@ export function Form10NameChange() {
     [],
   );
 
+  const amalgamatingNameOptions = useMemo(
+    () =>
+      (draft?.step2.amalgamatingCooperatives ?? [])
+        .filter((coop) => coop.legalName.trim())
+        .map((coop) => ({
+          value: coop.id,
+          label: coop.legalName.trim(),
+        })),
+    [draft?.step2.amalgamatingCooperatives],
+  );
+
   const errorSummaryItems = useMemo(() => {
     const items: { key: string; message: string; href: string }[] = [];
     if (errors.changeCooperativeName) {
@@ -121,6 +136,13 @@ export function Form10NameChange() {
         key: 'changeCooperativeName',
         message: errors.changeCooperativeName,
         href: '#change-cooperative-name',
+      });
+    }
+    if (errors.selectedAmalgamatedCooperativeId) {
+      items.push({
+        key: 'selectedAmalgamatedCooperativeId',
+        message: errors.selectedAmalgamatedCooperativeId,
+        href: '#amalgamated-cooperative-name',
       });
     }
     if (errors.proposedName) {
@@ -212,6 +234,16 @@ export function Form10NameChange() {
           validateCooperativeName,
         ),
       );
+    } else if (nameChange.changeCooperativeName === 'no') {
+      const selected = draft?.step2.amalgamatingCooperatives.find(
+        (coop) =>
+          coop.id === nameChange.selectedAmalgamatedCooperativeId &&
+          coop.legalName.trim(),
+      );
+      if (!selected) {
+        next.selectedAmalgamatedCooperativeId =
+          'Select the name of the amalgamated co-operative.';
+      }
     }
     return next;
   }
@@ -321,10 +353,40 @@ export function Form10NameChange() {
                     setErrors({});
                     dateErrorsRef.current = {};
                     window.requestAnimationFrame(() => syncDateErrors({}));
+                  } else {
+                    clearError('selectedAmalgamatedCooperativeId');
                   }
                 }}
               />
             </div>
+
+            {nameChange.changeCooperativeName === 'no' ? (
+              <div id="amalgamated-cooperative-name">
+                <OntarioDropdownList
+                  elementId="amalgamated-cooperative-name"
+                  caption="Please select the name of the amalgamated co-operative"
+                  name="amalgamated-cooperative-name"
+                  required
+                  isEmptyStartOption
+                  value={
+                    amalgamatingNameOptions.some(
+                      (option) =>
+                        option.value === nameChange.selectedAmalgamatedCooperativeId,
+                    )
+                      ? nameChange.selectedAmalgamatedCooperativeId
+                      : ''
+                  }
+                  options={amalgamatingNameOptions}
+                  errorMessage={errors.selectedAmalgamatedCooperativeId}
+                  customOnChange={(event) => {
+                    patchNameChange({
+                      selectedAmalgamatedCooperativeId: getEventValue(event),
+                    });
+                    clearError('selectedAmalgamatedCooperativeId');
+                  }}
+                />
+              </div>
+            ) : null}
 
             {nameChange.changeCooperativeName === 'change' ? (
               <ProposedNameAndNuans
