@@ -7,7 +7,7 @@ import {
   OntarioRadioButtons,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
-import { validateCooperativeName } from '../form1/nameValidation';
+import { validateCooperativeName } from '../form2/nameValidation';
 import { syncDateFieldByAnchor } from '../form7/dateErrorSync';
 import {
   emptyNameNuans,
@@ -394,7 +394,7 @@ export function Form10NameChange() {
                 nameKind="cooperative"
                 leadText={[
                   'An Ontario NUANS name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report.',
-                  'The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the name. The name of the co-operative must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “LIMITED”, “LIMITÉE”, “INC.”, “CORP.”, “LTD.” or “LTÉE”.',
+                  'The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the name. The name of the co-operative must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “INC.” or “CORP.”.',
                 ]}
                 value={nameChange.nameNuans}
                 errors={errors}

@@ -1,5 +1,5 @@
 import { formatBytes, formatIsoDateDisplay } from '../form7/form7Labels';
-import { validateCooperativeName } from '../form1/nameValidation';
+import { validateCooperativeName } from '../form2/nameValidation';
 import { validateNameNuansFields } from '../form7/ProposedNameAndNuans';
 import {
   MIN_AMALGAMATING_COOPS,
