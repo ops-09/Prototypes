@@ -97,7 +97,8 @@ export const BYB_COST_INTRO =
   'A filing fee is required to submit Articles of Incorporation.';
 
 export const BYB_COST_ITEMS: readonly string[] = [
-  'The filing fee for Articles of Incorporation: $335 for a standard co-operative.',
+  'The filing fee for Articles of Incorporation: $335 for a co-operative without share capital.',
+  'The filing fee for a non-profit co-operative without share capital: $155.',
   'A valid payment method available.',
 ];
 
