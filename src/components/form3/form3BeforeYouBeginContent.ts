@@ -40,7 +40,7 @@ export const BYB_STEPS: readonly BeforeYouBeginStep[] = [
   {
     title: 'Step 3: Corporation name',
     description:
-      'Indicate whether the application includes a name change, and provide a NUANS report and insolvency confirmation when a new name is proposed.',
+      'Indicate whether the application includes a name change, and provide a NUANS report when a new name is proposed.',
   },
   {
     title: 'Step 4: Supplementary letters patent',

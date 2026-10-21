@@ -31,8 +31,11 @@ const EMPTY_DETAILS_ERROR =
 const PROVISIONS_HINT = {
   hint: 'What are supplementary letters patent?',
   content:
-    'Supplementary letters patent change the corporation’s existing letters patent. Use this field to describe the provisions you are requesting, such as changes to the objects or special provisions of the corporation.',
+    'Supplementary letters patent change the corporation’s existing letters patent. Use this field to describe the provisions you are requesting, such as changes to the objects or special provisions of the corporation. The corporation is not insolvent within the meaning of subsection 1(3) of the Filings Regulation (O. Reg 393/21) under the Act.',
 };
+
+const PROVISIONS_HINT_TEXT =
+  'The corporation is not insolvent within the meaning of subsection 1(3) of the Filings Regulation (O. Reg 393/21) under the Act.';
 
 type FieldKey = 'resolutionConfirmedDate' | 'requestedProvisions';
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -267,6 +270,7 @@ export function Form3Step4() {
                 caption="The corporation applies for the issue of supplementary letters patent to provide as follows"
                 name="requested-provisions"
                 required
+                hintText={PROVISIONS_HINT_TEXT}
                 hintExpander={PROVISIONS_HINT}
                 value={step4.requestedProvisions}
                 errorMessage={errors.requestedProvisions}

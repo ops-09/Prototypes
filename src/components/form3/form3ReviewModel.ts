@@ -6,20 +6,11 @@ import {
   formatUploadedAt,
 } from '../form7/form7Labels';
 import { validateNameNuansFields } from '../form7/ProposedNameAndNuans';
-import type { Form3Draft, Form3NameLanguage } from './form3DraftStorage';
-
-const LANGUAGE_LABELS: Record<Exclude<Form3NameLanguage, ''>, string> = {
-  english: 'an English name',
-  french: 'a French name',
-  combined: 'a combination of English and French',
-  separate: 'an English name and a French name used separately',
-};
+import type { Form3Draft } from './form3DraftStorage';
 
 /** Same legal-element list as Form 2, worded for a corporation name. */
 export const FORM3_CORP_NAME_INFO =
   'The name of the corporation must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “INC.” or “CORP.”.';
-
-export const FORM3_NUMBER_NAME_LEGAL_ELEMENTS = PERMITTED_LEGAL_ELEMENTS;
 
 export type ReviewRow = {
   name: string;
@@ -77,25 +68,10 @@ export function validateForm3CorpName(value: string) {
 
 function isNameChangeComplete(draft: Form3Draft) {
   const change = draft.nameChange;
-  if (!change.notInsolvent) {
-    return false;
-  }
   if (change.changeCorporationName === 'no') {
     return true;
   }
   if (change.changeCorporationName !== 'change') {
-    return false;
-  }
-  if (change.hasNumberName === 'yes') {
-    return Boolean(change.legalElement);
-  }
-  if (change.hasNumberName !== 'no') {
-    return false;
-  }
-  if (!change.nameLanguage) {
-    return false;
-  }
-  if (change.nameLanguage === 'separate' && validateForm3CorpName(change.proposedNameFr)) {
     return false;
   }
   return (
@@ -121,53 +97,23 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
             name: 'Name change indicator',
             description: change.changeCorporationName === 'change' ? 'Yes' : 'Not provided',
           },
-          ...(change.hasNumberName === 'yes'
-            ? [
-                {
-                  name: 'Corporation name type',
-                  description: 'Number name',
-                },
-                {
-                  name: 'Legal element',
-                  description: displayOrEmpty(change.legalElement),
-                },
-              ]
-            : [
-                {
-                  name: 'Name language',
-                  description: change.nameLanguage
-                    ? LANGUAGE_LABELS[change.nameLanguage]
-                    : 'Not provided',
-                },
-                {
-                  name:
-                    change.nameLanguage === 'separate'
-                      ? 'Proposed corporation name (English)'
-                      : 'Proposed corporation name',
-                  description: displayOrEmpty(change.nameNuans.proposedName),
-                },
-                ...(change.nameLanguage === 'separate'
-                  ? [
-                      {
-                        name: 'Proposed corporation name (French)',
-                        description: displayOrEmpty(change.proposedNameFr),
-                      },
-                    ]
-                  : []),
-                ...change.nameNuans.nuansReports.flatMap((report, index, reports) => {
-                  const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
-                  return [
-                    {
-                      name: `NUANS report${ordinal}`,
-                      description: report.file?.name ?? 'Not provided',
-                    },
-                    {
-                      name: `NUANS report${ordinal} date`,
-                      description: formatIsoDateDisplay(report.date),
-                    },
-                  ];
-                }),
-              ]),
+          {
+            name: 'Proposed corporation name',
+            description: displayOrEmpty(change.nameNuans.proposedName),
+          },
+          ...change.nameNuans.nuansReports.flatMap((report, index, reports) => {
+            const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
+            return [
+              {
+                name: `NUANS report${ordinal}`,
+                description: report.file?.name ?? 'Not provided',
+              },
+              {
+                name: `NUANS report${ordinal} date`,
+                description: formatIsoDateDisplay(report.date),
+              },
+            ];
+          }),
         ];
 
   const provisionRows: ReviewRow[] = [

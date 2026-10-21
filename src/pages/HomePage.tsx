@@ -192,7 +192,7 @@ export function HomePage() {
           <OntarioCard
             headingLevel="h2"
             label="Form 3 — Step 3"
-            description="Corporation name — change, number name, NUANS, and insolvency confirmation."
+            description="Corporation name — change the name and upload a NUANS report when required."
             cardLink={withBasePath('/form-3/step-3')}
             ariaLabelText="Open Form 3 Step 3 corporation name"
           />
