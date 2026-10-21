@@ -183,10 +183,12 @@ $byb-marker-size: calc(
   padding-left: var(--ontario-spacing-5, 1.5rem);
   display: flex;
   flex-direction: column;
-  gap: var(--ontario-spacing-2, 0.5rem);
 }
 
 .bulletList li {
+  margin: 0;
+  // ODS `ul li` adds 0.75rem bottom padding except on the last item.
+  padding: 0;
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   line-height: 1.5;
 }

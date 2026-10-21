@@ -1,0 +1,102 @@
+import { Link } from 'react-router-dom';
+import { OntarioButton, OntarioPageAlert } from '@ongov/ontario-design-system-component-library-react';
+import { readForm3Draft } from '../components/form3/form3DraftStorage';
+import formStyles from '../components/form3/Form3Step1.module.scss';
+import { PlaygroundShell } from '../components/layout/PlaygroundShell';
+import styles from './Form3DraftSummaryPage.module.scss';
+
+export function Form3DraftSummaryPage() {
+  const draft = readForm3Draft();
+  const submitted = draft?.savedAs === 'submitted';
+
+  const continueHref =
+    draft && draft.lastCompletedStep >= 3
+      ? '/form-3/step-5'
+      : draft && draft.lastCompletedStep >= 2
+        ? '/form-3/step-4'
+        : draft && draft.lastCompletedStep >= 1
+          ? '/form-3/step-3'
+          : '/form-3/step-2';
+
+  return (
+    <PlaygroundShell
+      serviceTitle="For Business"
+      serviceHref="/"
+      mainClassName={formStyles.formMain}
+    >
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12 ontario-medium-8">
+          <h1 className={`ontario-h1 ${formStyles.pageTitle}`}>
+            {submitted ? 'Filing submitted' : 'Transaction summary'}
+          </h1>
+          <p className={formStyles.lead}>
+            {submitted
+              ? 'Your Application for Supplementary Letters Patent was submitted. A transaction summary was created for this browser session.'
+              : 'Form 3 draft saved locally in this browser session.'}
+          </p>
+
+          {!draft ? (
+            <OntarioPageAlert
+              type="warning"
+              heading="No draft found"
+              content="There is no saved Form 3 draft in this session. Return to Form 3 to continue."
+            />
+          ) : (
+            <>
+              <OntarioPageAlert
+                type="success"
+                heading={submitted ? 'Submission recorded' : 'Draft saved'}
+                content={
+                  submitted && draft.confirmationNumber
+                    ? `Confirmation number ${draft.confirmationNumber}. Saved at ${new Date(draft.savedAt).toLocaleString()}.`
+                    : `Saved at ${new Date(draft.savedAt).toLocaleString()} (mode: ${draft.savedAs}).`
+                }
+              />
+
+              <dl className={styles.summaryList}>
+                {draft.confirmationNumber ? (
+                  <div>
+                    <dt>Confirmation number</dt>
+                    <dd>{draft.confirmationNumber}</dd>
+                  </div>
+                ) : null}
+                <div>
+                  <dt>Corporation</dt>
+                  <dd>{draft.step1.corporationName || '—'}</dd>
+                </div>
+                <div>
+                  <dt>Name change</dt>
+                  <dd>
+                    {draft.nameChange.changeCorporationName === 'change'
+                      ? 'Yes'
+                      : draft.nameChange.changeCorporationName === 'no'
+                        ? 'No'
+                        : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Supporting documents</dt>
+                  <dd>{draft.step4.additional.length}</dd>
+                </div>
+              </dl>
+            </>
+          )}
+
+          <div className={formStyles.buttonGroup}>
+            {!submitted ? (
+              <OntarioButton
+                type="primary"
+                htmlType="button"
+                label="Continue filing"
+                href={continueHref}
+              />
+            ) : null}
+            <Link className={styles.homeLink} to="/">
+              Back to playground
+            </Link>
+          </div>
+        </div>
+      </div>
+    </PlaygroundShell>
+  );
+}

@@ -15,11 +15,15 @@ import {
   BYB_ESTIMATED_TIME_HEADING,
   BYB_FORM_ACT_LINE,
   BYB_FORM_TITLE_LINES,
+  BYB_FORM3_DOWNLOAD_LABEL,
   BYB_FORM3_INSTRUCTION,
   BYB_INSTRUCTIONS_HEADING,
   BYB_INSTRUCTIONS_INTRO,
   BYB_INTRO,
-  BYB_NAICS_INSTRUCTION,
+  BYB_NAICS_INSTRUCTION_AFTER,
+  BYB_NAICS_INSTRUCTION_BEFORE,
+  BYB_NAICS_LINK_LABEL,
+  BYB_NAICS_URL,
   BYB_NUANS_INSTRUCTION,
   BYB_NUANS_SITE_LABEL,
   BYB_NUANS_SITE_URL,
@@ -152,7 +156,17 @@ export function Form2BeforeYouBegin() {
             </h2>
             <p className={styles.sectionIntro}>{BYB_INSTRUCTIONS_INTRO}</p>
             <ul className={styles.bulletList}>
-              <li>{BYB_NAICS_INSTRUCTION}</li>
+              <li>
+                {BYB_NAICS_INSTRUCTION_BEFORE}
+                <a
+                  href={BYB_NAICS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {BYB_NAICS_LINK_LABEL}
+                </a>
+                {BYB_NAICS_INSTRUCTION_AFTER}
+              </li>
               <li>
                 {BYB_FORM3_INSTRUCTION}{' '}
                 <a
@@ -160,7 +174,7 @@ export function Form2BeforeYouBegin() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Download Form 3
+                  {BYB_FORM3_DOWNLOAD_LABEL}
                 </a>
                 .
               </li>

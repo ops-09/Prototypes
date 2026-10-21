@@ -489,7 +489,7 @@ export function Form1Step5() {
             <OntarioButton
               type="tertiary"
               htmlType="button"
-              label="Cancel/Exit"
+              label="Cancel"
               onClick={handleCancel}
             />
           </div>

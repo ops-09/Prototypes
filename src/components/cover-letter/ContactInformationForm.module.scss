@@ -18,6 +18,11 @@
 
 .alert {
   margin-bottom: var(--ontario-spacing-5, 1.5rem);
+
+  // ODS global `ul` is 3rem (48px) at ≥40em. Error-summary lists use 24px.
+  ul {
+    margin-left: var(--ontario-spacing-5, 1.5rem);
+  }
 }
 
 .errorSummaryLink {

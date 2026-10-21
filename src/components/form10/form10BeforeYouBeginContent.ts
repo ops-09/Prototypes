@@ -2,8 +2,7 @@
 
 /** Title lines — break early so lines wrap cleanly at form column widths. */
 export const BYB_FORM_TITLE_LINES = [
-  'Articles of Amalgamation',
-  'Form 10',
+  'Articles of Amalgamation Form 10',
 ] as const;
 
 /** Act line — body text under the page title, not part of the h1. */

@@ -469,7 +469,7 @@ export function Form7Step3() {
             <OntarioButton
               type="tertiary"
               htmlType="button"
-              label="Cancel / Exit"
+              label="Cancel"
               onClick={handleCancel}
             />
           </div>

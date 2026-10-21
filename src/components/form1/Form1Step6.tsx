@@ -567,7 +567,7 @@ export function Form1Step6() {
             <OntarioButton
               type="tertiary"
               htmlType="button"
-              label="Cancel/Exit"
+              label="Cancel"
               onClick={handleCancel}
             />
           </div>

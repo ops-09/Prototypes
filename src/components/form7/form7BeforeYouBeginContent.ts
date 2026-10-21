@@ -2,8 +2,7 @@
 
 /** Title lines — break early so lines wrap cleanly at form column widths. */
 export const BYB_FORM_TITLE_LINES = [
-  'Articles of Amendment',
-  'Form 7',
+  'Articles of Amendment Form 7',
 ] as const;
 
 /** Act line — body text under the page title, not part of the h1. */

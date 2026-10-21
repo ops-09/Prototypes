@@ -219,8 +219,8 @@ try {
   await page.goto(`${baseURL}/form-1`, { waitUntil: 'networkidle' });
   await pause(1000);
 
-  // Cancel / Exit → home
-  await clickButton(page, 'Cancel / Exit');
+  // Cancel → home
+  await clickButton(page, 'Cancel');
   await page.waitForURL((url) => url.pathname === '/', { timeout: 10000 });
   await pause(1600);
 } finally {

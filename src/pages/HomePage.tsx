@@ -170,6 +170,48 @@ export function HomePage() {
           />
           <OntarioCard
             headingLevel="h2"
+            label="Form 3"
+            description="Application for Supplementary Letters Patent — Before you begin, then cover letter and filing steps."
+            cardLink={withBasePath('/form-3')}
+            ariaLabelText="Open the Form 3 prototype"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 3 — Step 1"
+            description="Cover letter — contact information before the filing steps."
+            cardLink={withBasePath('/form-3/step-1')}
+            ariaLabelText="Open Form 3 Step 1 cover letter"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 3 — Step 2"
+            description="Corporation details — primary activity and official email."
+            cardLink={withBasePath('/form-3/step-2')}
+            ariaLabelText="Open Form 3 Step 2 corporation details"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 3 — Step 3"
+            description="Corporation name — change, number name, NUANS, and insolvency confirmation."
+            cardLink={withBasePath('/form-3/step-3')}
+            ariaLabelText="Open Form 3 Step 3 corporation name"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 3 — Step 4"
+            description="Resolution date, requested provisions, and optional supporting documents."
+            cardLink={withBasePath('/form-3/step-4')}
+            ariaLabelText="Open Form 3 Step 4 resolution and provisions"
+          />
+          <OntarioCard
+            headingLevel="h2"
+            label="Form 3 — Step 5"
+            description="Review and validation — summary, generate PDF, authorize, and submit."
+            cardLink={withBasePath('/form-3/step-5')}
+            ariaLabelText="Open Form 3 Step 5 review and validation"
+          />
+          <OntarioCard
+            headingLevel="h2"
             label="Form 7"
             description="Articles of Amendment — Before you begin, then cover letter and filing steps."
             cardLink={withBasePath('/form-7')}
