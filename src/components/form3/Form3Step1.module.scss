@@ -85,39 +85,6 @@
   padding-bottom: 0;
 }
 
-// ODS has no readOnly inputs — static OBR display composed with tokens.
-.obrField {
-  margin: 0;
-}
-
-.obrLabel {
-  margin: 0 0 var(--ontario-spacing-2, 0.5rem);
-}
-
-.obrValue {
-  margin: 0;
-  color: var(--ontario-colour-black, #1a1a1a);
-}
-
-.registryCalloutBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ontario-spacing-4, 1rem);
-}
-
-.registryCalloutRow {
-  margin: 0;
-}
-
-.registryCalloutLabel {
-  margin: 0 0 var(--ontario-spacing-1, 0.25rem);
-  font-weight: 700;
-}
-
-.registryCalloutValue {
-  margin: 0;
-}
-
 .fieldError {
   margin: 0 0 var(--ontario-spacing-2, 0.5rem);
   color: var(--ontario-colour-alert, #cd0000);

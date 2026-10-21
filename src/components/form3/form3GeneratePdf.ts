@@ -34,6 +34,7 @@ export function generateForm3ReviewPdf(args: { draft: Form3Draft }) {
   const sectionHtml = sections
     .map((section) => {
       const rows = section.rows
+        .filter((row) => row.name.toUpperCase() !== 'OCN')
         .map(
           (row) => `
           <tr>

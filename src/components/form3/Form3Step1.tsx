@@ -8,7 +8,6 @@ import {
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
 import { NaicsSearchAutosuggest } from '../form7/NaicsSearchAutosuggest';
-import { Form3RegistryCallout } from './Form3RegistryCallout';
 import { focusField, getEventValue, isValidEmail } from './form3Focus';
 import {
   FORM3_TOTAL_STEPS,
@@ -178,17 +177,8 @@ export function Form3Step1() {
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Corporation details</h1>
           <p className={styles.lead}>
-            Review the corporation&apos;s registry details, update primary activity and
-            official email as needed, then continue.
+            Update primary activity and official email as needed, then continue.
           </p>
-
-          <div className={styles.alert}>
-            <Form3RegistryCallout
-              corporationName={corporationName}
-              ocn={ocn}
-              incorporationDate={incorporationDate}
-            />
-          </div>
 
           <div className={styles.formStack}>
             <div id={FIELD_ANCHORS.primaryActivity} className={styles.naicsBlock}>

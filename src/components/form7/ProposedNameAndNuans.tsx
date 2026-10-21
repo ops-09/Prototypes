@@ -38,6 +38,18 @@ type ProposedNameAndNuansProps = {
   nameKind: 'cooperative' | 'corporation' | 'nfp';
   /** One or more lead paragraphs shown above the proposed name field. */
   leadText?: string | readonly string[];
+  /** Overrides the default proposed-name caption. */
+  proposedNameCaption?: string;
+  /** Optional second proposed-name field (English/French used separately). */
+  secondaryName?: {
+    elementId: string;
+    caption: string;
+    hintText?: string;
+    value: string;
+    errorMessage?: string;
+    onInput: (value: string) => void;
+    onBlur: (value: string) => void;
+  };
   value: NameNuansFields;
   errors: NameNuansErrors;
   dateValidatorFor: (reportId: string) => (
@@ -67,6 +79,8 @@ export function ProposedNameAndNuans({
   idPrefix,
   nameKind,
   leadText,
+  proposedNameCaption,
+  secondaryName,
   value,
   errors,
   dateValidatorFor,
@@ -151,7 +165,7 @@ export function ProposedNameAndNuans({
 
       <OntarioInput
         elementId={`${idPrefix}-proposed-name`}
-        caption={singleNameCaption}
+        caption={proposedNameCaption ?? singleNameCaption}
         name={`${idPrefix}-proposed-name`}
         required
         requiredValidationMessage={emptyMessage()}
@@ -166,6 +180,22 @@ export function ProposedNameAndNuans({
           patch({ proposedName: toBlockCapitals(getEventValue(event)) })
         }
       />
+
+      {secondaryName ? (
+        <OntarioInput
+          elementId={secondaryName.elementId}
+          caption={secondaryName.caption}
+          name={secondaryName.elementId}
+          required
+          hintText={secondaryName.hintText ?? nameHintText()}
+          value={secondaryName.value}
+          errorMessage={secondaryName.errorMessage}
+          customOnInput={(event) => secondaryName.onInput(getEventValue(event))}
+          customOnBlur={(event) =>
+            secondaryName.onBlur(toBlockCapitals(getEventValue(event)))
+          }
+        />
+      ) : null}
 
       {reports.map((report, index) => {
         const ordinal = reports.length > 1 ? ` ${index + 1}` : '';

@@ -14,24 +14,25 @@ import {
   validateForm3CorpName,
 } from './form3ReviewModel';
 import { syncDateFieldByAnchor } from '../form7/dateErrorSync';
-import { emptyNameNuans, type NameNuansFields } from '../form7/form7DraftStorage';
+import {
+  createEmptyNuansReport,
+  emptyNameNuans,
+  type NameNuansFields,
+} from '../form7/form7DraftStorage';
 import {
   nuansDateErrorKey,
   ProposedNameAndNuans,
   validateNameNuansFields,
   type NameNuansErrors,
 } from '../form7/ProposedNameAndNuans';
-import { Form3RegistryCallout } from './Form3RegistryCallout';
 import { focusField, getEventValue } from './form3Focus';
 import {
   EMPTY_NAME_CHANGE,
   FORM3_TOTAL_STEPS,
-  OBR_CORPORATION_NAME,
-  OBR_INCORPORATION_DATE,
-  OBR_OCN,
   readForm3Draft,
   upsertForm3NameChange,
   type Form3NameChangeData,
+  type Form3NameLanguage,
 } from './form3DraftStorage';
 import styles from './Form3Step1.module.scss';
 
@@ -47,8 +48,54 @@ type FieldErrors = NameNuansErrors &
     changeCorporationName: string;
     hasNumberName: string;
     legalElement: string;
+    nameLanguage: string;
+    proposedNameFr: string;
     notInsolvent: string;
   }>;
+
+const LANGUAGE_OPTIONS: {
+  value: Exclude<Form3NameLanguage, ''>;
+  elementId: string;
+  label: string;
+}[] = [
+  {
+    value: 'english',
+    elementId: 'name-language-en',
+    label: 'an English name',
+  },
+  {
+    value: 'french',
+    elementId: 'name-language-fr',
+    label: 'a French name',
+  },
+  {
+    value: 'combined',
+    elementId: 'name-language-combined',
+    label: 'a combination of English and French',
+  },
+  {
+    value: 'separate',
+    elementId: 'name-language-separate',
+    label: 'an English name and a French name used separately',
+  },
+];
+
+function reportsForLanguage(
+  language: Form3NameLanguage,
+  current: NameNuansFields,
+): NameNuansFields {
+  const reports =
+    current.nuansReports.length > 0
+      ? current.nuansReports
+      : [createEmptyNuansReport()];
+  if (language !== 'separate') {
+    return current;
+  }
+  if (reports.length >= 2) {
+    return { ...current, nuansReports: reports };
+  }
+  return { ...current, nuansReports: [...reports, createEmptyNuansReport()] };
+}
 
 function isNameChangeReady() {
   return Boolean(readForm3Draft()?.step1.corporationName);
@@ -70,10 +117,6 @@ export function Form3NameChange() {
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
   dateErrorsRef.current = errors;
-
-  const corporationName = draft?.step1.corporationName || OBR_CORPORATION_NAME;
-  const ocn = draft?.step1.ocn || OBR_OCN;
-  const incorporationDate = draft?.step1.incorporationDate || OBR_INCORPORATION_DATE;
 
   const changeNameOptions = useMemo(
     () => [
@@ -109,6 +152,8 @@ export function Form3NameChange() {
     add('changeCorporationName', '#change-corporation-name');
     add('hasNumberName', '#corp-has-name');
     add('legalElement', '#legal-element');
+    add('nameLanguage', '#name-language');
+    add('proposedNameFr', '#form3-name-proposed-name-fr');
     if (errors.proposedName) {
       items.push({
         key: 'proposedName',
@@ -203,14 +248,27 @@ export function Form3NameChange() {
           next.legalElement = 'Select a legal element for the number name.';
         }
       } else {
-        Object.assign(
-          next,
-          validateNameNuansFields(
-            nameChange.nameNuans,
-            'corporation',
-            validateForm3CorpName,
-          ),
-        );
+        if (!nameChange.nameLanguage) {
+          next.nameLanguage = 'Select the language of the corporation name.';
+        } else {
+          Object.assign(
+            next,
+            validateNameNuansFields(
+              nameChange.nameNuans,
+              'corporation',
+              validateForm3CorpName,
+            ),
+          );
+          if (nameChange.nameLanguage === 'separate') {
+            const frenchError = validateForm3CorpName(nameChange.proposedNameFr);
+            if (frenchError) {
+              next.proposedNameFr =
+                frenchError === 'Enter the corporation name.'
+                  ? 'Enter the French corporation name.'
+                  : frenchError;
+            }
+          }
+        }
       }
     }
     if (!nameChange.notInsolvent) {
@@ -304,14 +362,6 @@ export function Form3NameChange() {
             name.
           </p>
 
-          <div className={styles.alert}>
-            <Form3RegistryCallout
-              corporationName={corporationName}
-              ocn={ocn}
-              incorporationDate={incorporationDate}
-            />
-          </div>
-
           <div className={styles.formStack}>
             <div id="change-corporation-name">
               <OntarioRadioButtons
@@ -327,6 +377,8 @@ export function Form3NameChange() {
                     changeCorporationName: value,
                     hasNumberName: value === 'change' ? nameChange.hasNumberName : '',
                     legalElement: value === 'change' ? nameChange.legalElement : '',
+                    nameLanguage: value === 'change' ? nameChange.nameLanguage : '',
+                    proposedNameFr: value === 'change' ? nameChange.proposedNameFr : '',
                     nameNuans: value === 'no' ? emptyNameNuans() : nameChange.nameNuans,
                   });
                   clearError('changeCorporationName');
@@ -348,6 +400,8 @@ export function Form3NameChange() {
                     patch({
                       hasNumberName: value,
                       legalElement: value === 'yes' ? nameChange.legalElement : '',
+                      nameLanguage: value === 'no' ? nameChange.nameLanguage : '',
+                      proposedNameFr: value === 'no' ? nameChange.proposedNameFr : '',
                       nameNuans: value === 'no' ? nameChange.nameNuans : emptyNameNuans(),
                     });
                     clearError('hasNumberName');
@@ -384,16 +438,67 @@ export function Form3NameChange() {
                     content={SIMILAR_NAME_HELP}
                   />
                 </div>
-                <p className={styles.helpText}>{FORM3_CORP_NAME_INFO}</p>
-                <ProposedNameAndNuans
-                  idPrefix={ID_PREFIX}
-                  nameKind="corporation"
-                  value={nameChange.nameNuans}
-                  errors={errors}
-                  dateValidatorFor={dateValidatorFor}
-                  onChange={setNameNuans}
-                  onClearError={clearError}
-                />
+                <div id="name-language">
+                  <OntarioRadioButtons
+                    caption="The corporation will have"
+                    name="name-language"
+                    required
+                    value={nameChange.nameLanguage}
+                    options={LANGUAGE_OPTIONS}
+                    errorMessage={errors.nameLanguage}
+                    customOnChange={(event) => {
+                      const value = getEventValue(event) as Exclude<
+                        Form3NameLanguage,
+                        ''
+                      >;
+                      patch({
+                        nameLanguage: value,
+                        proposedNameFr:
+                          value === 'separate' ? nameChange.proposedNameFr : '',
+                        nameNuans: reportsForLanguage(value, nameChange.nameNuans),
+                      });
+                      clearError('nameLanguage');
+                      if (value !== 'separate') {
+                        clearError('proposedNameFr');
+                      }
+                    }}
+                  />
+                </div>
+                {nameChange.nameLanguage ? (
+                  <>
+                    <p className={styles.helpText}>{FORM3_CORP_NAME_INFO}</p>
+                    <ProposedNameAndNuans
+                      idPrefix={ID_PREFIX}
+                      nameKind="corporation"
+                      proposedNameCaption={
+                        nameChange.nameLanguage === 'separate'
+                          ? 'New Corporation Name (Proposed) — English'
+                          : undefined
+                      }
+                      secondaryName={
+                        nameChange.nameLanguage === 'separate'
+                          ? {
+                              elementId: `${ID_PREFIX}-proposed-name-fr`,
+                              caption:
+                                'New Corporation Name (Proposed) — French',
+                              value: nameChange.proposedNameFr,
+                              errorMessage: errors.proposedNameFr,
+                              onInput: (value) => {
+                                patch({ proposedNameFr: value });
+                                clearError('proposedNameFr');
+                              },
+                              onBlur: (value) => patch({ proposedNameFr: value }),
+                            }
+                          : undefined
+                      }
+                      value={nameChange.nameNuans}
+                      errors={errors}
+                      dateValidatorFor={dateValidatorFor}
+                      onChange={setNameNuans}
+                      onClearError={clearError}
+                    />
+                  </>
+                ) : null}
               </>
             ) : null}
 

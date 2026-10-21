@@ -6,7 +6,14 @@ import {
   formatUploadedAt,
 } from '../form7/form7Labels';
 import { validateNameNuansFields } from '../form7/ProposedNameAndNuans';
-import type { Form3Draft } from './form3DraftStorage';
+import type { Form3Draft, Form3NameLanguage } from './form3DraftStorage';
+
+const LANGUAGE_LABELS: Record<Exclude<Form3NameLanguage, ''>, string> = {
+  english: 'an English name',
+  french: 'a French name',
+  combined: 'a combination of English and French',
+  separate: 'an English name and a French name used separately',
+};
 
 /** Same legal-element list as Form 2, worded for a corporation name. */
 export const FORM3_CORP_NAME_INFO =
@@ -85,6 +92,12 @@ function isNameChangeComplete(draft: Form3Draft) {
   if (change.hasNumberName !== 'no') {
     return false;
   }
+  if (!change.nameLanguage) {
+    return false;
+  }
+  if (change.nameLanguage === 'separate' && validateForm3CorpName(change.proposedNameFr)) {
+    return false;
+  }
   return (
     Object.keys(
       validateNameNuansFields(change.nameNuans, 'corporation', validateForm3CorpName),
@@ -121,9 +134,26 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
               ]
             : [
                 {
-                  name: 'Proposed corporation name',
+                  name: 'Name language',
+                  description: change.nameLanguage
+                    ? LANGUAGE_LABELS[change.nameLanguage]
+                    : 'Not provided',
+                },
+                {
+                  name:
+                    change.nameLanguage === 'separate'
+                      ? 'Proposed corporation name (English)'
+                      : 'Proposed corporation name',
                   description: displayOrEmpty(change.nameNuans.proposedName),
                 },
+                ...(change.nameLanguage === 'separate'
+                  ? [
+                      {
+                        name: 'Proposed corporation name (French)',
+                        description: displayOrEmpty(change.proposedNameFr),
+                      },
+                    ]
+                  : []),
                 ...change.nameNuans.nuansReports.flatMap((report, index, reports) => {
                   const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
                   return [
@@ -170,10 +200,6 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
         {
           name: 'Corporation name',
           description: displayOrEmpty(draft.step1.corporationName),
-        },
-        {
-          name: 'OCN',
-          description: displayOrEmpty(draft.step1.ocn),
         },
         {
           name: 'Date of incorporation/amalgamation',

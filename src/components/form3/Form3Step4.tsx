@@ -10,15 +10,11 @@ import {
 import { isIsoDateComplete } from '../form1/nameValidation';
 import { aggregateDateFromEvent, syncDateFieldByAnchor } from '../form7/dateErrorSync';
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
-import { Form3RegistryCallout } from './Form3RegistryCallout';
 import { focusField, getEventValue } from './form3Focus';
 import {
   EMPTY_STEP4,
   FORM3_TOTAL_STEPS,
   MAX_PROVISIONS_CHARS,
-  OBR_CORPORATION_NAME,
-  OBR_INCORPORATION_DATE,
-  OBR_OCN,
   readForm3Draft,
   upsertForm3Step4,
   type Form3Step4Data,
@@ -73,10 +69,6 @@ export function Form3Step4() {
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
   dateErrorsRef.current = errors;
-
-  const corporationName = draft?.step1.corporationName || OBR_CORPORATION_NAME;
-  const ocn = draft?.step1.ocn || OBR_OCN;
-  const incorporationDate = draft?.step1.incorporationDate || OBR_INCORPORATION_DATE;
 
   const errorSummaryItems = useMemo(() => {
     const items: { key: FieldKey; message: string; href: string }[] = [];
@@ -213,14 +205,6 @@ export function Form3Step4() {
             the provisions being requested.
           </p>
 
-          <div className={styles.alert}>
-            <Form3RegistryCallout
-              corporationName={corporationName}
-              ocn={ocn}
-              incorporationDate={incorporationDate}
-            />
-          </div>
-
           <div className={styles.formStack}>
             <div id={DATE_ANCHOR} className={styles.resolutionDateBlock}>
               <p className={styles.resolutionDateLabel}>
@@ -229,7 +213,8 @@ export function Form3Step4() {
               </p>
               <p className={styles.helpText}>
                 The resolution authorizing this application was confirmed by the
-                shareholders/members of the corporation on this date.
+                shareholders/members of the corporation on this date under section 34
+                or 131 of the Corporations Act.
               </p>
               <div className={styles.resolutionDateInputClip}>
                 <OntarioDateInput
