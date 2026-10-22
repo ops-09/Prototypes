@@ -50,6 +50,8 @@ import { Form3Page } from './pages/Form3Page';
 import { Form3Step1Page } from './pages/Form3Step1Page';
 import { Form3Step4Page } from './pages/Form3Step4Page';
 import { Form3Step5Page } from './pages/Form3Step5Page';
+import { Form11DraftSummaryPage } from './pages/Form11DraftSummaryPage';
+import { Form11Step2Page } from './pages/Form11Step2Page';
 import { HomePage } from './pages/HomePage';
 import { InviteUserPage } from './pages/InviteUserPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
@@ -149,6 +151,10 @@ function App() {
         <Route path="/form-10/step-5" element={<Form10Step3Page />} />
         <Route path="/form-10/step-6" element={<Form10Step4Page />} />
         <Route path="/form-10/draft-summary" element={<Form10DraftSummaryPage />} />
+
+        <Route path="/form-11" element={<Navigate to="/form-11/step-2" replace />} />
+        <Route path="/form-11/step-2" element={<Form11Step2Page />} />
+        <Route path="/form-11/draft-summary" element={<Form11DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/user-management/invite" element={<InviteUserPage />} />

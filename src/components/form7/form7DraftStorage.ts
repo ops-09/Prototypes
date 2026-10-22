@@ -15,6 +15,9 @@ export type AmendmentType =
   | 'reduction-capital'
   | 'amend-other';
 
+/** Used on Form 7 NFP conversion when the corporation does not take a number name. */
+export type Form7NameLanguage = 'english' | 'french' | 'combined' | 'separate' | '';
+
 export type Form7Step1Data = {
   cooperativeName: string;
   ocn: string;
@@ -125,6 +128,9 @@ export type Form7Step2Data = {
   nameNuans: NameNuansFields;
   hasNumberName: 'yes' | 'no' | '';
   legalElement: string;
+  /** NFP conversion, not a number name: English / French / combined / separate. */
+  nameLanguage: Form7NameLanguage;
+  proposedNameFr: string;
   numberNameNuansFile: UploadedFileMeta | null;
   numberNameNuansDate: string;
   capitalReductionDescription: string;
@@ -178,6 +184,8 @@ export const EMPTY_STEP2: Form7Step2Data = {
   nameNuans: emptyNameNuans(),
   hasNumberName: '',
   legalElement: '',
+  nameLanguage: '',
+  proposedNameFr: '',
   numberNameNuansFile: null,
   numberNameNuansDate: '',
   capitalReductionDescription: '',

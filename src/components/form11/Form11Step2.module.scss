@@ -1,0 +1,119 @@
+// Form page main: no top pad (step indicator sits under header); 80px above footer.
+.formMain {
+  flex: 1;
+  min-width: 0;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  padding: 0 0 var(--ontario-spacing-10, 5rem);
+}
+
+// ODS step-indicator host defaults to inline-block; force full-width so Back / step label space apart.
+.stepIndicator {
+  display: block;
+  width: 100%;
+
+  :global(ontario-step-indicator) {
+    display: block;
+    width: 100%;
+  }
+}
+
+.alert {
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+
+  // ODS global `ul` is 3rem (48px) at ≥40em. Error-summary lists use 24px.
+  ul {
+    margin-left: var(--ontario-spacing-5, 1.5rem);
+  }
+}
+
+// Slotted page-alert links are light DOM; ODS `.ontario-alert--error a` only
+// applies in shadow. Style summary anchors directly (ODS page-alerts.html).
+.errorSummaryLink {
+  color: var(--ontario-colour-alert, #cd0000);
+
+  &:hover,
+  &:focus {
+    // ODS page-alert $ontario-alert-link-focus — not in global tokens
+    color: #6b0000;
+  }
+
+  &:active {
+    // ODS page-alert $ontario-alert-link-active — not in global tokens
+    color: #280000;
+  }
+
+  &:visited {
+    color: var(--ontario-colour-alert, #cd0000);
+  }
+}
+
+.pageTitle {
+  margin-top: 0;
+}
+
+.lead {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+}
+
+.formStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+}
+
+// SearchBox locks caption+hint+field into a narrow offset form. Compose title and
+// hint at column width (like lead/body), then compensate SearchBox host offset only.
+.naicsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.naicsLabel {
+  margin: 0;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.requiredFlag {
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.naicsSearch {
+  width: 100%;
+}
+
+.naicsBlock :global(ontario-hint-expander) {
+  display: block;
+  clear: both;
+  margin-bottom: 0;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-6, 2rem);
+  margin-top: var(--ontario-spacing-7, 2.5rem);
+}

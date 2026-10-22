@@ -15,6 +15,7 @@ import {
 } from './corpNameValidation';
 import { syncDateFieldByAnchor } from './dateErrorSync';
 import {
+  createEmptyNuansReport,
   emptyNameNuans,
   EMPTY_STEP2,
   normalizeNameNuans,
@@ -23,6 +24,7 @@ import {
   readForm7Draft,
   upsertForm7Step2,
   type AmendmentType,
+  type Form7NameLanguage,
   type Form7Step2Data,
   type NameNuansFields,
 } from './form7DraftStorage';
@@ -44,8 +46,54 @@ type Step2Errors = NameNuansErrors &
     changeCooperativeName: string;
     hasNumberName: string;
     legalElement: string;
+    nameLanguage: string;
+    proposedNameFr: string;
   }> &
   Record<string, string | undefined>;
+
+const LANGUAGE_OPTIONS: {
+  value: Exclude<Form7NameLanguage, ''>;
+  elementId: string;
+  label: string;
+}[] = [
+  {
+    value: 'english',
+    elementId: 'name-language-en',
+    label: 'an English name',
+  },
+  {
+    value: 'french',
+    elementId: 'name-language-fr',
+    label: 'a French name',
+  },
+  {
+    value: 'combined',
+    elementId: 'name-language-combined',
+    label: 'a combination of English and French',
+  },
+  {
+    value: 'separate',
+    elementId: 'name-language-separate',
+    label: 'an English name and a French name used separately',
+  },
+];
+
+function reportsForLanguage(
+  language: Form7NameLanguage,
+  current: NameNuansFields,
+): NameNuansFields {
+  const reports =
+    current.nuansReports.length > 0
+      ? current.nuansReports
+      : [createEmptyNuansReport()];
+  if (language !== 'separate') {
+    return current;
+  }
+  if (reports.length >= 2) {
+    return { ...current, nuansReports: reports };
+  }
+  return { ...current, nuansReports: [...reports, createEmptyNuansReport()] };
+}
 
 function getEventValue(event: globalThis.Event) {
   const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
@@ -195,6 +243,8 @@ export function Form7Step2() {
       { key: 'changeCooperativeName', href: '#change-cooperative-name' },
       { key: 'hasNumberName', href: '#corp-has-name' },
       { key: 'legalElement', href: '#legal-element' },
+      { key: 'nameLanguage', href: '#name-language' },
+      { key: 'proposedNameFr', href: `#${idPrefix}-proposed-name-fr` },
       {
         key: 'proposedName',
         href: nameNuansErrorHref(idPrefix, 'proposedName', step2.nameNuans.nuansReports),
@@ -309,10 +359,23 @@ export function Form7Step2() {
         next.hasNumberName =
           'Select whether this Not-for-Profit corporation will have a number name.';
       } else if (step2.hasNumberName === 'no') {
-        Object.assign(
-          next,
-          validateNameNuansFields(step2.nameNuans, 'nfp', validateNfpCorporationName),
-        );
+        if (!step2.nameLanguage) {
+          next.nameLanguage = 'Select the language of the corporation name.';
+        } else {
+          Object.assign(
+            next,
+            validateNameNuansFields(step2.nameNuans, 'nfp', validateNfpCorporationName),
+          );
+          if (step2.nameLanguage === 'separate') {
+            const frenchError = validateNfpCorporationName(step2.proposedNameFr);
+            if (frenchError) {
+              next.proposedNameFr =
+                frenchError === 'Enter the Not-for-Profit corporation name.'
+                  ? 'Enter the French Not-for-Profit corporation name.'
+                  : frenchError;
+            }
+          }
+        }
       }
     }
 
@@ -384,6 +447,8 @@ export function Form7Step2() {
       changeCooperativeName: '',
       hasNumberName: '',
       legalElement: '',
+      nameLanguage: '',
+      proposedNameFr: '',
       numberNameNuansFile: null,
       numberNameNuansDate: '',
       nameNuans: emptyNameNuans(),
@@ -596,26 +661,86 @@ export function Form7Step2() {
                       patchStep2({
                         hasNumberName: value,
                         legalElement: '',
+                        nameLanguage: value === 'no' ? step2.nameLanguage : '',
+                        proposedNameFr: value === 'no' ? step2.proposedNameFr : '',
                         numberNameNuansFile: null,
                         numberNameNuansDate: '',
                         nameNuans: value === 'no' ? step2.nameNuans : emptyNameNuans(),
                       });
                       clearError('hasNumberName');
+                      if (value !== 'no') {
+                        clearError('nameLanguage');
+                        clearError('proposedNameFr');
+                      }
                     }}
                   />
                 </div>
 
                 {step2.hasNumberName === 'no' ? (
-                  <ProposedNameAndNuans
-                    idPrefix={idPrefix}
-                    nameKind="nfp"
-                    leadText="Every Not-for-Profit corporation must have a name. You need a NUANS report for the proposed name."
-                    value={step2.nameNuans}
-                    errors={errors}
-                    dateValidatorFor={dateValidatorFor}
-                    onChange={setNameNuans}
-                    onClearError={clearError}
-                  />
+                  <>
+                    <p className={styles.lead}>
+                      Every Not-for-Profit corporation must have a name. You need a NUANS
+                      report for the proposed name.
+                    </p>
+                    <div id="name-language">
+                      <OntarioRadioButtons
+                        caption="The corporation will have"
+                        name="name-language"
+                        required
+                        value={step2.nameLanguage}
+                        options={LANGUAGE_OPTIONS}
+                        errorMessage={errors.nameLanguage}
+                        customOnChange={(event) => {
+                          const value = getEventValue(event) as Exclude<
+                            Form7NameLanguage,
+                            ''
+                          >;
+                          patchStep2({
+                            nameLanguage: value,
+                            proposedNameFr:
+                              value === 'separate' ? step2.proposedNameFr : '',
+                            nameNuans: reportsForLanguage(value, step2.nameNuans),
+                          });
+                          clearError('nameLanguage');
+                          if (value !== 'separate') {
+                            clearError('proposedNameFr');
+                          }
+                        }}
+                      />
+                    </div>
+                    {step2.nameLanguage ? (
+                      <ProposedNameAndNuans
+                        idPrefix={idPrefix}
+                        nameKind="nfp"
+                        proposedNameCaption={
+                          step2.nameLanguage === 'separate'
+                            ? 'New Not-for-Profit Corporation Name (Proposed) — English'
+                            : undefined
+                        }
+                        secondaryName={
+                          step2.nameLanguage === 'separate'
+                            ? {
+                                elementId: `${idPrefix}-proposed-name-fr`,
+                                caption:
+                                  'New Not-for-Profit Corporation Name (Proposed) — French',
+                                value: step2.proposedNameFr,
+                                errorMessage: errors.proposedNameFr,
+                                onInput: (value) => {
+                                  patchStep2({ proposedNameFr: value });
+                                  clearError('proposedNameFr');
+                                },
+                                onBlur: (value) => patchStep2({ proposedNameFr: value }),
+                              }
+                            : undefined
+                        }
+                        value={step2.nameNuans}
+                        errors={errors}
+                        dateValidatorFor={dateValidatorFor}
+                        onChange={setNameNuans}
+                        onClearError={clearError}
+                      />
+                    ) : null}
+                  </>
                 ) : null}
               </div>
             ) : null}

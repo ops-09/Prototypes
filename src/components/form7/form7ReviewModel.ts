@@ -6,6 +6,7 @@ import {
 import {
   affidavitsRequired,
   type Form7Draft,
+  type Form7NameLanguage,
   type NameNuansFields,
   type SupportingDocMeta,
 } from './form7DraftStorage';
@@ -30,6 +31,13 @@ export type ReviewSection = {
   editHref: string;
   complete: boolean;
   rows: ReviewRow[];
+};
+
+const LANGUAGE_LABELS: Record<Exclude<Form7NameLanguage, ''>, string> = {
+  english: 'English name',
+  french: 'French name',
+  combined: 'Combination of English and French',
+  separate: 'English and French names used separately',
 };
 
 function displayOrEmpty(value: string) {
@@ -155,6 +163,18 @@ function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
       description: yesNo(step2.hasNumberName),
     });
     if (step2.hasNumberName === 'no') {
+      rows.push({
+        name: 'Name language',
+        description: step2.nameLanguage
+          ? LANGUAGE_LABELS[step2.nameLanguage]
+          : 'Not provided',
+      });
+      if (step2.nameLanguage === 'separate') {
+        rows.push({
+          name: 'Not-for-Profit proposed name (French)',
+          description: displayOrEmpty(step2.proposedNameFr),
+        });
+      }
       rows.push(...nuansRows(step2.nameNuans, 'Not-for-Profit'));
     }
     return rows;
@@ -217,6 +237,15 @@ function isAmendmentComplete(draft: Form7Draft) {
     }
     if (step2.hasNumberName === 'yes') {
       return true;
+    }
+    if (!step2.nameLanguage) {
+      return false;
+    }
+    if (
+      step2.nameLanguage === 'separate' &&
+      Boolean(validateNfpCorporationName(step2.proposedNameFr))
+    ) {
+      return false;
     }
     return isNameNuansComplete(step2.nameNuans, 'nfp');
   }
