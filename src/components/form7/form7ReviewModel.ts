@@ -152,6 +152,18 @@ function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
         description: displayOrEmpty(step2.legalElement),
       });
     } else if (step2.hasNumberName === 'no') {
+      rows.push({
+        name: 'Name language',
+        description: step2.nameLanguage
+          ? LANGUAGE_LABELS[step2.nameLanguage]
+          : 'Not provided',
+      });
+      if (step2.nameLanguage === 'separate') {
+        rows.push({
+          name: 'Corporation proposed name (French)',
+          description: displayOrEmpty(step2.proposedNameFr),
+        });
+      }
       rows.push(...nuansRows(step2.nameNuans, 'Corporation'));
     }
     return rows;
@@ -227,6 +239,15 @@ function isAmendmentComplete(draft: Form7Draft) {
     }
     if (step2.hasNumberName === 'yes') {
       return Boolean(step2.legalElement.trim());
+    }
+    if (!step2.nameLanguage) {
+      return false;
+    }
+    if (
+      step2.nameLanguage === 'separate' &&
+      Boolean(validateCorporationName(step2.proposedNameFr))
+    ) {
+      return false;
     }
     return isNameNuansComplete(step2.nameNuans, 'corporation');
   }

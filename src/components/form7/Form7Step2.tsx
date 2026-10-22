@@ -184,7 +184,7 @@ export function Form7Step2() {
         value: 'convert-business-corp',
         elementId: 'amendment-convert-business-corp',
         label:
-          'Articles of Amendment (converting to a Business Corporations Act Corporation)',
+          'Articles of Amendment (converting to a business corporation under the Business Corporations Act)',
       },
       {
         value: 'convert-not-for-profit',
@@ -387,11 +387,22 @@ export function Form7Step2() {
         if (!step2.legalElement) {
           next.legalElement = 'Select a legal element for the number name.';
         }
+      } else if (!step2.nameLanguage) {
+        next.nameLanguage = 'Select the language of the corporation name.';
       } else {
         Object.assign(
           next,
           validateNameNuansFields(step2.nameNuans, 'corporation', validateCorporationName),
         );
+        if (step2.nameLanguage === 'separate') {
+          const frenchError = validateCorporationName(step2.proposedNameFr);
+          if (frenchError) {
+            next.proposedNameFr =
+              frenchError === 'Enter the corporation name.'
+                ? 'Enter the French corporation name.'
+                : frenchError;
+          }
+        }
       }
     }
 
@@ -597,6 +608,8 @@ export function Form7Step2() {
                       patchStep2({
                         hasNumberName: value,
                         legalElement: value === 'yes' ? step2.legalElement : '',
+                        nameLanguage: value === 'no' ? step2.nameLanguage : '',
+                        proposedNameFr: value === 'no' ? step2.proposedNameFr : '',
                         numberNameNuansFile: null,
                         numberNameNuansDate: '',
                         nameNuans: value === 'no' ? step2.nameNuans : emptyNameNuans(),
@@ -604,6 +617,10 @@ export function Form7Step2() {
                       clearError('hasNumberName');
                       if (value !== 'yes') {
                         clearError('legalElement');
+                      }
+                      if (value !== 'no') {
+                        clearError('nameLanguage');
+                        clearError('proposedNameFr');
                       }
                     }}
                   />
@@ -629,15 +646,65 @@ export function Form7Step2() {
                 ) : null}
 
                 {step2.hasNumberName === 'no' ? (
-                  <ProposedNameAndNuans
-                    idPrefix={idPrefix}
-                    nameKind="corporation"
-                    value={step2.nameNuans}
-                    errors={errors}
-                    dateValidatorFor={dateValidatorFor}
-                    onChange={setNameNuans}
-                    onClearError={clearError}
-                  />
+                  <>
+                    <div id="name-language">
+                      <OntarioRadioButtons
+                        caption="The corporation will have"
+                        name="name-language"
+                        required
+                        value={step2.nameLanguage}
+                        options={LANGUAGE_OPTIONS}
+                        errorMessage={errors.nameLanguage}
+                        customOnChange={(event) => {
+                          const value = getEventValue(event) as Exclude<
+                            Form7NameLanguage,
+                            ''
+                          >;
+                          patchStep2({
+                            nameLanguage: value,
+                            proposedNameFr:
+                              value === 'separate' ? step2.proposedNameFr : '',
+                            nameNuans: reportsForLanguage(value, step2.nameNuans),
+                          });
+                          clearError('nameLanguage');
+                          if (value !== 'separate') {
+                            clearError('proposedNameFr');
+                          }
+                        }}
+                      />
+                    </div>
+                    {step2.nameLanguage ? (
+                      <ProposedNameAndNuans
+                        idPrefix={idPrefix}
+                        nameKind="corporation"
+                        proposedNameCaption={
+                          step2.nameLanguage === 'separate'
+                            ? 'New Corporation Name (Proposed) — English'
+                            : undefined
+                        }
+                        secondaryName={
+                          step2.nameLanguage === 'separate'
+                            ? {
+                                elementId: `${idPrefix}-proposed-name-fr`,
+                                caption: 'New Corporation Name (Proposed) — French',
+                                value: step2.proposedNameFr,
+                                errorMessage: errors.proposedNameFr,
+                                onInput: (value) => {
+                                  patchStep2({ proposedNameFr: value });
+                                  clearError('proposedNameFr');
+                                },
+                                onBlur: (value) => patchStep2({ proposedNameFr: value }),
+                              }
+                            : undefined
+                        }
+                        value={step2.nameNuans}
+                        errors={errors}
+                        dateValidatorFor={dateValidatorFor}
+                        onChange={setNameNuans}
+                        onClearError={clearError}
+                      />
+                    ) : null}
+                  </>
                 ) : null}
               </div>
             ) : null}

@@ -3,7 +3,7 @@ import type { AmendmentType } from './form7DraftStorage';
 export const AMENDMENT_TYPE_LABELS: Record<AmendmentType, string> = {
   'change-name': 'Articles of Amendment',
   'convert-business-corp':
-    'Articles of Amendment (converting to a Business Corporations Act Corporation)',
+    'Articles of Amendment (converting to a business corporation under the Business Corporations Act)',
   'convert-not-for-profit':
     'Articles of Amendment (converting to a Not-for-Profit Corporations Act, 2010 Corporation)',
   'reduction-capital': 'Reduction of Authorized Capital',
