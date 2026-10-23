@@ -108,8 +108,7 @@ export function Form11Step2() {
       return;
     }
     upsertForm11Step2(buildStep2(), 'continue');
-    // Next filing step is not in the prototype yet.
-    navigate('/form-11/draft-summary');
+    navigate('/form-11/step-3');
   }
 
   function handleSaveAsDraft() {

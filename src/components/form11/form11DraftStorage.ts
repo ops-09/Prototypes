@@ -1,22 +1,109 @@
+import type { UploadedFileMeta } from '../form1/FileUpload';
+import {
+  EMPTY_DIRECTOR_ADDRESS,
+  type DirectorCountMode,
+  type DirectorResidentialAddress,
+  type YesNoAnswer,
+} from '../form1/form1DraftStorage';
+import {
+  emptyNameNuans,
+  normalizeNameNuans,
+  type NameNuansFields,
+  type SupportingDocMeta,
+} from '../form7/form7DraftStorage';
+import { SIGNED_IN_INDIVIDUAL } from '../../mock/signedInIndividual';
+
 const STORAGE_KEY = 'ops-rbac.form11.draft';
 
-/** Remaining Form 11 steps are not built yet — update when later stories land. */
-export const FORM11_TOTAL_STEPS = 5;
+export const FORM11_TOTAL_STEPS = 8;
+export const MIN_AMALGAMATING_NFPS = 2;
+export const MIN_DIRECTORS = 3;
+export const FORM11_RICH_TEXT_MAX_CHARS = 900_000;
 
 export type Form11Step2Data = {
   primaryActivity: string;
   email: string;
 };
 
+export type AmalgamatingNfp = {
+  id: string;
+  legalName: string;
+  ocn: string;
+  membersApprovalDate: string;
+  addedFromAccount: boolean;
+};
+
+export type Form11Step3Data = {
+  corporations: AmalgamatingNfp[];
+  agreementApproved: boolean;
+};
+
+export type Form11NameChangeChoice = '' | 'yes' | 'no';
+
+export type Form11Step4Data = {
+  changeName: Form11NameChangeChoice;
+  nameNuans: NameNuansFields;
+  selectedAmalgamatedCorporationId: string;
+};
+
+export type Form11Step5Data = {
+  postalCodeLookup: string;
+  selectedAddressId: string;
+  streetAndNumber: string;
+  unitType: string;
+  roomNumber: string;
+  municipality: string;
+  province: string;
+  postalCode: string;
+};
+
+export type Form11Director = {
+  id: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  email: string;
+  alsoIncorporator: YesNoAnswer | '';
+  address: DirectorResidentialAddress;
+  consentConfirmed: boolean;
+  consentFile: UploadedFileMeta | null;
+  addedFromAccount: boolean;
+};
+
+export type Form11Step6Data = {
+  countMode: DirectorCountMode | '';
+  fixedNumber: string;
+  minimumNumber: string;
+  maximumNumber: string;
+  directors: Form11Director[];
+};
+
+export type Form11Step7Data = {
+  amalgamationAgreement: string;
+  additionalDocuments: SupportingDocMeta[];
+};
+
+export type Form11Step8Data = {
+  authorizationConfirmed: boolean;
+  signedPdf: SupportingDocMeta | null;
+};
+
 export type Form11Draft = {
   step2: Form11Step2Data;
+  step3: Form11Step3Data;
+  step4: Form11Step4Data;
+  step5: Form11Step5Data;
+  step6: Form11Step6Data;
+  step7: Form11Step7Data;
+  step8: Form11Step8Data;
   savedAs: 'draft' | 'continue' | 'submitted';
   savedAt: string;
-  lastCompletedStep: 0 | 2;
+  lastCompletedStep: 0 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   confirmationNumber?: string;
 };
 
 export const OBR_CORPORATION_NAME = 'MAPLE LEAF WORKERS CO-OPERATIVE INC.';
+export const OBR_OCN = '100003456';
 export const OBR_PRIMARY_ACTIVITY = '624410 - Child day-care services';
 export const OBR_OFFICIAL_EMAIL = 'registry@mapleleafworkers.coop';
 
@@ -25,8 +112,252 @@ export const OBR_STEP2_DEFAULTS: Form11Step2Data = {
   email: OBR_OFFICIAL_EMAIL,
 };
 
+export const EMPTY_STEP3: Form11Step3Data = {
+  corporations: [],
+  agreementApproved: false,
+};
+
+export const EMPTY_STEP4: Form11Step4Data = {
+  changeName: '',
+  nameNuans: emptyNameNuans(),
+  selectedAmalgamatedCorporationId: '',
+};
+
+export const EMPTY_STEP5: Form11Step5Data = {
+  postalCodeLookup: '',
+  selectedAddressId: '',
+  streetAndNumber: '',
+  unitType: '',
+  roomNumber: '',
+  municipality: '',
+  province: 'Ontario',
+  postalCode: '',
+};
+
+export const EMPTY_STEP6: Form11Step6Data = {
+  countMode: '',
+  fixedNumber: '',
+  minimumNumber: '',
+  maximumNumber: '',
+  directors: [],
+};
+
+export const EMPTY_STEP7: Form11Step7Data = {
+  amalgamationAgreement: '',
+  additionalDocuments: [],
+};
+
+export const EMPTY_STEP8: Form11Step8Data = {
+  authorizationConfirmed: false,
+  signedPdf: null,
+};
+
+export const AGREEMENT_EMPTY_ERROR =
+  'Provide details of the copy of amalgamation agreement';
+export const AGREEMENT_MAX_LENGTH_ERROR =
+  'The text entered exceeds the maximum length of 900,000 characters.';
+
+export function hasForm11DirectorsComplete(step6: Form11Step6Data | undefined) {
+  if (!step6) {
+    return false;
+  }
+  const added = step6.directors.length;
+  if (step6.countMode === 'fixed') {
+    const fixed = Number.parseInt(step6.fixedNumber, 10);
+    return Number.isFinite(fixed) && fixed >= MIN_DIRECTORS && added === fixed;
+  }
+  if (step6.countMode === 'minMax') {
+    const min = Number.parseInt(step6.minimumNumber, 10);
+    const max = Number.parseInt(step6.maximumNumber, 10);
+    return (
+      Number.isFinite(min) &&
+      Number.isFinite(max) &&
+      min >= MIN_DIRECTORS &&
+      min <= max &&
+      added >= min &&
+      added <= max
+    );
+  }
+  return false;
+}
+
+export function createSeedDirector(index: number): Form11Director {
+  const people = [
+    { firstName: 'Alex', middleName: 'Jordan', lastName: 'Rivera' },
+    { firstName: 'Sam', middleName: '', lastName: 'Chen' },
+    { firstName: 'Priya', middleName: '', lastName: 'Nair' },
+  ];
+  const person = people[index] ?? people[0];
+  return {
+    ...createEmptyDirector(),
+    ...person,
+    email: `${person.firstName.toLowerCase()}@example.com`,
+    alsoIncorporator: 'yes',
+    address: {
+      ...EMPTY_DIRECTOR_ADDRESS,
+      addressType: 'canadian',
+      enterManually: true,
+      selectedAddressId: `seed-director-${index}`,
+      streetNumber: '100',
+      streetName: 'Queen',
+      streetType: 'St',
+      streetDirection: 'W',
+      cityTown: 'Toronto',
+      provinceState: 'Ontario',
+      postalCode: 'M5H 2N2',
+      country: 'Canada',
+    },
+  };
+}
+
+export function hasForm11HeadOffice(step5: Form11Step5Data | undefined) {
+  return Boolean(
+    step5?.selectedAddressId.trim() &&
+      step5.streetAndNumber.trim() &&
+      step5.municipality.trim() &&
+      step5.postalCode.trim(),
+  );
+}
+
+function newDirectorId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `director-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function createEmptyDirector(id = newDirectorId()): Form11Director {
+  return {
+    id,
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    email: '',
+    alsoIncorporator: '',
+    address: { ...EMPTY_DIRECTOR_ADDRESS },
+    consentConfirmed: false,
+    consentFile: null,
+    addedFromAccount: false,
+  };
+}
+
+export function createAccountDirector(id = newDirectorId()): Form11Director {
+  return {
+    ...createEmptyDirector(id),
+    firstName: SIGNED_IN_INDIVIDUAL.firstName,
+    middleName: SIGNED_IN_INDIVIDUAL.middleName,
+    lastName: SIGNED_IN_INDIVIDUAL.lastName,
+    email: SIGNED_IN_INDIVIDUAL.email,
+    addedFromAccount: true,
+  };
+}
+
+export function getDirectorLimit(step6: Form11Step6Data): number | null {
+  if (step6.countMode === 'fixed') {
+    const fixed = Number.parseInt(step6.fixedNumber, 10);
+    return Number.isFinite(fixed) && fixed > 0 ? fixed : null;
+  }
+  if (step6.countMode === 'minMax') {
+    const max = Number.parseInt(step6.maximumNumber, 10);
+    return Number.isFinite(max) && max > 0 ? max : null;
+  }
+  return null;
+}
+
+export function getDirectorMinimum(step6: Form11Step6Data): number | null {
+  if (step6.countMode === 'fixed') {
+    return getDirectorLimit(step6);
+  }
+  if (step6.countMode === 'minMax') {
+    const min = Number.parseInt(step6.minimumNumber, 10);
+    return Number.isFinite(min) && min > 0 ? min : null;
+  }
+  return null;
+}
+
+function normalizeDirector(entry: Partial<Form11Director> | undefined): Form11Director {
+  return {
+    ...createEmptyDirector(entry?.id),
+    ...(entry ?? {}),
+    address: {
+      ...EMPTY_DIRECTOR_ADDRESS,
+      ...(entry?.address ?? {}),
+    },
+    consentConfirmed: Boolean(entry?.consentConfirmed),
+    consentFile: entry?.consentFile ?? null,
+    addedFromAccount: Boolean(entry?.addedFromAccount),
+  };
+}
+
+export const HEAD_OFFICE_INFO =
+  'The head office of a Not-for-Profit corporation must be located in Ontario. The address must be set out in full. A post office box alone is not an acceptable address.';
+
+export function form11HeadOfficeLine(step5: Form11Step5Data) {
+  const unit = [step5.unitType, step5.roomNumber].filter((part) => part.trim()).join(' ');
+  return [unit, step5.streetAndNumber, step5.municipality, step5.province, step5.postalCode]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(', ');
+}
+
+function normalizeNameChangeChoice(value: unknown): Form11NameChangeChoice {
+  return value === 'yes' || value === 'no' ? value : '';
+}
+
+export function form11AmalgamatedName(draft: Form11Draft) {
+  if (draft.step4.changeName === 'yes') {
+    return draft.step4.nameNuans.proposedName.trim();
+  }
+  if (draft.step4.changeName === 'no') {
+    return (
+      draft.step3.corporations.find(
+        (entry) => entry.id === draft.step4.selectedAmalgamatedCorporationId,
+      )?.legalName.trim() ?? ''
+    );
+  }
+  return '';
+}
+
+export function createEmptyAmalgamatingNfp(): AmalgamatingNfp {
+  return {
+    id: crypto.randomUUID(),
+    legalName: '',
+    ocn: '',
+    membersApprovalDate: '',
+    addedFromAccount: false,
+  };
+}
+
+export function createAccountAmalgamatingNfp(): AmalgamatingNfp {
+  return {
+    ...createEmptyAmalgamatingNfp(),
+    legalName: OBR_CORPORATION_NAME,
+    ocn: OBR_OCN,
+    membersApprovalDate: '2026-03-01',
+    addedFromAccount: true,
+  };
+}
+
+export function isValidOcnFormat(value: string) {
+  return /^\d{6,12}$/.test(value.replace(/\s/g, ''));
+}
+
+export function normalizeOcn(value: string) {
+  return value.replace(/\s/g, '');
+}
+
 export function saveForm11Draft(draft: Form11Draft) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+}
+
+function normalizeAmalgamatingNfp(entry: Partial<AmalgamatingNfp> | undefined): AmalgamatingNfp {
+  return {
+    id: entry?.id || crypto.randomUUID(),
+    legalName: entry?.legalName ?? '',
+    ocn: entry?.ocn ?? '',
+    membersApprovalDate: entry?.membersApprovalDate ?? '',
+    addedFromAccount: Boolean(entry?.addedFromAccount),
+  };
 }
 
 export function readForm11Draft(): Form11Draft | null {
@@ -41,6 +372,41 @@ export function readForm11Draft(): Form11Draft | null {
       step2: {
         ...OBR_STEP2_DEFAULTS,
         ...(parsed.step2 ?? {}),
+      },
+      step3: {
+        ...EMPTY_STEP3,
+        ...(parsed.step3 ?? {}),
+        corporations: (parsed.step3?.corporations ?? []).map(normalizeAmalgamatingNfp),
+        agreementApproved: Boolean(parsed.step3?.agreementApproved),
+      },
+      step4: {
+        ...EMPTY_STEP4,
+        ...(parsed.step4 ?? {}),
+        changeName: normalizeNameChangeChoice(parsed.step4?.changeName),
+        nameNuans: normalizeNameNuans(parsed.step4?.nameNuans),
+        selectedAmalgamatedCorporationId:
+          parsed.step4?.selectedAmalgamatedCorporationId ?? '',
+      },
+      step5: {
+        ...EMPTY_STEP5,
+        ...(parsed.step5 ?? {}),
+        province: 'Ontario',
+      },
+      step6: {
+        ...EMPTY_STEP6,
+        ...(parsed.step6 ?? {}),
+        directors: (parsed.step6?.directors ?? []).map(normalizeDirector),
+      },
+      step7: {
+        ...EMPTY_STEP7,
+        ...(parsed.step7 ?? {}),
+        additionalDocuments: parsed.step7?.additionalDocuments ?? [],
+      },
+      step8: {
+        ...EMPTY_STEP8,
+        ...(parsed.step8 ?? {}),
+        authorizationConfirmed: Boolean(parsed.step8?.authorizationConfirmed),
+        signedPdf: parsed.step8?.signedPdf ?? null,
       },
     };
   } catch {
@@ -59,6 +425,12 @@ export function upsertForm11Step2(
   const existing = readForm11Draft();
   const draft: Form11Draft = {
     step2,
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4: existing?.step4 ?? { ...EMPTY_STEP4, nameNuans: emptyNameNuans() },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
     savedAs,
     savedAt: new Date().toISOString(),
     lastCompletedStep: existing?.lastCompletedStep ?? 0,
@@ -69,4 +441,184 @@ export function upsertForm11Step2(
   }
   saveForm11Draft(draft);
   return draft;
+}
+
+export function upsertForm11Step3(
+  step3: Form11Step3Data,
+  savedAs: Form11Draft['savedAs'],
+  lastCompletedStep?: Form11Draft['lastCompletedStep'],
+): Form11Draft {
+  const existing = readForm11Draft();
+  const draft: Form11Draft = {
+    step2: existing?.step2 ?? { ...OBR_STEP2_DEFAULTS },
+    step3,
+    step4: existing?.step4 ?? { ...EMPTY_STEP4, nameNuans: emptyNameNuans() },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: existing?.lastCompletedStep ?? 0,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  if (lastCompletedStep !== undefined) {
+    draft.lastCompletedStep = lastCompletedStep;
+  } else if (savedAs === 'continue') {
+    draft.lastCompletedStep = 3;
+  }
+  saveForm11Draft(draft);
+  return draft;
+}
+
+export function upsertForm11Step4(
+  step4: Form11Step4Data,
+  savedAs: Form11Draft['savedAs'],
+  lastCompletedStep?: Form11Draft['lastCompletedStep'],
+): Form11Draft {
+  const existing = readForm11Draft();
+  const draft: Form11Draft = {
+    step2: existing?.step2 ?? { ...OBR_STEP2_DEFAULTS },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4,
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: existing?.lastCompletedStep ?? 0,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  if (lastCompletedStep !== undefined) {
+    draft.lastCompletedStep = lastCompletedStep;
+  } else if (savedAs === 'continue') {
+    draft.lastCompletedStep = 4;
+  }
+  saveForm11Draft(draft);
+  return draft;
+}
+
+export function upsertForm11Step5(
+  step5: Form11Step5Data,
+  savedAs: Form11Draft['savedAs'],
+  lastCompletedStep?: Form11Draft['lastCompletedStep'],
+): Form11Draft {
+  const existing = readForm11Draft();
+  const draft: Form11Draft = {
+    step2: existing?.step2 ?? { ...OBR_STEP2_DEFAULTS },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4: existing?.step4 ?? { ...EMPTY_STEP4, nameNuans: emptyNameNuans() },
+    step5,
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: existing?.lastCompletedStep ?? 0,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  if (lastCompletedStep !== undefined) {
+    draft.lastCompletedStep = lastCompletedStep;
+  } else if (savedAs === 'continue') {
+    draft.lastCompletedStep = 5;
+  }
+  saveForm11Draft(draft);
+  return draft;
+}
+
+export function upsertForm11Step6(
+  step6: Form11Step6Data,
+  savedAs: Form11Draft['savedAs'],
+  lastCompletedStep?: Form11Draft['lastCompletedStep'],
+): Form11Draft {
+  const existing = readForm11Draft();
+  const draft: Form11Draft = {
+    step2: existing?.step2 ?? { ...OBR_STEP2_DEFAULTS },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4: existing?.step4 ?? { ...EMPTY_STEP4, nameNuans: emptyNameNuans() },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6,
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: existing?.lastCompletedStep ?? 0,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  if (lastCompletedStep !== undefined) {
+    draft.lastCompletedStep = lastCompletedStep;
+  } else if (savedAs === 'continue') {
+    draft.lastCompletedStep = 6;
+  }
+  saveForm11Draft(draft);
+  return draft;
+}
+
+export function upsertForm11Step7(
+  step7: Form11Step7Data,
+  savedAs: Form11Draft['savedAs'],
+  lastCompletedStep?: Form11Draft['lastCompletedStep'],
+): Form11Draft {
+  const existing = readForm11Draft();
+  const draft: Form11Draft = {
+    step2: existing?.step2 ?? { ...OBR_STEP2_DEFAULTS },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4: existing?.step4 ?? { ...EMPTY_STEP4, nameNuans: emptyNameNuans() },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7,
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: existing?.lastCompletedStep ?? 0,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  if (lastCompletedStep !== undefined) {
+    draft.lastCompletedStep = lastCompletedStep;
+  } else if (savedAs === 'continue') {
+    draft.lastCompletedStep = 7;
+  }
+  saveForm11Draft(draft);
+  return draft;
+}
+
+export function upsertForm11Step8(
+  step8: Form11Step8Data,
+  savedAs: Form11Draft['savedAs'],
+  lastCompletedStep?: Form11Draft['lastCompletedStep'],
+  confirmationNumber?: string,
+): Form11Draft {
+  const existing = readForm11Draft();
+  const draft: Form11Draft = {
+    step2: existing?.step2 ?? { ...OBR_STEP2_DEFAULTS },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4: existing?.step4 ?? { ...EMPTY_STEP4, nameNuans: emptyNameNuans() },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8,
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: existing?.lastCompletedStep ?? 0,
+    confirmationNumber: confirmationNumber ?? existing?.confirmationNumber,
+  };
+  if (lastCompletedStep !== undefined) {
+    draft.lastCompletedStep = lastCompletedStep;
+  } else if (savedAs === 'continue' || savedAs === 'submitted') {
+    draft.lastCompletedStep = 8;
+  }
+  saveForm11Draft(draft);
+  return draft;
+}
+
+export function createForm11ConfirmationNumber() {
+  const stamp = Date.now().toString(36).toUpperCase();
+  const rand = Math.floor(Math.random() * 9000 + 1000);
+  return `F11-${stamp}-${rand}`;
+}
+
+export function hasForm11Agreement(step7: Form11Step7Data | undefined) {
+  const text = step7?.amalgamationAgreement.trim() ?? '';
+  return Boolean(text) && text.length <= FORM11_RICH_TEXT_MAX_CHARS;
 }

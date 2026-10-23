@@ -50,6 +50,11 @@
   line-height: 1.5;
 }
 
+// Section gap is 12px ($ontario-spacing-3). Extra 12px here makes intro → first step 24px ($ontario-spacing-5).
+.sectionIntro + .stepsList {
+  margin-top: var(--ontario-spacing-3, 0.75rem);
+}
+
 // Offset OntarioCallout default vertical margins without piercing shadow DOM.
 .timeEstimateCallout {
   :global(ontario-callout) {

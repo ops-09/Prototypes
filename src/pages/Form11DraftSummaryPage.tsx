@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom';
 import { OntarioButton, OntarioPageAlert } from '@ongov/ontario-design-system-component-library-react';
-import { OBR_CORPORATION_NAME, readForm11Draft } from '../components/form11/form11DraftStorage';
+import {
+  form11AmalgamatedName,
+  form11HeadOfficeLine,
+  OBR_CORPORATION_NAME,
+  readForm11Draft,
+} from '../components/form11/form11DraftStorage';
 import formStyles from '../components/form11/Form11Step2.module.scss';
 import { PlaygroundShell } from '../components/layout/PlaygroundShell';
 import styles from './Form11DraftSummaryPage.module.scss';
@@ -8,6 +13,23 @@ import styles from './Form11DraftSummaryPage.module.scss';
 export function Form11DraftSummaryPage() {
   const draft = readForm11Draft();
   const submitted = draft?.savedAs === 'submitted';
+  const continueHref =
+    draft && draft.lastCompletedStep >= 7
+      ? '/form-11/step-8'
+      : draft && draft.lastCompletedStep >= 6
+      ? '/form-11/step-7'
+      : draft && draft.lastCompletedStep >= 5
+        ? '/form-11/step-6'
+        : draft && draft.lastCompletedStep >= 4
+          ? '/form-11/step-5'
+          : draft && draft.lastCompletedStep >= 3
+            ? '/form-11/step-4'
+            : draft && draft.lastCompletedStep >= 2
+              ? '/form-11/step-3'
+              : '/form-11/step-2';
+  const amalgamatingCount = draft?.step3.corporations.length ?? 0;
+  const amalgamatedName = draft ? form11AmalgamatedName(draft) : '';
+  const headOffice = draft ? form11HeadOfficeLine(draft.step5) : '';
 
   return (
     <PlaygroundShell
@@ -63,6 +85,36 @@ export function Form11DraftSummaryPage() {
                   <dt>Official email</dt>
                   <dd>{draft.step2.email || '—'}</dd>
                 </div>
+                <div>
+                  <dt>Amalgamating corporations</dt>
+                  <dd>{amalgamatingCount}</dd>
+                </div>
+                <div>
+                  <dt>Amalgamated corporation name</dt>
+                  <dd>{amalgamatedName || '—'}</dd>
+                </div>
+                <div>
+                  <dt>Head office address</dt>
+                  <dd>{headOffice || '—'}</dd>
+                </div>
+                <div>
+                  <dt>Directors</dt>
+                  <dd>{draft.step6.directors.length}</dd>
+                </div>
+                <div>
+                  <dt>Amalgamation agreement</dt>
+                  <dd>
+                    {draft.step7.amalgamationAgreement.trim() ? 'Provided' : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Additional documents</dt>
+                  <dd>{draft.step7.additionalDocuments.length}</dd>
+                </div>
+                <div>
+                  <dt>Signed PDF</dt>
+                  <dd>{draft.step8?.signedPdf?.name || '—'}</dd>
+                </div>
               </dl>
             </>
           )}
@@ -73,7 +125,7 @@ export function Form11DraftSummaryPage() {
                 type="primary"
                 htmlType="button"
                 label="Continue filing"
-                href="/form-11/step-2"
+                href={continueHref}
               />
             ) : null}
             <Link className={styles.homeLink} to="/">

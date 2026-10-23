@@ -64,7 +64,7 @@ const PROTOTYPES: PlaygroundCard[] = [
   {
     label: 'Form 11',
     description:
-      'Application for Letters Patent of Amalgamation — corporation details (step 2).',
+      'Application for Letters Patent of Amalgamation — corporation details through directors, then supporting documents.',
     href: '/form-11',
     ariaLabelText:
       'Open the Form 11 Application for Letters Patent of Amalgamation prototype',
@@ -306,6 +306,48 @@ const PROTOTYPE_PAGES: PageCategory[] = [
           'Corporation details — primary activity and official email, pre-populated from OBR.',
         href: '/form-11/step-2',
         ariaLabelText: 'Open Form 11 Step 2 corporation details',
+      },
+      {
+        label: 'Form 11 — Step 3',
+        description:
+          'Amalgamation details — amalgamating not-for-profit corporations and section 113(3) confirmation.',
+        href: '/form-11/step-3',
+        ariaLabelText: 'Open Form 11 Step 3 amalgamation details',
+      },
+      {
+        label: 'Form 11 — Step 4',
+        description:
+          'Amalgamated name — keep an existing amalgamating name or propose a new name with NUANS.',
+        href: '/form-11/step-4',
+        ariaLabelText: 'Open Form 11 Step 4 amalgamated corporation name',
+      },
+      {
+        label: 'Form 11 — Step 5',
+        description:
+          'Head office address — Ontario postal-code lookup for the amalgamated not-for-profit corporation.',
+        href: '/form-11/step-5',
+        ariaLabelText: 'Open Form 11 Step 5 head office address',
+      },
+      {
+        label: 'Form 11 — Step 6',
+        description:
+          'Directors — fixed or min/max count, add first directors and addresses for service.',
+        href: '/form-11/step-6',
+        ariaLabelText: 'Open Form 11 Step 6 directors',
+      },
+      {
+        label: 'Form 11 — Step 7',
+        description:
+          'Supporting documents — amalgamation agreement copy and optional additional PDFs.',
+        href: '/form-11/step-7',
+        ariaLabelText: 'Open Form 11 Step 7 supporting documents',
+      },
+      {
+        label: 'Form 11 — Step 8',
+        description:
+          'Review — application details, generate PDF, upload the signed copy, and submit.',
+        href: '/form-11/step-8',
+        ariaLabelText: 'Open Form 11 Step 8 review',
       },
     ],
   },

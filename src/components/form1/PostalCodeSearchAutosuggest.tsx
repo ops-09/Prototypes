@@ -15,6 +15,7 @@ import { FieldErrorMessage } from './FieldErrorMessage';
 import {
   filterAddressExamples,
   formatAddressSuggestion,
+  isOntarioPostalCode,
   type AddressLookupResult,
 } from './canadaPostLookup';
 // Reuse the Primary Activity (NAICS) search-field chrome and suggestion list styles.
@@ -25,6 +26,10 @@ type PostalCodeSearchAutosuggestProps = {
   value: string;
   onChange: (value: string) => void;
   onSelect: (entry: AddressLookupResult) => void;
+  /** Called when the search box Find/Search action runs. */
+  onSearch?: (query: string) => void;
+  /** Limit suggestions to Ontario postal codes (K, L, M, N, P). */
+  ontarioOnly?: boolean;
   errorMessage?: string;
   hintText?: string;
 };
@@ -113,6 +118,8 @@ export function PostalCodeSearchAutosuggest({
   value,
   onChange,
   onSelect,
+  onSearch,
+  ontarioOnly = false,
   errorMessage,
   hintText = 'Example: M5H 2N2, K1A 0A6, or Toronto',
 }: PostalCodeSearchAutosuggestProps) {
@@ -151,7 +158,12 @@ export function PostalCodeSearchAutosuggest({
     }
   }, [errorId, errorMessage, value]);
 
-  const suggestions = useMemo(() => filterAddressExamples(value), [value]);
+  const suggestions = useMemo(() => {
+    const matches = filterAddressExamples(value);
+    return ontarioOnly
+      ? matches.filter((entry) => isOntarioPostalCode(entry.postalCode))
+      : matches;
+  }, [ontarioOnly, value]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -410,7 +422,13 @@ export function PostalCodeSearchAutosuggest({
             customOnInput={handleInput}
             customOnFocus={openSuggestions}
             performSearch={async (nextValue) => {
-              onChange((nextValue ?? '').trim());
+              const query = (nextValue ?? value).trim();
+              onChange(query);
+              if (onSearch) {
+                onSearch(query);
+                openSuggestions();
+                return;
+              }
               closeSuggestions();
             }}
           />

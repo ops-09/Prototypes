@@ -1,0 +1,106 @@
+.addActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  align-items: center;
+}
+
+.addActionsAlone {
+  padding-top: var(--ontario-spacing-4, 1rem);
+  border-top: var(--ontario-global-tokens-border-size, 2px) solid
+    var(--ontario-greyscale-20, #cccccc);
+}
+
+.addLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: var(--ontario-global-tokens-border-size, 4px) solid
+      var(--ontario-colour-focus, #009adb);
+    outline-offset: var(--ontario-global-tokens-border-size, 4px);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.manualToggle {
+  :global(ontario-checkboxes) {
+    display: block;
+  }
+}
+
+.selectedCorp {
+  margin: 0;
+}
+
+.selectedLabel {
+  margin: 0 0 var(--ontario-spacing-2, 0.5rem);
+}
+
+.selectedValue {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.resolutionDateInputClip {
+  overflow: hidden;
+
+  :global(ontario-date-input) {
+    display: block;
+    margin-top: calc(
+      -1 * (var(--ontario-spacing-5, 1.5rem) + var(--ontario-spacing-4, 1rem))
+    );
+  }
+}
+
+.resolutionDateLabel {
+  margin: 0 0 var(--ontario-spacing-4, 1rem);
+  max-width: 100%;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
+.editorActions {
+  margin-top: var(--ontario-spacing-7, 2.5rem);
+}

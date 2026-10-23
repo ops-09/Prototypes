@@ -50,8 +50,16 @@ import { Form3Page } from './pages/Form3Page';
 import { Form3Step1Page } from './pages/Form3Step1Page';
 import { Form3Step4Page } from './pages/Form3Step4Page';
 import { Form3Step5Page } from './pages/Form3Step5Page';
+import { Form11CorporationSubflowPage } from './pages/Form11CorporationSubflowPage';
 import { Form11DraftSummaryPage } from './pages/Form11DraftSummaryPage';
 import { Form11Step2Page } from './pages/Form11Step2Page';
+import { Form11Step3Page } from './pages/Form11Step3Page';
+import { Form11Step4Page } from './pages/Form11Step4Page';
+import { Form11DirectorSubflowPage } from './pages/Form11DirectorSubflowPage';
+import { Form11Step5Page } from './pages/Form11Step5Page';
+import { Form11Step6Page } from './pages/Form11Step6Page';
+import { Form11Step7Page } from './pages/Form11Step7Page';
+import { Form11Step8Page } from './pages/Form11Step8Page';
 import { HomePage } from './pages/HomePage';
 import { InviteUserPage } from './pages/InviteUserPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
@@ -154,6 +162,28 @@ function App() {
 
         <Route path="/form-11" element={<Navigate to="/form-11/step-2" replace />} />
         <Route path="/form-11/step-2" element={<Form11Step2Page />} />
+        <Route path="/form-11/step-3" element={<Form11Step3Page />} />
+        <Route
+          path="/form-11/step-3/corporations/new"
+          element={<Form11CorporationSubflowPage />}
+        />
+        <Route
+          path="/form-11/step-3/corporations/:corporationId"
+          element={<Form11CorporationSubflowPage />}
+        />
+        <Route path="/form-11/step-4" element={<Form11Step4Page />} />
+        <Route path="/form-11/step-5" element={<Form11Step5Page />} />
+        <Route path="/form-11/step-6" element={<Form11Step6Page />} />
+        <Route
+          path="/form-11/step-6/directors/new"
+          element={<Form11DirectorSubflowPage />}
+        />
+        <Route
+          path="/form-11/step-6/directors/:directorId"
+          element={<Form11DirectorSubflowPage />}
+        />
+        <Route path="/form-11/step-7" element={<Form11Step7Page />} />
+        <Route path="/form-11/step-8" element={<Form11Step8Page />} />
         <Route path="/form-11/draft-summary" element={<Form11DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />

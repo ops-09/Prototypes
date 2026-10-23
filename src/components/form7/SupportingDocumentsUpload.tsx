@@ -41,6 +41,8 @@ type SupportingDocumentsUploadProps = {
   errorMessage?: string;
   onChange: (files: SupportingDocMeta[]) => void;
   inputId?: string;
+  /** Show the upload date next to file size in the list. */
+  showUploadedAt?: boolean;
 };
 
 function isAcceptedFile(file: File) {
@@ -65,6 +67,18 @@ function createDocMeta(file: File): SupportingDocMeta {
   };
 }
 
+function formatUploadDate(iso: string) {
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) {
+    return '';
+  }
+  return parsed.toLocaleDateString('en-CA', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 export function SupportingDocumentsUpload({
   label,
   hintText,
@@ -74,6 +88,7 @@ export function SupportingDocumentsUpload({
   errorMessage,
   onChange,
   inputId,
+  showUploadedAt = false,
 }: SupportingDocumentsUploadProps) {
   const generatedId = useId();
   const id = inputId ?? `supporting-docs-${generatedId}`;
@@ -250,7 +265,11 @@ export function SupportingDocumentsUpload({
                     >
                       {doc.name}
                     </a>
-                    <span className={fileStyles.fileSize}>{formatFileBytes(doc.size)}</span>
+                    <span className={fileStyles.fileSize}>
+                      {showUploadedAt && formatUploadDate(doc.uploadedAt)
+                        ? `${formatUploadDate(doc.uploadedAt)} · ${formatFileBytes(doc.size)}`
+                        : formatFileBytes(doc.size)}
+                    </span>
                   </div>
                 </div>
                 <button

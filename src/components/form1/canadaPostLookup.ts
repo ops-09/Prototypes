@@ -58,6 +58,20 @@ export function formatAddressSuggestion(entry: AddressLookupResult) {
   return `${entry.postalCode} — ${entry.label.replace(`, ON ${entry.postalCode}`, '')}`;
 }
 
+/** Street line used when lookup results populate Street & Number (or R.R. Number). */
+export function formatStreetAndNumber(entry: AddressLookupResult) {
+  return [
+    entry.streetNumber,
+    entry.streetNumberSuffix,
+    entry.streetName,
+    entry.streetType,
+    entry.streetDirection,
+  ]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(' ');
+}
+
 export const MOCK_ADDRESSES: AddressLookupResult[] = [
   {
     id: 'm5h-1',
