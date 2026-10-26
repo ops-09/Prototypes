@@ -1,8 +1,16 @@
 /** Copy for Form 1 Before you begin — edit here without changing layout. */
 
+import type { BeforeYouBeginChecklistItem } from '../shared/beforeYouBeginChecklist';
+import {
+  BYB_PAYMENT_LEAD,
+  BYB_PAYMENT_REVIEW_FEES,
+} from '../shared/beforeYouBeginPaymentContent';
+import { DIRECTOR_CONSENT_FORM_URL } from './form1DraftStorage';
+
 /** Title lines — break early so lines wrap cleanly at form column widths. */
 export const BYB_FORM_TITLE_LINES = [
-  'Articles of Incorporation of a Co-operative with Share Capital Form 1',
+  // Non-breaking hyphen so “Co-operative” does not wrap after “Co-”.
+  'Articles of Incorporation of a Co\u2011operative with Share Capital Form 1',
 ] as const;
 
 /** Act line — body text under the page title, not part of the h1. */
@@ -12,10 +20,7 @@ export const BYB_FORM_TITLE = [...BYB_FORM_TITLE_LINES, BYB_FORM_ACT_LINE].join(
   ' ',
 );
 
-export const BYB_INTRO =
-  'Please review the following information before starting your Articles of Incorporation filing.';
-
-export const BYB_ESTIMATED_TIME_HEADING = 'Estimated time to complete';
+export const BYB_FORM_NAME = BYB_FORM_TITLE_LINES.join(' ');
 
 export const BYB_ESTIMATED_TIME = 'Approximately 10 minutes';
 
@@ -71,51 +76,18 @@ export const BYB_STEPS: readonly BeforeYouBeginStep[] = [
   },
 ];
 
-export const BYB_DOCUMENTS_HEADING = 'Gather your supporting documents';
+export const BYB_DOCUMENTS_HEADING = 'Submission checklist';
 
 export const BYB_DOCUMENTS_INTRO =
   'You should have the following information available to complete your submission:';
 
-export type BeforeYouBeginDocument = {
-  beforeLink?: string;
-  linkLabel?: string;
-  afterLink?: string;
-  text?: string;
-};
+export const BYB_PAYMENT_LEAD_TEXT = BYB_PAYMENT_LEAD;
 
-export const BYB_DOCUMENTS: readonly BeforeYouBeginDocument[] = [
-  {
-    text: 'An Ontario NUANS name search report for the proposed name of the co-operative.',
-  },
-  {
-    beforeLink: 'A completed ',
-    linkLabel: 'Consent to Act as First Director (Form 3)',
-    afterLink:
-      ', required only for a first director who is not also an incorporator.',
-  },
-];
-
-export const BYB_COST_HEADING = 'Cost';
-
-export const BYB_COST_INTRO =
-  'A filing fee is required to submit Articles of Incorporation.';
-
-export const BYB_COST_ITEMS: readonly string[] = [
-  'The filing fee for Articles of Incorporation: $335 for a standard co-operative.',
+export const BYB_PAYMENT_ITEMS: readonly string[] = [
   'A valid payment method available.',
+  BYB_PAYMENT_REVIEW_FEES,
+  'The filing fee for Articles of Incorporation: $335 for a standard co-operative.',
 ];
-
-export const BYB_INSTRUCTIONS_HEADING = 'Instructions';
-
-export const BYB_INSTRUCTIONS_INTRO =
-  'Please keep the following guidelines in mind while completing your filing.';
-
-export type BeforeYouBeginInstruction = {
-  text: string;
-  /** When set, append a link after the text. */
-  linkHref?: string;
-  linkLabel?: string;
-};
 
 export const BYB_NAICS_INSTRUCTION_BEFORE =
   'The primary activity is the main activity of your corporation. Please refer to the ';
@@ -141,3 +113,24 @@ export const BYB_NUANS_SITE_URL =
   'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
 
 export const BYB_NUANS_SITE_LABEL = 'NUANS site';
+
+export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
+  {
+    beforeLink: BYB_NAICS_INSTRUCTION_BEFORE,
+    linkLabel: BYB_NAICS_LINK_LABEL,
+    linkHref: BYB_NAICS_URL,
+    afterLink: BYB_NAICS_INSTRUCTION_AFTER,
+  },
+  {
+    beforeLink: `${BYB_FORM3_INSTRUCTION} `,
+    linkLabel: BYB_FORM3_DOWNLOAD_LABEL,
+    linkHref: DIRECTOR_CONSENT_FORM_URL,
+    afterLink: '.',
+  },
+  {
+    beforeLink: `${BYB_NUANS_INSTRUCTION} `,
+    linkLabel: BYB_NUANS_SITE_LABEL,
+    linkHref: BYB_NUANS_SITE_URL,
+    afterLink: '.',
+  },
+];

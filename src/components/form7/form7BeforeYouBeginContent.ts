@@ -1,5 +1,11 @@
 /** Copy for Form 7 Before you begin — edit here without changing layout. */
 
+import type { BeforeYouBeginChecklistItem } from '../shared/beforeYouBeginChecklist';
+import {
+  BYB_PAYMENT_LEAD,
+  BYB_PAYMENT_REVIEW_FEES,
+} from '../shared/beforeYouBeginPaymentContent';
+
 /** Title lines — break early so lines wrap cleanly at form column widths. */
 export const BYB_FORM_TITLE_LINES = [
   'Articles of Amendment Form 7',
@@ -12,10 +18,7 @@ export const BYB_FORM_TITLE = [...BYB_FORM_TITLE_LINES, BYB_FORM_ACT_LINE].join(
   ' ',
 );
 
-export const BYB_INTRO =
-  'Please review the following information before starting your Articles of Amendment filing.';
-
-export const BYB_ESTIMATED_TIME_HEADING = 'Estimated time to complete';
+export const BYB_FORM_NAME = BYB_FORM_TITLE_LINES.join(' ');
 
 export const BYB_ESTIMATED_TIME = 'Approximately 10 minutes';
 
@@ -56,43 +59,20 @@ export const BYB_STEPS: readonly BeforeYouBeginStep[] = [
   },
 ];
 
-export const BYB_DOCUMENTS_HEADING = 'Gather your supporting documents';
+export const BYB_DOCUMENTS_HEADING = 'Submission checklist';
 
 export const BYB_DOCUMENTS_INTRO =
   'You should have the following information available to complete your submission:';
 
-export type BeforeYouBeginDocument = {
-  text: string;
-};
+export const BYB_PAYMENT_LEAD_TEXT = `${BYB_PAYMENT_LEAD} The fee depends on the amendment type.`;
 
-export const BYB_DOCUMENTS: readonly BeforeYouBeginDocument[] = [
-  {
-    text: 'A certified copy of the resolution authorizing the amendment.',
-  },
-  {
-    text: 'An Ontario NUANS name search report, if you are changing the co-operative’s name.',
-  },
-  {
-    text: 'Any affidavits or other supporting documents required for your amendment type.',
-  },
-];
-
-export const BYB_COST_HEADING = 'Cost';
-
-export const BYB_COST_INTRO =
-  'A filing fee is required to submit Articles of Amendment. The fee depends on the amendment type.';
-
-export const BYB_COST_ITEMS: readonly string[] = [
+export const BYB_PAYMENT_ITEMS: readonly string[] = [
+  'A valid payment method available.',
+  BYB_PAYMENT_REVIEW_FEES,
   'Name change or other amendment: $100.',
   'Convert a co-op to a business corporation under the Business Corporations Act - $200',
   'Convert a co-op to a not-for-profit corporation under the Not-for-Profit Corporations Act, 2010 - $100',
-  'A valid payment method available.',
 ];
-
-export const BYB_INSTRUCTIONS_HEADING = 'Instructions';
-
-export const BYB_INSTRUCTIONS_INTRO =
-  'Please keep the following guidelines in mind while completing your filing.';
 
 export const BYB_NAICS_INSTRUCTION =
   'The primary activity is the main activity of your corporation. Please refer to the North American Industry Classification System (NAICS) for the list of activities. Select the activity that best describes the primary activity carried on by the corporation and provide the activity code from the link in this form. This information will not appear in the public record and is collected for administrative purposes only.';
@@ -104,3 +84,24 @@ export const BYB_NUANS_SITE_URL =
   'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
 
 export const BYB_NUANS_SITE_LABEL = 'NUANS site';
+
+export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
+  {
+    text: 'A certified copy of the resolution authorizing the amendment.',
+  },
+  {
+    text: 'An Ontario NUANS name search report, if you are changing the co-operative’s name.',
+  },
+  {
+    text: 'Any affidavits or other supporting documents required for your amendment type.',
+  },
+  {
+    text: BYB_NAICS_INSTRUCTION,
+  },
+  {
+    beforeLink: `${BYB_NUANS_INSTRUCTION} `,
+    linkLabel: BYB_NUANS_SITE_LABEL,
+    linkHref: BYB_NUANS_SITE_URL,
+    afterLink: '.',
+  },
+];

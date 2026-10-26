@@ -22,6 +22,7 @@ const WHY_CONTACT =
 
 const FIELD_ANCHORS: Record<string, string> = {
   firstName: 'cover-letter-first-name',
+  middleName: 'cover-letter-middle-name',
   lastName: 'cover-letter-last-name',
   phoneNumber: 'cover-letter-phone-number',
   phoneExtension: 'cover-letter-phone-extension',
@@ -148,17 +149,12 @@ export function ContactInformationForm({
     if (!form.firstName.trim()) {
       next.firstName = 'Enter your first name.';
     }
+    if (!form.middleName.trim()) {
+      next.middleName = 'Enter your middle name(s).';
+    }
     if (!form.lastName.trim()) {
       next.lastName = 'Enter your last name.';
     }
-
-    Object.assign(
-      next,
-      validatePhoneFields({
-        phoneNumber: form.phoneNumber,
-        phoneExtension: form.phoneExtension,
-      }),
-    );
 
     if (!form.email.trim()) {
       next.email = 'Enter your email address.';
@@ -171,6 +167,14 @@ export function ContactInformationForm({
     } else if (form.email.trim() !== form.confirmEmail.trim()) {
       next.confirmEmail = 'Email addresses must match exactly.';
     }
+
+    Object.assign(
+      next,
+      validatePhoneFields({
+        phoneNumber: form.phoneNumber,
+        phoneExtension: form.phoneExtension,
+      }),
+    );
 
     return next;
   }
@@ -261,77 +265,47 @@ export function ContactInformationForm({
             </div>
           ) : null}
 
-          <h1 className={`ontario-h1 ${styles.pageTitle}`}>Contact Information</h1>
+          <h1 className={`ontario-h1 ${styles.pageTitle}`}>Contact information</h1>
 
           <p className={styles.lead}>{WHY_CONTACT}</p>
 
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Contact Name</h2>
-            <div className={styles.nameRow}>
-              <OntarioInput
-                elementId={FIELD_ANCHORS.firstName}
-                caption="First Name"
-                name="cover-letter-first-name"
-                type="text"
-                required
-                requiredValidationMessage="Enter your first name."
-                value={form.firstName}
-                errorMessage={errors.firstName}
-                customOnInput={(event) => patchField('firstName', getEventValue(event))}
-              />
-              <OntarioInput
-                elementId="cover-letter-middle-name"
-                caption="Middle Name(s)"
-                name="cover-letter-middle-name"
-                type="text"
-                value={form.middleName}
-                customOnInput={(event) => patchField('middleName', getEventValue(event))}
-              />
-              <OntarioInput
-                elementId={FIELD_ANCHORS.lastName}
-                caption="Last Name"
-                name="cover-letter-last-name"
-                type="text"
-                required
-                requiredValidationMessage="Enter your last name."
-                value={form.lastName}
-                errorMessage={errors.lastName}
-                customOnInput={(event) => patchField('lastName', getEventValue(event))}
-              />
-            </div>
-          </div>
-
-          <div className={styles.section}>
-            <div className={styles.phoneRow}>
-              <OntarioInput
-                elementId={FIELD_ANCHORS.phoneNumber}
-                caption="Phone number"
-                name="cover-letter-phone-number"
-                type="tel"
-                required
-                requiredValidationMessage="Enter your phone number."
-                value={form.phoneNumber}
-                errorMessage={errors.phoneNumber}
-                customOnInput={(event) => patchField('phoneNumber', getEventValue(event))}
-              />
-              <OntarioInput
-                elementId={FIELD_ANCHORS.phoneExtension}
-                caption="Ext."
-                name="cover-letter-phone-extension"
-                type="tel"
-                value={form.phoneExtension}
-                errorMessage={errors.phoneExtension}
-                customOnInput={(event) =>
-                  patchField('phoneExtension', getEventValue(event))
-                }
-              />
-            </div>
-          </div>
-
-          <div className={styles.emailStack}>
+          <div className={styles.formStack}>
+            <OntarioInput
+              elementId={FIELD_ANCHORS.firstName}
+              caption="First name"
+              name="cover-letter-first-name"
+              type="text"
+              required
+              requiredValidationMessage="Enter your first name."
+              value={form.firstName}
+              errorMessage={errors.firstName}
+              customOnInput={(event) => patchField('firstName', getEventValue(event))}
+            />
+            <OntarioInput
+              elementId={FIELD_ANCHORS.middleName}
+              caption="Middle name(s)"
+              name="cover-letter-middle-name"
+              type="text"
+              required
+              requiredValidationMessage="Enter your middle name(s)."
+              value={form.middleName}
+              errorMessage={errors.middleName}
+              customOnInput={(event) => patchField('middleName', getEventValue(event))}
+            />
+            <OntarioInput
+              elementId={FIELD_ANCHORS.lastName}
+              caption="Last name"
+              name="cover-letter-last-name"
+              type="text"
+              required
+              requiredValidationMessage="Enter your last name."
+              value={form.lastName}
+              errorMessage={errors.lastName}
+              customOnInput={(event) => patchField('lastName', getEventValue(event))}
+            />
             <OntarioInput
               elementId={FIELD_ANCHORS.email}
-              caption="Email Address"
+              caption="Email"
               name="cover-letter-email"
               type="email"
               required
@@ -361,6 +335,32 @@ export function ContactInformationForm({
               errorMessage={errors.confirmEmail}
               customOnInput={(event) => patchField('confirmEmail', getEventValue(event))}
             />
+            <div className={styles.shortField}>
+              <OntarioInput
+                elementId={FIELD_ANCHORS.phoneNumber}
+                caption="Phone number"
+                name="cover-letter-phone-number"
+                type="tel"
+                required
+                requiredValidationMessage="Enter your phone number."
+                value={form.phoneNumber}
+                errorMessage={errors.phoneNumber}
+                customOnInput={(event) => patchField('phoneNumber', getEventValue(event))}
+              />
+            </div>
+            <div className={styles.shortField}>
+              <OntarioInput
+                elementId={FIELD_ANCHORS.phoneExtension}
+                caption="Ext"
+                name="cover-letter-phone-extension"
+                type="tel"
+                value={form.phoneExtension}
+                errorMessage={errors.phoneExtension}
+                customOnInput={(event) =>
+                  patchField('phoneExtension', getEventValue(event))
+                }
+              />
+            </div>
           </div>
 
           <div className={styles.buttonGroup}>

@@ -1,37 +1,26 @@
 import { useNavigate } from 'react-router-dom';
+import { OntarioButton } from '@ongov/ontario-design-system-component-library-react';
+import { BeforeYouBeginChecklistList } from '../shared/BeforeYouBeginChecklistList';
+import { BeforeYouBeginContactSection } from '../shared/BeforeYouBeginContactSection';
+import { BeforeYouBeginPaymentSection } from '../shared/BeforeYouBeginPaymentSection';
+import { BeforeYouBeginPreamble } from '../shared/BeforeYouBeginPreamble';
 import {
-  OntarioButton,
-  OntarioCallout,
-  OntarioIconClock,
-} from '@ongov/ontario-design-system-component-library-react';
+  BYB_INSTRUCTIONS_HEADING,
+  BYB_INSTRUCTIONS_INTRO,
+  BYB_NAVIGATION_INSTRUCTIONS,
+} from '../shared/beforeYouBeginSharedContent';
 import {
-  BYB_COST_HEADING,
-  BYB_COST_INTRO,
-  BYB_COST_ITEMS,
+  BYB_PAYMENT_ITEMS,
+  BYB_PAYMENT_LEAD_TEXT,
   BYB_DOCUMENTS,
   BYB_DOCUMENTS_HEADING,
   BYB_DOCUMENTS_INTRO,
   BYB_ESTIMATED_TIME,
-  BYB_ESTIMATED_TIME_HEADING,
-  BYB_FORM_ACT_LINE,
-  BYB_FORM_TITLE_LINES,
-  BYB_FORM3_DOWNLOAD_LABEL,
-  BYB_FORM3_INSTRUCTION,
-  BYB_INSTRUCTIONS_HEADING,
-  BYB_INSTRUCTIONS_INTRO,
-  BYB_INTRO,
-  BYB_NAICS_INSTRUCTION_AFTER,
-  BYB_NAICS_INSTRUCTION_BEFORE,
-  BYB_NAICS_LINK_LABEL,
-  BYB_NAICS_URL,
-  BYB_NUANS_INSTRUCTION,
-  BYB_NUANS_SITE_LABEL,
-  BYB_NUANS_SITE_URL,
+  BYB_FORM_NAME,
   BYB_STEPS,
   BYB_STEPS_HEADING,
   BYB_STEPS_INTRO,
 } from './form1BeforeYouBeginContent';
-import { DIRECTOR_CONSENT_FORM_URL } from './form1DraftStorage';
 import styles from './Form1BeforeYouBegin.module.scss';
 
 export function Form1BeforeYouBegin() {
@@ -53,31 +42,12 @@ export function Form1BeforeYouBegin() {
   return (
     <div className="ontario-row">
       <div className="ontario-columns ontario-small-12 ontario-medium-8">
-        <h1 className={`ontario-h1 ${styles.pageTitle}`}>
-          {BYB_FORM_TITLE_LINES.map((line) => (
-            <span key={line} className={styles.pageTitleLine}>
-              {line}
-            </span>
-          ))}
-        </h1>
-        <p className={styles.formAct}>{BYB_FORM_ACT_LINE}</p>
-        <p className={styles.lead}>{BYB_INTRO}</p>
+        <BeforeYouBeginPreamble
+          formName={BYB_FORM_NAME}
+          estimatedTime={BYB_ESTIMATED_TIME}
+        />
 
         <div className={styles.stack}>
-          <div className={styles.timeEstimateCallout}>
-            <OntarioCallout
-              headingType="h2"
-              headingContent={BYB_ESTIMATED_TIME_HEADING}
-              headingContentType="string"
-              highlightColour="sky"
-            >
-              <div className={styles.timeEstimateBody}>
-                <OntarioIconClock colour="black" iconWidth={24} isDecorative />
-                <p className={styles.timeEstimateText}>{BYB_ESTIMATED_TIME}</p>
-              </div>
-            </OntarioCallout>
-          </div>
-
           <section className={styles.section} aria-labelledby="byb-steps-heading">
             <h2 id="byb-steps-heading" className={`ontario-h2 ${styles.sectionHeading}`}>
               {BYB_STEPS_HEADING}
@@ -109,40 +79,16 @@ export function Form1BeforeYouBegin() {
               {BYB_DOCUMENTS_HEADING}
             </h2>
             <p className={styles.sectionIntro}>{BYB_DOCUMENTS_INTRO}</p>
-            <ul className={styles.bulletList}>
-              {BYB_DOCUMENTS.map((item, index) => (
-                <li key={item.text ?? item.linkLabel ?? index}>
-                  {item.text ? (
-                    item.text
-                  ) : (
-                    <>
-                      {item.beforeLink}
-                      <a
-                        href={DIRECTOR_CONSENT_FORM_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {item.linkLabel}
-                      </a>
-                      {item.afterLink}
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <BeforeYouBeginChecklistList
+              items={BYB_DOCUMENTS}
+              className={styles.bulletList}
+            />
           </section>
 
-          <section className={styles.section} aria-labelledby="byb-cost-heading">
-            <h2 id="byb-cost-heading" className={`ontario-h2 ${styles.sectionHeading}`}>
-              {BYB_COST_HEADING}
-            </h2>
-            <p className={styles.sectionIntro}>{BYB_COST_INTRO}</p>
-            <ul className={styles.bulletList}>
-              {BYB_COST_ITEMS.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
+          <BeforeYouBeginPaymentSection
+            lead={BYB_PAYMENT_LEAD_TEXT}
+            items={BYB_PAYMENT_ITEMS}
+          />
 
           <section
             className={styles.section}
@@ -156,47 +102,19 @@ export function Form1BeforeYouBegin() {
             </h2>
             <p className={styles.sectionIntro}>{BYB_INSTRUCTIONS_INTRO}</p>
             <ul className={styles.bulletList}>
-              <li>
-                {BYB_NAICS_INSTRUCTION_BEFORE}
-                <a
-                  href={BYB_NAICS_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {BYB_NAICS_LINK_LABEL}
-                </a>
-                {BYB_NAICS_INSTRUCTION_AFTER}
-              </li>
-              <li>
-                {BYB_FORM3_INSTRUCTION}{' '}
-                <a
-                  href={DIRECTOR_CONSENT_FORM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {BYB_FORM3_DOWNLOAD_LABEL}
-                </a>
-                .
-              </li>
-              <li>
-                {BYB_NUANS_INSTRUCTION}{' '}
-                <a
-                  href={BYB_NUANS_SITE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {BYB_NUANS_SITE_LABEL}
-                </a>
-                .
-              </li>
+              {BYB_NAVIGATION_INSTRUCTIONS.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
           </section>
+
+          <BeforeYouBeginContactSection />
 
           <div className={styles.buttonGroup}>
             <OntarioButton
               type="primary"
               htmlType="button"
-              label="Start Application"
+              label="Continue"
               onClick={handleStartApplication}
             />
             <OntarioButton

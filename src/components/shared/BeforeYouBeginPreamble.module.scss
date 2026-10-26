@@ -1,0 +1,38 @@
+.pageTitle {
+  margin-top: 0;
+  margin-bottom: var(--ontario-spacing-2, 0.5rem);
+}
+
+.lead {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.preamble {
+  margin-bottom: var(--ontario-spacing-6, 2rem);
+}
+
+// Offset OntarioCallout default vertical margins without piercing shadow DOM.
+.timeEstimateCallout {
+  :global(ontario-callout) {
+    display: block;
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+.timeEstimateBody {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.timeEstimateText {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+}

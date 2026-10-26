@@ -61,58 +61,21 @@
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   line-height: 1.6;
   color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  text-wrap: pretty;
 }
 
-.section {
-  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
-}
-
-.sectionTitle {
-  margin: 0 0 var(--ontario-spacing-3, 0.75rem);
-  font-family: var(
-    --ontario-font-raleway-modified,
-    'Raleway Modified',
-    'Open Sans',
-    'Helvetica Neue',
-    Helvetica,
-    Arial,
-    sans-serif
-  );
-  font-size: 1.1875rem;
-  font-weight: var(--ontario-font-weights-bold, 700);
-  line-height: 1.5;
-  color: var(--ontario-colour-greyscale-black, #1a1a1a);
-}
-
-.nameRow {
-  display: grid;
-  gap: var(--ontario-spacing-4, 1rem);
-  grid-template-columns: 1fr;
-  // Bottom-align so inputs line up when a label wraps (e.g. Middle Name optional).
-  align-items: end;
-
-  @media screen and (min-width: 40em) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.phoneRow {
-  display: grid;
-  gap: var(--ontario-spacing-4, 1rem);
-  grid-template-columns: 1fr;
-  align-items: end;
-
-  @media screen and (min-width: 40em) {
-    // Phone number ~70%, Ext. ~30%
-    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
-  }
-}
-
-.emailStack {
+// Single-column stack: one field per row (reference cover letter layout).
+.formStack {
   display: flex;
   flex-direction: column;
-  gap: var(--ontario-spacing-4, 1rem);
+  gap: var(--ontario-spacing-5, 1.5rem);
   margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+// Phone and extension use a narrow input width; still stacked vertically.
+.shortField {
+  max-width: calc(var(--ontario-spacing-8, 3rem) * 4);
+  width: 100%;
 }
 
 .buttonGroup {

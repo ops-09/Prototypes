@@ -48,6 +48,7 @@
   margin: 0;
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   line-height: 1.5;
+  text-wrap: pretty;
 }
 
 // Section gap is 12px ($ontario-spacing-3). Extra 12px here makes intro → first step 24px ($ontario-spacing-5).
@@ -156,6 +157,7 @@ $byb-marker-size: calc(
   margin: 0;
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .bulletList {
@@ -171,6 +173,7 @@ $byb-marker-size: calc(
   padding: 0;
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .buttonGroup {
