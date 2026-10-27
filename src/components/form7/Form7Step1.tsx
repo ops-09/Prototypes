@@ -323,7 +323,7 @@ export function Form7Step1() {
             <div id={FIELD_ANCHORS.email}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.email}
-                caption="Official Email"
+                caption="Official email"
                 name="coop-email"
                 type="email"
                 required
@@ -342,7 +342,7 @@ export function Form7Step1() {
             <div id={FIELD_ANCHORS.confirmEmail}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.confirmEmail}
-                caption="Confirm Official Email"
+                caption="Confirm official email"
                 name="coop-confirm-email"
                 type="email"
                 required
@@ -386,7 +386,7 @@ export function Form7Step1() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

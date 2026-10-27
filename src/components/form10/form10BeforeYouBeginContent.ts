@@ -101,7 +101,7 @@ export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   },
   {
     beforeLink:
-      'Affidavits of Solvency (Amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated. Download the ',
+      'Affidavits of solvency (amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated. Download the ',
     linkLabel: 'Affidavit of Solvency form',
     linkHref: AFFIDAVIT_OF_SOLVENCY_AMALGAMATION_URL,
     afterLink: '.',

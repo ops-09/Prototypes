@@ -1,6 +1,7 @@
 import { formatBytes, formatIsoDateDisplay } from '../form7/form7Labels';
 import { validateCooperativeName } from '../form2/nameValidation';
 import { validateNameNuansFields } from '../form7/ProposedNameAndNuans';
+import type { PersonReviewGroup } from '../shared/personReviewRows';
 import {
   MIN_AMALGAMATING_COOPS,
   type Form10Draft,
@@ -24,6 +25,8 @@ export type ReviewSection = {
   editHref: string;
   complete: boolean;
   rows: ReviewRow[];
+  /** Per-entry summary lists, each with its own h2, rendered after `rows`. */
+  groups?: PersonReviewGroup[];
 };
 
 function displayOrEmpty(value: string) {
@@ -74,16 +77,6 @@ function selectedAmalgamatedCooperativeName(draft: Form10Draft) {
   );
 }
 
-function amalgamatedCooperativeName(draft: Form10Draft) {
-  if (draft.nameChange.changeCooperativeName === 'change') {
-    return draft.nameChange.nameNuans.proposedName.trim();
-  }
-  if (draft.nameChange.changeCooperativeName === 'no') {
-    return selectedAmalgamatedCooperativeName(draft);
-  }
-  return '';
-}
-
 function isNameChangeComplete(draft: Form10Draft) {
   if (!draft.nameChange.changeCooperativeName) {
     return false;
@@ -122,34 +115,29 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
         ? 'The amalgamation agreement has been duly approved as required by section 156 of the Co-operative Corporations Act.'
         : 'Not confirmed',
     },
-    {
-      name: 'Amalgamated co-operative name',
-      description: displayOrEmpty(amalgamatedCooperativeName(draft)),
-    },
   ];
 
-  draft.step2.amalgamatingCooperatives.forEach((coop, index) => {
-    amalgamatingRows.push(
-      {
-        name: `Amalgamating co-operative ${index + 1} — Name`,
-        description: displayOrEmpty(coop.legalName),
-      },
-      {
-        name: `Amalgamating co-operative ${index + 1} — OCN`,
-        description: displayOrEmpty(coop.ocn),
-      },
-      {
-        name: `Amalgamating co-operative ${index + 1} — Dates of Members’ Approval`,
-        description: coop.membersApprovalDate
-          ? formatIsoDateDisplay(coop.membersApprovalDate)
-          : 'Not provided',
-      },
-    );
-  });
+  const amalgamatingGroups: PersonReviewGroup[] = draft.step2.amalgamatingCooperatives.map(
+    (coop, index) => ({
+      key: coop.id,
+      caption: `Amalgamating co-operative ${index + 1}`,
+      editHref: `/form-10/step-3/cooperatives/${coop.id}`,
+      rows: [
+        { name: 'Name', description: displayOrEmpty(coop.legalName) },
+        { name: 'Ontario Corporation Number (OCN)', description: displayOrEmpty(coop.ocn) },
+        {
+          name: 'Date of members’ approval',
+          description: coop.membersApprovalDate
+            ? formatIsoDateDisplay(coop.membersApprovalDate)
+            : 'Not provided',
+        },
+      ],
+    }),
+  );
 
   const supportingRows: ReviewRow[] = [
     {
-      name: 'Certified Copy of the Amalgamation Agreement',
+      name: 'Certified copy of the amalgamation agreement',
       description: docLabel(draft.step3.certifiedAgreement, 'Not uploaded'),
     },
   ];
@@ -159,13 +147,13 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     );
     const label = coop.legalName.trim() || `Co-operative ${index + 1}`;
     supportingRows.push({
-      name: `${label} — Affidavit of Solvency #1`,
+      name: `${label} — Affidavit of solvency 1`,
       description: row?.affidavits[0]
         ? docLabel([row.affidavits[0]], 'Not uploaded')
         : 'Not uploaded',
     });
     supportingRows.push({
-      name: `${label} — Affidavit of Solvency #2`,
+      name: `${label} — Affidavit of solvency 2`,
       description: row?.affidavits[1]
         ? docLabel([row.affidavits[1]], 'Not uploaded')
         : 'Not uploaded',
@@ -207,6 +195,7 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
       editHref: '/form-10/step-3',
       complete: isAmalgamatingComplete(draft),
       rows: amalgamatingRows,
+      groups: amalgamatingGroups,
     },
     {
       key: 'nameChange',

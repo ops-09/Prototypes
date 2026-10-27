@@ -29,7 +29,7 @@ import styles from './Form7Step1.module.scss';
 const CURRENT_STEP = 4;
 const TOTAL_STEPS = 5;
 
-const MANDATORY_DOCS_ERROR = 'Supporting documentation is required before you can continue.';
+const MANDATORY_DOCS_ERROR = 'Upload the required supporting documents.';
 const SUBSECTIONS_ERROR =
   'Select at least one Co-operative Corporations Act subsection that authorizes the amendment.';
 
@@ -283,10 +283,10 @@ export function Form7Step3() {
 
   const requiredList = needAffidavits
     ? [
-        'Certified Copy of the Resolution',
-        'Affidavits of Solvency (Amendment), of two officers or of one officer and one director',
+        'Certified copy of the resolution',
+        'Affidavits of solvency (amendment), of two officers or of one officer and one director',
       ]
-    : ['Certified Copy of the Resolution'];
+    : ['Certified copy of the resolution'];
 
   return (
     <>
@@ -341,7 +341,7 @@ export function Form7Step3() {
 
             <div id={FIELD_ANCHORS.certifiedResolution}>
               <SupportingDocumentsUpload
-                label="Certified Copy of the Resolution"
+                label="Certified copy of the resolution"
                 required
                 hintText="Upload a certified copy of the resolution authorizing the amendment."
                 value={step3.certifiedResolution}
@@ -376,7 +376,7 @@ export function Form7Step3() {
             {needAffidavits ? (
               <div id={FIELD_ANCHORS.affidavits}>
                 <SupportingDocumentsUpload
-                  label="Affidavits of Solvency (Amendment)"
+                  label="Affidavits of solvency (amendment)"
                   required
                   hintText="Affidavits of two officers, or of one officer and one director, are required for a name change."
                   value={step3.affidavits}
@@ -463,7 +463,7 @@ export function Form7Step3() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

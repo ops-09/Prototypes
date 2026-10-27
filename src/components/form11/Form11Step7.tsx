@@ -15,7 +15,7 @@ import {
   createAccountAmalgamatingNfp,
   createEmptyAmalgamatingNfp,
   createSeedDirector,
-  EMPTY_STEP5,
+  SAMPLE_HEAD_OFFICE,
   EMPTY_STEP6,
   EMPTY_STEP7,
   EMPTY_STEP8,
@@ -82,15 +82,7 @@ function ensureStep7Draft(): Form11Draft {
       nameNuans: emptyNameNuans(),
       selectedAmalgamatedCorporationId: account.id,
     },
-    step5: {
-      ...EMPTY_STEP5,
-      postalCodeLookup: 'M5H 2N2',
-      selectedAddressId: 'm5h-1',
-      streetAndNumber: '100 Queen St W',
-      municipality: 'Toronto',
-      province: 'Ontario',
-      postalCode: 'M5H 2N2',
-    },
+    step5: { ...SAMPLE_HEAD_OFFICE },
     step6: {
       ...EMPTY_STEP6,
       countMode: 'fixed',
@@ -299,7 +291,7 @@ export function Form11Step7() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

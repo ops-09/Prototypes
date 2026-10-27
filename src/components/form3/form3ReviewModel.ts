@@ -139,7 +139,7 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
   return [
     {
       key: 'corporation',
-      caption: 'Corporation Information',
+      caption: 'Corporation information',
       editHref: '/form-3/step-2',
       complete: Boolean(draft.step1.corporationName && draft.step1.primaryActivity.trim()),
       rows: [
@@ -155,14 +155,14 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
     },
     {
       key: 'nameChange',
-      caption: 'Name Change Information',
+      caption: 'Name change information',
       editHref: '/form-3/step-3',
       complete: isNameChangeComplete(draft),
       rows: nameRows,
     },
     {
       key: 'provisions',
-      caption: 'Supplementary Letters Patent Information',
+      caption: 'Supplementary letters patent information',
       editHref: '/form-3/step-4',
       complete: isProvisionsComplete(draft),
       rows: provisionRows,

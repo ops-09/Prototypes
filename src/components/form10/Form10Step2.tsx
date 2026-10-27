@@ -339,7 +339,7 @@ export function Form10Step2() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

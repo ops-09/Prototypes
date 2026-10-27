@@ -22,11 +22,11 @@ export type AddressLookupResult = {
 export const FIND_POSTAL_CODE_URL =
   'https://www.canadapost-postescanada.ca/cpc/en/tools/find-a-postal-code.page';
 
-export const POSTAL_CODE_FORMAT_ERROR = 'Please enter a valid postal code.';
+export const POSTAL_CODE_FORMAT_ERROR = 'Enter a postal code in the format A1A 1A1.';
 export const POSTAL_CODE_ONTARIO_ERROR =
   'The head office address must be located in Ontario.';
 export const POSTAL_CODE_NOT_FOUND_ERROR =
-  'No address was found for the postal code entered. Please check the postal code and try again.';
+  'No address was found for this postal code. Check the postal code, or enter the address in the fields below.';
 
 const ONTARIO_FSA_LETTERS = new Set(['K', 'L', 'M', 'N', 'P']);
 

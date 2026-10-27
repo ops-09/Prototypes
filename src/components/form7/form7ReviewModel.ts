@@ -359,7 +359,7 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
           description: displayOrEmpty(draft.step1.ocn),
         },
         {
-          name: 'Type of Co-operative',
+          name: 'Type of co-operative',
           description: displayOrEmpty(draft.step1.cooperativeType),
         },
         {
@@ -367,7 +367,7 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
           description: amendmentTypeLabel(draft.step2.amendmentType),
         },
         {
-          name: 'Primary Activity',
+          name: 'Primary activity',
           description: displayOrEmpty(draft.step1.primaryActivity),
         },
         {

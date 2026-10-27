@@ -41,8 +41,6 @@ import step4Styles from './Form2Step4.module.scss';
 const CURRENT_STEP = 5;
 const TOTAL_STEPS = 9;
 
-const REQUIRED = 'Required Field.';
-const REQUIRED_RETRY = 'Required Field. Please try again.';
 const MIN_DIRECTORS_ALLOWED = 3;
 const DIRECTORS_AT_LEAST_THREE_ERROR =
   'The number of directors must be at least 3.';
@@ -266,8 +264,7 @@ function ensureStep4Draft(): Form2Draft {
   const existing = readForm2Draft();
   if (
     hasForm2Step1Data(existing?.step1) &&
-    hasForm2Step2Data(existing.step2) &&
-    existing.step3.streetNumber
+    hasForm2Step2Data(existing.step2)
   ) {
     const step4 = { ...EMPTY_STEP4, ...(existing.step4 ?? {}) };
     return {
@@ -292,22 +289,7 @@ function ensureStep4Draft(): Form2Draft {
       email: 'registry@greeninstitute.coop',
       confirmEmail: 'registry@greeninstitute.coop',
     },
-    step3: {
-      ...EMPTY_STEP3,
-      enterManually: true,
-      streetNumber: '100',
-      streetName: 'Queen',
-      streetType: 'St',
-      streetDirection: 'W',
-      cityTown: 'Toronto',
-      province: 'Ontario',
-      postalCode: 'M5H 2N2',
-      country: 'Canada',
-      municipalityStatus: 'City',
-      municipalityName: 'Toronto',
-      countyStatus: 'Regional Municipality',
-      countyName: 'Toronto',
-    },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: {
       ...EMPTY_STEP4,
       ...(existing?.step4 ?? {}),
@@ -392,12 +374,12 @@ export function Form2Step4() {
     const page: PageErrors = {};
 
     if (!step4.countMode) {
-      page.countMode = REQUIRED;
+      page.countMode = 'Select how the number of directors is determined.';
     }
 
     if (step4.countMode === 'fixed') {
       if (!step4.fixedNumber.trim()) {
-        page.fixedNumber = REQUIRED;
+        page.fixedNumber = 'Enter the fixed number of directors.';
       } else {
         const fixed = Number.parseInt(step4.fixedNumber, 10);
         if (!Number.isFinite(fixed) || fixed < MIN_DIRECTORS_ALLOWED) {
@@ -408,7 +390,7 @@ export function Form2Step4() {
 
     if (step4.countMode === 'minMax') {
       if (!step4.minimumNumber.trim()) {
-        page.minimumNumber = REQUIRED;
+        page.minimumNumber = 'Enter the minimum number of directors.';
       } else {
         const min = Number.parseInt(step4.minimumNumber, 10);
         if (!Number.isFinite(min) || min < MIN_DIRECTORS_ALLOWED) {
@@ -416,7 +398,7 @@ export function Form2Step4() {
         }
       }
       if (!step4.maximumNumber.trim()) {
-        page.maximumNumber = REQUIRED;
+        page.maximumNumber = 'Enter the maximum number of directors.';
       }
       const min = Number.parseInt(step4.minimumNumber, 10);
       const max = Number.parseInt(step4.maximumNumber, 10);
@@ -433,11 +415,11 @@ export function Form2Step4() {
     }
 
     if (!step4.multiStakeholder) {
-      page.multiStakeholder = REQUIRED;
+      page.multiStakeholder = 'Select whether this is a multi-stakeholder co-operative.';
     }
 
     if (step4.multiStakeholder === 'yes' && !step4.stakeholderDirectorsText.trim()) {
-      page.stakeholderDirectorsText = REQUIRED_RETRY;
+      page.stakeholderDirectorsText = 'Enter the number of directors each stakeholder group may elect.';
     }
 
     const directorsError = getDirectorsCountError(step4);
@@ -589,7 +571,7 @@ export function Form2Step4() {
                   name="fixed-number-of-directors"
                   type="text"
                   required
-                  requiredValidationMessage={REQUIRED}
+                  requiredValidationMessage="Enter the fixed number of directors."
                   hintText="Enter the fixed number of directors. The number must be at least 3."
                   inputWidth="5-char-width"
                   value={step4.fixedNumber}
@@ -618,7 +600,7 @@ export function Form2Step4() {
                     name="minimum-number-of-directors"
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED}
+                    requiredValidationMessage="Enter the minimum number of directors."
                     hintText="Enter the minimum number of directors. The number must be at least 3."
                     inputWidth="5-char-width"
                     value={step4.minimumNumber}
@@ -639,7 +621,7 @@ export function Form2Step4() {
                     name="maximum-number-of-directors"
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED}
+                    requiredValidationMessage="Enter the maximum number of directors."
                     hintText="Please enter the maximum number of directors."
                     inputWidth="5-char-width"
                     value={step4.maximumNumber}
@@ -776,7 +758,7 @@ export function Form2Step4() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

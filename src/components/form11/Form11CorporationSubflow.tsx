@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { OntarioPageAlert } from '@ongov/ontario-design-system-component-library-react';
+import { SubflowErrorSummary } from '../shared/SubflowErrorSummary';
 import {
   Form11CorporationEditor,
   validateAmalgamatingNfp,
@@ -106,22 +106,22 @@ export function Form11CorporationSubflow() {
     navigate(LIST_HREF);
   }
 
-  const errorItems = Object.entries(errors).filter(([, message]) => Boolean(message));
 
   return (
     <div className="ontario-row">
       <div className="ontario-columns ontario-small-12 ontario-medium-8">
-        {showErrorSummary && errorItems.length > 0 ? (
-          <div className={styles.alert} tabIndex={-1}>
-            <OntarioPageAlert type="error" heading="There is a problem">
-              <p>Errors were found on this page:</p>
-              <ul>
-                {errorItems.map(([key, message]) => (
-                  <li key={key}>{message}</li>
-                ))}
-              </ul>
-            </OntarioPageAlert>
-          </div>
+        {showErrorSummary ? (
+          <SubflowErrorSummary
+            errors={errors}
+            anchorCandidates={(key) => {
+            const base = `nfp-${current.id}`;
+            if (key === 'search') return [`form11-ocn-search-${current.id}`, `${base}-name`];
+            if (key === 'date') return [`amalgamating-date-${current.id}`];
+            return [`${base}-${key}`, `form11-ocn-search-${current.id}`];
+          }}
+            alertClassName={styles.alert}
+            linkClassName={styles.errorSummaryLink}
+          />
         ) : null}
 
         <h1 className={`ontario-h1 ${styles.subflowPageTitle}`}>

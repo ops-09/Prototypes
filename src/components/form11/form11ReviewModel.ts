@@ -4,17 +4,21 @@ import {
   formatUploadedAt,
 } from '../form7/form7Labels';
 import {
-  formatDirectorAddressLine,
-  formatDirectorFullName,
-} from './Form11DirectorEditor';
-import {
   form11AmalgamatedName,
+  form11HeadOfficeLine,
   hasForm11Agreement,
   hasForm11DirectorsComplete,
   hasForm11HeadOffice,
   MIN_AMALGAMATING_NFPS,
   type Form11Draft,
 } from './form11DraftStorage';
+import {
+  displayValue,
+  formatMailingAddress,
+  formatPersonName,
+  formatYesNoAnswer,
+  type PersonReviewGroup,
+} from '../shared/personReviewRows';
 
 export type ReviewRow = {
   name: string;
@@ -36,6 +40,8 @@ export type ReviewSection = {
   editHref: string;
   complete: boolean;
   rows: ReviewRow[];
+  /** Per-person summary lists, each with its own h2, rendered after `rows`. */
+  groups?: PersonReviewGroup[];
 };
 
 function displayOrEmpty(value: string) {
@@ -97,38 +103,41 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
   }
 
   const headOfficeRows: ReviewRow[] = [
-    { name: 'Street address', description: displayOrEmpty(draft.step5.streetAndNumber) },
-    { name: 'Unit type', description: displayOrEmpty(draft.step5.unitType) },
+    {
+      name: 'Head office address',
+      description: displayOrEmpty(form11HeadOfficeLine(draft.step5)),
+    },
+    {
+      name: 'Municipality',
+      description:
+        draft.step5.municipalityStatus.trim() && draft.step5.cityTown.trim()
+          ? `${draft.step5.municipalityStatus} of ${draft.step5.cityTown}`
+          : 'Not provided',
+    },
+    {
+      name: 'County / region',
+      description: draft.step5.countyName.trim()
+        ? `${draft.step5.countyStatus} of ${draft.step5.countyName}`.trim()
+        : 'Not provided',
+    },
   ];
-  if (draft.step5.roomNumber.trim()) {
-    headOfficeRows.push({
-      name: 'Unit/suite number',
-      description: draft.step5.roomNumber.trim(),
-    });
-  }
-  headOfficeRows.push(
-    { name: 'City/town', description: displayOrEmpty(draft.step5.municipality) },
-    { name: 'Province', description: 'Ontario' },
-    { name: 'Postal code', description: displayOrEmpty(draft.step5.postalCode) },
-  );
 
   const directorRows: ReviewRow[] =
     draft.step6.directors.length === 0
       ? [{ name: 'Directors', description: 'Not provided' }]
-      : draft.step6.directors.flatMap((director, index) => {
-          const ordinal =
-            draft.step6.directors.length > 1 ? ` ${index + 1}` : '';
-          return [
-            {
-              name: `Full name${ordinal}`,
-              description: displayOrEmpty(formatDirectorFullName(director)),
-            },
-            {
-              name: `Address for service${ordinal}`,
-              description: displayOrEmpty(formatDirectorAddressLine(director)),
-            },
-          ];
-        });
+      : [];
+
+  const directorGroups: PersonReviewGroup[] = draft.step6.directors.map((director, index) => ({
+    key: director.id,
+    caption: `Director ${index + 1}`,
+    editHref: `/form-11/step-6/directors/${director.id}`,
+    rows: [
+      { name: 'Name', description: formatPersonName(director) },
+      { name: 'Email', description: displayValue(director.email) },
+      { name: 'Also an incorporator', description: formatYesNoAnswer(director.alsoIncorporator) },
+      { name: 'Address for service', description: formatMailingAddress(director.address) },
+    ],
+  }));
 
   const supportingRows = draft.step7.additionalDocuments.map((file, index) => ({
     name:
@@ -163,21 +172,20 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
       rows:
         draft.step3.corporations.length === 0
           ? [{ name: 'Amalgamating corporations', description: 'Not provided' }]
-          : draft.step3.corporations.flatMap((entry, index) => {
-              const ordinal =
-                draft.step3.corporations.length > 1 ? ` ${index + 1}` : '';
-              return [
-                {
-                  name: `Name${ordinal}`,
-                  description: displayOrEmpty(entry.legalName),
-                },
-                { name: `OCN${ordinal}`, description: displayOrEmpty(entry.ocn) },
-                {
-                  name: `Date of shareholders/members' approval${ordinal}`,
-                  description: formatIsoDateDisplay(entry.membersApprovalDate),
-                },
-              ];
-            }),
+          : [],
+      groups: draft.step3.corporations.map((entry, index) => ({
+        key: entry.id,
+        caption: `Amalgamating corporation ${index + 1}`,
+        editHref: `/form-11/step-3/corporations/${entry.id}`,
+        rows: [
+          { name: 'Name', description: displayOrEmpty(entry.legalName) },
+          { name: 'Ontario Corporation Number (OCN)', description: displayOrEmpty(entry.ocn) },
+          {
+            name: "Date of shareholders/members' approval",
+            description: formatIsoDateDisplay(entry.membersApprovalDate),
+          },
+        ],
+      })),
     },
     {
       key: 'amalgamatedName',
@@ -199,6 +207,7 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
       editHref: '/form-11/step-6',
       complete: hasForm11DirectorsComplete(draft.step6),
       rows: directorRows,
+      groups: directorGroups,
     },
     {
       key: 'agreement',

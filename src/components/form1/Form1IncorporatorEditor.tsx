@@ -2,28 +2,13 @@ import { useState } from 'react';
 import {
   OntarioButton,
   OntarioCheckboxes,
-  OntarioDropdownList,
   OntarioInput,
   OntarioPageAlert,
   OntarioRadioButtons,
 } from '@ongov/ontario-design-system-component-library-react';
 import {
-  FIND_POSTAL_CODE_URL,
-  formatPostalCode,
-  isValidPostalCodeFormat,
-  POSTAL_CODE_FORMAT_ERROR,
-  provinceFromPostalCode,
-  type AddressLookupResult,
-} from './canadaPostLookup';
-import {
-  CANADIAN_PROVINCE_OPTIONS,
   EMPTY_DIRECTOR_ADDRESS,
   formatUnitLabel,
-  STREET_DIRECTION_OPTIONS,
-  STREET_NUMBER_SUFFIX_OPTIONS,
-  STREET_TYPE_OPTIONS,
-  UNIT_TYPE_OPTIONS,
-  unitTypeRequiredError,
   type DirectorAddressType,
   type Form1Director,
   type Form1Incorporator,
@@ -35,14 +20,16 @@ import {
   type OntarioCorporationResult,
 } from './ontarioCorporationLookup';
 import { OntarioCorporationSearchAutosuggest } from './OntarioCorporationSearchAutosuggest';
-import { PostalCodeSearchAutosuggest } from './PostalCodeSearchAutosuggest';
 import styles from './Form1Step1.module.scss';
 import step3Styles from './Form1Step3.module.scss';
 import step4Styles from './Form1Step4.module.scss';
+import {
+  CanadianAddressFields,
+  validateCanadianAddress,
+} from '../shared/CanadianAddressFields';
 
-const REQUIRED_RETRY = 'Required Field. Please try again.';
-const SHARES_WHOLE_NUMBER = 'Please enter a whole number greater than zero.';
-const AMOUNT_INVALID = 'Please enter a valid amount.';
+const SHARES_WHOLE_NUMBER = 'Enter the number of shares as a whole number greater than 0.';
+const AMOUNT_INVALID = 'Enter the amount in dollars, like 1000.00.';
 const CORP_NOT_FOUND_ALERT =
   'No corporation was found for that search. Enter the corporation name and OCN below, or try a different search.';
 const CORP_DUPLICATE = 'This corporation has already been added.';
@@ -80,9 +67,9 @@ export type IncorporatorFieldKey =
 export type IncorporatorErrors = Partial<Record<IncorporatorFieldKey, string>>;
 
 const ADDRESS_TYPE_OPTIONS = [
-  { value: 'canadian', label: 'Canadian Address' },
-  { value: 'us', label: 'US Address' },
-  { value: 'international', label: 'International Address' },
+  { value: 'canadian', label: 'Canadian address' },
+  { value: 'us', label: 'US address' },
+  { value: 'international', label: 'International address' },
 ];
 
 const TYPE_OPTIONS = [
@@ -108,27 +95,6 @@ function clearAddressForType(
   return base;
 }
 
-function applyCanadianLookup(
-  prev: Form1Incorporator['address'],
-  result: AddressLookupResult,
-): Form1Incorporator['address'] {
-  return {
-    ...prev,
-    selectedAddressId: result.id,
-    unitType: result.unitType,
-    unitNumber: result.roomNumber,
-    streetNumber: result.streetNumber,
-    streetName: result.streetName,
-    streetNumberSuffix: result.streetNumberSuffix,
-    streetType: result.streetType,
-    streetDirection: result.streetDirection,
-    cityTown: result.cityTown,
-    provinceState: provinceFromPostalCode(result.postalCode) || prev.provinceState,
-    postalCode: result.postalCode,
-    country: 'Canada',
-  };
-}
-
 function isWholeNumberGreaterThanZero(value: string) {
   if (!/^\d+$/.test(value.trim())) {
     return false;
@@ -150,51 +116,28 @@ function validateAddress(
   next: IncorporatorErrors,
 ) {
   if (!address.addressType) {
-    next.addressType = REQUIRED_RETRY;
+    next.addressType = 'Select the type of address.';
   }
 
   if (address.addressType === 'canadian') {
-    if (!address.enterManually && !address.selectedAddressId) {
-      next.postalCodeLookup = REQUIRED_RETRY;
-    }
-    const unitTypeError = unitTypeRequiredError(address.unitNumber, address.unitType);
-    if (unitTypeError) {
-      next.unitType = unitTypeError;
-    }
-    if (!address.streetNumber.trim()) {
-      next.streetNumber = REQUIRED_RETRY;
-    }
-    if (!address.streetName.trim()) {
-      next.streetName = REQUIRED_RETRY;
-    }
-    if (!address.cityTown.trim()) {
-      next.cityTown = REQUIRED_RETRY;
-    }
-    if (!address.provinceState.trim()) {
-      next.provinceState = REQUIRED_RETRY;
-    }
-    if (!address.postalCode.trim()) {
-      next.postalCode = REQUIRED_RETRY;
-    } else if (!isValidPostalCodeFormat(address.postalCode)) {
-      next.postalCode = POSTAL_CODE_FORMAT_ERROR;
-    }
+    Object.assign(next, validateCanadianAddress(address));
   }
 
   if (address.addressType === 'us' || address.addressType === 'international') {
     if (!address.addressLine1.trim()) {
-      next.addressLine1 = REQUIRED_RETRY;
+      next.addressLine1 = 'Enter address line 1.';
     }
     if (!address.cityTown.trim()) {
-      next.cityTown = REQUIRED_RETRY;
+      next.cityTown = 'Enter the city or town.';
     }
     if (!address.provinceState.trim()) {
-      next.provinceState = REQUIRED_RETRY;
+      next.provinceState = 'Enter the state, province or region.';
     }
     if (!address.postalCode.trim()) {
-      next.postalCode = REQUIRED_RETRY;
+      next.postalCode = 'Enter the ZIP or postal code.';
     }
     if (address.addressType === 'international' && !address.country.trim()) {
-      next.country = REQUIRED_RETRY;
+      next.country = 'Enter the country.';
     }
   }
 }
@@ -204,17 +147,17 @@ function validateShareFields(
   next: IncorporatorErrors,
 ) {
   if (!incorporator.numberOfShares.trim()) {
-    next.numberOfShares = REQUIRED_RETRY;
+    next.numberOfShares = 'Enter the number of shares.';
   } else if (!isWholeNumberGreaterThanZero(incorporator.numberOfShares)) {
     next.numberOfShares = SHARES_WHOLE_NUMBER;
   }
 
   if (!incorporator.classDesignation.trim()) {
-    next.classDesignation = REQUIRED_RETRY;
+    next.classDesignation = 'Enter the class or designation of the shares.';
   }
 
   if (!incorporator.amountToBePaid.trim()) {
-    next.amountToBePaid = REQUIRED_RETRY;
+    next.amountToBePaid = 'Enter the amount to be paid.';
   } else if (!isValidDollarAmount(incorporator.amountToBePaid)) {
     next.amountToBePaid = AMOUNT_INVALID;
   }
@@ -230,22 +173,24 @@ export function validateIncorporator(
   if (isLinked || incorporator.type === 'individual') {
     if (!isLinked) {
       if (!incorporator.firstName.trim()) {
-        next.firstName = REQUIRED_RETRY;
+        next.firstName = 'Enter the first name.';
       }
       if (!incorporator.lastName.trim()) {
-        next.lastName = REQUIRED_RETRY;
+        next.lastName = 'Enter the last name.';
       }
-      validateAddress(incorporator.address, next);
     }
     validateShareFields(incorporator, next);
+    if (!isLinked) {
+      validateAddress(incorporator.address, next);
+    }
     return next;
   }
 
   if (!incorporator.corporationName.trim()) {
-    next.corporation = REQUIRED_RETRY;
+    next.corporation = 'Enter the corporation name.';
   }
   if (!incorporator.ocn.trim()) {
-    next.corporationSearch = REQUIRED_RETRY;
+    next.corporationSearch = 'Enter the Ontario Corporation Number (OCN).';
   } else if (
     options.existingOcns?.some(
       (ocn) => ocn === incorporator.ocn && ocn.length > 0,
@@ -255,13 +200,13 @@ export function validateIncorporator(
   }
 
   if (!incorporator.firstName.trim()) {
-    next.firstName = REQUIRED_RETRY;
+    next.firstName = 'Enter the first name of the person signing.';
   }
   if (!incorporator.lastName.trim()) {
-    next.lastName = REQUIRED_RETRY;
+    next.lastName = 'Enter the last name of the person signing.';
   }
   if (!incorporator.signerPosition.trim()) {
-    next.signerPosition = REQUIRED_RETRY;
+    next.signerPosition = 'Enter the position of the person signing.';
   }
 
   return next;
@@ -402,10 +347,6 @@ export function Form1IncorporatorBlock({
 }: Form1IncorporatorBlockProps) {
   const prefix = `inc-${incorporator.id}`;
   const isLinked = Boolean(incorporator.linkedDirectorId);
-  const showCanadianFields =
-    incorporator.address.addressType === 'canadian' &&
-    (incorporator.address.enterManually ||
-      Boolean(incorporator.address.selectedAddressId));
   const showManualForeign =
     incorporator.address.addressType === 'us' ||
     incorporator.address.addressType === 'international';
@@ -582,11 +523,12 @@ export function Form1IncorporatorBlock({
               <div className={step4Styles.nameRow}>
                 <OntarioInput
                   elementId={`${prefix}-first-name`}
-                  caption="First Name"
+                  caption="First name"
+                  inputWidth="20-char-width"
                   name={`${prefix}-first-name`}
                   type="text"
                   required
-                  requiredValidationMessage={REQUIRED_RETRY}
+                  requiredValidationMessage="Enter the first name."
                   value={incorporator.firstName}
                   errorMessage={errors.firstName}
                   customOnInput={(event) =>
@@ -595,7 +537,8 @@ export function Form1IncorporatorBlock({
                 />
                 <OntarioInput
                   elementId={`${prefix}-middle-name`}
-                  caption="Middle Name(s)"
+                  caption="Middle name(s)"
+                  inputWidth="20-char-width"
                   name={`${prefix}-middle-name`}
                   type="text"
                   required={false}
@@ -607,11 +550,12 @@ export function Form1IncorporatorBlock({
                 />
                 <OntarioInput
                   elementId={`${prefix}-last-name`}
-                  caption="Last Name"
+                  caption="Last name"
+                  inputWidth="20-char-width"
                   name={`${prefix}-last-name`}
                   type="text"
                   required
-                  requiredValidationMessage={REQUIRED_RETRY}
+                  requiredValidationMessage="Enter the last name."
                   value={incorporator.lastName}
                   errorMessage={errors.lastName}
                   customOnInput={(event) =>
@@ -619,10 +563,69 @@ export function Form1IncorporatorBlock({
                   }
                 />
               </div>
+            </>
+          ) : (
+            <div className={step4Styles.readOnlyField}>
+              <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
+                Incorporator
+              </h5>
+              <p className={step4Styles.readOnlyValue}>
+                {formatIncorporatorFullName(incorporator) || '—'}
+              </p>
+              <p className={step4Styles.readOnlyValue}>
+                {formatIncorporatorAddressLine(incorporator)}
+              </p>
+            </div>
+          )}
 
+          <OntarioInput
+            elementId={`${prefix}-shares`}
+            caption="Number of shares"
+            name={`${prefix}-shares`}
+            type="text"
+            inputWidth="10-char-width"
+            required
+            requiredValidationMessage="Enter the number of shares."
+            value={incorporator.numberOfShares}
+            errorMessage={errors.numberOfShares}
+            customOnInput={(event) =>
+              patch({ numberOfShares: getEventValue(event).replace(/\D/g, '') })
+            }
+          />
+          <OntarioInput
+            elementId={`${prefix}-class`}
+            caption="Class/designation"
+            name={`${prefix}-class`}
+            type="text"
+            required
+            requiredValidationMessage="Enter the class or designation of the shares."
+            value={incorporator.classDesignation}
+            errorMessage={errors.classDesignation}
+            customOnInput={(event) =>
+              patch({ classDesignation: getEventValue(event) })
+            }
+          />
+          <OntarioInput
+            elementId={`${prefix}-amount`}
+            caption="Amount to be paid"
+            name={`${prefix}-amount`}
+            type="text"
+            inputWidth="10-char-width"
+            required
+            requiredValidationMessage="Enter the amount to be paid."
+            hintText="Enter a dollar amount, for example 1000.00"
+            value={incorporator.amountToBePaid}
+            errorMessage={errors.amountToBePaid}
+            customOnInput={(event) =>
+              patch({ amountToBePaid: getEventValue(event) })
+            }
+          />
+
+          {!isLinked ? (
+            <>
               <div id={`${prefix}-address-type`}>
                 <OntarioRadioButtons
-                  caption="Residential Address"
+                  caption="Residential address"
                   name={`${prefix}-address-type`}
                   required
                   hintText="Select Canadian, US, or International. Canadian addresses are not limited to Ontario."
@@ -639,243 +642,12 @@ export function Form1IncorporatorBlock({
               </div>
 
               {incorporator.address.addressType === 'canadian' ? (
-                <div className={step3Styles.addressFields}>
-                  {!incorporator.address.enterManually ? (
-                    <div className={step3Styles.lookupBlock}>
-                      <label
-                        className={styles.naicsLabel}
-                        htmlFor={`${prefix}-postal-lookup`}
-                      >
-                        Find the address using a postal code
-                        <span className={styles.requiredFlag}> (required)</span>
-                      </label>
-                      <div className={styles.naicsSearch}>
-                        <PostalCodeSearchAutosuggest
-                          elementId={`${prefix}-postal-lookup`}
-                          value={incorporator.address.postalCodeLookup}
-                          errorMessage={errors.postalCodeLookup}
-                          hintText="Example: M5H 2N2, V6B 5A1, or Calgary (Canada-wide)"
-                          onChange={(value) =>
-                            patchAddress({ postalCodeLookup: value })
-                          }
-                          onSelect={(result) => {
-                            onChange({
-                              ...incorporator,
-                              address: {
-                                ...applyCanadianLookup(incorporator.address, result),
-                                postalCodeLookup: formatPostalCode(result.postalCode),
-                                enterManually: false,
-                              },
-                            });
-                          }}
-                        />
-                      </div>
-                      <p className={step3Styles.postalCodeHint}>
-                        Need help finding a postal code?{' '}
-                        <a
-                          href={FIND_POSTAL_CODE_URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Find a postal code
-                        </a>
-                      </p>
-                    </div>
-                  ) : null}
-
-                  <div className={step3Styles.manualToggle}>
-                    <OntarioCheckboxes
-                      caption="Manual address entry"
-                      name={`${prefix}-enter-manually`}
-                      value={incorporator.address.enterManually ? ['manual'] : []}
-                      options={[
-                        {
-                          value: 'manual',
-                          elementId: `${prefix}-enter-manually`,
-                          label: 'Enter the address manually',
-                        },
-                      ]}
-                      customOnChange={(event) => {
-                        const target = event.target as HTMLInputElement | null;
-                        const checked = Boolean(target?.checked);
-                        onChange({
-                          ...incorporator,
-                          address: {
-                            ...clearAddressForType('canadian'),
-                            enterManually: checked,
-                          },
-                        });
-                      }}
-                    />
-                  </div>
-
-                  {showCanadianFields ? (
-                    <>
-                      <div className={step3Styles.addressGrid}>
-                        <div className={step3Styles.gridHalf}>
-                          <OntarioDropdownList
-                            elementId={`${prefix}-unit-type`}
-                            caption="Unit type"
-                            name={`${prefix}-unit-type`}
-                            required={Boolean(incorporator.address.unitNumber.trim())}
-                            isEmptyStartOption
-                            value={incorporator.address.unitType}
-                            options={UNIT_TYPE_OPTIONS}
-                            errorMessage={errors.unitType}
-                            customOnChange={(event) =>
-                              patchAddress({ unitType: getEventValue(event) })
-                            }
-                          />
-                        </div>
-                        <div className={step3Styles.gridHalf}>
-                          <OntarioInput
-                            elementId={`${prefix}-unit`}
-                            caption="Unit number"
-                            name={`${prefix}-unit`}
-                            type="text"
-                            required={false}
-                            requiredValidationMessage=""
-                            value={incorporator.address.unitNumber}
-                            customOnInput={(event) => {
-                              const unitNumber = getEventValue(event);
-                              patchAddress({
-                                unitNumber,
-                                unitType: unitNumber.trim()
-                                  ? incorporator.address.unitType
-                                  : '',
-                              });
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className={step3Styles.addressGrid}>
-                        <div className={step3Styles.gridHalf}>
-                          <OntarioInput
-                            elementId={`${prefix}-street-number`}
-                            caption="Street number"
-                            name={`${prefix}-street-number`}
-                            type="text"
-                            required
-                            requiredValidationMessage={REQUIRED_RETRY}
-                            value={incorporator.address.streetNumber}
-                            errorMessage={errors.streetNumber}
-                            customOnInput={(event) =>
-                              patchAddress({ streetNumber: getEventValue(event) })
-                            }
-                          />
-                        </div>
-                        <div className={step3Styles.gridHalf}>
-                          <OntarioDropdownList
-                            elementId={`${prefix}-street-suffix`}
-                            caption="Street number suffix"
-                            name={`${prefix}-street-suffix`}
-                            isEmptyStartOption
-                            options={STREET_NUMBER_SUFFIX_OPTIONS}
-                            value={incorporator.address.streetNumberSuffix}
-                            customOnChange={(event) =>
-                              patchAddress({
-                                streetNumberSuffix: getEventValue(event),
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                      <OntarioInput
-                        elementId={`${prefix}-street-name`}
-                        caption="Street name"
-                        name={`${prefix}-street-name`}
-                        type="text"
-                        required
-                        requiredValidationMessage={REQUIRED_RETRY}
-                        value={incorporator.address.streetName}
-                        errorMessage={errors.streetName}
-                        customOnInput={(event) =>
-                          patchAddress({ streetName: getEventValue(event) })
-                        }
-                      />
-                      <div className={step3Styles.addressGrid}>
-                        <div className={step3Styles.gridHalf}>
-                          <OntarioDropdownList
-                            elementId={`${prefix}-street-type`}
-                            caption="Street type"
-                            name={`${prefix}-street-type`}
-                            isEmptyStartOption
-                            options={STREET_TYPE_OPTIONS}
-                            value={incorporator.address.streetType}
-                            customOnChange={(event) =>
-                              patchAddress({ streetType: getEventValue(event) })
-                            }
-                          />
-                        </div>
-                        <div className={step3Styles.gridHalf}>
-                          <OntarioDropdownList
-                            elementId={`${prefix}-street-direction`}
-                            caption="Street direction"
-                            name={`${prefix}-street-direction`}
-                            isEmptyStartOption
-                            options={STREET_DIRECTION_OPTIONS}
-                            value={incorporator.address.streetDirection}
-                            customOnChange={(event) =>
-                              patchAddress({
-                                streetDirection: getEventValue(event),
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                      <OntarioInput
-                        elementId={`${prefix}-city`}
-                        caption="City/Town"
-                        name={`${prefix}-city`}
-                        type="text"
-                        required
-                        requiredValidationMessage={REQUIRED_RETRY}
-                        value={incorporator.address.cityTown}
-                        errorMessage={errors.cityTown}
-                        customOnInput={(event) =>
-                          patchAddress({ cityTown: getEventValue(event) })
-                        }
-                      />
-                      <OntarioDropdownList
-                        elementId={`${prefix}-province`}
-                        caption="Province/Territory"
-                        name={`${prefix}-province`}
-                        required
-                        isEmptyStartOption
-                        options={CANADIAN_PROVINCE_OPTIONS}
-                        value={incorporator.address.provinceState}
-                        errorMessage={errors.provinceState}
-                        customOnChange={(event) =>
-                          patchAddress({ provinceState: getEventValue(event) })
-                        }
-                      />
-                      <OntarioInput
-                        elementId={`${prefix}-postal`}
-                        caption="Postal code"
-                        name={`${prefix}-postal`}
-                        type="text"
-                        required
-                        requiredValidationMessage={REQUIRED_RETRY}
-                        value={incorporator.address.postalCode}
-                        errorMessage={errors.postalCode}
-                        customOnInput={(event) =>
-                          patchAddress({ postalCode: getEventValue(event) })
-                        }
-                        customOnBlur={(event) =>
-                          patchAddress({
-                            postalCode: formatPostalCode(getEventValue(event)),
-                          })
-                        }
-                      />
-                      <div className={step4Styles.readOnlyField}>
-                        <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
-                          Country
-                        </h5>
-                        <p className={step4Styles.readOnlyValue}>Canada</p>
-                      </div>
-                    </>
-                  ) : null}
-                </div>
+                <CanadianAddressFields
+                  idPrefix={prefix}
+                  address={incorporator.address}
+                  errors={errors}
+                  onChange={(address) => onChange({ ...incorporator, address })}
+                />
               ) : null}
 
               {showManualForeign ? (
@@ -886,7 +658,7 @@ export function Form1IncorporatorBlock({
                     name={`${prefix}-line1`}
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED_RETRY}
+                    requiredValidationMessage="Enter address line 1."
                     value={incorporator.address.addressLine1}
                     errorMessage={errors.addressLine1}
                     customOnInput={(event) =>
@@ -911,7 +683,7 @@ export function Form1IncorporatorBlock({
                     name={`${prefix}-foreign-city`}
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED_RETRY}
+                    requiredValidationMessage="Enter the city or town."
                     value={incorporator.address.cityTown}
                     errorMessage={errors.cityTown}
                     customOnInput={(event) =>
@@ -928,7 +700,7 @@ export function Form1IncorporatorBlock({
                     name={`${prefix}-state-region`}
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED_RETRY}
+                    requiredValidationMessage="Enter the state, province or region."
                     value={incorporator.address.provinceState}
                     errorMessage={errors.provinceState}
                     customOnInput={(event) =>
@@ -945,7 +717,7 @@ export function Form1IncorporatorBlock({
                     name={`${prefix}-zip`}
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED_RETRY}
+                    requiredValidationMessage="Enter the ZIP or postal code."
                     value={incorporator.address.postalCode}
                     errorMessage={errors.postalCode}
                     customOnInput={(event) =>
@@ -966,7 +738,7 @@ export function Form1IncorporatorBlock({
                       name={`${prefix}-country`}
                       type="text"
                       required
-                      requiredValidationMessage={REQUIRED_RETRY}
+                      requiredValidationMessage="Enter the country."
                       value={incorporator.address.country}
                       errorMessage={errors.country}
                       customOnInput={(event) =>
@@ -977,60 +749,7 @@ export function Form1IncorporatorBlock({
                 </div>
               ) : null}
             </>
-          ) : (
-            <div className={step4Styles.readOnlyField}>
-              <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
-                Incorporator
-              </h5>
-              <p className={step4Styles.readOnlyValue}>
-                {formatIncorporatorFullName(incorporator) || '—'}
-              </p>
-              <p className={step4Styles.readOnlyValue}>
-                {formatIncorporatorAddressLine(incorporator)}
-              </p>
-            </div>
-          )}
-
-          <OntarioInput
-            elementId={`${prefix}-shares`}
-            caption="Number of Shares"
-            name={`${prefix}-shares`}
-            type="text"
-            required
-            requiredValidationMessage={REQUIRED_RETRY}
-            value={incorporator.numberOfShares}
-            errorMessage={errors.numberOfShares}
-            customOnInput={(event) =>
-              patch({ numberOfShares: getEventValue(event).replace(/\D/g, '') })
-            }
-          />
-          <OntarioInput
-            elementId={`${prefix}-class`}
-            caption="Class/Designation"
-            name={`${prefix}-class`}
-            type="text"
-            required
-            requiredValidationMessage={REQUIRED_RETRY}
-            value={incorporator.classDesignation}
-            errorMessage={errors.classDesignation}
-            customOnInput={(event) =>
-              patch({ classDesignation: getEventValue(event) })
-            }
-          />
-          <OntarioInput
-            elementId={`${prefix}-amount`}
-            caption="Amount to be Paid"
-            name={`${prefix}-amount`}
-            type="text"
-            required
-            requiredValidationMessage={REQUIRED_RETRY}
-            hintText="Enter a dollar amount, for example 1000.00"
-            value={incorporator.amountToBePaid}
-            errorMessage={errors.amountToBePaid}
-            customOnInput={(event) =>
-              patch({ amountToBePaid: getEventValue(event) })
-            }
-          />
+          ) : null}
         </>
       ) : (
         <>
@@ -1096,7 +815,7 @@ export function Form1IncorporatorBlock({
                 name={`${prefix}-corporation-name`}
                 type="text"
                 required
-                requiredValidationMessage={REQUIRED_RETRY}
+                requiredValidationMessage="Enter the corporation name."
                 hintText="Enter the legal name of the corporation."
                 value={incorporator.corporationName}
                 errorMessage={errors.corporation}
@@ -1110,7 +829,7 @@ export function Form1IncorporatorBlock({
                 name={`${prefix}-ocn`}
                 type="text"
                 required
-                requiredValidationMessage={REQUIRED_RETRY}
+                requiredValidationMessage="Enter the Ontario Corporation Number (OCN)."
                 hintText="Enter the Ontario corporation number."
                 value={incorporator.ocn}
                 errorMessage={searchError || errors.corporationSearch}
@@ -1145,11 +864,12 @@ export function Form1IncorporatorBlock({
           <div className={step4Styles.nameRow}>
             <OntarioInput
               elementId={`${prefix}-signer-first`}
-              caption="First Name"
+              caption="First name"
+              inputWidth="20-char-width"
               name={`${prefix}-signer-first`}
               type="text"
               required
-              requiredValidationMessage={REQUIRED_RETRY}
+              requiredValidationMessage="Enter the first name of the person signing."
               value={incorporator.firstName}
               errorMessage={errors.firstName}
               customOnInput={(event) =>
@@ -1158,7 +878,8 @@ export function Form1IncorporatorBlock({
             />
             <OntarioInput
               elementId={`${prefix}-signer-middle`}
-              caption="Middle Name(s)"
+              caption="Middle name(s)"
+              inputWidth="20-char-width"
               name={`${prefix}-signer-middle`}
               type="text"
               required={false}
@@ -1170,11 +891,12 @@ export function Form1IncorporatorBlock({
             />
             <OntarioInput
               elementId={`${prefix}-signer-last`}
-              caption="Last Name"
+              caption="Last name"
+              inputWidth="20-char-width"
               name={`${prefix}-signer-last`}
               type="text"
               required
-              requiredValidationMessage={REQUIRED_RETRY}
+              requiredValidationMessage="Enter the last name of the person signing."
               value={incorporator.lastName}
               errorMessage={errors.lastName}
               customOnInput={(event) =>
@@ -1188,7 +910,7 @@ export function Form1IncorporatorBlock({
             name={`${prefix}-position`}
             type="text"
             required
-            requiredValidationMessage={REQUIRED_RETRY}
+            requiredValidationMessage="Enter the position of the person signing."
             value={incorporator.signerPosition}
             errorMessage={errors.signerPosition}
             customOnInput={(event) =>

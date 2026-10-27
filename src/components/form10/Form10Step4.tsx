@@ -104,7 +104,7 @@ export function Form10Step4() {
     const next: ReviewErrors = {};
     if (incompleteKeys.size > 0) {
       next.sections =
-        'One or more sections are incomplete. Use Edit to correct the information before submitting.';
+        'One or more sections are incomplete. Use Change to correct the information before submitting.';
     }
     if (!step4.signedPdf) {
       next.signedPdf = SIGNED_PDF_REQUIRED;
@@ -244,20 +244,36 @@ export function Form10Step4() {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Review</h1>
           <p className={styles.lead}>
             Review the information you entered for this Articles of Amalgamation filing.
-            Use Edit to correct a section, generate a PDF to sign, upload the signed copy,
+            Use Change to correct a section, generate a PDF to sign, upload the signed copy,
             then authorize and submit. There is no filing fee for Form 10.
           </p>
 
           <div className={styles.formStack}>
             {sections.map((section) => (
-              <div key={section.key} id={sectionAnchor(section.key)}>
-                <Form7SummaryList
-                  caption={section.caption}
-                  headingLevel="h2"
-                  captionActionLink={{ href: section.editHref, label: 'Edit' }}
-                  items={section.rows}
-                  columnRatio="1-2"
-                />
+              <div
+                key={section.key}
+                id={sectionAnchor(section.key)}
+                className={section.groups?.length ? styles.formStack : undefined}
+              >
+                {section.rows.length > 0 || !section.groups?.length ? (
+                  <Form7SummaryList
+                    caption={section.caption}
+                    headingLevel="h2"
+                    captionActionLink={{ href: section.editHref, label: 'Change' }}
+                    items={section.rows}
+                    columnRatio="1-2"
+                  />
+                ) : null}
+                {section.groups?.map((group) => (
+                  <Form7SummaryList
+                    key={group.key}
+                    caption={group.caption}
+                    headingLevel="h2"
+                    captionActionLink={{ href: group.editHref, label: 'Change' }}
+                    items={group.rows}
+                    columnRatio="1-2"
+                  />
+                ))}
               </div>
             ))}
 
@@ -358,7 +374,7 @@ export function Form10Step4() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

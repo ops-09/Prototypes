@@ -2,28 +2,36 @@
   margin: 0;
 }
 
-.lookupBlock {
+.searchBlock {
   display: flex;
   flex-direction: column;
-  gap: var(--ontario-spacing-4, 1rem);
+  gap: var(--ontario-spacing-3, 0.75rem);
 }
 
-.postalCodeHint {
+.searchLabel {
+  margin: 0;
+  font-family: var(
+    --ontario-font-raleway-modified,
+    'Raleway Modified',
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 1.1875rem;
+  font-weight: var(--ontario-font-weights-bold, 700);
+  line-height: 1.5;
+  color: var(--ontario-colour-black, #1a1a1a);
+  text-wrap: balance;
+}
+
+.searchIntro {
   margin: 0;
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   line-height: 1.5;
   color: var(--ontario-colour-black, #1a1a1a);
-
-  a {
-    color: var(--ontario-colour-link, #0066cc);
-  }
-}
-
-.manualToggle {
-  // Hide the checkbox group legend — pattern shows a single option only.
-  :global(ontario-checkboxes) {
-    display: block;
-  }
+  text-wrap: pretty;
 }
 
 .addressFields {
@@ -32,11 +40,18 @@
   gap: var(--ontario-spacing-5, 1.5rem);
 }
 
+// Single-column stacked address fields (full-width dropdowns, sized text inputs).
+.addressStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+// Legacy two-column grid — director/incorporator subflows still use this layout.
 .addressGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--ontario-spacing-5, 1.5rem);
-  // Bottom-align paired fields so inputs line up when one column has hint text.
   align-items: end;
 
   @media screen and (min-width: 40em) {
@@ -51,7 +66,28 @@
   justify-content: flex-end;
 }
 
-// ODS has no readOnly inputs — locked province/country composed with tokens.
+.lookupBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.postalCodeHint {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+
+  a {
+    color: var(--ontario-colour-link, #0066cc);
+  }
+}
+
+.manualToggle {
+  :global(ontario-checkboxes) {
+    display: block;
+  }
+}
+
 .lockedField {
   margin: 0;
 }
@@ -70,12 +106,10 @@
   font-size: 1.1875rem;
   font-weight: var(--ontario-font-weights-bold, 700);
   line-height: 1.5;
-  color: var(--ontario-colour-black, #1a1a1a);
 }
 
 .lockedValue {
   margin: 0;
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   line-height: 1.5;
-  color: var(--ontario-colour-black, #1a1a1a);
 }

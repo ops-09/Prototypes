@@ -4,16 +4,8 @@ import {
   type CoverLetterContact,
 } from '../cover-letter/coverLetterContactStorage';
 import { formatIsoDateDisplay } from '../form7/form7Labels';
-import {
-  formatDirectorFullName,
-  formatDirectorListDescription,
-  validateDirector,
-} from './Form1DirectorEditor';
-import {
-  formatIncorporatorFullName,
-  formatIncorporatorListDescription,
-  validateIncorporator,
-} from './Form1IncorporatorEditor';
+import { validateDirector } from './Form1DirectorEditor';
+import { validateIncorporator } from './Form1IncorporatorEditor';
 import {
   formatCooperativeSubtype,
   formatUnitLabel,
@@ -23,6 +15,11 @@ import {
   type Form1Step3Data,
   type Form1Step4Data,
 } from './form1DraftStorage';
+import {
+  buildDirectorGroups,
+  buildIncorporatorGroups,
+  type PersonReviewGroup,
+} from '../shared/personReviewRows';
 import { validateNuansDate } from '../form7/nuansValidation';
 import { validateCooperativeName } from './nameValidation';
 
@@ -47,6 +44,8 @@ export type ReviewSection = {
   editHref: string;
   complete: boolean;
   rows: ReviewRow[];
+  /** Per-person summary lists, each with its own h2, rendered after `rows`. */
+  groups?: PersonReviewGroup[];
 };
 
 function displayOrEmpty(value: string) {
@@ -83,6 +82,11 @@ function formatHeadOffice(step3: Form1Step3Data) {
     ]
       .filter(Boolean)
       .join(' '),
+    step3.poBox?.trim() ? `PO Box ${step3.poBox.trim()}` : '',
+    step3.station?.trim() ? `Station ${step3.station.trim()}` : '',
+    step3.ruralRoute?.trim() ? `RR ${step3.ruralRoute.trim()}` : '',
+    step3.lotPartBlockSection?.trim() ?? '',
+    step3.concessionOrPlan?.trim() ?? '',
     step3.cityTown,
     step3.province,
     step3.postalCode,
@@ -292,11 +296,11 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       complete: isTypeContactComplete(draft),
       rows: [
         {
-          name: 'Type of Co-operative',
+          name: 'Type of co-operative',
           description: displayOrEmpty(formatCooperativeSubtype(draft.step2)),
         },
         {
-          name: 'Primary Activity',
+          name: 'Primary activity',
           description: displayOrEmpty(draft.step2.primaryActivity),
         },
         {
@@ -317,9 +321,10 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
         },
         {
           name: 'Municipality',
-          description: draft.step3.municipalityName.trim()
-            ? `${draft.step3.municipalityStatus} of ${draft.step3.municipalityName}`.trim()
-            : 'Not provided',
+          description:
+            draft.step3.municipalityStatus.trim() && draft.step3.cityTown.trim()
+              ? `${draft.step3.municipalityStatus} of ${draft.step3.cityTown}`
+              : 'Not provided',
         },
         {
           name: 'County / region',
@@ -351,23 +356,11 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
               },
             ]
           : []),
-        ...draft.step4.directors.map((director, index) => {
-          const name =
-            formatDirectorFullName(director) ||
-            `Director ${index + 1} (incomplete)`;
-          const listDescription = formatDirectorListDescription(director);
-          // Same two-line layout as Step 5: details, then address.
-          const details = [name, listDescription.details]
-            .filter(Boolean)
-            .join(' · ');
-          return {
-            name: `Director ${index + 1}`,
-            description: listDescription.address
-              ? `${details}\n${listDescription.address}`
-              : details,
-          };
-        }),
       ],
+      groups: buildDirectorGroups(draft.step4.directors, {
+        editHref: (id) => `/form-1/step-5/directors/${id}`,
+        includeShares: true,
+      }),
     },
     {
       key: 'shareInformation',
@@ -429,35 +422,11 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       rows:
         draft.step7.incorporators.length === 0
           ? [{ name: 'Incorporators', description: 'Not provided' }]
-          : draft.step7.incorporators.map((entry, index) => {
-              const name =
-                entry.type === 'corporation'
-                  ? entry.corporationName || `Incorporator ${index + 1}`
-                  : formatIncorporatorFullName(entry) ||
-                    `Incorporator ${index + 1}`;
-              const linkedDirector = entry.linkedDirectorId
-                ? draft.step4.directors.find(
-                    (director) => director.id === entry.linkedDirectorId,
-                  )
-                : null;
-              const description = formatIncorporatorListDescription(
-                entry,
-                linkedDirector,
-              );
-              const details = [
-                name,
-                entry.linkedDirectorId ? 'First director' : '',
-                description.details,
-              ]
-                .filter(Boolean)
-                .join(' · ');
-              return {
-                name: `Incorporator ${index + 1}`,
-                description: description.address
-                  ? `${details}\n${description.address}`
-                  : details,
-              };
-            }),
+          : [],
+      groups: buildIncorporatorGroups(draft.step7.incorporators, draft.step4.directors, {
+        editHref: (id) => `/form-1/step-8/incorporators/${id}`,
+        includeShares: true,
+      }),
     },
   ];
 }

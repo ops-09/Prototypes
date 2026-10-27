@@ -24,13 +24,13 @@ const AGREEMENT_HINT =
   'A certified copy of the amalgamation agreement approved by each of the amalgamating co-operatives. The effective date of the amalgamation agreement must be within six (6) months of the submission of the Articles of Amalgamation.';
 
 const AFFIDAVIT_HINT =
-  'Affidavits of Solvency (Amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated.';
+  'Affidavits of solvency (amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated.';
 
 const AGREEMENT_REQUIRED_ERROR =
-  'A Certified Copy of the Amalgamation Agreement is required.';
+  'Upload a certified copy of the amalgamation agreement.';
 
 const AFFIDAVITS_REQUIRED_ERROR =
-  'Two Affidavits of Solvency are required for each amalgamating co-operative.';
+  'Upload 2 affidavits of solvency for each amalgamating co-operative.';
 
 type FieldKey = 'agreement' | `affidavits-${string}`;
 
@@ -242,13 +242,13 @@ export function Form10Step3() {
               <OntarioCallout
                 headingContentType="string"
                 headingContent="Required for this amalgamation"
-                content="One Certified Copy of the Amalgamation Agreement for this filing, and two Affidavits of Solvency (Amalgamation) for each amalgamating co-operative. PDF only, maximum 20 MB per file."
+                content="One Certified copy of the amalgamation agreement for this filing, and two Affidavits of solvency (amalgamation) for each amalgamating co-operative. PDF only, maximum 20 MB per file."
               />
             </div>
 
             <div id="agreement">
               <SupportingDocumentsUpload
-                label="Certified Copy of the Amalgamation Agreement"
+                label="Certified copy of the amalgamation agreement"
                 required
                 maxFiles={1}
                 hintText={AGREEMENT_HINT}
@@ -290,7 +290,7 @@ export function Form10Step3() {
 
                   <div id={affidavitsKey}>
                     <SupportingDocumentsUpload
-                      label="Affidavits of Solvency (Amalgamation)"
+                      label="Affidavits of solvency (amalgamation)"
                       required
                       maxFiles={2}
                       hintText={AFFIDAVIT_HINT}
@@ -317,7 +317,7 @@ export function Form10Step3() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

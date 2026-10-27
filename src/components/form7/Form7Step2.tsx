@@ -370,8 +370,8 @@ export function Form7Step2() {
             const frenchError = validateNfpCorporationName(step2.proposedNameFr);
             if (frenchError) {
               next.proposedNameFr =
-                frenchError === 'Enter the Not-for-Profit corporation name.'
-                  ? 'Enter the French Not-for-Profit corporation name.'
+                frenchError === 'Enter the not-for-profit corporation name.'
+                  ? 'Enter the French not-for-profit corporation name.'
                   : frenchError;
             }
           }
@@ -522,7 +522,7 @@ export function Form7Step2() {
             <div id="amendment-type">
               <OntarioRadioButtons
                 caption={{
-                  captionText: 'Select the Amendment type:',
+                  captionText: 'Select the amendment type:',
                   captionType: 'default',
                 }}
                 name="amendment-type"
@@ -630,7 +630,7 @@ export function Form7Step2() {
                   <div id="legal-element">
                     <OntarioDropdownList
                       elementId="legal-element-select"
-                      caption="Legal element for the Number Name"
+                      caption="Legal element for the number name"
                       name="legal-element"
                       required
                       isEmptyStartOption
@@ -679,14 +679,14 @@ export function Form7Step2() {
                         nameKind="corporation"
                         proposedNameCaption={
                           step2.nameLanguage === 'separate'
-                            ? 'New Corporation Name (Proposed) — English'
+                            ? 'New corporation name (proposed) — English'
                             : undefined
                         }
                         secondaryName={
                           step2.nameLanguage === 'separate'
                             ? {
                                 elementId: `${idPrefix}-proposed-name-fr`,
-                                caption: 'New Corporation Name (Proposed) — French',
+                                caption: 'New corporation name (proposed) — French',
                                 value: step2.proposedNameFr,
                                 errorMessage: errors.proposedNameFr,
                                 onInput: (value) => {
@@ -781,7 +781,7 @@ export function Form7Step2() {
                         nameKind="nfp"
                         proposedNameCaption={
                           step2.nameLanguage === 'separate'
-                            ? 'New Not-for-Profit Corporation Name (Proposed) — English'
+                            ? 'New not-for-profit corporation name (proposed) — English'
                             : undefined
                         }
                         secondaryName={
@@ -789,7 +789,7 @@ export function Form7Step2() {
                             ? {
                                 elementId: `${idPrefix}-proposed-name-fr`,
                                 caption:
-                                  'New Not-for-Profit Corporation Name (Proposed) — French',
+                                  'New not-for-profit corporation name (proposed) — French',
                                 value: step2.proposedNameFr,
                                 errorMessage: errors.proposedNameFr,
                                 onInput: (value) => {
@@ -823,7 +823,7 @@ export function Form7Step2() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

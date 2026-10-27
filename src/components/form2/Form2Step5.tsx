@@ -37,14 +37,14 @@ const CURRENT_STEP = 6;
 const TOTAL_STEPS = 9;
 
 const MAX_LENGTH_ERROR =
-  'The text entered exceeds the maximum length of 900,000 characters.';
+  'Enter 900,000 characters or fewer.';
 const BUSINESS_POWERS_REQUIRED =
-  'Restrictions on the business or powers of the co-operative must be entered.';
+  'Enter the restrictions on the business or powers of the co-operative, or enter “Not applicable”.';
 const MINIMUM_MEMBER_LOAN_REQUIRED =
-  'The amount of the minimum member loan must be entered.';
+  'Enter the amount of the minimum member loan.';
 const MEMBER_LOAN_TRANSFER_REQUIRED =
-  'The restrictions on transfer of member loans must be entered.';
-const MEMBERSHIP_FEE_REQUIRED = 'The amount of membership fee must be entered.';
+  'Enter the restrictions on transfer of member loans.';
+const MEMBERSHIP_FEE_REQUIRED = 'Enter the amount of the membership fee.';
 
 type PageFieldKey =
   | 'businessPowersRestrictions'
@@ -162,7 +162,6 @@ function ensureStep5Draft(): Form2Draft {
   if (
     hasForm2Step1Data(existing?.step1) &&
     hasForm2Step2Data(existing.step2) &&
-    existing.step3.streetNumber &&
     existing.step4.directors.length > 0
   ) {
     return {
@@ -183,22 +182,7 @@ function ensureStep5Draft(): Form2Draft {
       email: 'registry@greeninstitute.coop',
       confirmEmail: 'registry@greeninstitute.coop',
     },
-    step3: {
-      ...EMPTY_STEP3,
-      enterManually: true,
-      streetNumber: '100',
-      streetName: 'Queen',
-      streetType: 'St',
-      streetDirection: 'W',
-      cityTown: 'Toronto',
-      province: 'Ontario',
-      postalCode: 'M5H 2N2',
-      country: 'Canada',
-      municipalityStatus: 'City',
-      municipalityName: 'Toronto',
-      countyStatus: 'Regional Municipality',
-      countyName: 'Toronto',
-    },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: {
       ...EMPTY_STEP4,
       ...(existing?.step4 ?? {}),
@@ -435,6 +419,7 @@ export function Form2Step5() {
                 caption="The amount of the minimum member loan, if any"
                 name={FIELD_ANCHORS.minimumMemberLoan}
                 type="text"
+                inputWidth="20-char-width"
                 required
                 requiredValidationMessage={MINIMUM_MEMBER_LOAN_REQUIRED}
                 hintText={NOT_APPLICABLE_HINT}
@@ -467,6 +452,7 @@ export function Form2Step5() {
                 caption="The amount of membership fee is"
                 name={FIELD_ANCHORS.membershipFee}
                 type="text"
+                inputWidth="20-char-width"
                 required
                 requiredValidationMessage={MEMBERSHIP_FEE_REQUIRED}
                 hintText={NOT_APPLICABLE_HINT}
@@ -489,7 +475,7 @@ export function Form2Step5() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

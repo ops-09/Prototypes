@@ -1,6 +1,12 @@
 import type { UploadedFileMeta } from '../form1/FileUpload';
 import {
+  formatHeadOfficeAddressLine,
+  validateHeadOfficeAddress,
+  type HeadOfficeAddress,
+} from '../shared/OntarioHeadOfficeAddressFields';
+import {
   EMPTY_DIRECTOR_ADDRESS,
+  EMPTY_STEP3 as EMPTY_HEAD_OFFICE_STEP,
   type DirectorCountMode,
   type DirectorResidentialAddress,
   type YesNoAnswer,
@@ -46,16 +52,7 @@ export type Form11Step4Data = {
   selectedAmalgamatedCorporationId: string;
 };
 
-export type Form11Step5Data = {
-  postalCodeLookup: string;
-  selectedAddressId: string;
-  streetAndNumber: string;
-  unitType: string;
-  roomNumber: string;
-  municipality: string;
-  province: string;
-  postalCode: string;
-};
+export type Form11Step5Data = HeadOfficeAddress;
 
 export type Form11Director = {
   id: string;
@@ -123,15 +120,22 @@ export const EMPTY_STEP4: Form11Step4Data = {
   selectedAmalgamatedCorporationId: '',
 };
 
-export const EMPTY_STEP5: Form11Step5Data = {
-  postalCodeLookup: '',
-  selectedAddressId: '',
-  streetAndNumber: '',
-  unitType: '',
-  roomNumber: '',
-  municipality: '',
-  province: 'Ontario',
-  postalCode: '',
+export const EMPTY_STEP5: Form11Step5Data = { ...EMPTY_HEAD_OFFICE_STEP };
+
+/** Sample head office used when a later step is opened directly from the playground. */
+export const SAMPLE_HEAD_OFFICE: Form11Step5Data = {
+  ...EMPTY_HEAD_OFFICE_STEP,
+  selectedAddressId: 'm5h-1',
+  streetNumber: '100',
+  streetName: 'Queen',
+  streetType: 'St',
+  streetDirection: 'W',
+  cityTown: 'Toronto',
+  municipalityStatus: 'City',
+  municipalityName: 'Toronto',
+  countyStatus: 'Regional Municipality',
+  countyName: 'Toronto',
+  postalCode: 'M5H 2N2',
 };
 
 export const EMPTY_STEP6: Form11Step6Data = {
@@ -153,9 +157,9 @@ export const EMPTY_STEP8: Form11Step8Data = {
 };
 
 export const AGREEMENT_EMPTY_ERROR =
-  'Provide details of the copy of amalgamation agreement';
+  'Enter the details of the copy of the amalgamation agreement.';
 export const AGREEMENT_MAX_LENGTH_ERROR =
-  'The text entered exceeds the maximum length of 900,000 characters.';
+  'Enter 900,000 characters or fewer.';
 
 export function hasForm11DirectorsComplete(step6: Form11Step6Data | undefined) {
   if (!step6) {
@@ -211,12 +215,7 @@ export function createSeedDirector(index: number): Form11Director {
 }
 
 export function hasForm11HeadOffice(step5: Form11Step5Data | undefined) {
-  return Boolean(
-    step5?.selectedAddressId.trim() &&
-      step5.streetAndNumber.trim() &&
-      step5.municipality.trim() &&
-      step5.postalCode.trim(),
-  );
+  return step5 ? Object.keys(validateHeadOfficeAddress(step5)).length === 0 : false;
 }
 
 function newDirectorId() {
@@ -226,6 +225,13 @@ function newDirectorId() {
   return `director-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+/** Form 11 directors only take a Canadian address for service, so it starts selected. */
+const EMPTY_FORM11_DIRECTOR_ADDRESS: DirectorResidentialAddress = {
+  ...EMPTY_DIRECTOR_ADDRESS,
+  addressType: 'canadian',
+  country: 'Canada',
+};
+
 export function createEmptyDirector(id = newDirectorId()): Form11Director {
   return {
     id,
@@ -234,7 +240,7 @@ export function createEmptyDirector(id = newDirectorId()): Form11Director {
     lastName: '',
     email: '',
     alsoIncorporator: '',
-    address: { ...EMPTY_DIRECTOR_ADDRESS },
+    address: { ...EMPTY_FORM11_DIRECTOR_ADDRESS },
     consentConfirmed: false,
     consentFile: null,
     addedFromAccount: false,
@@ -280,8 +286,10 @@ function normalizeDirector(entry: Partial<Form11Director> | undefined): Form11Di
     ...createEmptyDirector(entry?.id),
     ...(entry ?? {}),
     address: {
-      ...EMPTY_DIRECTOR_ADDRESS,
+      ...EMPTY_FORM11_DIRECTOR_ADDRESS,
       ...(entry?.address ?? {}),
+      addressType: 'canadian',
+      country: entry?.address?.country || 'Canada',
     },
     consentConfirmed: Boolean(entry?.consentConfirmed),
     consentFile: entry?.consentFile ?? null,
@@ -293,11 +301,7 @@ export const HEAD_OFFICE_INFO =
   'The head office of a Not-for-Profit corporation must be located in Ontario. The address must be set out in full. A post office box alone is not an acceptable address.';
 
 export function form11HeadOfficeLine(step5: Form11Step5Data) {
-  const unit = [step5.unitType, step5.roomNumber].filter((part) => part.trim()).join(' ');
-  return [unit, step5.streetAndNumber, step5.municipality, step5.province, step5.postalCode]
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .join(', ');
+  return formatHeadOfficeAddressLine(step5);
 }
 
 function normalizeNameChangeChoice(value: unknown): Form11NameChangeChoice {

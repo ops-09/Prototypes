@@ -58,7 +58,7 @@ export function validateCorporationName(value: string): string | undefined {
 export function validateNfpCorporationName(value: string): string | undefined {
   const trimmed = value.trim();
   if (!trimmed) {
-    return 'Enter the Not-for-Profit corporation name.';
+    return 'Enter the not-for-profit corporation name.';
   }
 
   return validateNameFormat(trimmed);

@@ -1,7 +1,7 @@
 import { isIsoDateComplete } from '../form1/nameValidation';
 
 export const NUANS_EXPIRED_ERROR =
-  'The attached NUANS Report is no longer valid. A NUANS Report must be issued within 90 days of the filing date. Please provide a current report.';
+  'The NUANS report is more than 90 days old. Upload a NUANS report issued within 90 days of the filing date.';
 
 export const NUANS_REQUIRED_ERROR = 'Upload a NUANS report.';
 export const NUANS_DATE_REQUIRED_ERROR = 'Enter the NUANS report date.';

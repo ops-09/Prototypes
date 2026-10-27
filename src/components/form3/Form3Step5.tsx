@@ -98,7 +98,7 @@ export function Form3Step5() {
     const next: ReviewErrors = {};
     if (incompleteKeys.size > 0) {
       next.sections =
-        'One or more sections are incomplete. Use Edit to correct the information before submitting.';
+        'One or more sections are incomplete. Use Change to correct the information before submitting.';
     }
     if (!step5.signedPdf) {
       next.signedPdf = SIGNED_PDF_REQUIRED;
@@ -234,7 +234,7 @@ export function Form3Step5() {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Review</h1>
           <p className={styles.lead}>
             Review the information you entered for this Application for Supplementary
-            Letters Patent. Use Edit to correct a section, generate a PDF to sign, upload
+            Letters Patent. Use Change to correct a section, generate a PDF to sign, upload
             the signed copy, then authorize and submit.
           </p>
 
@@ -244,7 +244,7 @@ export function Form3Step5() {
                 <Form7SummaryList
                   caption={section.caption}
                   headingLevel="h2"
-                  captionActionLink={{ href: section.editHref, label: 'Edit' }}
+                  captionActionLink={{ href: section.editHref, label: 'Change' }}
                   items={section.rows}
                   columnRatio="1-2"
                 />
@@ -347,7 +347,7 @@ export function Form3Step5() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

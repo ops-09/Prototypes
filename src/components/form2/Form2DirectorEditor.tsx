@@ -1,45 +1,31 @@
 import {
   OntarioButton,
   OntarioCheckboxes,
-  OntarioDropdownList,
   OntarioIconDelete,
   OntarioIconEdit,
   OntarioInput,
   OntarioPageAlert,
   OntarioRadioButtons,
 } from '@ongov/ontario-design-system-component-library-react';
-import {
-  FIND_POSTAL_CODE_URL,
-  formatPostalCode,
-  isValidPostalCodeFormat,
-  POSTAL_CODE_FORMAT_ERROR,
-  provinceFromPostalCode,
-  type AddressLookupResult,
-} from './canadaPostLookup';
 import { FileUpload } from './FileUpload';
 import {
-  CANADIAN_PROVINCE_OPTIONS,
   DIRECTOR_CONSENT_FORM_URL,
   EMPTY_DIRECTOR_ADDRESS,
   formatUnitLabel,
-  STREET_DIRECTION_OPTIONS,
-  STREET_NUMBER_SUFFIX_OPTIONS,
-  STREET_TYPE_OPTIONS,
-  UNIT_TYPE_OPTIONS,
-  unitTypeRequiredError,
   type DirectorAddressType,
   type Form2Director,
   type YesNoAnswer,
 } from './form2DraftStorage';
-import { PostalCodeSearchAutosuggest } from './PostalCodeSearchAutosuggest';
-import styles from './Form2Step1.module.scss';
 import step3Styles from './Form2Step3.module.scss';
 import step4Styles from './Form2Step4.module.scss';
+import {
+  CanadianAddressFields,
+  validateCanadianAddress,
+} from '../shared/CanadianAddressFields';
 
-const REQUIRED = 'Required Field.';
-const EMAIL_INVALID = 'Please enter a valid email address.';
-const SHARES_WHOLE_NUMBER = 'Please enter a whole number greater than zero.';
-const AMOUNT_INVALID = 'Please enter a valid amount.';
+const EMAIL_INVALID = 'Enter a valid email address, like name@example.com.';
+const SHARES_WHOLE_NUMBER = 'Enter the number of shares as a whole number greater than 0.';
+const AMOUNT_INVALID = 'Enter the amount in dollars, like 1000.00.';
 const CONSENT_CHECKBOX_REQUIRED =
   'Confirm that this director has given consent to act as first director.';
 const CONSENT_FILE_REQUIRED =
@@ -94,17 +80,17 @@ export const DIRECTOR_ERROR_FIELD_ORDER: DirectorFieldKey[] = [
 ];
 
 const DIRECTOR_FIELD_LABELS: Record<DirectorFieldKey, string> = {
-  firstName: 'First Name',
-  lastName: 'Last Name',
-  email: 'Email Address',
+  firstName: 'First name',
+  lastName: 'Last name',
+  email: 'Email address',
   residentCanadian: 'Resident Canadian',
   alsoIncorporator: 'Also an incorporator',
-  numberOfShares: 'Number of Shares',
-  classDesignation: 'Class/Designation',
-  amountToBePaid: 'Amount to be Paid',
+  numberOfShares: 'Number of shares',
+  classDesignation: 'Class/designation',
+  amountToBePaid: 'Amount to be paid',
   consent: 'Director consent',
   consentFile: 'Upload consent form',
-  addressType: 'Residential Address',
+  addressType: 'Residential address',
   postalCodeLookup: 'Find the address using a postal code',
   unitType: 'Unit type',
   streetNumber: 'Street number',
@@ -173,9 +159,9 @@ export function getDirectorFieldAnchor(
 }
 
 const ADDRESS_TYPE_OPTIONS = [
-  { value: 'canadian', label: 'Canadian Address' },
-  { value: 'us', label: 'US Address' },
-  { value: 'international', label: 'International Address' },
+  { value: 'canadian', label: 'Canadian address' },
+  { value: 'us', label: 'US address' },
+  { value: 'international', label: 'International address' },
 ];
 
 function getEventValue(event: globalThis.Event) {
@@ -214,96 +200,49 @@ function clearAddressForType(addressType: DirectorAddressType | ''): Form2Direct
   return base;
 }
 
-function applyCanadianLookup(
-  prev: Form2Director['address'],
-  result: AddressLookupResult,
-): Form2Director['address'] {
-  return {
-    ...prev,
-    selectedAddressId: result.id,
-    unitType: result.unitType,
-    unitNumber: result.roomNumber,
-    streetNumber: result.streetNumber,
-    streetName: result.streetName,
-    streetNumberSuffix: result.streetNumberSuffix,
-    streetType: result.streetType,
-    streetDirection: result.streetDirection,
-    cityTown: result.cityTown,
-    provinceState: provinceFromPostalCode(result.postalCode) || prev.provinceState,
-    postalCode: result.postalCode,
-    country: 'Canada',
-  };
-}
-
 export function validateDirector(director: Form2Director): DirectorErrors {
   const next: DirectorErrors = {};
   const needsConsent = director.alsoIncorporator === 'no';
 
   if (!director.firstName.trim()) {
-    next.firstName = REQUIRED;
+    next.firstName = 'Enter the first name.';
   }
   if (!director.lastName.trim()) {
-    next.lastName = REQUIRED;
+    next.lastName = 'Enter the last name.';
   }
   if (director.email.trim() && !isValidEmail(director.email.trim())) {
     next.email = EMAIL_INVALID;
   }
   if (!director.residentCanadian) {
-    next.residentCanadian = REQUIRED;
+    next.residentCanadian = 'Select whether the director is a resident Canadian.';
   }
   if (!director.alsoIncorporator) {
-    next.alsoIncorporator = REQUIRED;
+    next.alsoIncorporator = 'Select whether the director is also an incorporator.';
   }
   // Form 2 (without share capital): no share details when also an incorporator.
   if (!director.address.addressType) {
-    next.addressType = REQUIRED;
+    next.addressType = 'Select the type of address.';
   }
 
   if (director.address.addressType === 'canadian') {
-    if (!director.address.enterManually && !director.address.selectedAddressId) {
-      next.postalCodeLookup = REQUIRED;
-    }
-    const unitTypeError = unitTypeRequiredError(
-      director.address.unitNumber,
-      director.address.unitType,
-    );
-    if (unitTypeError) {
-      next.unitType = unitTypeError;
-    }
-    if (!director.address.streetNumber.trim()) {
-      next.streetNumber = REQUIRED;
-    }
-    if (!director.address.streetName.trim()) {
-      next.streetName = REQUIRED;
-    }
-    if (!director.address.cityTown.trim()) {
-      next.cityTown = REQUIRED;
-    }
-    if (!director.address.provinceState.trim()) {
-      next.provinceState = REQUIRED;
-    }
-    if (!director.address.postalCode.trim()) {
-      next.postalCode = REQUIRED;
-    } else if (!isValidPostalCodeFormat(director.address.postalCode)) {
-      next.postalCode = POSTAL_CODE_FORMAT_ERROR;
-    }
+    Object.assign(next, validateCanadianAddress(director.address));
   }
 
   if (director.address.addressType === 'us' || director.address.addressType === 'international') {
     if (!director.address.addressLine1.trim()) {
-      next.addressLine1 = REQUIRED;
+      next.addressLine1 = 'Enter address line 1.';
     }
     if (!director.address.cityTown.trim()) {
-      next.cityTown = REQUIRED;
+      next.cityTown = 'Enter the city or town.';
     }
     if (!director.address.provinceState.trim()) {
-      next.provinceState = REQUIRED;
+      next.provinceState = 'Enter the state, province or region.';
     }
     if (!director.address.postalCode.trim()) {
-      next.postalCode = REQUIRED;
+      next.postalCode = 'Enter the ZIP or postal code.';
     }
     if (director.address.addressType === 'international' && !director.address.country.trim()) {
-      next.country = REQUIRED;
+      next.country = 'Enter the country.';
     }
   }
 
@@ -436,9 +375,6 @@ export function Form2DirectorBlock({
 }: Form2DirectorBlockProps) {
   const prefix = `dir-${director.id}`;
   const needsConsent = director.alsoIncorporator === 'no';
-  const showCanadianFields =
-    director.address.addressType === 'canadian' &&
-    (director.address.enterManually || Boolean(director.address.selectedAddressId));
   const showManualForeign =
     director.address.addressType === 'us' || director.address.addressType === 'international';
 
@@ -564,18 +500,20 @@ export function Form2DirectorBlock({
         <div className={step4Styles.nameRow}>
           <OntarioInput
             elementId={`${prefix}-first-name`}
-            caption="First Name"
+            caption="First name"
+            inputWidth="20-char-width"
             name={`${prefix}-first-name`}
             type="text"
             required
-            requiredValidationMessage={REQUIRED}
+            requiredValidationMessage="Enter the first name."
             value={director.firstName}
             errorMessage={errors.firstName}
             customOnInput={(event) => patch({ firstName: getEventValue(event) })}
           />
           <OntarioInput
             elementId={`${prefix}-middle-name`}
-            caption="Middle Name(s)"
+            caption="Middle name(s)"
+            inputWidth="20-char-width"
             name={`${prefix}-middle-name`}
             type="text"
             required={false}
@@ -585,11 +523,12 @@ export function Form2DirectorBlock({
           />
           <OntarioInput
             elementId={`${prefix}-last-name`}
-            caption="Last Name"
+            caption="Last name"
+            inputWidth="20-char-width"
             name={`${prefix}-last-name`}
             type="text"
             required
-            requiredValidationMessage={REQUIRED}
+            requiredValidationMessage="Enter the last name."
             value={director.lastName}
             errorMessage={errors.lastName}
             customOnInput={(event) => patch({ lastName: getEventValue(event) })}
@@ -598,7 +537,7 @@ export function Form2DirectorBlock({
 
         <OntarioInput
           elementId={`${prefix}-email`}
-          caption="Email Address"
+          caption="Email address"
           name={`${prefix}-email`}
           type="email"
           required={false}
@@ -654,7 +593,7 @@ export function Form2DirectorBlock({
 
         {needsConsent ? (
           <div className={step4Styles.consentBlock}>
-            <h4 className={`ontario-h4 ${step4Styles.sectionHeading}`}>Director Consent</h4>
+            <h4 className={`ontario-h4 ${step4Styles.sectionHeading}`}>Director consent</h4>
             <div id={`${prefix}-consent`}>
               <OntarioCheckboxes
                 caption="Director consent"
@@ -703,7 +642,7 @@ export function Form2DirectorBlock({
 
         <div id={`${prefix}-address-type`}>
           <OntarioRadioButtons
-            caption="Residential Address"
+            caption="Residential address"
             name={`${prefix}-address-type`}
             required
             hintText="Select Canadian, US, or International. Canadian addresses are not limited to Ontario."
@@ -720,226 +659,12 @@ export function Form2DirectorBlock({
         </div>
 
         {director.address.addressType === 'canadian' ? (
-          <div className={step3Styles.addressFields}>
-            {!director.address.enterManually ? (
-              <div className={step3Styles.lookupBlock}>
-                <label className={styles.naicsLabel} htmlFor={`${prefix}-postal-lookup`}>
-                  Find the address using a postal code
-                  <span className={styles.requiredFlag}> (required)</span>
-                </label>
-                <div className={styles.naicsSearch}>
-                  <PostalCodeSearchAutosuggest
-                    elementId={`${prefix}-postal-lookup`}
-                    value={director.address.postalCodeLookup}
-                    errorMessage={errors.postalCodeLookup}
-                    hintText="Example: M5H 2N2, V6B 5A1, or Calgary (Canada-wide)"
-                    onChange={(value) => patchAddress({ postalCodeLookup: value })}
-                    onSelect={(result) => {
-                      onChange({
-                        ...director,
-                        address: {
-                          ...applyCanadianLookup(director.address, result),
-                          postalCodeLookup: formatPostalCode(result.postalCode),
-                          enterManually: false,
-                        },
-                      });
-                    }}
-                  />
-                </div>
-                <p className={step3Styles.postalCodeHint}>
-                  Need help finding a postal code?{' '}
-                  <a href={FIND_POSTAL_CODE_URL} target="_blank" rel="noopener noreferrer">
-                    Find a postal code
-                  </a>
-                </p>
-              </div>
-            ) : null}
-
-            <div className={step3Styles.manualToggle}>
-              <OntarioCheckboxes
-                caption="Manual address entry"
-                name={`${prefix}-enter-manually`}
-                value={director.address.enterManually ? ['manual'] : []}
-                options={[
-                  {
-                    value: 'manual',
-                    elementId: `${prefix}-enter-manually`,
-                    label: 'Enter the address manually',
-                  },
-                ]}
-                customOnChange={(event) => {
-                  const target = event.target as HTMLInputElement | null;
-                  const checked = Boolean(target?.checked);
-                  onChange({
-                    ...director,
-                    address: {
-                      ...clearAddressForType('canadian'),
-                      enterManually: checked,
-                    },
-                  });
-                }}
-              />
-            </div>
-
-            {showCanadianFields ? (
-              <>
-                <div className={step3Styles.addressGrid}>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioDropdownList
-                      elementId={`${prefix}-unit-type`}
-                      caption="Unit type"
-                      name={`${prefix}-unit-type`}
-                      required={Boolean(director.address.unitNumber.trim())}
-                      isEmptyStartOption
-                      value={director.address.unitType}
-                      options={UNIT_TYPE_OPTIONS}
-                      errorMessage={errors.unitType}
-                      customOnChange={(event) =>
-                        patchAddress({ unitType: getEventValue(event) })
-                      }
-                    />
-                  </div>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioInput
-                      elementId={`${prefix}-unit`}
-                      caption="Unit number"
-                      name={`${prefix}-unit`}
-                      type="text"
-                      required={false}
-                      requiredValidationMessage=""
-                      value={director.address.unitNumber}
-                      customOnInput={(event) => {
-                        const unitNumber = getEventValue(event);
-                        patchAddress({
-                          unitNumber,
-                          unitType: unitNumber.trim()
-                            ? director.address.unitType
-                            : '',
-                        });
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className={step3Styles.addressGrid}>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioInput
-                      elementId={`${prefix}-street-number`}
-                      caption="Street number"
-                      name={`${prefix}-street-number`}
-                      type="text"
-                      required
-                      requiredValidationMessage={REQUIRED}
-                      value={director.address.streetNumber}
-                      errorMessage={errors.streetNumber}
-                      customOnInput={(event) =>
-                        patchAddress({ streetNumber: getEventValue(event) })
-                      }
-                    />
-                  </div>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioDropdownList
-                      elementId={`${prefix}-street-suffix`}
-                      caption="Street number suffix"
-                      name={`${prefix}-street-suffix`}
-                      isEmptyStartOption
-                      options={STREET_NUMBER_SUFFIX_OPTIONS}
-                      value={director.address.streetNumberSuffix}
-                      customOnChange={(event) =>
-                        patchAddress({ streetNumberSuffix: getEventValue(event) })
-                      }
-                    />
-                  </div>
-                </div>
-                <OntarioInput
-                  elementId={`${prefix}-street-name`}
-                  caption="Street name"
-                  name={`${prefix}-street-name`}
-                  type="text"
-                  required
-                  requiredValidationMessage={REQUIRED}
-                  value={director.address.streetName}
-                  errorMessage={errors.streetName}
-                  customOnInput={(event) =>
-                    patchAddress({ streetName: getEventValue(event) })
-                  }
-                />
-                <div className={step3Styles.addressGrid}>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioDropdownList
-                      elementId={`${prefix}-street-type`}
-                      caption="Street type"
-                      name={`${prefix}-street-type`}
-                      isEmptyStartOption
-                      options={STREET_TYPE_OPTIONS}
-                      value={director.address.streetType}
-                      customOnChange={(event) =>
-                        patchAddress({ streetType: getEventValue(event) })
-                      }
-                    />
-                  </div>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioDropdownList
-                      elementId={`${prefix}-street-direction`}
-                      caption="Street direction"
-                      name={`${prefix}-street-direction`}
-                      isEmptyStartOption
-                      options={STREET_DIRECTION_OPTIONS}
-                      value={director.address.streetDirection}
-                      customOnChange={(event) =>
-                        patchAddress({ streetDirection: getEventValue(event) })
-                      }
-                    />
-                  </div>
-                </div>
-                <OntarioInput
-                  elementId={`${prefix}-city`}
-                  caption="City/Town"
-                  name={`${prefix}-city`}
-                  type="text"
-                  required
-                  requiredValidationMessage={REQUIRED}
-                  value={director.address.cityTown}
-                  errorMessage={errors.cityTown}
-                  customOnInput={(event) =>
-                    patchAddress({ cityTown: getEventValue(event) })
-                  }
-                />
-                <OntarioDropdownList
-                  elementId={`${prefix}-province`}
-                  caption="Province/Territory"
-                  name={`${prefix}-province`}
-                  required
-                  isEmptyStartOption
-                  options={CANADIAN_PROVINCE_OPTIONS}
-                  value={director.address.provinceState}
-                  errorMessage={errors.provinceState}
-                  customOnChange={(event) =>
-                    patchAddress({ provinceState: getEventValue(event) })
-                  }
-                />
-                <OntarioInput
-                  elementId={`${prefix}-postal`}
-                  caption="Postal code"
-                  name={`${prefix}-postal`}
-                  type="text"
-                  required
-                  requiredValidationMessage={REQUIRED}
-                  value={director.address.postalCode}
-                  errorMessage={errors.postalCode}
-                  customOnInput={(event) =>
-                    patchAddress({ postalCode: getEventValue(event) })
-                  }
-                  customOnBlur={(event) =>
-                    patchAddress({ postalCode: formatPostalCode(getEventValue(event)) })
-                  }
-                />
-                <div className={step4Styles.readOnlyField}>
-                  <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Country</h5>
-                  <p className={step4Styles.readOnlyValue}>Canada</p>
-                </div>
-              </>
-            ) : null}
-          </div>
+          <CanadianAddressFields
+            idPrefix={prefix}
+            address={director.address}
+            errors={errors}
+            onChange={(address) => onChange({ ...director, address })}
+          />
         ) : null}
 
         {showManualForeign ? (
@@ -950,7 +675,7 @@ export function Form2DirectorBlock({
               name={`${prefix}-line1`}
               type="text"
               required
-              requiredValidationMessage={REQUIRED}
+              requiredValidationMessage="Enter address line 1."
               value={director.address.addressLine1}
               errorMessage={errors.addressLine1}
               customOnInput={(event) =>
@@ -975,7 +700,7 @@ export function Form2DirectorBlock({
               name={`${prefix}-foreign-city`}
               type="text"
               required
-              requiredValidationMessage={REQUIRED}
+              requiredValidationMessage="Enter the city or town."
               value={director.address.cityTown}
               errorMessage={errors.cityTown}
               customOnInput={(event) =>
@@ -990,7 +715,7 @@ export function Form2DirectorBlock({
               name={`${prefix}-state-region`}
               type="text"
               required
-              requiredValidationMessage={REQUIRED}
+              requiredValidationMessage="Enter the state, province or region."
               value={director.address.provinceState}
               errorMessage={errors.provinceState}
               customOnInput={(event) =>
@@ -1005,7 +730,7 @@ export function Form2DirectorBlock({
               name={`${prefix}-zip`}
               type="text"
               required
-              requiredValidationMessage={REQUIRED}
+              requiredValidationMessage="Enter the ZIP or postal code."
               value={director.address.postalCode}
               errorMessage={errors.postalCode}
               customOnInput={(event) =>
@@ -1024,7 +749,7 @@ export function Form2DirectorBlock({
                 name={`${prefix}-country`}
                 type="text"
                 required
-                requiredValidationMessage={REQUIRED}
+                requiredValidationMessage="Enter the country."
                 value={director.address.country}
                 errorMessage={errors.country}
                 customOnInput={(event) =>

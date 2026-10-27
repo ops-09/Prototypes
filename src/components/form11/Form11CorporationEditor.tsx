@@ -27,7 +27,7 @@ const CORP_NOT_FOUND_ALERT =
   'No not-for-profit corporation was found for that search. Enter the corporation name and OCN below, or try a different search.';
 const SELECT_REQUIRED =
   'Search for and select a not-for-profit corporation, or enter its details manually.';
-export const INVALID_DATE_ERROR = "Please enter a valid Date of Members' Approval.";
+export const INVALID_DATE_ERROR = "Enter a valid date of members' approval.";
 export const DUPLICATE_ERROR = 'This corporation has already been added.';
 
 export type CorporationEditorErrors = Partial<{

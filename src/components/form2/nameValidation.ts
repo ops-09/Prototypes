@@ -15,7 +15,7 @@ export const NAME_VALIDATION_ERROR =
 export const COOPERATIVE_NAME_REQUIRED_ERROR = NAME_VALIDATION_ERROR;
 
 export const SECOND_NUANS_ERROR =
-  'Please upload the second NUANS report before continuing.';
+  'Upload the second NUANS report.';
 
 export type NameLanguageOption = 'english' | 'french' | 'combined' | 'separate';
 

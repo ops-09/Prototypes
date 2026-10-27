@@ -6,8 +6,8 @@ export const AMENDMENT_TYPE_LABELS: Record<AmendmentType, string> = {
     'Articles of Amendment (converting to a business corporation under the Business Corporations Act)',
   'convert-not-for-profit':
     'Articles of Amendment (converting to a Not-for-Profit Corporations Act, 2010 Corporation)',
-  'reduction-capital': 'Reduction of Authorized Capital',
-  'amend-other': 'Other Amendment',
+  'reduction-capital': 'Reduction of authorized capital',
+  'amend-other': 'Other amendment',
 };
 
 export function amendmentTypeLabel(type: AmendmentType | '') {

@@ -282,7 +282,7 @@ export function Form11Step4() {
           <div className={styles.formStack}>
             <div id="change-nfp-name">
               <OntarioRadioButtons
-                caption="Will there be a name change for the Not-for-Profit corporation?"
+                caption="Will there be a name change for the not-for-profit corporation?"
                 name="change-nfp-name"
                 required
                 value={step4.changeName}
@@ -359,7 +359,7 @@ export function Form11Step4() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

@@ -394,7 +394,7 @@ export function PostalCodeSearchAutosuggest({
       ref={containerRef}
       onKeyDownCapture={handleKeyDown}
     >
-      <OntarioHintText hint={hintText} />
+      {hintText.trim() ? <OntarioHintText hint={hintText} /> : null}
       <div className={styles.fieldControl}>
         <FieldErrorMessage id={errorId} message={errorMessage} />
         <div className={styles.inputClip} ref={clipRef}>

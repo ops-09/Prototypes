@@ -2,29 +2,18 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioDropdownList,
-  OntarioInput,
   OntarioPageAlert,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
-import {
-  FIND_POSTAL_CODE_URL,
-  formatPostalCode,
-  formatStreetAndNumber,
-  isOntarioPostalCode,
-  isValidPostalCodeFormat,
-  lookupAddressesByPostalCode,
-  normalizePostalCode,
-  POSTAL_CODE_FORMAT_ERROR,
-  POSTAL_CODE_NOT_FOUND_ERROR,
-  POSTAL_CODE_ONTARIO_ERROR,
-  type AddressLookupResult,
-} from '../form1/canadaPostLookup';
-import { UNIT_TYPE_OPTIONS } from '../form1/form1DraftStorage';
-import { PostalCodeSearchAutosuggest } from '../form1/PostalCodeSearchAutosuggest';
-import step3Styles from '../form1/Form1Step3.module.scss';
 import { emptyNameNuans } from '../form7/form7DraftStorage';
-import { focusField, getEventValue } from './form11Focus';
+import {
+  HEAD_OFFICE_FIELD_ANCHORS,
+  HEAD_OFFICE_FIELD_ORDER,
+  OntarioHeadOfficeAddressFields,
+  validateHeadOfficeAddress,
+  type HeadOfficeErrors,
+} from '../shared/OntarioHeadOfficeAddressFields';
+import { focusField } from './form11Focus';
 import {
   createAccountAmalgamatingNfp,
   createEmptyAmalgamatingNfp,
@@ -45,26 +34,6 @@ import {
 import styles from './Form11Step2.module.scss';
 
 const CURRENT_STEP = 5;
-const HEAD_OFFICE_REQUIRED_ERROR = 'Head Office Address must be entered.';
-
-type FieldKey = 'postalCodeLookup' | 'headOffice' | 'streetAndNumber' | 'municipality' | 'postalCode';
-type FieldErrors = Partial<Record<FieldKey, string>>;
-
-const FIELD_ANCHORS: Record<FieldKey, string> = {
-  postalCodeLookup: 'postal-code-lookup',
-  headOffice: 'head-office-address',
-  streetAndNumber: 'street-and-number',
-  municipality: 'municipality',
-  postalCode: 'postal-code',
-};
-
-const FIELD_ORDER: FieldKey[] = [
-  'postalCodeLookup',
-  'headOffice',
-  'streetAndNumber',
-  'municipality',
-  'postalCode',
-];
 
 function hasPriorSteps(draft: Form11Draft | null) {
   return Boolean(
@@ -113,30 +82,6 @@ function ensureStep5Draft(): Form11Draft {
   return draft;
 }
 
-function applyLookupResult(prev: Form11Step5Data, entry: AddressLookupResult): Form11Step5Data {
-  return {
-    ...prev,
-    selectedAddressId: entry.id,
-    postalCodeLookup: formatPostalCode(entry.postalCode),
-    streetAndNumber: formatStreetAndNumber(entry),
-    unitType: entry.unitType,
-    roomNumber: entry.roomNumber,
-    municipality: entry.cityTown,
-    province: 'Ontario',
-    postalCode: formatPostalCode(entry.postalCode),
-  };
-}
-
-function hasSelectedAddress(step5: Form11Step5Data) {
-  return Boolean(
-    step5.selectedAddressId.trim() &&
-      step5.streetAndNumber.trim() &&
-      step5.municipality.trim() &&
-      step5.postalCode.trim() &&
-      isOntarioPostalCode(step5.postalCode),
-  );
-}
-
 export function Form11Step5() {
   const navigate = useNavigate();
   const existing = readForm11Draft();
@@ -155,113 +100,40 @@ export function Form11Step5() {
     ...EMPTY_STEP5,
     ...(draft.step5 ?? {}),
     province: 'Ontario',
+    country: 'Canada',
   }));
-  const [errors, setErrors] = useState<FieldErrors>({});
+  const [errors, setErrors] = useState<HeadOfficeErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
-  const showAddressFields = Boolean(
-    step5.selectedAddressId.trim() ||
-      step5.streetAndNumber.trim() ||
-      step5.municipality.trim() ||
-      step5.postalCode.trim(),
+  const errorSummaryItems = useMemo(
+    () =>
+      HEAD_OFFICE_FIELD_ORDER.flatMap((key) => {
+        const message = errors[key];
+        if (!message) {
+          return [];
+        }
+        return [{ key, message, href: `#${HEAD_OFFICE_FIELD_ANCHORS[key]}` }];
+      }),
+    [errors],
   );
 
-  const errorSummaryItems = useMemo(() => {
-    return FIELD_ORDER.flatMap((key) => {
-      const message = errors[key];
-      if (!message) {
-        return [];
-      }
-      return [{ key, message, href: `#${FIELD_ANCHORS[key]}` }];
-    });
-  }, [errors]);
-
-  function patchStep5(partial: Partial<Form11Step5Data>) {
-    setStep5((prev) => ({ ...prev, ...partial, province: 'Ontario' }));
-  }
-
-  function clearError(...keys: FieldKey[]) {
-    setErrors((prev) => {
-      let changed = false;
-      const next = { ...prev };
-      keys.forEach((key) => {
-        if (next[key]) {
-          delete next[key];
-          changed = true;
-        }
-      });
-      return changed ? next : prev;
-    });
-  }
-
-  function handlePostalLookupChange(next: string) {
-    setStep5((prev) => {
-      const keepsSelection =
-        Boolean(prev.selectedAddressId) &&
-        normalizePostalCode(next) === normalizePostalCode(prev.postalCode);
-      if (keepsSelection) {
-        return { ...prev, postalCodeLookup: next, province: 'Ontario' };
-      }
-      return {
-        ...prev,
-        postalCodeLookup: next,
-        selectedAddressId: '',
-        streetAndNumber: '',
-        unitType: '',
-        roomNumber: '',
-        municipality: '',
-        province: 'Ontario',
-        postalCode: '',
-      };
-    });
-    clearError('postalCodeLookup', 'headOffice', 'streetAndNumber', 'municipality', 'postalCode');
-  }
-
-  function handleFindAddress(query: string) {
-    const nextErrors: FieldErrors = {};
-    if (!isValidPostalCodeFormat(query)) {
-      nextErrors.postalCodeLookup = POSTAL_CODE_FORMAT_ERROR;
-    } else if (!isOntarioPostalCode(query)) {
-      nextErrors.postalCodeLookup = POSTAL_CODE_ONTARIO_ERROR;
-    } else {
-      const matches = lookupAddressesByPostalCode(query).filter((entry) =>
-        isOntarioPostalCode(entry.postalCode),
-      );
-      if (matches.length === 0) {
-        nextErrors.postalCodeLookup = POSTAL_CODE_NOT_FOUND_ERROR;
-      }
-    }
-
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next.postalCodeLookup;
-      delete next.headOffice;
-      return { ...next, ...nextErrors };
-    });
-  }
-
-  function handlePostalLookupSelect(entry: AddressLookupResult) {
-    if (!isOntarioPostalCode(entry.postalCode)) {
-      setErrors((prev) => ({
-        ...prev,
-        postalCodeLookup: POSTAL_CODE_ONTARIO_ERROR,
-      }));
+  function handleAddressChange(next: Form11Step5Data, cleared: (keyof HeadOfficeErrors)[]) {
+    setStep5({ ...next, province: next.province || 'Ontario' });
+    if (cleared.length === 0) {
       return;
     }
-    setStep5((prev) => applyLookupResult(prev, entry));
-    clearError('postalCodeLookup', 'headOffice', 'streetAndNumber', 'municipality', 'postalCode');
-  }
-
-  function validate(): FieldErrors {
-    const next: FieldErrors = {};
-    if (!hasSelectedAddress(step5)) {
-      next.postalCodeLookup = HEAD_OFFICE_REQUIRED_ERROR;
-    }
-    return next;
+    setErrors((prev) => {
+      if (!cleared.some((key) => prev[key])) {
+        return prev;
+      }
+      const remaining = { ...prev };
+      cleared.forEach((key) => delete remaining[key]);
+      return remaining;
+    });
   }
 
   function handleContinue() {
-    const nextErrors = validate();
+    const nextErrors = validateHeadOfficeAddress(step5);
     const hasErrors = Object.keys(nextErrors).length > 0;
     setErrors(nextErrors);
     setShowErrorSummary(hasErrors);
@@ -342,128 +214,12 @@ export function Form11Step5() {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Head office address</h1>
           <p className={styles.lead}>{HEAD_OFFICE_INFO}</p>
 
-          <div className={styles.formStack} id={FIELD_ANCHORS.headOffice}>
-            <div id={FIELD_ANCHORS.postalCodeLookup} className={step3Styles.lookupBlock}>
-              <label
-                className={styles.naicsLabel}
-                htmlFor={`${FIELD_ANCHORS.postalCodeLookup}-input`}
-              >
-                Find the address using a postal code
-                <span className={styles.requiredFlag}> (required)</span>
-              </label>
-
-              <div className={styles.naicsSearch}>
-                <PostalCodeSearchAutosuggest
-                  elementId={`${FIELD_ANCHORS.postalCodeLookup}-input`}
-                  value={step5.postalCodeLookup}
-                  ontarioOnly
-                  hintText="Example: M5H 2N2"
-                  errorMessage={errors.postalCodeLookup || errors.headOffice}
-                  onChange={handlePostalLookupChange}
-                  onSearch={handleFindAddress}
-                  onSelect={handlePostalLookupSelect}
-                />
-              </div>
-
-              <p className={step3Styles.postalCodeHint}>
-                If you do not know your postal code you can find it{' '}
-                <a href={FIND_POSTAL_CODE_URL} target="_blank" rel="noopener noreferrer">
-                  here
-                </a>
-                .
-              </p>
-            </div>
-
-            {showAddressFields ? (
-              <div className={step3Styles.addressFields}>
-                <div id={FIELD_ANCHORS.streetAndNumber}>
-                  <OntarioInput
-                    elementId={FIELD_ANCHORS.streetAndNumber}
-                    caption="Street & Number (or R.R. Number)"
-                    name="street-and-number"
-                    type="text"
-                    required
-                    requiredValidationMessage={HEAD_OFFICE_REQUIRED_ERROR}
-                    value={step5.streetAndNumber}
-                    errorMessage={errors.streetAndNumber}
-                    customOnInput={(event) => {
-                      patchStep5({ streetAndNumber: getEventValue(event) });
-                      clearError('streetAndNumber', 'headOffice');
-                    }}
-                  />
-                </div>
-
-                <div className={step3Styles.addressGrid}>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioDropdownList
-                      elementId="unit-type"
-                      caption="Unit Type"
-                      name="unit-type"
-                      isEmptyStartOption
-                      value={step5.unitType}
-                      options={[...UNIT_TYPE_OPTIONS]}
-                      customOnChange={(event) => patchStep5({ unitType: getEventValue(event) })}
-                    />
-                  </div>
-                  <div className={step3Styles.gridHalf}>
-                    <OntarioInput
-                      elementId="room-number"
-                      caption="Room Number"
-                      name="room-number"
-                      type="text"
-                      inputWidth="10-char-width"
-                      required={false}
-                      requiredValidationMessage=""
-                      value={step5.roomNumber}
-                      customOnInput={(event) => patchStep5({ roomNumber: getEventValue(event) })}
-                    />
-                  </div>
-                </div>
-
-                <div id={FIELD_ANCHORS.municipality}>
-                  <OntarioInput
-                    elementId={FIELD_ANCHORS.municipality}
-                    caption="Name of Municipality or Post Office"
-                    name="municipality"
-                    type="text"
-                    required
-                    requiredValidationMessage={HEAD_OFFICE_REQUIRED_ERROR}
-                    value={step5.municipality}
-                    errorMessage={errors.municipality}
-                    customOnInput={(event) => {
-                      patchStep5({ municipality: getEventValue(event) });
-                      clearError('municipality', 'headOffice');
-                    }}
-                  />
-                </div>
-
-                <div className={step3Styles.lockedField}>
-                  <p className={step3Styles.lockedLabel}>Province</p>
-                  <p className={step3Styles.lockedValue}>Ontario</p>
-                </div>
-
-                <div id={FIELD_ANCHORS.postalCode}>
-                  <OntarioInput
-                    elementId={FIELD_ANCHORS.postalCode}
-                    caption="Postal Code"
-                    name="postal-code"
-                    type="text"
-                    inputWidth="7-char-width"
-                    required
-                    requiredValidationMessage={HEAD_OFFICE_REQUIRED_ERROR}
-                    value={step5.postalCode}
-                    errorMessage={errors.postalCode}
-                    customOnInput={(event) => {
-                      patchStep5({ postalCode: getEventValue(event) });
-                      clearError('postalCode', 'headOffice');
-                    }}
-                    customOnBlur={(event) => {
-                      patchStep5({ postalCode: formatPostalCode(getEventValue(event)) });
-                    }}
-                  />
-                </div>
-              </div>
-            ) : null}
+          <div className={styles.formStack} id="head-office-address">
+            <OntarioHeadOfficeAddressFields
+              address={step5}
+              errors={errors}
+              onChange={handleAddressChange}
+            />
           </div>
 
           <div className={styles.buttonGroup}>
@@ -476,7 +232,7 @@ export function Form11Step5() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

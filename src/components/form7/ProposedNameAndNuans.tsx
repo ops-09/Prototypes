@@ -93,10 +93,10 @@ export function ProposedNameAndNuans({
     value.nuansReports.length > 0 ? value.nuansReports : [createEmptyNuansReport()];
 
   const singleNameCaption = isCoop
-    ? 'New Co-operative Name (Proposed)'
+    ? 'New co-operative name (proposed)'
     : isNfp
-      ? 'New Not-for-Profit Corporation Name (Proposed)'
-      : 'New Corporation Name (Proposed)';
+      ? 'New not-for-profit corporation name (proposed)'
+      : 'New corporation name (proposed)';
 
   function patch(partial: Partial<NameNuansFields>) {
     onChange({ ...value, nuansReports: reports, ...partial });
@@ -136,7 +136,7 @@ export function ProposedNameAndNuans({
       return COOPERATIVE_NAME_REQUIRED_ERROR;
     }
     if (isNfp) {
-      return 'Enter the Not-for-Profit corporation name.';
+      return 'Enter the not-for-profit corporation name.';
     }
     return 'Enter the corporation name.';
   }
@@ -294,7 +294,7 @@ export function validateNameNuansFields(
     nameKind === 'cooperative'
       ? COOPERATIVE_NAME_REQUIRED_ERROR
       : nameKind === 'nfp'
-        ? 'Enter the Not-for-Profit corporation name.'
+        ? 'Enter the not-for-profit corporation name.'
         : 'Enter the corporation name.';
 
   if (!value.proposedName.trim()) {

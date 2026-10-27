@@ -21,11 +21,11 @@ import {
 } from './form7DraftStorage';
 
 export const UNSUPPORTED_TYPE_ERROR =
-  'The selected file type is not supported. Please upload a PDF file.';
+  'The selected file must be a PDF.';
 export const MAX_SIZE_ERROR =
-  'The selected file exceeds the maximum file size allowed. Please upload a smaller file.';
+  'The selected file is too large. Upload a smaller file.';
 export const SECURITY_SCAN_ERROR =
-  'The selected file could not be uploaded. Please select a different file.';
+  'The selected file could not be uploaded. Select a different file.';
 
 const ACCEPTED_EXT = ['.pdf'];
 const ACCEPTED_MIME = ['application/pdf'];

@@ -20,7 +20,7 @@ import { focusField, getEventValue } from './form11Focus';
 import {
   createAccountAmalgamatingNfp,
   createEmptyAmalgamatingNfp,
-  EMPTY_STEP5,
+  SAMPLE_HEAD_OFFICE,
   EMPTY_STEP6,
   EMPTY_STEP7,
   EMPTY_STEP8,
@@ -41,7 +41,6 @@ import styles from './Form11Step2.module.scss';
 import step4Styles from '../form1/Form1Step4.module.scss';
 
 const CURRENT_STEP = 6;
-const REQUIRED = 'Required Field.';
 const DIRECTORS_AT_LEAST_THREE_ERROR = 'The number of directors must be at least 3.';
 const MIN_MAX_ORDER_ERROR =
   'The minimum number of directors cannot be greater than the maximum.';
@@ -72,7 +71,7 @@ const FIELD_ORDER: PageFieldKey[] = [
 ];
 
 const COUNT_MODE_OPTIONS = [
-  { value: 'fixed', elementId: 'count-fixed', label: 'Fixed Number' },
+  { value: 'fixed', elementId: 'count-fixed', label: 'Fixed number' },
   { value: 'minMax', elementId: 'count-min-max', label: 'Minimum/Maximum' },
 ];
 
@@ -170,15 +169,7 @@ function ensureStep6Draft(): Form11Draft {
       nameNuans: emptyNameNuans(),
       selectedAmalgamatedCorporationId: account.id,
     },
-    step5: {
-      ...EMPTY_STEP5,
-      postalCodeLookup: 'M5H 2N2',
-      selectedAddressId: 'm5h-1',
-      streetAndNumber: '100 Queen St W',
-      municipality: 'Toronto',
-      province: 'Ontario',
-      postalCode: 'M5H 2N2',
-    },
+    step5: { ...SAMPLE_HEAD_OFFICE },
     step6: existing?.step6 ?? { ...EMPTY_STEP6 },
     step7: existing?.step7 ?? { ...EMPTY_STEP7 },
     step8: existing?.step8 ?? { ...EMPTY_STEP8 },
@@ -263,11 +254,11 @@ export function Form11Step6() {
   function validatePage(): PageErrors {
     const page: PageErrors = {};
     if (!step6.countMode) {
-      page.countMode = REQUIRED;
+      page.countMode = 'Select how the number of directors is specified.';
     }
     if (step6.countMode === 'fixed') {
       if (!step6.fixedNumber.trim()) {
-        page.fixedNumber = REQUIRED;
+        page.fixedNumber = 'Enter the fixed number of directors.';
       } else {
         const fixed = Number.parseInt(step6.fixedNumber, 10);
         if (!Number.isFinite(fixed) || fixed < MIN_DIRECTORS) {
@@ -277,7 +268,7 @@ export function Form11Step6() {
     }
     if (step6.countMode === 'minMax') {
       if (!step6.minimumNumber.trim()) {
-        page.minimumNumber = REQUIRED;
+        page.minimumNumber = 'Enter the minimum number of directors.';
       } else {
         const min = Number.parseInt(step6.minimumNumber, 10);
         if (!Number.isFinite(min) || min < MIN_DIRECTORS) {
@@ -285,7 +276,7 @@ export function Form11Step6() {
         }
       }
       if (!step6.maximumNumber.trim()) {
-        page.maximumNumber = REQUIRED;
+        page.maximumNumber = 'Enter the maximum number of directors.';
       }
       const min = Number.parseInt(step6.minimumNumber, 10);
       const max = Number.parseInt(step6.maximumNumber, 10);
@@ -458,11 +449,11 @@ export function Form11Step6() {
               <div id={FIELD_ANCHORS.fixedNumber} className={step4Styles.countFields}>
                 <OntarioInput
                   elementId={FIELD_ANCHORS.fixedNumber}
-                  caption="Fixed Number of Directors"
+                  caption="Fixed number of directors"
                   name="fixed-number-of-directors"
                   type="text"
                   required
-                  requiredValidationMessage={REQUIRED}
+                  requiredValidationMessage="Enter the fixed number of directors."
                   hintText="Enter the fixed number of directors. The number must be at least 3."
                   inputWidth="5-char-width"
                   value={step6.fixedNumber}
@@ -491,7 +482,7 @@ export function Form11Step6() {
                     name="minimum-number-of-directors"
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED}
+                    requiredValidationMessage="Enter the minimum number of directors."
                     hintText="Enter the minimum number of directors. The number must be at least 3."
                     inputWidth="5-char-width"
                     value={step6.minimumNumber}
@@ -512,7 +503,7 @@ export function Form11Step6() {
                     name="maximum-number-of-directors"
                     type="text"
                     required
-                    requiredValidationMessage={REQUIRED}
+                    requiredValidationMessage="Enter the maximum number of directors."
                     hintText="Please enter the maximum number of directors."
                     inputWidth="5-char-width"
                     value={step6.maximumNumber}
@@ -616,7 +607,7 @@ export function Form11Step6() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

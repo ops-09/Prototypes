@@ -27,7 +27,7 @@ const DATE_ANCHOR = 'form3-resolution-date';
 const FUTURE_DATE_ERROR = 'The resolution confirmation date cannot be in the future.';
 const EMPTY_DATE_ERROR = 'Enter the resolution confirmation date.';
 const EMPTY_DETAILS_ERROR =
-  'Provide details of the supplementary letters patent being requested.';
+  'Enter the details of the supplementary letters patent being requested.';
 const PROVISIONS_HINT = {
   hint: 'What are supplementary letters patent?',
   content:
@@ -305,7 +305,7 @@ export function Form3Step4() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

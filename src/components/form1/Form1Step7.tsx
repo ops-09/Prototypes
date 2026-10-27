@@ -58,11 +58,11 @@ function incorporatorsCountError(
   }
   if (subtype === WORKER_COOPERATIVE) {
     return count < MIN_WORKER_INCORPORATORS
-      ? 'At least 5 incorporators are required to incorporate a Worker Co-operative.'
+      ? 'Add at least 5 incorporators to incorporate a Worker Co-operative.'
       : undefined;
   }
   return count < MIN_INCORPORATORS
-    ? 'At least 3 incorporators are required.'
+    ? 'Add at least 3 incorporators.'
     : undefined;
 }
 
@@ -79,7 +79,6 @@ function ensureStep7Draft(): Form1Draft {
   if (
     hasForm1Step1Data(existing?.step1) &&
     hasForm1Step2Data(existing.step2) &&
-    existing.step3.streetNumber &&
     existing.step4.directors.length > 0 &&
     existing.step5.authorizedCapital.trim()
   ) {
@@ -138,22 +137,7 @@ function ensureStep7Draft(): Form1Draft {
       email: 'registry@greeninstitute.coop',
       confirmEmail: 'registry@greeninstitute.coop',
     },
-    step3: {
-      ...EMPTY_STEP3,
-      enterManually: true,
-      streetNumber: '100',
-      streetName: 'Queen',
-      streetType: 'St',
-      streetDirection: 'W',
-      cityTown: 'Toronto',
-      province: 'Ontario',
-      postalCode: 'M5H 2N2',
-      country: 'Canada',
-      municipalityStatus: 'City',
-      municipalityName: 'Toronto',
-      countyStatus: 'Regional Municipality',
-      countyName: 'Toronto',
-    },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: {
       ...EMPTY_STEP4,
       ...(existing?.step4 ?? {}),
@@ -442,7 +426,7 @@ export function Form1Step7() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

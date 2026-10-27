@@ -7,14 +7,14 @@ export type FilingFeeLine = {
 
 /** Prototype fee schedule for Articles of Amendment (Form 7). */
 const FEE_BY_TYPE: Record<AmendmentType, FilingFeeLine> = {
-  'change-name': { label: 'Name Change Fee', amount: 155 },
-  'convert-business-corp': { label: 'Conversion Fee', amount: 330 },
-  'convert-not-for-profit': { label: 'Conversion Fee', amount: 330 },
+  'change-name': { label: 'Name change fee', amount: 155 },
+  'convert-business-corp': { label: 'Conversion fee', amount: 330 },
+  'convert-not-for-profit': { label: 'Conversion fee', amount: 330 },
   'reduce-authorized-capital': {
-    label: 'Reduction of Authorized Capital Fee',
+    label: 'Reduction of authorized capital fee',
     amount: 155,
   },
-  'amend-other': { label: 'Other Amendment Fee', amount: 155 },
+  'amend-other': { label: 'Other amendment fee', amount: 155 },
 };
 
 export function getFilingFees(amendmentType: AmendmentType | ''): FilingFeeLine[] {

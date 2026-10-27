@@ -149,6 +149,11 @@ export type Form2Step3Data = {
   streetNumberSuffix: string;
   streetType: string;
   streetDirection: string;
+  poBox: string;
+  station: string;
+  ruralRoute: string;
+  lotPartBlockSection: string;
+  concessionOrPlan: string;
   cityTown: string;
   province: string;
   postalCode: string;
@@ -304,6 +309,11 @@ export const EMPTY_STEP3: Form2Step3Data = {
   streetNumberSuffix: '',
   streetType: '',
   streetDirection: '',
+  poBox: '',
+  station: '',
+  ruralRoute: '',
+  lotPartBlockSection: '',
+  concessionOrPlan: '',
   cityTown: '',
   province: 'Ontario',
   postalCode: '',
@@ -493,6 +503,11 @@ export function syncIncorporatorsFromDirectors(
 
   return [...linked, ...nonLinked];
 }
+
+/** Head office must be in Ontario, Canada. */
+export const HEAD_OFFICE_PROVINCE_OPTIONS = [{ value: 'Ontario', label: 'Ontario' }] as const;
+
+export const HEAD_OFFICE_COUNTRY_OPTIONS = [{ value: 'Canada', label: 'Canada' }] as const;
 
 export const CANADIAN_PROVINCE_OPTIONS = [
   { value: 'Alberta', label: 'Alberta' },

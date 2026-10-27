@@ -65,7 +65,6 @@ function ensureStep8Draft(): Form1Draft {
   if (
     hasForm1Step1Data(existing?.step1) &&
     hasForm1Step2Data(existing.step2) &&
-    existing.step3.streetNumber &&
     existing.step4.directors.length > 0 &&
     existing.step5.authorizedCapital.trim() &&
     existing.step7.incorporators.length > 0
@@ -133,22 +132,7 @@ function ensureStep8Draft(): Form1Draft {
       email: 'registry@greeninstitute.coop',
       confirmEmail: 'registry@greeninstitute.coop',
     },
-    step3: {
-      ...EMPTY_STEP3,
-      enterManually: true,
-      streetNumber: '100',
-      streetName: 'Queen',
-      streetType: 'St',
-      streetDirection: 'W',
-      cityTown: 'Toronto',
-      province: 'Ontario',
-      postalCode: 'M5H 2N2',
-      country: 'Canada',
-      municipalityStatus: 'City',
-      municipalityName: 'Toronto',
-      countyStatus: 'Regional Municipality',
-      countyName: 'Toronto',
-    },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: {
       ...EMPTY_STEP4,
       ...(existing?.step4 ?? {}),
@@ -230,7 +214,7 @@ export function Form1Step8() {
     const next: ReviewErrors = {};
     if (incompleteKeys.size > 0) {
       next.sections =
-        'One or more sections are incomplete. Use Edit to correct the information before submitting.';
+        'One or more sections are incomplete. Use Change to correct the information before submitting.';
     }
     if (!step8.signedPdf) {
       next.signedPdf = SIGNED_PDF_REQUIRED;
@@ -360,20 +344,36 @@ export function Form1Step8() {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Review</h1>
           <p className={styles.lead}>
             Review the information you entered for this Articles of Incorporation filing.
-            Use Edit to correct a section, generate a PDF to sign, upload the signed copy,
+            Use Change to correct a section, generate a PDF to sign, upload the signed copy,
             then authorize and submit.
           </p>
 
           <div className={styles.formStack}>
             {sections.map((section) => (
-              <div key={section.key} id={sectionAnchor(section.key)}>
-                <Form7SummaryList
-                  caption={section.caption}
-                  headingLevel="h2"
-                  captionActionLink={{ href: section.editHref, label: 'Edit' }}
-                  items={section.rows}
-                  columnRatio="1-2"
-                />
+              <div
+                key={section.key}
+                id={sectionAnchor(section.key)}
+                className={section.groups?.length ? styles.formStack : undefined}
+              >
+                {section.rows.length > 0 || !section.groups?.length ? (
+                  <Form7SummaryList
+                    caption={section.caption}
+                    headingLevel="h2"
+                    captionActionLink={{ href: section.editHref, label: 'Change' }}
+                    items={section.rows}
+                    columnRatio="1-2"
+                  />
+                ) : null}
+                {section.groups?.map((group) => (
+                  <Form7SummaryList
+                    key={group.key}
+                    caption={group.caption}
+                    headingLevel="h2"
+                    captionActionLink={{ href: group.editHref, label: 'Change' }}
+                    items={group.rows}
+                    columnRatio="1-2"
+                  />
+                ))}
               </div>
             ))}
 
@@ -479,7 +479,7 @@ export function Form1Step8() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

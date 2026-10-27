@@ -210,8 +210,8 @@ try {
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
   await pause(1600);
 
-  // Save as Draft → summary
-  await clickButton(page, 'Save as Draft');
+  // Save as draft → summary
+  await clickButton(page, 'Save as draft');
   await page.waitForURL('**/form-1/draft-summary', { timeout: 10000 });
   await pause(2000);
 

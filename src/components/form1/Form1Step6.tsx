@@ -37,15 +37,15 @@ const CURRENT_STEP = 7;
 const TOTAL_STEPS = 9;
 
 const MAX_LENGTH_ERROR =
-  'The text entered exceeds the maximum length of 900,000 characters.';
+  'Enter 900,000 characters or fewer.';
 const FIELD_REQUIRED =
   'Enter the required information, or enter “Not applicable” if none.';
-const MEMBERSHIP_CLASSES_REQUIRED = 'The classes of membership must be entered.';
+const MEMBERSHIP_CLASSES_REQUIRED = 'Enter the classes of membership.';
 const MEMBERSHIP_CLASS_TERMS_REQUIRED =
-  'The terms and conditions attaching to each class of membership must be entered.';
-const STAKEHOLDER_GROUPS_REQUIRED = 'The stakeholder groups must be entered.';
+  'Enter the terms and conditions attaching to each class of membership.';
+const STAKEHOLDER_GROUPS_REQUIRED = 'Enter the stakeholder groups.';
 const STAKEHOLDER_GROUP_TERMS_REQUIRED =
-  'The terms and conditions for membership in each stakeholder group must be entered.';
+  'Enter the terms and conditions for membership in each stakeholder group.';
 
 type PageFieldKey =
   | 'membershipClasses'
@@ -163,7 +163,6 @@ function ensureStep6Draft(): Form1Draft {
   if (
     hasForm1Step1Data(existing?.step1) &&
     hasForm1Step2Data(existing.step2) &&
-    existing.step3.streetNumber &&
     existing.step4.directors.length > 0 &&
     existing.step5.authorizedCapital.trim()
   ) {
@@ -228,22 +227,7 @@ function ensureStep6Draft(): Form1Draft {
       email: 'registry@greeninstitute.coop',
       confirmEmail: 'registry@greeninstitute.coop',
     },
-    step3: {
-      ...EMPTY_STEP3,
-      enterManually: true,
-      streetNumber: '100',
-      streetName: 'Queen',
-      streetType: 'St',
-      streetDirection: 'W',
-      cityTown: 'Toronto',
-      province: 'Ontario',
-      postalCode: 'M5H 2N2',
-      country: 'Canada',
-      municipalityStatus: 'City',
-      municipalityName: 'Toronto',
-      countyStatus: 'Regional Municipality',
-      countyName: 'Toronto',
-    },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
     step4: {
       ...EMPTY_STEP4,
       ...(existing?.step4 ?? {}),
@@ -561,7 +545,7 @@ export function Form1Step6() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

@@ -11,6 +11,7 @@ import {
   type CoverLetterContact,
   writeCoverLetterContact,
 } from './coverLetterContactStorage';
+import { PhoneNumberFields } from '../shared/PhoneNumberFields';
 import {
   normalizePhoneNumber,
   validatePhoneFields,
@@ -149,9 +150,6 @@ export function ContactInformationForm({
     if (!form.firstName.trim()) {
       next.firstName = 'Enter your first name.';
     }
-    if (!form.middleName.trim()) {
-      next.middleName = 'Enter your middle name(s).';
-    }
     if (!form.lastName.trim()) {
       next.lastName = 'Enter your last name.';
     }
@@ -286,8 +284,6 @@ export function ContactInformationForm({
               caption="Middle name(s)"
               name="cover-letter-middle-name"
               type="text"
-              required
-              requiredValidationMessage="Enter your middle name(s)."
               value={form.middleName}
               errorMessage={errors.middleName}
               customOnInput={(event) => patchField('middleName', getEventValue(event))}
@@ -326,7 +322,7 @@ export function ContactInformationForm({
             />
             <OntarioInput
               elementId={FIELD_ANCHORS.confirmEmail}
-              caption="Confirm Email Address"
+              caption="Confirm email address"
               name="cover-letter-confirm-email"
               type="email"
               required
@@ -335,32 +331,19 @@ export function ContactInformationForm({
               errorMessage={errors.confirmEmail}
               customOnInput={(event) => patchField('confirmEmail', getEventValue(event))}
             />
-            <div className={styles.shortField}>
-              <OntarioInput
-                elementId={FIELD_ANCHORS.phoneNumber}
-                caption="Phone number"
-                name="cover-letter-phone-number"
-                type="tel"
-                required
-                requiredValidationMessage="Enter your phone number."
-                value={form.phoneNumber}
-                errorMessage={errors.phoneNumber}
-                customOnInput={(event) => patchField('phoneNumber', getEventValue(event))}
-              />
-            </div>
-            <div className={styles.shortField}>
-              <OntarioInput
-                elementId={FIELD_ANCHORS.phoneExtension}
-                caption="Ext"
-                name="cover-letter-phone-extension"
-                type="tel"
-                value={form.phoneExtension}
-                errorMessage={errors.phoneExtension}
-                customOnInput={(event) =>
-                  patchField('phoneExtension', getEventValue(event))
-                }
-              />
-            </div>
+            <PhoneNumberFields
+              phoneElementId={FIELD_ANCHORS.phoneNumber}
+              extensionElementId={FIELD_ANCHORS.phoneExtension}
+              phoneName="cover-letter-phone-number"
+              extensionName="cover-letter-phone-extension"
+              phoneNumber={form.phoneNumber}
+              phoneExtension={form.phoneExtension}
+              errors={errors}
+              onPhoneNumberChange={(value) => patchField('phoneNumber', value)}
+              onPhoneExtensionChange={(value) =>
+                patchField('phoneExtension', value)
+              }
+            />
           </div>
 
           <div className={styles.buttonGroup}>

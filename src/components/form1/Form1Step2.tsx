@@ -31,10 +31,9 @@ import styles from './Form1Step1.module.scss';
 const CURRENT_STEP = 3;
 const TOTAL_STEPS = 9;
 
-const REQUIRED_FIELD_ERROR = 'Required Field. Please try again.';
-const EMAIL_FORMAT_ERROR = 'Please enter a valid email address.';
+const EMAIL_FORMAT_ERROR = 'Enter a valid email address, like name@example.com.';
 const EMAIL_MATCH_ERROR =
-  'The email addresses you entered do not match. Please try again.';
+  'Official emails must match.';
 
 type FieldKey =
   | 'cooperativeSubtype'
@@ -164,17 +163,17 @@ export function Form1Step2() {
     const next: FieldErrors = {};
 
     if (!step2.primaryActivity.trim() || !isSelectedNaicsLabel(step2.primaryActivity)) {
-      next.primaryActivity = REQUIRED_FIELD_ERROR;
+      next.primaryActivity = 'Enter the NAICS (primary activity).';
     }
 
     if (!step2.email.trim()) {
-      next.email = REQUIRED_FIELD_ERROR;
+      next.email = 'Enter the official email.';
     } else if (!isValidEmail(step2.email)) {
       next.email = EMAIL_FORMAT_ERROR;
     }
 
     if (!step2.confirmEmail.trim()) {
-      next.confirmEmail = REQUIRED_FIELD_ERROR;
+      next.confirmEmail = 'Confirm the official email.';
     } else if (!isValidEmail(step2.confirmEmail)) {
       next.confirmEmail = EMAIL_FORMAT_ERROR;
     } else if (
@@ -326,11 +325,11 @@ export function Form1Step2() {
             <div id={FIELD_ANCHORS.email} className={styles.emailField}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.email}
-                caption="Official Email"
+                caption="Official email"
                 name="official-email"
                 type="email"
                 required
-                requiredValidationMessage={REQUIRED_FIELD_ERROR}
+                requiredValidationMessage="Enter the official email."
                 value={step2.email}
                 errorMessage={errors.email}
                 customOnInput={(event) => {
@@ -348,11 +347,11 @@ export function Form1Step2() {
             <div id={FIELD_ANCHORS.confirmEmail}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.confirmEmail}
-                caption="Confirm Official Email"
+                caption="Confirm official email"
                 name="confirm-official-email"
                 type="email"
                 required
-                requiredValidationMessage={REQUIRED_FIELD_ERROR}
+                requiredValidationMessage="Confirm the official email."
                 value={step2.confirmEmail}
                 errorMessage={errors.confirmEmail}
                 customOnInput={(event) => {
@@ -373,7 +372,7 @@ export function Form1Step2() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton

@@ -23,7 +23,7 @@ import styles from './Form3Step1.module.scss';
 
 const CURRENT_STEP = 2;
 const EMAIL_MISMATCH_ERROR =
-  'Official Email and Confirm Official Email must match';
+  'Official emails must match.';
 
 type FieldKey = 'primaryActivity' | 'email' | 'confirmEmail';
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -201,7 +201,7 @@ export function Form3Step1() {
                 />
               </div>
               <OntarioHintExpander
-                hint="What is a Primary Activity (NAICS):"
+                hint="What is a primary activity (NAICS):"
                 hintContentType="html"
                 content={
                   'The primary activity is the main activity of your corporation. Please refer to <a href="https://www.statcan.gc.ca/en/concepts/searchclasscod" target="_blank" rel="noopener noreferrer">North American Industry Classification System (NAICS) Canada</a> for the list of activities. Select the activity that best describes the primary activity carried on by the corporation and provide the activity code from the link in this form.'
@@ -212,7 +212,7 @@ export function Form3Step1() {
             <div id={FIELD_ANCHORS.email}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.email}
-                caption="Official Email"
+                caption="Official email"
                 name="corp-email"
                 type="email"
                 required
@@ -230,7 +230,7 @@ export function Form3Step1() {
             <div id={FIELD_ANCHORS.confirmEmail}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.confirmEmail}
-                caption="Confirm Official Email"
+                caption="Confirm official email"
                 name="corp-confirm-email"
                 type="email"
                 required
@@ -255,7 +255,7 @@ export function Form3Step1() {
             <OntarioButton
               type="secondary"
               htmlType="button"
-              label="Save as Draft"
+              label="Save as draft"
               onClick={handleSaveAsDraft}
             />
             <OntarioButton
