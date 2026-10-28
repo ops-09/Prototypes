@@ -204,22 +204,16 @@ export function ProposedNameAndNuans({
 
         return (
           <div key={report.id} className={styles.nuansReportBlock}>
-            {index > 0 ? <hr className={styles.nuansReportDivider} /> : null}
-            {reports.length > 1 ? (
-              <div className={styles.nuansReportHeader}>
-                <h3 className={`ontario-h4 ${styles.nuansReportHeading}`}>
-                  NUANS report{ordinal}
-                </h3>
-                <button
-                  type="button"
-                  className={styles.removeLink}
-                  onClick={() => removeReport(report.id)}
-                  aria-label={`Remove NUANS report ${index + 1}`}
-                >
-                  <OntarioIconDelete colour="blue" iconWidth={24} isDecorative />
-                  Remove
-                </button>
-              </div>
+            {index > 0 ? (
+              <button
+                type="button"
+                className={styles.removeLink}
+                onClick={() => removeReport(report.id)}
+                aria-label={`Remove NUANS report ${index + 1}`}
+              >
+                <OntarioIconDelete colour="inherit" iconWidth={24} isDecorative />
+                Remove
+              </button>
             ) : null}
 
             <FileUpload

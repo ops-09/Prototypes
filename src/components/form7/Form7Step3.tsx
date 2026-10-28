@@ -334,6 +334,7 @@ export function Form7Step3() {
 
           <div id={FIELD_ANCHORS.supportingDocs} className={styles.formStack}>
             <OntarioCallout
+              className={styles.flushCallout}
               headingContentType="string"
               headingContent="Required for this amendment"
               content={`Required documents: ${requiredList.join('; ')}.`}
@@ -343,7 +344,7 @@ export function Form7Step3() {
               <SupportingDocumentsUpload
                 label="Certified copy of the resolution"
                 required
-                hintText="Upload a certified copy of the resolution authorizing the amendment."
+                hintText="Upload a certified copy of the resolution authorizing the amendment. You can upload more than one file."
                 value={step3.certifiedResolution}
                 errorMessage={errors.certifiedResolution}
                 onChange={(files) => patchDocs('certifiedResolution', files, 'certifiedResolution')}
@@ -360,6 +361,10 @@ export function Form7Step3() {
                 }}
                 name="authorization-subsections"
                 required
+                hintExpander={{
+                  hint: 'Which subsections apply to my amendment?',
+                  content: 'TBD',
+                }}
                 options={[...AUTHORIZATION_SUBSECTION_OPTIONS]}
                 value={step3.authorizationSubsections}
                 errorMessage={errors.authorizationSubsections}
@@ -378,7 +383,7 @@ export function Form7Step3() {
                 <SupportingDocumentsUpload
                   label="Affidavits of solvency (amendment)"
                   required
-                  hintText="Affidavits of two officers, or of one officer and one director, are required for a name change."
+                  hintText="Affidavits of two officers, or of one officer and one director, are required for a name change. You can upload more than one file."
                   value={step3.affidavits}
                   errorMessage={errors.affidavits}
                   onChange={(files) => patchDocs('affidavits', files, 'affidavits')}
@@ -389,7 +394,7 @@ export function Form7Step3() {
 
             <SupportingDocumentsUpload
               label="Additional supporting documents"
-              hintText="Optional. Upload any other documents that support this amendment."
+              hintText="Optional. Upload any other documents that support this amendment. You can upload more than one file."
               value={step3.additional}
               onChange={(files) => patchDocs('additional', files, 'supportingDocs')}
               inputId="additional-docs-upload"

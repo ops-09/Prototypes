@@ -1,3 +1,4 @@
+import type { ReviewFileLink } from '../shared/uploadedFilePreview';
 import {
   contactFromSignedInProfile,
   readCoverLetterContact,
@@ -26,6 +27,7 @@ import { validateCooperativeName } from './nameValidation';
 export type ReviewRow = {
   name: string;
   description: string;
+  files?: ReviewFileLink[];
 };
 
 export type ReviewSectionKey =
@@ -255,6 +257,7 @@ function buildNameRows(step1: Form2Step1Data): ReviewRow[] {
       {
         name: `NUANS report${ordinal}`,
         description: report.file?.name ?? 'Not provided',
+        files: report.file ? [report.file] : undefined,
       },
       {
         name: `NUANS report${ordinal} date`,

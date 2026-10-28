@@ -1,3 +1,4 @@
+import type { ReviewFileLink } from '../shared/uploadedFilePreview';
 import {
   contactFromSignedInProfile,
   readCoverLetterContact,
@@ -26,6 +27,7 @@ import { validateCooperativeName } from './nameValidation';
 export type ReviewRow = {
   name: string;
   description: string;
+  files?: ReviewFileLink[];
 };
 
 export type ReviewSectionKey =
@@ -70,7 +72,7 @@ function yesNo(value: string) {
   return 'Not provided';
 }
 
-function formatHeadOffice(step3: Form1Step3Data) {
+export function formatHeadOffice(step3: Form1Step3Data) {
   const street = [
     formatUnitLabel(step3.unitType, step3.roomNumber),
     [
@@ -243,6 +245,7 @@ function buildNameRows(step1: Form1Step1Data): ReviewRow[] {
       {
         name: `NUANS report${ordinal}`,
         description: report.file?.name ?? 'Not provided',
+        files: report.file ? [report.file] : undefined,
       },
       {
         name: `NUANS report${ordinal} date`,

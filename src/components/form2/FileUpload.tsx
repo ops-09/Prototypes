@@ -13,6 +13,7 @@ import {
   OntarioIconDocument,
   OntarioIconUpload,
 } from '@ongov/ontario-design-system-component-library-react';
+import { rememberUploadedFile } from '../shared/uploadedFilePreview';
 import styles from './FileUpload.module.scss';
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
@@ -43,6 +44,12 @@ function isAcceptedFile(file: File) {
   const extOk = ACCEPTED_EXT.some((ext) => lower.endsWith(ext));
   const mimeOk = !file.type || ACCEPTED_MIME.includes(file.type);
   return extOk && mimeOk;
+}
+
+function maxReachedError(maxFiles: number) {
+  return maxFiles === 1
+    ? 'You can only upload 1 file. Remove the uploaded file to upload a different one.'
+    : `You can upload up to ${maxFiles} files. Remove a file to upload another.`;
 }
 
 export function formatFileBytes(size: number) {
@@ -79,6 +86,7 @@ export function FileUpload({
 
   function openPicker() {
     if (atMax) {
+      setLocalError(maxReachedError(maxFiles));
       return;
     }
     inputRef.current?.click();
@@ -102,6 +110,7 @@ export function FileUpload({
     }
 
     setLocalError(undefined);
+    rememberUploadedFile(file);
     onChange({ name: file.name, size: file.size, type: file.type || 'application/pdf' }, file);
   }
 
@@ -110,9 +119,7 @@ export function FileUpload({
       return;
     }
     if (atMax) {
-      setLocalError(
-        `You've reached the maximum of ${maxFiles} file${maxFiles === 1 ? '' : 's'}. Remove a file to upload another.`,
-      );
+      setLocalError(maxReachedError(maxFiles));
       return;
     }
     if (files.length > maxFiles) {
@@ -131,9 +138,6 @@ export function FileUpload({
   }
 
   function onDropZoneKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (atMax) {
-      return;
-    }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       openPicker();
@@ -142,9 +146,7 @@ export function FileUpload({
 
   function onDragOver(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
-    if (!atMax) {
-      setDragActive(true);
-    }
+    setDragActive(true);
   }
 
   function onDragLeave(event: DragEvent<HTMLDivElement>) {
@@ -177,10 +179,9 @@ export function FileUpload({
       <div
         className={`${styles.dropZone} ${dragActive ? styles.dropZoneActive : ''} ${
           displayError ? styles.dropZoneError : ''
-        } ${atMax ? styles.dropZoneDisabled : ''}`}
+        }`}
         role="button"
-        tabIndex={atMax ? -1 : 0}
-        aria-disabled={atMax}
+        tabIndex={0}
         aria-describedby={displayError ? errorId : undefined}
         onKeyDown={onDropZoneKeyDown}
         onDragOver={onDragOver}

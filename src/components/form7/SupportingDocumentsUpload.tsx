@@ -15,6 +15,7 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import { formatFileBytes } from '../form1/FileUpload';
 import fileStyles from '../form1/FileUpload.module.scss';
+import { rememberUploadedFile } from '../shared/uploadedFilePreview';
 import {
   MAX_SUPPORTING_DOC_BYTES,
   type SupportingDocMeta,
@@ -99,9 +100,11 @@ export function SupportingDocumentsUpload({
 
   const displayError = errorMessage || localError;
   const atMax = value.length >= maxFiles;
+  const maxReachedError = `You can upload up to ${maxFiles} files. Remove a file to upload another.`;
 
   function openPicker() {
     if (atMax) {
+      setLocalError(maxReachedError);
       return;
     }
     inputRef.current?.click();
@@ -114,7 +117,7 @@ export function SupportingDocumentsUpload({
 
     if (atMax) {
       setLocalError(
-        `You've reached the maximum of ${maxFiles} files. Remove a file to upload another.`,
+        maxReachedError,
       );
       return;
     }
@@ -124,7 +127,7 @@ export function SupportingDocumentsUpload({
 
     Array.from(fileList).forEach((file) => {
       if (next.length >= maxFiles) {
-        lastError = `You've reached the maximum of ${maxFiles} files. Remove a file to upload another.`;
+        lastError = maxReachedError;
         return;
       }
       if (!isAcceptedFile(file)) {
@@ -139,6 +142,7 @@ export function SupportingDocumentsUpload({
         lastError = SECURITY_SCAN_ERROR;
         return;
       }
+      rememberUploadedFile(file);
       next.push(createDocMeta(file));
     });
 
@@ -155,9 +159,6 @@ export function SupportingDocumentsUpload({
   }
 
   function onDropZoneKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (atMax) {
-      return;
-    }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       openPicker();
@@ -166,9 +167,7 @@ export function SupportingDocumentsUpload({
 
   function onDragOver(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
-    if (!atMax) {
-      setDragActive(true);
-    }
+    setDragActive(true);
   }
 
   function onDragLeave(event: DragEvent<HTMLDivElement>) {
@@ -201,10 +200,9 @@ export function SupportingDocumentsUpload({
       <div
         className={`${fileStyles.dropZone} ${dragActive ? fileStyles.dropZoneActive : ''} ${
           displayError ? fileStyles.dropZoneError : ''
-        } ${atMax ? fileStyles.dropZoneDisabled : ''}`}
+        }`}
         role="button"
-        tabIndex={atMax ? -1 : 0}
-        aria-disabled={atMax}
+        tabIndex={0}
         aria-describedby={displayError ? errorId : undefined}
         onKeyDown={onDropZoneKeyDown}
         onDragOver={onDragOver}

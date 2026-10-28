@@ -1,9 +1,16 @@
 import { Link } from "react-router-dom";
+import { OntarioIconNewWindow } from "@ongov/ontario-design-system-component-library-react";
+import {
+  openUploadedFile,
+  type ReviewFileLink,
+} from "../shared/uploadedFilePreview";
 import styles from "./Form7SummaryList.module.scss";
 
 export type Form7SummaryListItem = {
   name: string;
   description: string;
+  /** Uploaded files shown as links that open a preview in a new tab instead of `description`. */
+  files?: ReviewFileLink[];
 };
 
 type Form7SummaryListProps = {
@@ -68,9 +75,30 @@ export function Form7SummaryList({
               <dt className={styles.key}>{item.name}</dt>
               <dd className={styles.value}>
                 <span className={styles.srOnly}>Your answer is: </span>
-                {item.description.split("\n").map((line, lineIndex) => (
-                  <div key={`${item.name}-line-${lineIndex}`}>{line}</div>
-                ))}
+                {item.files?.length
+                  ? item.files.map((file, fileIndex) => (
+                      <div key={`${item.name}-file-${fileIndex}`}>
+                        <a
+                          className={styles.fileLink}
+                          href={`#${item.name}-file-${fileIndex}`}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            openUploadedFile(file);
+                          }}
+                        >
+                          <OntarioIconNewWindow
+                            colour="blue"
+                            iconWidth={24}
+                            isDecorative
+                          />
+                          <span className={styles.fileLinkText}>{file.name}</span>
+                          <span className={styles.srOnly}> (opens in a new tab)</span>
+                        </a>
+                      </div>
+                    ))
+                  : item.description.split("\n").map((line, lineIndex) => (
+                      <div key={`${item.name}-line-${lineIndex}`}>{line}</div>
+                    ))}
               </dd>
             </div>
           ))}

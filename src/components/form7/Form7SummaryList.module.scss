@@ -120,6 +120,32 @@
   }
 }
 
+.fileLink {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  color: var(--ontario-colour-link, #0066cc);
+  text-decoration: none;
+  word-break: break-word;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+.fileLinkText {
+  text-decoration: underline;
+}
+
 .ratio1_2 {
   .key {
     flex: 1;

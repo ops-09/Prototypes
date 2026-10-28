@@ -1,3 +1,4 @@
+import type { ReviewFileLink } from '../shared/uploadedFilePreview';
 import { validateCooperativeName } from '../form1/nameValidation';
 import {
   validateCorporationName,
@@ -10,17 +11,13 @@ import {
   type NameNuansFields,
   type SupportingDocMeta,
 } from './form7DraftStorage';
-import {
-  amendmentTypeLabel,
-  formatBytes,
-  formatIsoDateDisplay,
-  formatUploadedAt,
-} from './form7Labels';
+import { amendmentTypeLabel, formatIsoDateDisplay } from './form7Labels';
 import { validateNameNuansFields } from './ProposedNameAndNuans';
 
 export type ReviewRow = {
   name: string;
   description: string;
+  files?: ReviewFileLink[];
 };
 
 export type ReviewSectionKey = 'coopDetails' | 'amendmentDetails' | 'supportingDocs';
@@ -81,6 +78,7 @@ function nuansRows(fields: NameNuansFields, prefix = ''): ReviewRow[] {
       {
         name: `${labelPrefix}NUANS report${ordinal}`.trim(),
         description: report.file?.name ?? 'Not provided',
+        files: report.file ? [report.file] : undefined,
       },
       {
         name: `${labelPrefix}NUANS report${ordinal} date`.trim(),
@@ -111,7 +109,8 @@ function docRows(docs: SupportingDocMeta[], label: string): ReviewRow[] {
   }
   return docs.map((doc, index) => ({
     name: docs.length > 1 ? `${label} (${index + 1})` : label,
-    description: `${doc.name} · ${formatUploadedAt(doc.uploadedAt)} · ${formatBytes(doc.size)}`,
+    description: doc.name,
+    files: [doc],
   }));
 }
 

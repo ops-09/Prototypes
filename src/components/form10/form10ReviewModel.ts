@@ -1,4 +1,5 @@
-import { formatBytes, formatIsoDateDisplay } from '../form7/form7Labels';
+import type { ReviewFileLink } from '../shared/uploadedFilePreview';
+import { formatIsoDateDisplay } from '../form7/form7Labels';
 import { validateCooperativeName } from '../form2/nameValidation';
 import { validateNameNuansFields } from '../form7/ProposedNameAndNuans';
 import type { PersonReviewGroup } from '../shared/personReviewRows';
@@ -11,6 +12,7 @@ import {
 export type ReviewRow = {
   name: string;
   description: string;
+  files?: ReviewFileLink[];
 };
 
 export type ReviewSectionKey =
@@ -34,18 +36,11 @@ function displayOrEmpty(value: string) {
   return trimmed || 'Not provided';
 }
 
-function docLabel(docs: SupportingDocMeta[], emptyLabel: string) {
+function docFields(docs: SupportingDocMeta[], emptyLabel: string) {
   if (docs.length === 0) {
-    return emptyLabel;
+    return { description: emptyLabel };
   }
-  return docs
-    .map(
-      (doc) =>
-        `${doc.name} (${formatBytes(doc.size)}${
-          doc.uploadedAt ? `, ${formatIsoDateDisplay(doc.uploadedAt.slice(0, 10))}` : ''
-        })`,
-    )
-    .join('\n');
+  return { description: docs.map((doc) => doc.name).join('\n'), files: docs };
 }
 
 function isCoopDetailsComplete(draft: Form10Draft) {
@@ -138,7 +133,7 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
   const supportingRows: ReviewRow[] = [
     {
       name: 'Certified copy of the amalgamation agreement',
-      description: docLabel(draft.step3.certifiedAgreement, 'Not uploaded'),
+      ...docFields(draft.step3.certifiedAgreement, 'Not uploaded'),
     },
   ];
   draft.step2.amalgamatingCooperatives.forEach((coop, index) => {
@@ -148,15 +143,11 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     const label = coop.legalName.trim() || `Co-operative ${index + 1}`;
     supportingRows.push({
       name: `${label} — Affidavit of solvency 1`,
-      description: row?.affidavits[0]
-        ? docLabel([row.affidavits[0]], 'Not uploaded')
-        : 'Not uploaded',
+      ...docFields(row?.affidavits[0] ? [row.affidavits[0]] : [], 'Not uploaded'),
     });
     supportingRows.push({
       name: `${label} — Affidavit of solvency 2`,
-      description: row?.affidavits[1]
-        ? docLabel([row.affidavits[1]], 'Not uploaded')
-        : 'Not uploaded',
+      ...docFields(row?.affidavits[1] ? [row.affidavits[1]] : [], 'Not uploaded'),
     });
   });
 
@@ -213,17 +204,20 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
                 name: 'New co-operative name (proposed)',
                 description: displayOrEmpty(draft.nameChange.nameNuans.proposedName),
               },
-              ...draft.nameChange.nameNuans.nuansReports.map((report, index) => ({
-                name:
-                  draft.nameChange.nameNuans.nuansReports.length > 1
-                    ? `NUANS report ${index + 1}`
-                    : 'NUANS report',
-                description: report.file
-                  ? `${report.file.name}${
-                      report.date ? ` (${formatIsoDateDisplay(report.date)})` : ''
-                    }`
-                  : 'Not uploaded',
-              })),
+              ...draft.nameChange.nameNuans.nuansReports.flatMap((report, index, reports) => {
+                const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
+                return [
+                  {
+                    name: `NUANS report${ordinal}`,
+                    description: report.file?.name ?? 'Not uploaded',
+                    files: report.file ? [report.file] : undefined,
+                  },
+                  {
+                    name: `NUANS report${ordinal} date`,
+                    description: report.date ? formatIsoDateDisplay(report.date) : 'Not provided',
+                  },
+                ];
+              }),
             ]
           : [
               {

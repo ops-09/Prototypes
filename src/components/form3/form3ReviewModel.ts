@@ -1,10 +1,7 @@
+import type { ReviewFileLink } from '../shared/uploadedFilePreview';
 import { validateNameFormat } from '../form1/nameFormatRules';
 import { PERMITTED_LEGAL_ELEMENTS } from '../form2/nameValidation';
-import {
-  formatBytes,
-  formatIsoDateDisplay,
-  formatUploadedAt,
-} from '../form7/form7Labels';
+import { formatIsoDateDisplay } from '../form7/form7Labels';
 import { validateNameNuansFields } from '../form7/ProposedNameAndNuans';
 import type { Form3Draft } from './form3DraftStorage';
 
@@ -15,6 +12,7 @@ export const FORM3_CORP_NAME_INFO =
 export type ReviewRow = {
   name: string;
   description: string;
+  files?: ReviewFileLink[];
 };
 
 export type ReviewSectionKey = 'corporation' | 'nameChange' | 'provisions';
@@ -107,6 +105,7 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
               {
                 name: `NUANS report${ordinal}`,
                 description: report.file?.name ?? 'Not provided',
+        files: report.file ? [report.file] : undefined,
               },
               {
                 name: `NUANS report${ordinal} date`,
@@ -132,7 +131,8 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
             draft.step4.additional.length > 1
               ? `Supporting document ${index + 1}`
               : 'Supporting document',
-          description: `${file.name}\nUploaded ${formatUploadedAt(file.uploadedAt)}\n${formatBytes(file.size)}`,
+          description: file.name,
+          files: [file],
         }))),
   ];
 

@@ -229,30 +229,12 @@
 }
 
 .nuansReportBlock {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--ontario-spacing-7, 2.5rem);
-}
-
-// Stack gap (2rem) above + margin-top, block gap (1.5rem) below + margin-bottom: ~3rem each side.
-.nuansReportDivider {
-  width: 100%;
-  margin: var(--ontario-spacing-4, 1rem) 0 var(--ontario-spacing-5, 1.5rem);
-  padding: 0;
-  border: 0;
-  border-top: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
-}
-
-.nuansReportHeader {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ontario-spacing-4, 1rem);
-}
-
-.nuansReportHeading {
-  margin: 0;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  padding: var(--ontario-spacing-5, 1.5rem);
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
 }
 
 .addActions {
@@ -301,7 +283,11 @@
   }
 }
 
+// Pinned beside the first field label so the grey container reads as one removable report.
 .removeLink {
+  position: absolute;
+  top: var(--ontario-spacing-5, 1.5rem);
+  right: var(--ontario-spacing-5, 1.5rem);
   display: inline-flex;
   align-items: center;
   gap: var(--ontario-spacing-2, 0.5rem);
@@ -309,7 +295,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--ontario-colour-link, #0066cc);
+  color: var(--ontario-colour-alert, #cd0000);
   font-family: var(
     --ontario-font-open-sans,
     'Open Sans',
@@ -321,13 +307,11 @@
   font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
   font-weight: var(--ontario-font-weights-semi-bold, 600);
   line-height: 1.5;
-  text-decoration: none;
+  text-decoration: underline;
   cursor: pointer;
-  flex: 0 0 auto;
 
   &:hover {
-    color: var(--ontario-colour-link--hover, #00478f);
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   &:focus-visible {
@@ -339,4 +323,12 @@
 .nuansMaxNote {
   margin: 0;
   color: var(--ontario-colour-black, #1a1a1a);
+}
+
+// ontario-callout adds its own outer margin (spacing-6 above, spacing-7 below) inside its shadow
+// root; offset it on the host so the callout's box sits flush with the element's edges.
+.flushCallout {
+  display: block;
+  margin-top: calc(-1 * var(--ontario-spacing-6, 2rem));
+  margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
 }

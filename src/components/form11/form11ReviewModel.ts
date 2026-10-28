@@ -1,8 +1,5 @@
-import {
-  formatBytes,
-  formatIsoDateDisplay,
-  formatUploadedAt,
-} from '../form7/form7Labels';
+import type { ReviewFileLink } from '../shared/uploadedFilePreview';
+import { formatIsoDateDisplay } from '../form7/form7Labels';
 import {
   form11AmalgamatedName,
   form11HeadOfficeLine,
@@ -23,6 +20,7 @@ import {
 export type ReviewRow = {
   name: string;
   description: string;
+  files?: ReviewFileLink[];
 };
 
 export type ReviewSectionKey =
@@ -93,6 +91,7 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
         {
           name: `NUANS report${ordinal} document`,
           description: report.file?.name ?? 'Not provided',
+        files: report.file ? [report.file] : undefined,
         },
         {
           name: `NUANS report${ordinal} date`,
@@ -144,7 +143,8 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
       draft.step7.additionalDocuments.length > 1
         ? `Supporting document ${index + 1}`
         : 'Supporting document',
-    description: `${file.name}\nUploaded ${formatUploadedAt(file.uploadedAt)}\n${formatBytes(file.size)}`,
+    description: file.name,
+          files: [file],
   }));
 
   const sections: ReviewSection[] = [
