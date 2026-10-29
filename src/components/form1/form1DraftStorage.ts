@@ -222,6 +222,7 @@ export type Form1Incorporator = {
   firstName: string;
   middleName: string;
   lastName: string;
+  residentCanadian: YesNoAnswer | '';
   address: DirectorResidentialAddress;
   numberOfShares: string;
   classDesignation: string;
@@ -417,6 +418,7 @@ export function createEmptyIncorporator(
     firstName: '',
     middleName: '',
     lastName: '',
+    residentCanadian: '',
     address: { ...EMPTY_DIRECTOR_ADDRESS },
     numberOfShares: '',
     classDesignation: '',
@@ -438,6 +440,7 @@ export function incorporatorFromDirector(
     firstName: director.firstName,
     middleName: director.middleName,
     lastName: director.lastName,
+    residentCanadian: director.residentCanadian,
     address: structuredClone(director.address),
     numberOfShares: director.numberOfShares,
     classDesignation: director.classDesignation,
@@ -477,6 +480,7 @@ export function syncIncorporatorsFromDirectors(
       firstName: director.firstName,
       middleName: director.middleName,
       lastName: director.lastName,
+      residentCanadian: director.residentCanadian,
       address: structuredClone(director.address),
       numberOfShares: director.numberOfShares,
       classDesignation: director.classDesignation,
@@ -898,8 +902,7 @@ export function upsertForm1Step4(
   const existing = readForm1Draft();
   if (
     !hasForm1Step1Data(existing?.step1) ||
-    !hasForm1Step2Data(existing.step2) ||
-    !existing.step3.streetNumber
+    !hasForm1Step2Data(existing.step2)
   ) {
     return null;
   }
@@ -1011,10 +1014,7 @@ export function upsertForm1Step7(
   const existing = readForm1Draft();
   if (
     !hasForm1Step1Data(existing?.step1) ||
-    !hasForm1Step2Data(existing.step2) ||
-    !existing.step3.streetNumber ||
-    !existing.step4.directors.length ||
-    !existing.step5.authorizedCapital.trim()
+    !hasForm1Step2Data(existing.step2)
   ) {
     return null;
   }

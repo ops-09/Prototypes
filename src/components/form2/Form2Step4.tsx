@@ -708,7 +708,9 @@ export function Form2Step4() {
                               {name}
                             </button>
                             <div className={step4Styles.summaryDescription}>
-                              <div>{description.details}</div>
+                              {description.details.map((line) => (
+                                <div key={line}>{line}</div>
+                              ))}
                               {description.address ? (
                                 <div>{description.address}</div>
                               ) : null}

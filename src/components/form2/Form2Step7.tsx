@@ -357,12 +357,14 @@ export function Form2Step7() {
                       entry,
                       linkedDirector,
                     );
-                    const detailsLine = [
-                      linked ? 'First director' : '',
-                      description.details,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ');
+                    const detailLines = [
+                      linked
+                        ? 'First director'
+                        : entry.type === 'corporation'
+                          ? 'Corporation'
+                          : 'Individual',
+                      ...description.details,
+                    ].filter(Boolean);
                     return (
                       <li key={entry.id} className={step4Styles.summaryItem}>
                         <div className={step4Styles.summaryMain}>
@@ -374,7 +376,9 @@ export function Form2Step7() {
                             {name}
                           </button>
                           <div className={step4Styles.summaryDescription}>
-                            <div>{detailsLine}</div>
+                            {detailLines.map((line) => (
+                              <div key={line}>{line}</div>
+                            ))}
                             {description.address ? (
                               <div>{description.address}</div>
                             ) : null}

@@ -1,3 +1,15 @@
+.fieldGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-6, 2rem);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
 .sectionHeading {
   margin: 0;
 }

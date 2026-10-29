@@ -47,6 +47,7 @@ export type IncorporatorFieldKey =
   | 'type'
   | 'firstName'
   | 'lastName'
+  | 'residentCanadian'
   | 'addressType'
   | 'postalCodeLookup'
   | 'unitType'
@@ -178,6 +179,9 @@ export function validateIncorporator(
       if (!incorporator.lastName.trim()) {
         next.lastName = 'Enter the last name.';
       }
+      if (!incorporator.residentCanadian) {
+        next.residentCanadian = 'Select whether the incorporator is a resident Canadian.';
+      }
       validateAddress(incorporator.address, next);
     }
     // Form 2 (without share capital): no share details for incorporators.
@@ -267,7 +271,7 @@ function formatYesNo(value: YesNoAnswer | '') {
 }
 
 export type IncorporatorListDescription = {
-  details: string;
+  details: string[];
   address: string;
 };
 
@@ -278,31 +282,26 @@ export function formatIncorporatorListDescription(
   if (incorporator.type === 'corporation') {
     const signer = formatIncorporatorFullName(incorporator);
     const position = incorporator.signerPosition.trim();
-    const parts = [
+    const details = [
       incorporator.ocn ? `OCN ${incorporator.ocn}` : '',
       signer && position ? `${signer}, ${position}` : signer || position,
     ].filter(Boolean);
     return {
-      details: parts.join(' · ') || 'Corporation incorporator',
+      details: details.length > 0 ? details : ['Corporation incorporator'],
       address: '',
     };
   }
 
   const addressLine = formatIncorporatorAddressLine(incorporator);
   const director = linkedDirector ?? null;
+  const residentCanadian = director?.residentCanadian || incorporator.residentCanadian;
   const details = [
-    director?.residentCanadian
-      ? `Resident Canadian: ${formatYesNo(director.residentCanadian)}`
-      : '',
-    director?.alsoIncorporator
-      ? `Also an incorporator: ${formatYesNo(director.alsoIncorporator)}`
-      : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
+    `Resident Canadian: ${formatYesNo(residentCanadian)}`,
+    'Also an incorporator: Yes',
+  ];
 
   return {
-    details: details || 'Incorporator details',
+    details,
     address: addressLine !== '—' ? addressLine : '',
   };
 }
@@ -375,6 +374,7 @@ export function Form2IncorporatorBlock({
         firstName: '',
         middleName: '',
         lastName: '',
+        residentCanadian: '',
         corporationName: '',
         ocn: '',
         signerPosition: '',
@@ -388,6 +388,7 @@ export function Form2IncorporatorBlock({
       firstName: '',
       middleName: '',
       lastName: '',
+      residentCanadian: '',
       address: { ...EMPTY_DIRECTOR_ADDRESS },
       numberOfShares: '',
       classDesignation: '',
@@ -547,6 +548,23 @@ export function Form2IncorporatorBlock({
                 />
               </div>
 
+              <div id={`${prefix}-resident-canadian`}>
+                <OntarioRadioButtons
+                  caption="Resident Canadian"
+                  name={`${prefix}-resident-canadian`}
+                  required
+                  value={incorporator.residentCanadian || ''}
+                  options={[
+                    { value: 'yes', elementId: `${prefix}-resident-yes`, label: 'Yes' },
+                    { value: 'no', elementId: `${prefix}-resident-no`, label: 'No' },
+                  ]}
+                  errorMessage={errors.residentCanadian}
+                  customOnChange={(event) =>
+                    patch({ residentCanadian: getEventValue(event) as YesNoAnswer })
+                  }
+                />
+              </div>
+
               <div id={`${prefix}-address-type`}>
                 <OntarioRadioButtons
                   caption="The names and residential addresses of the incorporators are:"
@@ -674,17 +692,27 @@ export function Form2IncorporatorBlock({
               ) : null}
             </>
           ) : (
-            <div className={step4Styles.readOnlyField}>
-              <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
-                Incorporator
-              </h5>
-              <p className={step4Styles.readOnlyValue}>
-                {formatIncorporatorFullName(incorporator) || '—'}
-              </p>
-              <p className={step4Styles.readOnlyValue}>
-                {formatIncorporatorAddressLine(incorporator)}
-              </p>
-            </div>
+            <>
+              <div className={step4Styles.readOnlyField}>
+                <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
+                  Incorporator
+                </h5>
+                <p className={step4Styles.readOnlyValue}>
+                  {formatIncorporatorFullName(incorporator) || '—'}
+                </p>
+                <p className={step4Styles.readOnlyValue}>
+                  {formatIncorporatorAddressLine(incorporator)}
+                </p>
+              </div>
+              <div className={step4Styles.readOnlyField}>
+                <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>
+                  Resident Canadian
+                </h5>
+                <p className={step4Styles.readOnlyValue}>
+                  {formatYesNo(incorporator.residentCanadian)}
+                </p>
+              </div>
+            </>
           )}
 
         </>

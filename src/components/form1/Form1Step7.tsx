@@ -337,7 +337,8 @@ export function Form1Step7() {
           </div>
 
           <p className={step4Styles.sectionLabel}>
-            The shares to be taken by the incorporators are:
+            The shares to be taken by the incorporators are:{' '}
+            <span className={step4Styles.sectionLabelFlag}>(required)</span>
           </p>
 
           <div className={styles.formStack}>
@@ -361,12 +362,14 @@ export function Form1Step7() {
                       entry,
                       linkedDirector,
                     );
-                    const detailsLine = [
-                      linked ? 'First director' : '',
-                      description.details,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ');
+                    const detailLines = [
+                      linked
+                        ? 'First director'
+                        : entry.type === 'corporation'
+                          ? 'Corporation'
+                          : 'Individual',
+                      ...description.details,
+                    ].filter(Boolean);
                     return (
                       <li key={entry.id} className={step4Styles.summaryItem}>
                         <div className={step4Styles.summaryMain}>
@@ -378,7 +381,9 @@ export function Form1Step7() {
                             {name}
                           </button>
                           <div className={step4Styles.summaryDescription}>
-                            <div>{detailsLine}</div>
+                            {detailLines.map((line) => (
+                              <div key={line}>{line}</div>
+                            ))}
                             {description.address ? (
                               <div>{description.address}</div>
                             ) : null}

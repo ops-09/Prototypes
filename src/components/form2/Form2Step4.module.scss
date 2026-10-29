@@ -137,6 +137,8 @@
 }
 
 .summaryDescription {
+  display: flex;
+  flex-direction: column;
   margin: 0;
   font-size: var(--ontario-font-sizes-small, 0.875rem);
   line-height: 1.5;

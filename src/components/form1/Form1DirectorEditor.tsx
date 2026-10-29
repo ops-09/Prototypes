@@ -22,6 +22,7 @@ import {
   CanadianAddressFields,
   validateCanadianAddress,
 } from '../shared/CanadianAddressFields';
+import { formatShareSummary } from '../shared/personReviewRows';
 
 const EMAIL_INVALID = 'Enter a valid email address, like name@example.com.';
 const SHARES_WHOLE_NUMBER = 'Enter the number of shares as a whole number greater than 0.';
@@ -284,7 +285,7 @@ export function formatDirectorFullName(director: Form1Director): string {
 }
 
 export type DirectorListDescription = {
-  details: string;
+  details: string[];
   address: string;
 };
 
@@ -293,35 +294,27 @@ export function formatDirectorListDescription(
 ): DirectorListDescription {
   const email = director.email.trim();
   const addressLine = formatDirectorAddressLine(director);
-  const shares = director.numberOfShares.trim();
-  const className = director.classDesignation.trim();
-  const amount = director.amountToBePaid.trim();
-  const sharePart =
-    director.alsoIncorporator === 'yes' && (shares || className || amount)
-      ? [
-          shares ? `${shares} shares` : '',
-          className || '',
-          amount ? `$${amount.replace(/^\$/, '')}` : '',
-        ]
-          .filter(Boolean)
-          .join(' · ')
+  const shareLine =
+    director.alsoIncorporator === 'yes' &&
+    (director.numberOfShares.trim() ||
+      director.classDesignation.trim() ||
+      director.amountToBePaid.trim())
+      ? formatShareSummary(director)
       : '';
 
   const details = [
-    email || '',
+    email,
     director.residentCanadian
       ? `Resident Canadian: ${formatYesNo(director.residentCanadian)}`
       : '',
     director.alsoIncorporator
       ? `Also an incorporator: ${formatYesNo(director.alsoIncorporator)}`
       : '',
-    sharePart,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+    shareLine,
+  ].filter(Boolean);
 
   return {
-    details: details || 'Director details',
+    details: details.length > 0 ? details : ['Director details'],
     address: addressLine !== '—' ? addressLine : '',
   };
 }

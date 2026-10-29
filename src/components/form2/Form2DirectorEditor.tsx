@@ -270,7 +270,7 @@ export function formatDirectorFullName(director: Form2Director): string {
 }
 
 export type DirectorListDescription = {
-  details: string;
+  details: string[];
   address: string;
 };
 
@@ -280,19 +280,17 @@ export function formatDirectorListDescription(
   const email = director.email.trim();
   const addressLine = formatDirectorAddressLine(director);
   const details = [
-    email || '',
+    email,
     director.residentCanadian
       ? `Resident Canadian: ${formatYesNo(director.residentCanadian)}`
       : '',
     director.alsoIncorporator
       ? `Also an incorporator: ${formatYesNo(director.alsoIncorporator)}`
       : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  ].filter(Boolean);
 
   return {
-    details: details || 'Director details',
+    details: details.length > 0 ? details : ['Director details'],
     address: addressLine !== '—' ? addressLine : '',
   };
 }

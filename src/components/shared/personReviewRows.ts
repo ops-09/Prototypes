@@ -114,19 +114,22 @@ function formatDollars(amount: string) {
   })}`;
 }
 
-/** e.g. "2 at $5,000, Class A". */
+/** e.g. "2 shares at $5,000, Class A". */
 export function formatShareSummary(shares: {
   numberOfShares: string;
   amountToBePaid: string;
   classDesignation: string;
 }) {
   const count = shares.numberOfShares.trim();
+  const shareLabel = count
+    ? `${count} ${count === "1" ? "share" : "shares"}`
+    : "";
   const amount = shares.amountToBePaid.trim()
     ? formatDollars(shares.amountToBePaid)
     : "";
   const className = shares.classDesignation.trim();
   const countAndAmount =
-    count && amount ? `${count} at ${amount}` : count || amount;
+    shareLabel && amount ? `${shareLabel} at ${amount}` : shareLabel || amount;
   return [countAndAmount, className].filter(Boolean).join(", ") || NOT_PROVIDED;
 }
 
@@ -166,6 +169,7 @@ type ReviewIncorporator = PersonName &
     id: string;
     type: string;
     linkedDirectorId: string;
+    residentCanadian?: string;
     address: DirectorResidentialAddress;
     corporationName: string;
     ocn: string;
@@ -249,14 +253,19 @@ export function buildIncorporatorGroups<D extends ReviewDirector>(
         description: formatPersonName(director ?? incorporator),
       });
       if (director) {
-        rows.push(
-          { name: "Email", description: displayValue(director.email) },
-          {
-            name: "Residency",
-            description: formatResidency(director.residentCanadian),
-          },
-          { name: "First director", description: "Yes" },
-        );
+        rows.push({ name: "Email", description: displayValue(director.email) });
+      }
+      rows.push(
+        {
+          name: "Residency",
+          description: formatResidency(
+            director?.residentCanadian || incorporator.residentCanadian || "",
+          ),
+        },
+        { name: "Also an incorporator", description: "Yes" },
+      );
+      if (director) {
+        rows.push({ name: "First director", description: "Yes" });
       }
       if (options.includeShares) {
         rows.push({
