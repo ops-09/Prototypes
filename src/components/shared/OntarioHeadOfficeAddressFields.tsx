@@ -60,7 +60,6 @@ export const HEAD_OFFICE_FIELD_ORDER: HeadOfficeFieldKey[] = [
   'unitType',
   'streetNumber',
   'streetName',
-  'cityTown',
   'municipalityStatus',
   'countyStatus',
   'countyName',
@@ -73,7 +72,6 @@ const ALL_FIELD_KEYS = HEAD_OFFICE_FIELD_ORDER;
 export const HEAD_OFFICE_ERRORS = {
   streetNumber: 'Enter the street number.',
   streetName: 'Enter the street name.',
-  cityTown: 'Enter the city, town, village or municipality.',
   municipalityStatus: 'Select the status of the municipality.',
   countyStatus: 'Select the county, district or regional municipality.',
   countyName: 'Enter the name of the county, district or regional municipality.',
@@ -96,9 +94,6 @@ export function validateHeadOfficeAddress(address: HeadOfficeAddress): HeadOffic
   }
   if (!address.streetName.trim()) {
     next.streetName = HEAD_OFFICE_ERRORS.streetName;
-  }
-  if (!address.cityTown.trim()) {
-    next.cityTown = HEAD_OFFICE_ERRORS.cityTown;
   }
   if (!address.municipalityStatus.trim()) {
     next.municipalityStatus = HEAD_OFFICE_ERRORS.municipalityStatus;
@@ -379,19 +374,6 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
             value={address.concessionOrPlan}
             customOnInput={(event) => patch({ concessionOrPlan: getEventValue(event) })}
           />
-          <div id={HEAD_OFFICE_FIELD_ANCHORS.cityTown}>
-            <OntarioInput
-              elementId={HEAD_OFFICE_FIELD_ANCHORS.cityTown}
-              caption="City, town, village or municipality"
-              name="city-town"
-              type="text"
-              required
-              requiredValidationMessage={HEAD_OFFICE_ERRORS.cityTown}
-              value={address.cityTown}
-              errorMessage={errors.cityTown}
-              customOnInput={(event) => patch({ cityTown: getEventValue(event) }, 'cityTown')}
-            />
-          </div>
           <div id={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}>
             <OntarioDropdownList
               elementId={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}

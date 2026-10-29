@@ -140,7 +140,6 @@ function isHeadOfficeComplete(step3: Form1Step3Data) {
   return Boolean(
     step3.streetNumber.trim() &&
       step3.streetName.trim() &&
-      step3.cityTown.trim() &&
       step3.postalCode.trim(),
   );
 }
