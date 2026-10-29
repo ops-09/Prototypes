@@ -240,16 +240,31 @@ const PROTOTYPE_PAGES: PageCategory[] = [
         ariaLabelText: 'Open Form 7 Step 1 cover letter',
       },
       {
+        label: 'Form 7 — Step 2',
+        description:
+          'Business details — primary activity, official email, and type of co-operative.',
+        href: '/form-7/step-2',
+        ariaLabelText: 'Open Form 7 Step 2 business details',
+      },
+      {
+        label: 'Form 7 — Step 3',
+        description:
+          'Amendment details — type of amendment, name change, and NUANS when required.',
+        href: '/form-7/step-3',
+        ariaLabelText: 'Open Form 7 Step 3 amendment details',
+      },
+      {
         label: 'Form 7 — Step 4',
-        description: 'Supporting documents upload for Articles of Amendment.',
+        description:
+          'Supporting documents — certified resolution, authorization subsections, and optional uploads.',
         href: '/form-7/step-4',
-        ariaLabelText: 'Open Form 7 Step 4 Supporting documents',
+        ariaLabelText: 'Open Form 7 Step 4 supporting documents',
       },
       {
         label: 'Form 7 — Step 5',
-        description: 'Review and validation — summary, authorization, and submit.',
+        description: 'Review and validation — summary, generate PDF, authorize, and submit.',
         href: '/form-7/step-5',
-        ariaLabelText: 'Open Form 7 Step 5 Review and validation',
+        ariaLabelText: 'Open Form 7 Step 5 review and validation',
       },
     ],
   },

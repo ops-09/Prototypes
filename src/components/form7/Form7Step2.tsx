@@ -18,10 +18,14 @@ import {
   createEmptyNuansReport,
   emptyNameNuans,
   EMPTY_STEP2,
+  EMPTY_STEP3,
+  EMPTY_STEP4,
   normalizeNameNuans,
   OBR_INCORPORATION_DATE,
   OBR_OCN,
+  OBR_STEP1_DEFAULTS,
   readForm7Draft,
+  saveForm7Draft,
   upsertForm7Step2,
   type AmendmentType,
   type Form7NameLanguage,
@@ -114,6 +118,27 @@ function focusField(anchorId: string) {
   focusable?.focus({ preventScroll: true });
 }
 
+function ensureStep2Draft() {
+  const existing = readForm7Draft();
+  if (existing?.step1.cooperativeName) {
+    return existing;
+  }
+
+  // Prototype deep-link: seed Step 1 so /form-7/step-3 opens from the playground.
+  const now = new Date().toISOString();
+  const seeded = {
+    step1: { ...OBR_STEP1_DEFAULTS },
+    step2: existing?.step2 ?? { ...EMPTY_STEP2, nameNuans: emptyNameNuans() },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4: existing?.step4 ?? { ...EMPTY_STEP4 },
+    savedAs: 'continue' as const,
+    savedAt: now,
+    lastCompletedStep: 1 as const,
+  };
+  saveForm7Draft(seeded);
+  return seeded;
+}
+
 function nameNuansErrorHref(
   idPrefix: string,
   key: string,
@@ -137,7 +162,7 @@ function nameNuansErrorHref(
 
 export function Form7Step2() {
   const navigate = useNavigate();
-  const draft = readForm7Draft();
+  const draft = ensureStep2Draft();
 
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const dateErrorsRef = useRef<Step2Errors>({});
