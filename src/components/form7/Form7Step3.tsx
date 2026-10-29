@@ -342,7 +342,7 @@ export function Form7Step3() {
 
             <div id={FIELD_ANCHORS.certifiedResolution}>
               <SupportingDocumentsUpload
-                label="Certified copy of the resolution"
+                label="The following is a certified copy of the resolution amending the articles of the co-operative:"
                 required
                 hintText="Upload a certified copy of the resolution authorizing the amendment. You can upload more than one file."
                 value={step3.certifiedResolution}
@@ -403,7 +403,7 @@ export function Form7Step3() {
             <div id={FIELD_ANCHORS.resolutionConfirmedDate}>
               <p className={styles.resolutionDateLabel}>
                 The resolution authorizing the amendment was confirmed by the members of
-                the co-operative on
+                the co-operative
                 <span className={styles.requiredFlag}> (required)</span>
               </p>
               {/* DateInput always renders a required flag on its legend; clip that blank caption. */}

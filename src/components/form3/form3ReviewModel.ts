@@ -96,7 +96,7 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
             description: change.changeCorporationName === 'change' ? 'Yes' : 'Not provided',
           },
           {
-            name: 'Proposed corporation name',
+            name: 'The name of the corporation is changed to (if applicable): (Set out in Block Capital Letters)',
             description: displayOrEmpty(change.nameNuans.proposedName),
           },
           ...change.nameNuans.nuansReports.flatMap((report, index, reports) => {
@@ -117,11 +117,11 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
 
   const provisionRows: ReviewRow[] = [
     {
-      name: 'Resolution confirmation',
-      description: `The resolution authorizing this application was confirmed by the shareholders/members of the corporation on: ${formatIsoDateDisplay(draft.step4.resolutionConfirmedDate)} under section 34 or 131 of the Corporations Act.`,
+      name: 'The resolution authorizing this application was confirmed by the shareholders/members of the corporation on:',
+      description: formatIsoDateDisplay(draft.step4.resolutionConfirmedDate),
     },
     {
-      name: 'The corporation applies for the issue of supplementary letters patent to provide as follows',
+      name: 'The corporation applies for the issue of supplementary letters patent to provide as follows:',
       description: displayOrEmpty(draft.step4.requestedProvisions),
     },
     ...(draft.step4.additional.length === 0
@@ -144,11 +144,11 @@ export function buildReviewSections(draft: Form3Draft): ReviewSection[] {
       complete: Boolean(draft.step1.corporationName && draft.step1.primaryActivity.trim()),
       rows: [
         {
-          name: 'Corporation name',
+          name: 'Name of the applicant corporation: (Set out in Block Capital Letters)',
           description: displayOrEmpty(draft.step1.corporationName),
         },
         {
-          name: 'Date of incorporation/amalgamation',
+          name: 'Date of incorporation/amalgamation:',
           description: formatIsoDateDisplay(draft.step1.incorporationDate),
         },
       ],

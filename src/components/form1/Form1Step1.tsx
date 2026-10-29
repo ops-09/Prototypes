@@ -355,7 +355,7 @@ export function Form1Step1() {
           <div className={styles.formStack}>
             <OntarioInput
               elementId="cooperative-name"
-              caption="Co-operative name (proposed)"
+              caption="The name of the co-operative is: (Set out in Block Capital Letters)"
               name="cooperative-name"
               required
               requiredValidationMessage={COOPERATIVE_NAME_REQUIRED_ERROR}

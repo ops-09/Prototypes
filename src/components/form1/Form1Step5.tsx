@@ -399,7 +399,7 @@ export function Form1Step5() {
             <div id={FIELD_ANCHORS.businessPowersRestrictions}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.businessPowersRestrictions}
-                caption="Restrictions on the business the co-operative may carry on or on the powers the co-operative may exercise, if any"
+                caption="Restrictions, if any, on the business the co-operative may carry on or on powers the co-operative may exercise:"
                 name={FIELD_ANCHORS.businessPowersRestrictions}
                 required
                 hintText={NOT_APPLICABLE_HINT}
@@ -414,7 +414,7 @@ export function Form1Step5() {
             <div id={FIELD_ANCHORS.authorizedCapital}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.authorizedCapital}
-                caption="Authorized capital for each class of share"
+                caption="The authorized capital for each class of share is:"
                 name={FIELD_ANCHORS.authorizedCapital}
                 required
                 hintText={NOT_APPLICABLE_HINT}
@@ -429,7 +429,7 @@ export function Form1Step5() {
             <div id={FIELD_ANCHORS.preferenceShareTerms}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.preferenceShareTerms}
-                caption="Designations, preferences, rights, conditions, restrictions, limitations or prohibitions attaching to the preference shares, if any"
+                caption="The designations, preferences, rights, conditions, restrictions, limitations or prohibitions attaching to the preference shares, if any, are:"
                 name={FIELD_ANCHORS.preferenceShareTerms}
                 required
                 hintText={NOT_APPLICABLE_HINT}
@@ -444,7 +444,7 @@ export function Form1Step5() {
             <div id={FIELD_ANCHORS.shareTransferRestrictions}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.shareTransferRestrictions}
-                caption="Restrictions on the allotment, issue or transfer of shares"
+                caption="The restrictions on the allotment, issue or transfer of shares are:"
                 name={FIELD_ANCHORS.shareTransferRestrictions}
                 required
                 hintText={NOT_APPLICABLE_HINT}

@@ -580,7 +580,7 @@ export function Form1IncorporatorBlock({
 
           <OntarioInput
             elementId={`${prefix}-shares`}
-            caption="Number of shares"
+            caption="The shares to be taken by the incorporators are:"
             name={`${prefix}-shares`}
             type="text"
             inputWidth="10-char-width"
@@ -625,7 +625,7 @@ export function Form1IncorporatorBlock({
             <>
               <div id={`${prefix}-address-type`}>
                 <OntarioRadioButtons
-                  caption="Residential address"
+                  caption="The names and residential addresses of the incorporators are:"
                   name={`${prefix}-address-type`}
                   required
                   hintText="Select Canadian, US, or International. Canadian addresses are not limited to Ontario."

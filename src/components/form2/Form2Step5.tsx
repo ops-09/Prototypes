@@ -401,7 +401,7 @@ export function Form2Step5() {
             <div id={FIELD_ANCHORS.businessPowersRestrictions}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.businessPowersRestrictions}
-                caption="Restrictions, if any, on the business the co-operative may carry on or on powers the co-operative may exercise"
+                caption="Restrictions, if any, on the business the co-operative may carry on or on powers the co-operative may exercise:"
                 name={FIELD_ANCHORS.businessPowersRestrictions}
                 required
                 hintText={NOT_APPLICABLE_HINT}
@@ -416,7 +416,7 @@ export function Form2Step5() {
             <div id={FIELD_ANCHORS.minimumMemberLoan}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.minimumMemberLoan}
-                caption="The amount of the minimum member loan, if any"
+                caption="The amount of the minimum member loan, if any:"
                 name={FIELD_ANCHORS.minimumMemberLoan}
                 type="text"
                 inputWidth="20-char-width"
@@ -434,7 +434,7 @@ export function Form2Step5() {
             <div id={FIELD_ANCHORS.memberLoanTransferRestrictions}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.memberLoanTransferRestrictions}
-                caption="The restrictions on transfer of member loans are"
+                caption="The restrictions on transfer of member loans are:"
                 name={FIELD_ANCHORS.memberLoanTransferRestrictions}
                 required
                 hintText={NOT_APPLICABLE_HINT}
@@ -449,7 +449,7 @@ export function Form2Step5() {
             <div id={FIELD_ANCHORS.membershipFee}>
               <OntarioInput
                 elementId={FIELD_ANCHORS.membershipFee}
-                caption="The amount of membership fee is"
+                caption="The amount of membership fee is:"
                 name={FIELD_ANCHORS.membershipFee}
                 type="text"
                 inputWidth="20-char-width"

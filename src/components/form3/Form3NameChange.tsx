@@ -15,6 +15,7 @@ import {
   validateNameNuansFields,
   type NameNuansErrors,
 } from '../form7/ProposedNameAndNuans';
+import { Form7RegistryCallout } from '../form7/Form7RegistryCallout';
 import { focusField, getEventValue } from './form3Focus';
 import {
   EMPTY_NAME_CHANGE,
@@ -252,6 +253,15 @@ export function Form3NameChange() {
             name.
           </p>
 
+          <div className={styles.registryCallout}>
+            <Form7RegistryCallout
+              heading="Corporation details"
+              nameLabel="Name of the applicant corporation: (Set out in Block Capital Letters)"
+              cooperativeName={draft.step1.corporationName}
+              incorporationDate={draft.step1.incorporationDate}
+            />
+          </div>
+
           <div className={styles.formStack}>
             <div id="change-corporation-name">
               <OntarioRadioButtons
@@ -289,6 +299,7 @@ export function Form3NameChange() {
                 <ProposedNameAndNuans
                   idPrefix={ID_PREFIX}
                   nameKind="corporation"
+                  proposedNameCaption="The name of the corporation is changed to (if applicable): (Set out in Block Capital Letters)"
                   value={nameChange.nameNuans}
                   errors={errors}
                   dateValidatorFor={dateValidatorFor}

@@ -3,8 +3,10 @@ import styles from './Form7Step1.module.scss';
 
 type Form7RegistryCalloutProps = {
   cooperativeName: string;
-  ocn: string;
+  ocn?: string;
   incorporationDate: string;
+  heading?: string;
+  nameLabel?: string;
 };
 
 function formatObrDate(isoDate: string) {
@@ -20,25 +22,29 @@ export function Form7RegistryCallout({
   cooperativeName,
   ocn,
   incorporationDate,
+  heading = 'Co-operative details',
+  nameLabel = 'The name of the co-operative is: (Set out in Block Capital Letters)',
 }: Form7RegistryCalloutProps) {
   return (
     <OntarioCallout
       headingType="h2"
-      headingContent="Co-operative details"
+      headingContent={heading}
       headingContentType="string"
       highlightColour="teal"
     >
       <div className={styles.registryCalloutBody}>
         <div className={styles.registryCalloutRow}>
-          <p className={styles.registryCalloutLabel}>Current co-operative name</p>
+          <p className={styles.registryCalloutLabel}>{nameLabel}</p>
           <p className={styles.registryCalloutValue}>{cooperativeName}</p>
         </div>
+        {ocn ? (
+          <div className={styles.registryCalloutRow}>
+            <p className={styles.registryCalloutLabel}>OCN Number</p>
+            <p className={styles.registryCalloutValue}>{ocn}</p>
+          </div>
+        ) : null}
         <div className={styles.registryCalloutRow}>
-          <p className={styles.registryCalloutLabel}>OCN Number</p>
-          <p className={styles.registryCalloutValue}>{ocn}</p>
-        </div>
-        <div className={styles.registryCalloutRow}>
-          <p className={styles.registryCalloutLabel}>Date of incorporation/amalgamation</p>
+          <p className={styles.registryCalloutLabel}>Date of incorporation/amalgamation:</p>
           <p className={styles.registryCalloutValue}>{formatObrDate(incorporationDate)}</p>
         </div>
       </div>

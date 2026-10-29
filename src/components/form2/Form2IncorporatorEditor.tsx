@@ -549,7 +549,7 @@ export function Form2IncorporatorBlock({
 
               <div id={`${prefix}-address-type`}>
                 <OntarioRadioButtons
-                  caption="Residential address"
+                  caption="The names and residential addresses of the incorporators are:"
                   name={`${prefix}-address-type`}
                   required
                   hintText="Select Canadian, US, or International. Canadian addresses are not limited to Ontario."

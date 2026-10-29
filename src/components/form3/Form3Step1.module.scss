@@ -61,6 +61,10 @@
   margin: 0 0 var(--ontario-spacing-5, 1.5rem);
 }
 
+.registryCallout {
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
 .formStack > .lead,
 .formStack > .leadGroup .lead {
   // Spacing to the next field comes from .formStack gap (40px).

@@ -114,7 +114,7 @@ function docRows(docs: SupportingDocMeta[], label: string): ReviewRow[] {
   }));
 }
 
-function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
+export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
   const { step2 } = draft;
   const type = step2.amendmentType;
   const rows: ReviewRow[] = [
@@ -322,16 +322,16 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
   );
 
   const supportingRows: ReviewRow[] = [
-    ...docRows(draft.step3.certifiedResolution, 'Certified copy of the resolution'),
+    ...docRows(draft.step3.certifiedResolution, 'The following is a certified copy of the resolution amending the articles of the co-operative:'),
     {
-      name: 'Authorizing subsections (CCA s.151)',
+      name: 'The above amendment has been duly authorized as required by subsections 151(1), (2), (2.1), (3) and/or (4) of the Co-operative Corporations Act. Please choose the applicable subsections below:',
       description:
         draft.step3.authorizationSubsections.length > 0
           ? draft.step3.authorizationSubsections.join(', ')
           : 'Not provided',
     },
     {
-      name: 'The resolution authorizing the amendment was confirmed by the members of the co-operative on',
+      name: 'The resolution authorizing the amendment was confirmed by the members of the co-operative',
       description: formatIsoDateDisplay(draft.step3.resolutionConfirmedDate),
     },
   ];
@@ -350,8 +350,12 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
       complete: isCoopDetailsComplete(draft),
       rows: [
         {
-          name: 'Co-operative legal name',
+          name: 'The name of the co-operative is: (Set out in Block Capital Letters)',
           description: displayOrEmpty(draft.step1.cooperativeName),
+        },
+        {
+          name: 'Date of incorporation/amalgamation:',
+          description: formatIsoDateDisplay(draft.step1.incorporationDate),
         },
         {
           name: 'Ontario Corporation Number (OCN)',

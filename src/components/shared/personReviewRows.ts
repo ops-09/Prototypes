@@ -208,8 +208,14 @@ export function buildDirectorGroups(
 export function buildIncorporatorGroups<D extends ReviewDirector>(
   incorporators: ReviewIncorporator[],
   directors: D[],
-  options: { editHref: (id: string) => string; includeShares: boolean },
+  options: {
+    editHref: (id: string) => string;
+    includeShares: boolean;
+    labels?: { shares?: string; address?: string };
+  },
 ): PersonReviewGroup[] {
+  const sharesLabel = options.labels?.shares ?? "Shares";
+  const addressLabel = options.labels?.address ?? "Address";
   return incorporators.map((incorporator, index) => {
     const rows: PersonReviewRow[] = [];
     if (incorporator.type === "corporation") {
@@ -254,12 +260,12 @@ export function buildIncorporatorGroups<D extends ReviewDirector>(
       }
       if (options.includeShares) {
         rows.push({
-          name: "Shares",
+          name: sharesLabel,
           description: formatShareSummary(incorporator),
         });
       }
       rows.push({
-        name: "Address",
+        name: addressLabel,
         description: formatMailingAddress((director ?? incorporator).address),
       });
       return {
@@ -271,7 +277,7 @@ export function buildIncorporatorGroups<D extends ReviewDirector>(
     }
     if (options.includeShares) {
       rows.push({
-        name: "Shares",
+        name: sharesLabel,
         description: formatShareSummary(incorporator),
       });
     }

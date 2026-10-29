@@ -454,7 +454,7 @@ export function Form2Step6() {
             <div id={FIELD_ANCHORS.membershipClasses}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.membershipClasses}
-                caption="Classes of membership, if any"
+                caption="The classes of membership, if any, are:"
                 name={FIELD_ANCHORS.membershipClasses}
                 required
                 hintText={NOT_APPLICABLE_HINT}
@@ -469,7 +469,7 @@ export function Form2Step6() {
             <div id={FIELD_ANCHORS.membershipClassTerms}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.membershipClassTerms}
-                caption="Terms and conditions attaching to each class of membership"
+                caption="The terms and conditions attaching to each class of membership are:"
                 name={FIELD_ANCHORS.membershipClassTerms}
                 required
                 hintText={NOT_APPLICABLE_HINT}
@@ -484,7 +484,7 @@ export function Form2Step6() {
             <div id={FIELD_ANCHORS.stakeholderGroups}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.stakeholderGroups}
-                caption="Stakeholder groups, if any"
+                caption="The stakeholder groups, if any, are:"
                 name={FIELD_ANCHORS.stakeholderGroups}
                 required={stakeholderFieldsRequired}
                 hintText={
@@ -503,7 +503,7 @@ export function Form2Step6() {
             <div id={FIELD_ANCHORS.stakeholderGroupTerms}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.stakeholderGroupTerms}
-                caption="Terms and conditions for membership in each stakeholder group"
+                caption="The terms and conditions for membership in each stakeholder group are:"
                 name={FIELD_ANCHORS.stakeholderGroupTerms}
                 required={stakeholderFieldsRequired}
                 hintText={
@@ -522,7 +522,7 @@ export function Form2Step6() {
             <div id={FIELD_ANCHORS.specialProvisions}>
               <OntarioTextarea
                 elementId={FIELD_ANCHORS.specialProvisions}
-                caption="Special provisions, if any"
+                caption="Special provisions, if any, are:"
                 name={FIELD_ANCHORS.specialProvisions}
                 required
                 hintText={NOT_APPLICABLE_HINT}

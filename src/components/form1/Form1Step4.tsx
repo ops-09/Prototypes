@@ -539,7 +539,7 @@ export function Form1Step4() {
           <div className={styles.formStack}>
             <div id={FIELD_ANCHORS.countMode}>
               <OntarioRadioButtons
-                caption="How is the number of directors determined?"
+                caption="Number of directors is/are:"
                 name="director-count-mode"
                 required
                 hintText="Please provide us how many directors the co-operative can have."
@@ -663,7 +663,7 @@ export function Form1Step4() {
               <div id={FIELD_ANCHORS.stakeholderDirectorsText}>
                 <OntarioTextarea
                   elementId={FIELD_ANCHORS.stakeholderDirectorsText}
-                  caption="The number (or minimum and maximum number) of directors each stakeholder group may elect"
+                  caption="The number (or minimum and maximum number) of directors each stakeholder group in a multi-stakeholder co-operative may elect is:"
                   name="stakeholder-directors-text"
                   required
                   value={step4.stakeholderDirectorsText}
@@ -679,7 +679,10 @@ export function Form1Step4() {
             {areDirectorQuestionsComplete(step4) ? (
               <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>
                 <div>
-                  <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>Add directors</h2>
+                  <p className={step4Styles.sectionLabel}>
+                    The first directors are:{' '}
+                    <span className={step4Styles.sectionLabelFlag}>(required)</span>
+                  </p>
                   {areDirectorQuestionsComplete(step4) ? (
                     <p className={step4Styles.sectionLead}>
                       {formatDirectorSelectionSummary(step4)}

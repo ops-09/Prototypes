@@ -211,13 +211,11 @@ export function Form3Step4() {
           <div className={styles.formStack}>
             <div id={DATE_ANCHOR} className={styles.resolutionDateBlock}>
               <p className={styles.resolutionDateLabel}>
-                Resolution date
+                The resolution authorizing this application was confirmed by the shareholders/members of the corporation on:
                 <span className={styles.requiredFlag}> (required)</span>
               </p>
               <p className={styles.helpText}>
-                The resolution authorizing this application was confirmed by the
-                shareholders/members of the corporation on this date under section 34
-                or 131 of the Corporations Act.
+                Under section 34 or 131 of the Corporations Act.
               </p>
               <div className={styles.resolutionDateInputClip}>
                 <OntarioDateInput
@@ -267,7 +265,7 @@ export function Form3Step4() {
               {/* ODS has no rich-text editor — OntarioTextarea only. */}
               <OntarioTextarea
                 elementId="requested-provisions-input"
-                caption="The corporation applies for the issue of supplementary letters patent to provide as follows"
+                caption="The corporation applies for the issue of supplementary letters patent to provide as follows:"
                 name="requested-provisions"
                 required
                 hintText={PROVISIONS_HINT_TEXT}

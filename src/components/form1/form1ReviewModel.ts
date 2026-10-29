@@ -22,6 +22,7 @@ import {
   type PersonReviewGroup,
 } from '../shared/personReviewRows';
 import { validateNuansDate } from '../form7/nuansValidation';
+import { formatHeadOfficeLocation } from '../shared/headOfficeFormat';
 import { validateCooperativeName } from './nameValidation';
 
 export type ReviewRow = {
@@ -219,7 +220,7 @@ function isContactComplete(contact: CoverLetterContact) {
 function buildNameRows(step1: Form1Step1Data): ReviewRow[] {
   const rows: ReviewRow[] = [
     {
-      name: 'Co-operative name',
+      name: 'The name of the co-operative is: (Set out in Block Capital Letters)',
       description: displayOrEmpty(step1.cooperativeName),
     },
   ];
@@ -319,21 +320,12 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       complete: isHeadOfficeComplete(draft.step3),
       rows: [
         {
-          name: 'Head office address',
+          name: 'The address of the head office is:',
           description: formatHeadOffice(draft.step3),
         },
         {
-          name: 'Municipality',
-          description:
-            draft.step3.municipalityStatus.trim() && draft.step3.cityTown.trim()
-              ? `${draft.step3.municipalityStatus} of ${draft.step3.cityTown}`
-              : 'Not provided',
-        },
-        {
-          name: 'County / region',
-          description: draft.step3.countyName.trim()
-            ? `${draft.step3.countyStatus} of ${draft.step3.countyName}`.trim()
-            : 'Not provided',
+          name: 'The head office is at the:',
+          description: displayOrEmpty(formatHeadOfficeLocation(draft.step3)),
         },
       ],
     },
@@ -344,7 +336,7 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       complete: isDirectorsComplete(draft.step4),
       rows: [
         {
-          name: 'Number of directors',
+          name: 'Number of directors is/are:',
           description: formatDirectorCount(draft.step4),
         },
         {
@@ -354,7 +346,7 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
         ...(draft.step4.multiStakeholder === 'yes'
           ? [
               {
-                name: 'Stakeholder directors',
+                name: 'The number (or minimum and maximum number) of directors each stakeholder group in a multi-stakeholder co-operative may elect is:',
                 description: textPreview(draft.step4.stakeholderDirectorsText),
               },
             ]
@@ -372,19 +364,19 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       complete: isShareComplete(draft),
       rows: [
         {
-          name: 'Business / powers restrictions',
+          name: 'Restrictions, if any, on the business the co-operative may carry on or on powers the co-operative may exercise:',
           description: textPreview(draft.step5.businessPowersRestrictions),
         },
         {
-          name: 'Authorized capital',
+          name: 'The authorized capital for each class of share is:',
           description: textPreview(draft.step5.authorizedCapital),
         },
         {
-          name: 'Preference share terms',
+          name: 'The designations, preferences, rights, conditions, restrictions, limitations or prohibitions attaching to the preference shares, if any, are:',
           description: textPreview(draft.step5.preferenceShareTerms),
         },
         {
-          name: 'Share transfer restrictions',
+          name: 'The restrictions on the allotment, issue or transfer of shares are:',
           description: textPreview(draft.step5.shareTransferRestrictions),
         },
       ],
@@ -396,23 +388,23 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       complete: isMembershipComplete(draft),
       rows: [
         {
-          name: 'Classes of membership',
+          name: 'The classes of membership, if any, are:',
           description: textPreview(draft.step6.membershipClasses),
         },
         {
-          name: 'Membership class terms',
+          name: 'The terms and conditions attaching to each class of membership are:',
           description: textPreview(draft.step6.membershipClassTerms),
         },
         {
-          name: 'Stakeholder groups',
+          name: 'The stakeholder groups, if any, are:',
           description: textPreview(draft.step6.stakeholderGroups),
         },
         {
-          name: 'Stakeholder group terms',
+          name: 'The terms and conditions for membership in each stakeholder group are:',
           description: textPreview(draft.step6.stakeholderGroupTerms),
         },
         {
-          name: 'Special provisions',
+          name: 'Special provisions, if any, are:',
           description: textPreview(draft.step6.specialProvisions),
         },
       ],
@@ -429,6 +421,10 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       groups: buildIncorporatorGroups(draft.step7.incorporators, draft.step4.directors, {
         editHref: (id) => `/form-1/step-8/incorporators/${id}`,
         includeShares: true,
+        labels: {
+          shares: 'The shares to be taken by the incorporators are:',
+          address: 'The names and residential addresses of the incorporators are:',
+        },
       }),
     },
   ];

@@ -185,6 +185,8 @@ type OntarioHeadOfficeAddressFieldsProps<T extends HeadOfficeAddress> = {
   errors?: HeadOfficeErrors;
   /** `clearedErrors` lists fields whose error should be removed after this edit. */
   onChange: (address: T, clearedErrors: HeadOfficeFieldKey[]) => void;
+  searchLabel?: string;
+  municipalityStatusCaption?: string;
 };
 
 /** Ontario-only head office address: search, then one field per row. */
@@ -192,6 +194,8 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
   address,
   errors = {},
   onChange,
+  searchLabel = 'Search address',
+  municipalityStatusCaption = 'Status of municipality',
 }: OntarioHeadOfficeAddressFieldsProps<T>) {
   function patch(partial: Partial<HeadOfficeAddress>, ...cleared: HeadOfficeFieldKey[]) {
     const next = { ...address, ...partial };
@@ -209,7 +213,7 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
   return (
     <>
       <div id={HEAD_OFFICE_FIELD_ANCHORS.postalCodeLookup} className={addressStyles.searchBlock}>
-        <p className={addressStyles.searchLabel}>Search address</p>
+        <p className={addressStyles.searchLabel}>{searchLabel}</p>
         <p className={addressStyles.searchIntro}>
           Type a street address or postal code. If you can&apos;t find your address, you can
           enter it manually.
@@ -391,7 +395,7 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
           <div id={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}>
             <OntarioDropdownList
               elementId={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}
-              caption="Status of municipality"
+              caption={municipalityStatusCaption}
               name="municipality-status"
               required
               isEmptyStartOption

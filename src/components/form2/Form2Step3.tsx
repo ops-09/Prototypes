@@ -225,6 +225,8 @@ export function Form2Step3() {
               address={step3}
               errors={errors}
               onChange={handleAddressChange}
+              searchLabel="The address of the head office is:"
+              municipalityStatusCaption="The head office is at the:"
             />
           </div>
 
