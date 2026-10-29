@@ -45,6 +45,9 @@ const CURRENT_STEP = 3;
 const TOTAL_STEPS = 5;
 const COOPERATIVE_NAME_CAPTION =
   'The name of the co-operative is: (Set out in Block Capital Letters)';
+const CORPORATION_NAME_CAPTION =
+  'The name of the corporation is: (Set out in Block Capital Letters)';
+const CORPORATION_NAME_CAPTION_FR = `${CORPORATION_NAME_CAPTION} — French`;
 
 type Step2Errors = NameNuansErrors &
   Partial<{
@@ -707,14 +710,14 @@ export function Form7Step2() {
                         nameKind="corporation"
                         proposedNameCaption={
                           step2.nameLanguage === 'separate'
-                            ? `${COOPERATIVE_NAME_CAPTION} — English`
-                            : COOPERATIVE_NAME_CAPTION
+                            ? `${CORPORATION_NAME_CAPTION} — English`
+                            : CORPORATION_NAME_CAPTION
                         }
                         secondaryName={
                           step2.nameLanguage === 'separate'
                             ? {
                                 elementId: `${idPrefix}-proposed-name-fr`,
-                                caption: 'New corporation name (proposed) — French',
+                                caption: CORPORATION_NAME_CAPTION_FR,
                                 value: step2.proposedNameFr,
                                 errorMessage: errors.proposedNameFr,
                                 onInput: (value) => {
@@ -809,15 +812,14 @@ export function Form7Step2() {
                         nameKind="nfp"
                         proposedNameCaption={
                           step2.nameLanguage === 'separate'
-                            ? `${COOPERATIVE_NAME_CAPTION} — English`
-                            : COOPERATIVE_NAME_CAPTION
+                            ? `${CORPORATION_NAME_CAPTION} — English`
+                            : CORPORATION_NAME_CAPTION
                         }
                         secondaryName={
                           step2.nameLanguage === 'separate'
                             ? {
                                 elementId: `${idPrefix}-proposed-name-fr`,
-                                caption:
-                                  'New not-for-profit corporation name (proposed) — French',
+                                caption: CORPORATION_NAME_CAPTION_FR,
                                 value: step2.proposedNameFr,
                                 errorMessage: errors.proposedNameFr,
                                 onInput: (value) => {

@@ -169,7 +169,7 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
       });
       if (step2.nameLanguage === 'separate') {
         rows.push({
-          name: 'Corporation proposed name (French)',
+          name: 'The name of the corporation is: (Set out in Block Capital Letters) — French',
           description: displayOrEmpty(step2.proposedNameFr),
         });
       }
@@ -177,7 +177,7 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
         ...nuansRows(
           step2.nameNuans,
           'Corporation',
-          'The name of the co-operative is: (Set out in Block Capital Letters)',
+          'The name of the corporation is: (Set out in Block Capital Letters)',
         ),
       );
     }
@@ -198,7 +198,7 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
       });
       if (step2.nameLanguage === 'separate') {
         rows.push({
-          name: 'Not-for-Profit proposed name (French)',
+          name: 'The name of the corporation is: (Set out in Block Capital Letters) — French',
           description: displayOrEmpty(step2.proposedNameFr),
         });
       }
@@ -206,7 +206,7 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
         ...nuansRows(
           step2.nameNuans,
           'Not-for-Profit',
-          'The name of the co-operative is: (Set out in Block Capital Letters)',
+          'The name of the corporation is: (Set out in Block Capital Letters)',
         ),
       );
     }

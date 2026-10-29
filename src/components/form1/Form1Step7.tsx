@@ -336,6 +336,10 @@ export function Form1Step7() {
             />
           </div>
 
+          <p className={step4Styles.sectionLabel}>
+            The shares to be taken by the incorporators are:
+          </p>
+
           <div className={styles.formStack}>
             <div id={FIELD_ANCHORS.incorporators} className={step4Styles.directorsSection}>
               <FieldErrorMessage message={errors.incorporators} />
