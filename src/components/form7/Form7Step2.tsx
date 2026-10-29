@@ -43,6 +43,8 @@ import styles from './Form7Step1.module.scss';
 
 const CURRENT_STEP = 3;
 const TOTAL_STEPS = 5;
+const COOPERATIVE_NAME_CAPTION =
+  'The name of the co-operative is: (Set out in Block Capital Letters)';
 
 type Step2Errors = NameNuansErrors &
   Partial<{
@@ -601,6 +603,7 @@ export function Form7Step2() {
                   <ProposedNameAndNuans
                     idPrefix={idPrefix}
                     nameKind="cooperative"
+                    proposedNameCaption={COOPERATIVE_NAME_CAPTION}
                     leadText={[
                       'An Ontario NUANS name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report.',
                       'The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the name. The name of the co-operative must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “LIMITED”, “LIMITÉE”, “INC.”, “CORP.”, “LTD.” or “LTÉE”.',
@@ -704,8 +707,8 @@ export function Form7Step2() {
                         nameKind="corporation"
                         proposedNameCaption={
                           step2.nameLanguage === 'separate'
-                            ? 'New corporation name (proposed) — English'
-                            : undefined
+                            ? `${COOPERATIVE_NAME_CAPTION} — English`
+                            : COOPERATIVE_NAME_CAPTION
                         }
                         secondaryName={
                           step2.nameLanguage === 'separate'
@@ -806,8 +809,8 @@ export function Form7Step2() {
                         nameKind="nfp"
                         proposedNameCaption={
                           step2.nameLanguage === 'separate'
-                            ? 'New not-for-profit corporation name (proposed) — English'
-                            : undefined
+                            ? `${COOPERATIVE_NAME_CAPTION} — English`
+                            : COOPERATIVE_NAME_CAPTION
                         }
                         secondaryName={
                           step2.nameLanguage === 'separate'

@@ -48,11 +48,15 @@ function yesNo(value: 'yes' | 'no' | '') {
   return 'Not provided';
 }
 
-function nuansRows(fields: NameNuansFields, prefix = ''): ReviewRow[] {
+function nuansRows(
+  fields: NameNuansFields,
+  prefix = '',
+  proposedNameLabel?: string,
+): ReviewRow[] {
   const labelPrefix = prefix ? `${prefix} ` : '';
   const rows: ReviewRow[] = [
     {
-      name: `${labelPrefix}Proposed name`.trim(),
+      name: proposedNameLabel ?? `${labelPrefix}Proposed name`.trim(),
       description: displayOrEmpty(fields.proposedName),
     },
   ];
@@ -135,7 +139,13 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
             : 'Not provided',
     });
     if (step2.changeCooperativeName === 'change') {
-      rows.push(...nuansRows(step2.nameNuans, 'Co-operative'));
+      rows.push(
+        ...nuansRows(
+          step2.nameNuans,
+          'Co-operative',
+          'The name of the co-operative is: (Set out in Block Capital Letters)',
+        ),
+      );
     }
     return rows;
   }
@@ -163,7 +173,13 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
           description: displayOrEmpty(step2.proposedNameFr),
         });
       }
-      rows.push(...nuansRows(step2.nameNuans, 'Corporation'));
+      rows.push(
+        ...nuansRows(
+          step2.nameNuans,
+          'Corporation',
+          'The name of the co-operative is: (Set out in Block Capital Letters)',
+        ),
+      );
     }
     return rows;
   }
@@ -186,7 +202,13 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
           description: displayOrEmpty(step2.proposedNameFr),
         });
       }
-      rows.push(...nuansRows(step2.nameNuans, 'Not-for-Profit'));
+      rows.push(
+        ...nuansRows(
+          step2.nameNuans,
+          'Not-for-Profit',
+          'The name of the co-operative is: (Set out in Block Capital Letters)',
+        ),
+      );
     }
     return rows;
   }
