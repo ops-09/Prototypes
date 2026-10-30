@@ -34,7 +34,7 @@ import styles from './Form2Step1.module.scss';
 import step5Styles from './Form2Step5.module.scss';
 
 const CURRENT_STEP = 6;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const MAX_LENGTH_ERROR =
   'Enter 900,000 characters or fewer.';

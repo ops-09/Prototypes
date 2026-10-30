@@ -86,10 +86,10 @@ function formatPdfShareAmount(amount: string) {
     return amount.trim();
   }
   const hasCents = raw.includes('.');
-  return `$${value.toLocaleString('en-CA', {
+  return value.toLocaleString('en-CA', {
     minimumFractionDigits: hasCents ? 2 : 0,
     maximumFractionDigits: 2,
-  })}`;
+  });
 }
 
 export function formatDirectorCount(step4: DirectorCount) {

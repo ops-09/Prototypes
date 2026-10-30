@@ -36,7 +36,7 @@ import styles from './Form2Step1.module.scss';
 import step4Styles from './Form2Step4.module.scss';
 
 const CURRENT_STEP = 8;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const MIN_INCORPORATORS = 3;
 const MIN_WORKER_INCORPORATORS = 5;

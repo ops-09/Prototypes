@@ -10,7 +10,9 @@ export function Form3DraftSummaryPage() {
   const submitted = draft?.savedAs === 'submitted';
 
   const continueHref =
-    draft && draft.lastCompletedStep >= 3
+    draft && draft.lastCompletedStep >= 4
+      ? '/form-3/step-6'
+      : draft && draft.lastCompletedStep >= 3
       ? '/form-3/step-5'
       : draft && draft.lastCompletedStep >= 2
         ? '/form-3/step-4'

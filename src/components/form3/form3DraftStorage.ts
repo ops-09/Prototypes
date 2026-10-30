@@ -9,7 +9,7 @@ import {
 
 const STORAGE_KEY = 'ops-rbac.form3.draft';
 
-export const FORM3_TOTAL_STEPS = 5;
+export const FORM3_TOTAL_STEPS = 6;
 export const MAX_SUPPORTING_DOC_BYTES = 20 * 1024 * 1024;
 export const MAX_PROVISIONS_CHARS = 900_000;
 
@@ -51,7 +51,7 @@ export type Form3Draft = {
   step5: Form3Step5Data;
   savedAs: 'draft' | 'continue' | 'submitted';
   savedAt: string;
-  lastCompletedStep: 0 | 1 | 2 | 3 | 4;
+  lastCompletedStep: 0 | 1 | 2 | 3 | 4 | 5;
   confirmationNumber?: string;
 };
 

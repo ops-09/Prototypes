@@ -14,7 +14,9 @@ export function Form11DraftSummaryPage() {
   const draft = readForm11Draft();
   const submitted = draft?.savedAs === 'submitted';
   const continueHref =
-    draft && draft.lastCompletedStep >= 7
+    draft && draft.lastCompletedStep >= 8
+      ? '/form-11/step-9'
+      : draft && draft.lastCompletedStep >= 7
       ? '/form-11/step-8'
       : draft && draft.lastCompletedStep >= 6
       ? '/form-11/step-7'

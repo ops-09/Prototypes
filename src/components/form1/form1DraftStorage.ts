@@ -262,7 +262,7 @@ export type Form1Draft = {
   step8: Form1Step8Data;
   savedAt: string;
   mode: 'continue' | 'draft' | 'submitted';
-  lastCompletedStep: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  lastCompletedStep: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   confirmationNumber?: string;
 };
 
@@ -644,7 +644,8 @@ function normalizeLastCompletedStep(value: unknown): Form1Draft['lastCompletedSt
     value === 5 ||
     value === 6 ||
     value === 7 ||
-    value === 8
+    value === 8 ||
+    value === 9
   ) {
     return value;
   }
@@ -1074,7 +1075,7 @@ export function upsertForm1Step8(
     mode,
     lastCompletedStep:
       mode === 'submitted'
-        ? 8
+        ? 9
         : maxStep(existing.lastCompletedStep, lastCompletedStep),
     confirmationNumber: confirmationNumber ?? existing.confirmationNumber,
   };

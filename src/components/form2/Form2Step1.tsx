@@ -32,7 +32,7 @@ import { validateNuansDate } from '../form7/nuansValidation';
 import styles from './Form2Step1.module.scss';
 
 const CURRENT_STEP = 2;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const NON_PROFIT_REQUIRED = 'Select whether this is a non-profit organization.';
 

@@ -42,7 +42,7 @@ import {
 import styles from './Form7Step1.module.scss';
 
 const CURRENT_STEP = 3;
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 const COOPERATIVE_NAME_CAPTION =
   'The name of the co-operative is: (Set out in Block Capital Letters)';
 const CORPORATION_NAME_CAPTION =

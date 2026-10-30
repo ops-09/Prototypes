@@ -13,6 +13,7 @@ import { Form1Step5Page } from './pages/Form1Step5Page';
 import { Form1Step6Page } from './pages/Form1Step6Page';
 import { Form1Step7Page } from './pages/Form1Step7Page';
 import { Form1Step8Page } from './pages/Form1Step8Page';
+import { Form1Step9Page } from './pages/Form1Step9Page';
 import { Form1IncorporatorSubflowPage } from './pages/Form1IncorporatorSubflowPage';
 import { Form2BeforeYouBeginPage } from './pages/Form2BeforeYouBeginPage';
 import { Form2DraftSummaryPage } from './pages/Form2DraftSummaryPage';
@@ -26,6 +27,7 @@ import { Form2Step5Page } from './pages/Form2Step5Page';
 import { Form2Step6Page } from './pages/Form2Step6Page';
 import { Form2Step7Page } from './pages/Form2Step7Page';
 import { Form2Step8Page } from './pages/Form2Step8Page';
+import { Form2Step9Page } from './pages/Form2Step9Page';
 import { Form2IncorporatorSubflowPage } from './pages/Form2IncorporatorSubflowPage';
 import { Form7BeforeYouBeginPage } from './pages/Form7BeforeYouBeginPage';
 import { Form7DraftSummaryPage } from './pages/Form7DraftSummaryPage';
@@ -34,6 +36,7 @@ import { Form7Step1Page } from './pages/Form7Step1Page';
 import { Form7Step2Page } from './pages/Form7Step2Page';
 import { Form7Step3Page } from './pages/Form7Step3Page';
 import { Form7Step4Page } from './pages/Form7Step4Page';
+import { Form7Step5Page } from './pages/Form7Step5Page';
 import { Form10BeforeYouBeginPage } from './pages/Form10BeforeYouBeginPage';
 import { Form10DraftSummaryPage } from './pages/Form10DraftSummaryPage';
 import { Form10Page } from './pages/Form10Page';
@@ -43,6 +46,7 @@ import { Form10NameChangePage } from './pages/Form10NameChangePage';
 import { Form10Step2Page } from './pages/Form10Step2Page';
 import { Form10Step3Page } from './pages/Form10Step3Page';
 import { Form10Step4Page } from './pages/Form10Step4Page';
+import { Form10Step5Page } from './pages/Form10Step5Page';
 import { Form3BeforeYouBeginPage } from './pages/Form3BeforeYouBeginPage';
 import { Form3DraftSummaryPage } from './pages/Form3DraftSummaryPage';
 import { Form3NameChangePage } from './pages/Form3NameChangePage';
@@ -50,6 +54,7 @@ import { Form3Page } from './pages/Form3Page';
 import { Form3Step1Page } from './pages/Form3Step1Page';
 import { Form3Step4Page } from './pages/Form3Step4Page';
 import { Form3Step5Page } from './pages/Form3Step5Page';
+import { Form3Step6Page } from './pages/Form3Step6Page';
 import { Form11CorporationSubflowPage } from './pages/Form11CorporationSubflowPage';
 import { Form11DraftSummaryPage } from './pages/Form11DraftSummaryPage';
 import { Form11Step2Page } from './pages/Form11Step2Page';
@@ -60,6 +65,7 @@ import { Form11Step5Page } from './pages/Form11Step5Page';
 import { Form11Step6Page } from './pages/Form11Step6Page';
 import { Form11Step7Page } from './pages/Form11Step7Page';
 import { Form11Step8Page } from './pages/Form11Step8Page';
+import { Form11Step9Page } from './pages/Form11Step9Page';
 import { HomePage } from './pages/HomePage';
 import { InviteUserPage } from './pages/InviteUserPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
@@ -99,6 +105,7 @@ function App() {
           element={<Form1IncorporatorSubflowPage />}
         />
         <Route path="/form-1/step-9" element={<Form1Step8Page />} />
+        <Route path="/form-1/step-10" element={<Form1Step9Page />} />
         <Route path="/form-1/draft-summary" element={<Form1DraftSummaryPage />} />
         <Route path="/form-2" element={<Form2BeforeYouBeginPage />} />
         <Route path="/form-2/step-1" element={<Form2Page />} />
@@ -126,6 +133,7 @@ function App() {
           element={<Form2IncorporatorSubflowPage />}
         />
         <Route path="/form-2/step-9" element={<Form2Step8Page />} />
+        <Route path="/form-2/step-10" element={<Form2Step9Page />} />
         <Route path="/form-2/draft-summary" element={<Form2DraftSummaryPage />} />
         <Route path="/form-3" element={<Form3BeforeYouBeginPage />} />
         <Route path="/form-3/step-1" element={<Form3Page />} />
@@ -133,6 +141,7 @@ function App() {
         <Route path="/form-3/step-3" element={<Form3NameChangePage />} />
         <Route path="/form-3/step-4" element={<Form3Step4Page />} />
         <Route path="/form-3/step-5" element={<Form3Step5Page />} />
+        <Route path="/form-3/step-6" element={<Form3Step6Page />} />
         <Route path="/form-3/draft-summary" element={<Form3DraftSummaryPage />} />
         <Route path="/form-7" element={<Form7BeforeYouBeginPage />} />
         {/* Cover letter is step 1; Before you begin has no step number. */}
@@ -141,6 +150,7 @@ function App() {
         <Route path="/form-7/step-3" element={<Form7Step2Page />} />
         <Route path="/form-7/step-4" element={<Form7Step3Page />} />
         <Route path="/form-7/step-5" element={<Form7Step4Page />} />
+        <Route path="/form-7/step-6" element={<Form7Step5Page />} />
         <Route path="/form-7/draft-summary" element={<Form7DraftSummaryPage />} />
         <Route path="/form-10" element={<Form10BeforeYouBeginPage />} />
         {/* Cover letter is step 1; Before you begin has no step number. */}
@@ -158,6 +168,7 @@ function App() {
         <Route path="/form-10/step-4" element={<Form10NameChangePage />} />
         <Route path="/form-10/step-5" element={<Form10Step3Page />} />
         <Route path="/form-10/step-6" element={<Form10Step4Page />} />
+        <Route path="/form-10/step-7" element={<Form10Step5Page />} />
         <Route path="/form-10/draft-summary" element={<Form10DraftSummaryPage />} />
 
         <Route path="/form-11" element={<Navigate to="/form-11/step-2" replace />} />
@@ -184,6 +195,7 @@ function App() {
         />
         <Route path="/form-11/step-7" element={<Form11Step7Page />} />
         <Route path="/form-11/step-8" element={<Form11Step8Page />} />
+        <Route path="/form-11/step-9" element={<Form11Step9Page />} />
         <Route path="/form-11/draft-summary" element={<Form11DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />

@@ -24,7 +24,7 @@ import { NaicsSearchAutosuggest } from './NaicsSearchAutosuggest';
 import styles from './Form7Step1.module.scss';
 
 const CURRENT_STEP = 2;
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 const COOPERATIVE_TYPE_LABELS = [
   'Child-Care Co-operative',

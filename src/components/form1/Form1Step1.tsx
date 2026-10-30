@@ -30,7 +30,7 @@ import { validateNuansDate } from '../form7/nuansValidation';
 import styles from './Form1Step1.module.scss';
 
 const CURRENT_STEP = 2;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 type FieldErrors = Partial<{
   cooperativeName: string;

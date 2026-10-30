@@ -27,7 +27,7 @@ import { SupportingDocumentsUpload } from './SupportingDocumentsUpload';
 import styles from './Form7Step1.module.scss';
 
 const CURRENT_STEP = 4;
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 const MANDATORY_DOCS_ERROR = 'Upload the required supporting documents.';
 const SUBSECTIONS_ERROR =

@@ -29,7 +29,7 @@ import {
 import styles from './Form2Step1.module.scss';
 
 const CURRENT_STEP = 3;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const EMAIL_FORMAT_ERROR = 'Enter a valid email address, like name@example.com.';
 const EMAIL_MATCH_ERROR =

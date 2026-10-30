@@ -301,7 +301,9 @@ export function Form1DraftSummaryPage() {
                 htmlType="button"
                 label="Continue filing"
                 href={
-                  draft && draft.lastCompletedStep >= 7
+                  draft && draft.lastCompletedStep >= 8
+                    ? '/form-1/step-10'
+                    : draft && draft.lastCompletedStep >= 7
                     ? '/form-1/step-9'
                     : draft && draft.lastCompletedStep >= 6
                       ? '/form-1/step-7'

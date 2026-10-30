@@ -74,12 +74,12 @@ export type Form10Draft = {
   step4: Form10Step4Data;
   savedAs: 'draft' | 'continue' | 'submitted';
   savedAt: string;
-  lastCompletedStep: 0 | 1 | 2 | 3 | 4 | 5;
+  lastCompletedStep: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   confirmationNumber?: string;
 };
 
-/** Cover (1) → business (2) → amalgamation (3) → name (4) → documents (5) → review (6). */
-export const FORM10_TOTAL_STEPS = 6;
+/** Cover (1) → business (2) → amalgamation (3) → name (4) → documents (5) → review (6) → submit (7). */
+export const FORM10_TOTAL_STEPS = 7;
 
 /** Sample OBR registry values for this Articles of Amalgamation prototype. */
 export const OBR_COOPERATIVE_NAME = 'MAPLE LEAF WORKERS CO-OPERATIVE INC.';
@@ -184,7 +184,7 @@ function normalizeLastCompletedStep(
   nameChangeAnswer: Form10NameChangeData['changeCooperativeName'],
 ): Form10Draft['lastCompletedStep'] {
   const step =
-    value === 1 || value === 2 || value === 3 || value === 4 || value === 5
+    value === 1 || value === 2 || value === 3 || value === 4 || value === 5 || value === 6
       ? value
       : 0;
   // Legacy drafts used 3 = supporting docs and 4 = review, with no name-change answer.

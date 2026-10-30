@@ -32,7 +32,7 @@ import {
 import styles from './Form1Step1.module.scss';
 
 const CURRENT_STEP = 4;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 function focusField(anchorId: string) {
   const target = document.getElementById(anchorId);

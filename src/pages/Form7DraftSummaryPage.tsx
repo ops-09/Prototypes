@@ -89,8 +89,10 @@ export function Form7DraftSummaryPage() {
                 htmlType="button"
                 label="Continue filing"
                 href={
-                  draft && draft.lastCompletedStep >= 3
-                    ? '/form-7/step-5'
+                  draft && draft.lastCompletedStep >= 4
+                    ? '/form-7/step-6'
+                    : draft && draft.lastCompletedStep >= 3
+                      ? '/form-7/step-5'
                     : '/form-7/step-4'
                 }
               />

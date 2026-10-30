@@ -168,7 +168,7 @@ export type Form7Draft = {
   step4: Form7Step4Data;
   savedAs: 'draft' | 'continue' | 'submitted';
   savedAt: string;
-  lastCompletedStep: 1 | 2 | 3 | 4;
+  lastCompletedStep: 1 | 2 | 3 | 4 | 5;
   confirmationNumber?: string;
 };
 
@@ -330,7 +330,7 @@ export function upsertForm7Step1(
 export function upsertForm7Step2(
   step2: Form7Step2Data,
   savedAs: Form7Draft['savedAs'],
-  lastCompletedStep: 1 | 2 | 3 | 4 = 2,
+  lastCompletedStep: Form7Draft['lastCompletedStep'] = 2,
 ): Form7Draft | null {
   const existing = readForm7Draft();
   if (!existing?.step1.cooperativeName) {
@@ -352,7 +352,7 @@ export function upsertForm7Step2(
 export function upsertForm7Step3(
   step3: Form7Step3Data,
   savedAs: Form7Draft['savedAs'],
-  lastCompletedStep: 1 | 2 | 3 | 4 = 3,
+  lastCompletedStep: Form7Draft['lastCompletedStep'] = 3,
 ): Form7Draft | null {
   const existing = readForm7Draft();
   if (!existing?.step1.cooperativeName || !existing.step2.amendmentType) {
@@ -373,7 +373,7 @@ export function upsertForm7Step3(
 export function upsertForm7Step4(
   step4: Form7Step4Data,
   savedAs: Form7Draft['savedAs'],
-  lastCompletedStep: 1 | 2 | 3 | 4 = 4,
+  lastCompletedStep: Form7Draft['lastCompletedStep'] = 4,
   confirmationNumber?: string,
 ): Form7Draft | null {
   const existing = readForm7Draft();

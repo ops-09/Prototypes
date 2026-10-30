@@ -21,7 +21,7 @@ import { SIGNED_IN_INDIVIDUAL } from '../../mock/signedInIndividual';
 
 const STORAGE_KEY = 'ops-rbac.form11.draft';
 
-export const FORM11_TOTAL_STEPS = 8;
+export const FORM11_TOTAL_STEPS = 9;
 export const MIN_AMALGAMATING_NFPS = 2;
 export const MIN_DIRECTORS = 3;
 export const FORM11_RICH_TEXT_MAX_CHARS = 900_000;
@@ -95,7 +95,7 @@ export type Form11Draft = {
   step8: Form11Step8Data;
   savedAs: 'draft' | 'continue' | 'submitted';
   savedAt: string;
-  lastCompletedStep: 0 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  lastCompletedStep: 0 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
   confirmationNumber?: string;
 };
 
@@ -609,7 +609,9 @@ export function upsertForm11Step8(
   };
   if (lastCompletedStep !== undefined) {
     draft.lastCompletedStep = lastCompletedStep;
-  } else if (savedAs === 'continue' || savedAs === 'submitted') {
+  } else if (savedAs === 'submitted') {
+    draft.lastCompletedStep = 9;
+  } else if (savedAs === 'continue') {
     draft.lastCompletedStep = 8;
   }
   saveForm11Draft(draft);

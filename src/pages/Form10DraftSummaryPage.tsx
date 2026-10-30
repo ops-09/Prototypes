@@ -17,7 +17,9 @@ export function Form10DraftSummaryPage() {
     ) ?? 0;
 
   const continueHref =
-    draft && draft.lastCompletedStep >= 4
+    draft && draft.lastCompletedStep >= 5
+      ? '/form-10/step-7'
+      : draft && draft.lastCompletedStep >= 4
       ? '/form-10/step-6'
       : draft && draft.lastCompletedStep >= 3
         ? '/form-10/step-5'

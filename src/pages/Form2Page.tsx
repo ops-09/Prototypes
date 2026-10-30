@@ -2,7 +2,7 @@ import { ContactInformationForm } from '../components/cover-letter/ContactInform
 import formStyles from '../components/cover-letter/ContactInformationForm.module.scss';
 import { PlaygroundShell } from '../components/layout/PlaygroundShell';
 
-/** Form 1 cover letter / contact information (step 1 of 9). */
+/** Form 2 cover letter / contact information (step 1 of 10). */
 export function Form2Page() {
   return (
     <PlaygroundShell
@@ -13,7 +13,7 @@ export function Form2Page() {
       <ContactInformationForm
         continueHref="/form-2/step-2"
         currentStep={1}
-        numberOfSteps={9}
+        numberOfSteps={10}
         backButtonUrl="/form-2"
         primaryButtonLabel="Continue"
       />

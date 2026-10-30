@@ -2,15 +2,12 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioCheckboxes,
   OntarioPageAlert,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
 import { Form7SummaryList } from '../form7/Form7SummaryList';
-import reviewStyles from '../form7/Form7Step4.module.scss';
-import { FileUpload } from './FileUpload';
+import { GeneratePdfSection } from '../shared/GeneratePdfSection';
 import {
-  createForm1ConfirmationNumber,
   createSeedStep1,
   EMPTY_STEP2,
   EMPTY_STEP3,
@@ -31,23 +28,16 @@ import {
 import { generateForm1ReviewPdf } from './form1GeneratePdf';
 import {
   buildReviewSections,
-  resolveCoverLetterContact,
   type ReviewSectionKey,
 } from './form1ReviewModel';
 import styles from './Form1Step1.module.scss';
 
 const CURRENT_STEP = 9;
-const TOTAL_STEPS = 9;
-const AUTH_OPTION_VALUE = 'authorized';
+const TOTAL_STEPS = 10;
 
 type ReviewErrors = Partial<{
   sections: string;
-  signedPdf: string;
-  authorization: string;
 }>;
-
-const SIGNED_PDF_REQUIRED =
-  'Upload the signed PDF before submitting this filing.';
 
 const SECTION_ORDER: ReviewSectionKey[] = [
   'contact',
@@ -60,7 +50,7 @@ const SECTION_ORDER: ReviewSectionKey[] = [
   'incorporators',
 ];
 
-function ensureStep8Draft(): Form1Draft {
+export function ensureStep8Draft(): Form1Draft {
   const existing = readForm1Draft();
   if (
     hasForm1Step1Data(existing?.step1) &&
@@ -163,7 +153,7 @@ export function Form1Step8() {
   const draft = ensureStep8Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
-  const [step8, setStep8] = useState<Form1Step8Data>(() => ({
+  const [step8] = useState<Form1Step8Data>(() => ({
     ...EMPTY_STEP8,
     ...(draft.step8 ?? {}),
   }));
@@ -172,10 +162,6 @@ export function Form1Step8() {
   const [pdfBlocked, setPdfBlocked] = useState(false);
   const [pdfGenerated, setPdfGenerated] = useState(false);
 
-  const contact = resolveCoverLetterContact();
-  const filerName = [contact.firstName, contact.lastName]
-    .filter(Boolean)
-    .join(' ');
   const sections = useMemo(() => buildReviewSections(draft), [draft]);
   const incompleteKeys = useMemo(
     () =>
@@ -184,49 +170,20 @@ export function Form1Step8() {
       ),
     [sections],
   );
-  const authOptions = useMemo(
-    () => [
-      {
-        value: AUTH_OPTION_VALUE,
-        elementId: 'form1-authorization-confirm',
-        label: `I, ${filerName}, confirm that I am authorized to file these Articles of Incorporation and that the information in this filing is true and complete.`,
-      },
-    ],
-    [filerName],
-  );
-
   if (!hasForm1Step1Data(draft.step1) || !draft.step7.incorporators.length) {
     return <Navigate to="/form-1" replace />;
-  }
-
-  function clearError(key: keyof ReviewErrors) {
-    setErrors((prev) => {
-      if (!prev[key]) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next[key];
-      return next;
-    });
   }
 
   function validate(): ReviewErrors {
     const next: ReviewErrors = {};
     if (incompleteKeys.size > 0) {
       next.sections =
-        'One or more sections are incomplete. Use Change to correct the information before submitting.';
-    }
-    if (!step8.signedPdf) {
-      next.signedPdf = SIGNED_PDF_REQUIRED;
-    }
-    if (!step8.authorizationConfirmed) {
-      next.authorization =
-        'Confirm the authorization statement before submitting the filing.';
+        'One or more sections are incomplete. Use Change to correct the information before continuing.';
     }
     return next;
   }
 
-  function handleSubmit() {
+  function handleContinue() {
     const nextErrors = validate();
     const hasErrors = Object.keys(nextErrors).length > 0;
     setErrors(nextErrors);
@@ -239,13 +196,12 @@ export function Form1Step8() {
       return;
     }
 
-    const confirmationNumber = createForm1ConfirmationNumber();
-    upsertForm1Step8(step8, 'submitted', 8, confirmationNumber);
-    navigate('/form-1/draft-summary');
+    upsertForm1Step8(step8, 'continue', 8);
+    navigate('/form-1/step-10');
   }
 
   function handleSaveAsDraft() {
-    upsertForm1Step8(step8, 'draft', 7);
+    upsertForm1Step8(step8, 'draft', 8);
     navigate('/form-1/draft-summary');
   }
 
@@ -259,10 +215,6 @@ export function Form1Step8() {
     if (opened) {
       setPdfGenerated(true);
     }
-  }
-
-  function patchStep8(partial: Partial<Form1Step8Data>) {
-    setStep8((prev) => ({ ...prev, ...partial }));
   }
 
   const firstIncompleteKey =
@@ -310,32 +262,6 @@ export function Form1Step8() {
                       </a>
                     </li>
                   ) : null}
-                  {errors.signedPdf ? (
-                    <li>
-                      <a
-                        className={styles.errorSummaryLink}
-                        href="#form1-signed-pdf"
-                        onClick={(event) =>
-                          handleSummaryLinkClick(event, '#form1-signed-pdf')
-                        }
-                      >
-                        {errors.signedPdf}
-                      </a>
-                    </li>
-                  ) : null}
-                  {errors.authorization ? (
-                    <li>
-                      <a
-                        className={styles.errorSummaryLink}
-                        href="#form1-authorization"
-                        onClick={(event) =>
-                          handleSummaryLinkClick(event, '#form1-authorization')
-                        }
-                      >
-                        {errors.authorization}
-                      </a>
-                    </li>
-                  ) : null}
                 </ul>
               </OntarioPageAlert>
             </div>
@@ -344,8 +270,8 @@ export function Form1Step8() {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Review</h1>
           <p className={styles.lead}>
             Review the information you entered for this Articles of Incorporation filing.
-            Use Change to correct a section, generate a PDF to sign, upload the signed copy,
-            then authorize and submit.
+            Use Change to correct a section, then generate a PDF to sign. Continue to the
+            next step to upload the signed copy and authorize the filing.
           </p>
 
           <div className={styles.formStack}>
@@ -377,104 +303,20 @@ export function Form1Step8() {
               </div>
             ))}
 
-            <section
-              id="form1-generate-upload"
-              className={reviewStyles.pdfSection}
-              aria-labelledby="form1-generate-upload-heading"
-            >
-              <h2
-                id="form1-generate-upload-heading"
-                className={reviewStyles.sectionHeading}
-              >
-                Generate and upload PDF
-              </h2>
-              <div className={reviewStyles.pdfSectionBody}>
-                <div className={reviewStyles.pdfStep}>
-                  <h3 className={reviewStyles.pdfStepTitle}>1. Generate PDF</h3>
-                  <p className={reviewStyles.pdfStepText}>
-                    Generate a PDF of the information prepared for this filing. Print or save
-                    the PDF, then sign it. After signing, upload the signed PDF below.
-                  </p>
-                  <OntarioButton
-                    type="secondary"
-                    htmlType="button"
-                    label="Generate PDF"
-                    onClick={handleGeneratePdf}
-                  />
-                  {pdfBlocked ? (
-                    <OntarioPageAlert
-                      type="warning"
-                      heading="Pop-up blocked"
-                      content="Allow pop-ups for this site to open the printable PDF preview."
-                    />
-                  ) : null}
-                  {pdfGenerated && !pdfBlocked ? (
-                    <OntarioPageAlert
-                      type="success"
-                      heading="PDF generated"
-                      content="Sign the PDF, then upload the signed copy below."
-                    />
-                  ) : null}
-                </div>
-
-                <div id="form1-signed-pdf" className={reviewStyles.pdfStep}>
-                  <FileUpload
-                    inputId="form1-signed-pdf-upload"
-                    label="2. Upload signed PDF"
-                    required
-                    hintText="Upload the signed copy of the generated PDF. PDF only, maximum 20 MB."
-                    buttonLabel="Upload signed PDF"
-                    value={step8.signedPdf}
-                    errorMessage={errors.signedPdf}
-                    onChange={(file) => {
-                      patchStep8({ signedPdf: file });
-                      clearError('signedPdf');
-                    }}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section
-              id="form1-authorization"
-              className={reviewStyles.authSection}
-              aria-labelledby="form1-authorization-heading"
-            >
-              <h2
-                id="form1-authorization-heading"
-                className={reviewStyles.sectionHeading}
-              >
-                Authorization
-              </h2>
-              <OntarioCheckboxes
-                caption={{
-                  captionText: 'Authorization declaration',
-                  captionType: 'default',
-                }}
-                name="form1-authorization"
-                required
-                options={authOptions}
-                value={step8.authorizationConfirmed ? [AUTH_OPTION_VALUE] : []}
-                errorMessage={errors.authorization}
-                customOnChange={(event) => {
-                  const selected = (event.target as HTMLInputElement | null)?.checked;
-                  const nextChecked =
-                    typeof selected === 'boolean'
-                      ? selected
-                      : !step8.authorizationConfirmed;
-                  patchStep8({ authorizationConfirmed: nextChecked });
-                  clearError('authorization');
-                }}
-              />
-            </section>
+            <GeneratePdfSection
+              idPrefix="form1"
+              pdfBlocked={pdfBlocked}
+              pdfGenerated={pdfGenerated}
+              onGenerate={handleGeneratePdf}
+            />
           </div>
 
           <div className={styles.buttonGroup}>
             <OntarioButton
               type="primary"
               htmlType="button"
-              label="Submit"
-              onClick={handleSubmit}
+              label="Continue"
+              onClick={handleContinue}
             />
             <OntarioButton
               type="secondary"

@@ -39,7 +39,7 @@ import styles from './Form1Step1.module.scss';
 import step4Styles from './Form1Step4.module.scss';
 
 const CURRENT_STEP = 5;
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const MIN_DIRECTORS_ALLOWED = 3;
 const DIRECTORS_AT_LEAST_THREE_ERROR =
