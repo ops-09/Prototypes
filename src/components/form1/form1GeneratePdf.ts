@@ -4,15 +4,13 @@ import {
   firstDirectorsTableHtml,
   formatDirectorCount,
   incorporatorAddressesTableHtml,
-  incorporatorName,
+  incorporatorSharesTableHtml,
   incorporatorSignatureName,
   openArticlesPdf,
-  tableHtml,
   valueHtml,
   type ArticlesPdfItem,
 } from '../shared/articlesPdf';
 import { formatHeadOfficeLocation } from '../shared/headOfficeFormat';
-import { formatShareSummary } from '../shared/personReviewRows';
 import type { Form1Draft } from './form1DraftStorage';
 import { formatHeadOffice } from './form1ReviewModel';
 
@@ -63,13 +61,7 @@ function buildItems(draft: Form1Draft): ArticlesPdfItem[] {
     ['Special provisions, if any, are:', valueHtml(step6.specialProvisions)],
     [
       'The shares to be taken by the incorporators are:',
-      tableHtml(
-        ['Incorporator', 'Shares'],
-        step7.incorporators.map((incorporator) => [
-          incorporatorName(incorporator, step4.directors),
-          formatShareSummary(incorporator),
-        ]),
-      ),
+      incorporatorSharesTableHtml(step7.incorporators, step4.directors),
     ],
     [
       'The names and residential addresses of the incorporators are:',

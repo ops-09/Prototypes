@@ -20,6 +20,9 @@ type PdfIncorporator = PdfPerson & {
   linkedDirectorId: string;
   corporationName: string;
   signerPosition: string;
+  numberOfShares?: string;
+  classDesignation?: string;
+  amountToBePaid?: string;
 };
 
 type DirectorCount = {
@@ -47,11 +50,46 @@ export function tableHtml(headers: string[], rows: string[][]) {
   }
   return `
     <table>
-      <thead><tr>${headers.map((header) => `<th scope="col">${escapeHtml(header)}</th>`).join('')}</tr></thead>
+      <thead><tr>${headers
+        .map(
+          (header) =>
+            `<th scope="col">${escapeHtml(header).replace(/\n/g, '<br />')}</th>`,
+        )
+        .join('')}</tr></thead>
       <tbody>${rows
         .map((cells) => `<tr>${cells.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`)
         .join('')}</tbody>
     </table>`;
+}
+
+/** Block capitals for PDF names; leave the empty-state label as written. */
+function formatPdfName(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === NOT_PROVIDED) {
+    return NOT_PROVIDED;
+  }
+  return trimmed.toUpperCase();
+}
+
+function formatPdfPersonName(person: PdfPerson) {
+  const name = formatPersonName(person);
+  return name === NOT_PROVIDED ? NOT_PROVIDED : name.toUpperCase();
+}
+
+function formatPdfShareAmount(amount: string) {
+  const raw = amount.trim().replace(/[$,\s]/g, '');
+  if (!raw) {
+    return NOT_PROVIDED;
+  }
+  const value = Number(raw);
+  if (Number.isNaN(value)) {
+    return amount.trim();
+  }
+  const hasCents = raw.includes('.');
+  return `$${value.toLocaleString('en-CA', {
+    minimumFractionDigits: hasCents ? 2 : 0,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 export function formatDirectorCount(step4: DirectorCount) {
@@ -70,7 +108,7 @@ export function firstDirectorsTableHtml(directors: PdfDirector[]) {
   return tableHtml(
     ['Name', 'Address', 'Resident Canadian'],
     directors.map((director) => [
-      formatPersonName(director),
+      formatPdfPersonName(director),
       formatMailingAddress(director.address),
       director.residentCanadian === 'yes'
         ? 'Yes'
@@ -89,9 +127,9 @@ function linkedDirector<D extends PdfDirector>(incorporator: PdfIncorporator, di
 
 export function incorporatorName(incorporator: PdfIncorporator, directors: PdfDirector[]) {
   if (incorporator.type === 'corporation') {
-    return incorporator.corporationName.trim() || NOT_PROVIDED;
+    return formatPdfName(incorporator.corporationName);
   }
-  return formatPersonName(linkedDirector(incorporator, directors) ?? incorporator);
+  return formatPdfPersonName(linkedDirector(incorporator, directors) ?? incorporator);
 }
 
 export function incorporatorAddressesTableHtml(
@@ -107,6 +145,21 @@ export function incorporatorAddressesTableHtml(
   );
 }
 
+export function incorporatorSharesTableHtml(
+  incorporators: PdfIncorporator[],
+  directors: PdfDirector[],
+) {
+  return tableHtml(
+    ['Name', 'Number\nof shares', 'Class/\nDesignation', 'Amount to\nbe Paid'],
+    incorporators.map((incorporator) => [
+      incorporatorName(incorporator, directors),
+      incorporator.numberOfShares?.trim() || NOT_PROVIDED,
+      incorporator.classDesignation?.trim() || NOT_PROVIDED,
+      formatPdfShareAmount(incorporator.amountToBePaid ?? ''),
+    ]),
+  );
+}
+
 /** Signature line name: person, or corporation with signing officer and office. */
 export function incorporatorSignatureName(incorporator: PdfIncorporator) {
   const person = [incorporator.firstName, incorporator.middleName, incorporator.lastName]
@@ -116,9 +169,12 @@ export function incorporatorSignatureName(incorporator: PdfIncorporator) {
   if (incorporator.type === 'corporation') {
     const corp = incorporator.corporationName.trim();
     const office = incorporator.signerPosition.trim();
-    return [corp, person, office].filter(Boolean).join(', ') || '';
+    return [corp, person, office]
+      .filter(Boolean)
+      .map((part) => part.toUpperCase())
+      .join(', ');
   }
-  return person;
+  return person ? person.toUpperCase() : '';
 }
 
 function itemHtml(number: number, label: string, html: string) {
@@ -130,7 +186,7 @@ function itemHtml(number: number, label: string, html: string) {
 }
 
 const INCORPORATOR_SIGNATURE_INTRO =
-  'These articles are signed in duplicate. Full name(s) and signature(s) of incorporator(s). In the case of a corporation set out the name of the corporation and the name and office of the person signing on behalf of the corporation';
+  'Full name(s) and signature(s) of incorporator(s). In the case of a corporation set out the name of the corporation and the name and office of the person signing on behalf of the corporation';
 const INCORPORATOR_NAME_CAPTION =
   'Name of incorporator (or corporation name & signatories name and office)';
 
@@ -213,7 +269,7 @@ export function openArticlesPdf(args: {
     table { width: calc(100% - 1.75rem); margin-left: 1.75rem; border-collapse: collapse; }
     th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.75rem 0.5rem 0; border-bottom: 1px solid #ccc; }
     td { white-space: pre-wrap; }
-    th { font-weight: 700; border-bottom-color: #1a1a1a; }
+    th { font-weight: 700; border-bottom-color: #1a1a1a; white-space: normal; }
     .signature-section { margin-top: 2.5rem; page-break-inside: avoid; }
     .signature-heading { margin: 0 0 0.5rem; font-size: 1rem; }
     .signature-intro { margin: 0 0 1.5rem; }

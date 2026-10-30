@@ -115,7 +115,6 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
   ${sectionHtml}
   <section class="signature-section">
     <h2>Signatures</h2>
-    <p class="signature-intro">These articles are signed in duplicate.</p>
     ${signatureHtml}
   </section>
   <section class="stamp-section" aria-label="This space is for Ministry Use Only">
