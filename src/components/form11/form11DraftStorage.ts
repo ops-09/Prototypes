@@ -298,7 +298,7 @@ function normalizeDirector(entry: Partial<Form11Director> | undefined): Form11Di
 }
 
 export const HEAD_OFFICE_INFO =
-  'The head office of a Not-for-Profit corporation must be located in Ontario. The address must be set out in full. A post office box alone is not an acceptable address.';
+  'The head office of the corporation must be located in Ontario. The address must be set out in full. A post office box alone is not an acceptable address.';
 
 export function form11HeadOfficeLine(step5: Form11Step5Data) {
   return formatHeadOfficeAddressLine(step5);

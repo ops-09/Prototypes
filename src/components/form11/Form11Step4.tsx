@@ -7,7 +7,7 @@ import {
   OntarioRadioButtons,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
-import { validateNfpCorporationName } from '../form7/corpNameValidation';
+import { validateNameFormat } from '../form1/nameFormatRules';
 import { syncDateFieldByAnchor } from '../form7/dateErrorSync';
 import { emptyNameNuans } from '../form7/form7DraftStorage';
 import {
@@ -30,7 +30,15 @@ import styles from './Form11Step2.module.scss';
 const CURRENT_STEP = 4;
 const ID_PREFIX = 'form11-name';
 const SELECT_NAME_ERROR =
-  'Select the name that will be used for the amalgamated not-for-profit corporation.';
+  'Select the name that will be used for the amalgamated corporation.';
+
+function validateForm11ProposedName(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return 'Enter the corporation name.';
+  }
+  return validateNameFormat(trimmed);
+}
 
 type FieldErrors = NameNuansErrors &
   Partial<{
@@ -183,7 +191,7 @@ export function Form11Step4() {
     } else if (step4.changeName === 'yes') {
       Object.assign(
         next,
-        validateNameNuansFields(step4.nameNuans, 'nfp', validateNfpCorporationName),
+        validateNameNuansFields(step4.nameNuans, 'corporation', validateForm11ProposedName),
       );
     } else if (step4.changeName === 'no') {
       const selected = draft?.step3.corporations.find(
@@ -272,17 +280,17 @@ export function Form11Step4() {
           ) : null}
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>
-            Amalgamated not-for-profit corporation name
+            Amalgamated corporation name
           </h1>
           <p className={styles.lead}>
-            Specify whether the amalgamated not-for-profit corporation will use a new name
-            or keep the name of one of the amalgamating corporations.
+            Specify whether the amalgamated corporation will use a new name or keep the
+            name of one of the amalgamating corporations.
           </p>
 
           <div className={styles.formStack}>
             <div id="change-nfp-name">
               <OntarioRadioButtons
-                caption="Will there be a name change for the not-for-profit corporation?"
+                caption="Will there be a name change for the corporation?"
                 name="change-nfp-name"
                 required
                 value={step4.changeName}
@@ -312,7 +320,7 @@ export function Form11Step4() {
               <div id="amalgamated-nfp-name">
                 <OntarioDropdownList
                   elementId="amalgamated-nfp-name"
-                  caption="Please select the name of the amalgamated not-for-profit corporation."
+                  caption="Please select the name of the amalgamated corporation."
                   name="amalgamated-nfp-name"
                   required
                   isEmptyStartOption
@@ -338,8 +346,8 @@ export function Form11Step4() {
             {step4.changeName === 'yes' ? (
               <ProposedNameAndNuans
                 idPrefix={ID_PREFIX}
-                nameKind="nfp"
-                leadText="An Ontario NUANS name search report for the proposed name of the not-for-profit corporation. The search report must be submitted with the application within 90 days of the production of the report."
+                nameKind="corporation"
+                leadText="An Ontario NUANS name search report for the proposed name of the corporation. The search report must be submitted with the application within 90 days of the production of the report."
                 value={step4.nameNuans}
                 errors={errors}
                 dateValidatorFor={dateValidatorFor}

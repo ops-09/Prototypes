@@ -355,7 +355,7 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       {
         label: 'Form 11 — Step 3',
         description:
-          'Amalgamation details — amalgamating not-for-profit corporations and section 113(3) confirmation.',
+          'Amalgamation details — amalgamating corporations and section 113(3) confirmation.',
         href: '/form-11/step-3',
         ariaLabelText: 'Open Form 11 Step 3 amalgamation details',
       },
@@ -369,7 +369,7 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       {
         label: 'Form 11 — Step 5',
         description:
-          'Head office address — Ontario postal-code lookup for the amalgamated not-for-profit corporation.',
+          'Head office address — Ontario postal-code lookup for the amalgamated corporation.',
         href: '/form-11/step-5',
         ariaLabelText: 'Open Form 11 Step 5 head office address',
       },

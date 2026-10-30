@@ -29,10 +29,10 @@ import styles from './Form11Step3.module.scss';
 
 const CURRENT_STEP = 3;
 const BOUND_CORP_ERROR =
-  'Add the corporation associated with your account as one of the amalgamating not-for-profit corporations.';
+  'Add the corporation associated with your account as one of the amalgamating corporations.';
 const AGREEMENT_ERROR =
   'Confirm that the amalgamation agreement has been duly approved as required by section 113(3) of the Corporations Act.';
-const MIN_CORPS_ERROR = `Add at least ${MIN_AMALGAMATING_NFPS} amalgamating not-for-profit corporations.`;
+const MIN_CORPS_ERROR = `Add at least ${MIN_AMALGAMATING_NFPS} amalgamating corporations.`;
 
 type FieldKey = 'corporations' | 'agreementApproved';
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -211,9 +211,9 @@ export function Form11Step3() {
 
           <h1 className={`ontario-h1 ${pageStyles.pageTitle}`}>Amalgamation details</h1>
           <p className={pageStyles.lead}>
-            Identify the amalgamating not-for-profit corporations and confirm that the
-            amalgamation agreement has been duly approved as required by section 113(3) of
-            the Corporations Act.
+            Identify the amalgamating corporations and confirm that the amalgamation
+            agreement has been duly approved as required by section 113(3) of the
+            Corporations Act.
           </p>
 
           <div className={pageStyles.formStack}>

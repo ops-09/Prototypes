@@ -24,9 +24,9 @@ import pageStyles from './Form11Step2.module.scss';
 import styles from './Form11Step3.module.scss';
 
 const CORP_NOT_FOUND_ALERT =
-  'No not-for-profit corporation was found for that search. Enter the corporation name and OCN below, or try a different search.';
+  'No corporation was found for that search. Enter the corporation name and OCN below, or try a different search.';
 const SELECT_REQUIRED =
-  'Search for and select a not-for-profit corporation, or enter its details manually.';
+  'Search for and select a corporation, or enter its details manually.';
 export const INVALID_DATE_ERROR = "Enter a valid date of members' approval.";
 export const DUPLICATE_ERROR = 'This corporation has already been added.';
 
@@ -184,7 +184,7 @@ export function Form11CorporationEditor({
                   ? undefined
                   : searchError || errors.search || errors.name || errors.ocn
               }
-              hintText="Please search for the Not-for-Profit corporation using the Ontario Corporation Number. If you cannot find the corporation, select “Enter the not-for-profit corporation name and OCN manually” below."
+              hintText="Please search for the corporation using the Ontario Corporation Number. If you cannot find the corporation, select “Enter the corporation name and OCN manually” below."
               onChange={handleQueryChange}
               onSelect={applySearchResult}
               onNoResults={handleNoResults}
@@ -199,7 +199,7 @@ export function Form11CorporationEditor({
                 {
                   value: 'manual',
                   elementId: `${corporation.id}-enter-manually`,
-                  label: 'Enter the not-for-profit corporation name and OCN manually',
+                  label: 'Enter the corporation name and OCN manually',
                 },
               ]}
               customOnChange={(event) => {
@@ -233,7 +233,7 @@ export function Form11CorporationEditor({
                 name={nameKey}
                 type="text"
                 required
-                hintText="Enter the legal name of the not-for-profit corporation."
+                hintText="Enter the legal name of the corporation."
                 value={corporation.legalName}
                 errorMessage={errors.name}
                 customOnInput={(event) =>

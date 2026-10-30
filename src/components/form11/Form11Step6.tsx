@@ -414,8 +414,8 @@ export function Form11Step6() {
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Directors</h1>
           <p className={styles.lead}>
-            Provide the first directors of the amalgamated not-for-profit corporation and their
-            addresses for service. At least {MIN_DIRECTORS} directors must be added.
+            Provide the first directors of the amalgamated corporation and their addresses
+            for service. At least {MIN_DIRECTORS} directors must be added.
           </p>
 
           <div className={styles.formStack}>
@@ -424,7 +424,7 @@ export function Form11Step6() {
                 caption="How is the number of directors specified?"
                 name="director-count-mode"
                 required
-                hintText="The amalgamated not-for-profit corporation must have at least 3 directors."
+                hintText="The amalgamated corporation must have at least 3 directors."
                 value={step6.countMode}
                 options={COUNT_MODE_OPTIONS}
                 errorMessage={errors.countMode}

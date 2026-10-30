@@ -126,8 +126,8 @@ export function Form11CorporationSubflow() {
 
         <h1 className={`ontario-h1 ${styles.subflowPageTitle}`}>
           {isNew
-            ? 'Add amalgamating not-for-profit corporation'
-            : 'Edit amalgamating not-for-profit corporation'}
+            ? 'Add amalgamating corporation'
+            : 'Edit amalgamating corporation'}
         </h1>
 
         <Form11CorporationEditor
