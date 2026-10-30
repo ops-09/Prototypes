@@ -13,7 +13,6 @@ import {
   displayValue,
   formatMailingAddress,
   formatPersonName,
-  formatYesNoAnswer,
   type PersonReviewGroup,
 } from '../shared/personReviewRows';
 
@@ -133,7 +132,6 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
     rows: [
       { name: 'Name', description: formatPersonName(director) },
       { name: 'Email', description: displayValue(director.email) },
-      { name: 'Also an incorporator', description: formatYesNoAnswer(director.alsoIncorporator) },
       { name: 'Address for service', description: formatMailingAddress(director.address) },
     ],
   }));

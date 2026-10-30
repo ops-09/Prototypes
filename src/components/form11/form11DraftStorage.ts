@@ -7,6 +7,7 @@ import {
 import {
   EMPTY_DIRECTOR_ADDRESS,
   EMPTY_STEP3 as EMPTY_HEAD_OFFICE_STEP,
+  type DirectorAddressType,
   type DirectorCountMode,
   type DirectorResidentialAddress,
   type YesNoAnswer,
@@ -225,12 +226,19 @@ function newDirectorId() {
   return `director-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-/** Form 11 directors only take a Canadian address for service, so it starts selected. */
+/** New Form 11 directors start on a Canadian address for service; US and international remain available. */
 const EMPTY_FORM11_DIRECTOR_ADDRESS: DirectorResidentialAddress = {
   ...EMPTY_DIRECTOR_ADDRESS,
   addressType: 'canadian',
   country: 'Canada',
 };
+
+function normalizeAddressType(value: unknown): DirectorAddressType {
+  if (value === 'canadian' || value === 'us' || value === 'international') {
+    return value;
+  }
+  return 'canadian';
+}
 
 export function createEmptyDirector(id = newDirectorId()): Form11Director {
   return {
@@ -282,14 +290,20 @@ export function getDirectorMinimum(step6: Form11Step6Data): number | null {
 }
 
 function normalizeDirector(entry: Partial<Form11Director> | undefined): Form11Director {
+  const addressType = normalizeAddressType(entry?.address?.addressType);
   return {
     ...createEmptyDirector(entry?.id),
     ...(entry ?? {}),
     address: {
       ...EMPTY_FORM11_DIRECTOR_ADDRESS,
       ...(entry?.address ?? {}),
-      addressType: 'canadian',
-      country: entry?.address?.country || 'Canada',
+      addressType,
+      country:
+        addressType === 'canadian'
+          ? entry?.address?.country || 'Canada'
+          : addressType === 'us'
+            ? 'United States'
+            : entry?.address?.country || '',
     },
     consentConfirmed: Boolean(entry?.consentConfirmed),
     consentFile: entry?.consentFile ?? null,

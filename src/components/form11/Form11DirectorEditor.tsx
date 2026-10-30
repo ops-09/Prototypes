@@ -7,9 +7,11 @@ import {
 import { FileUpload } from '../form1/FileUpload';
 import {
   DIRECTOR_CONSENT_FORM_URL,
+  EMPTY_DIRECTOR_ADDRESS,
   formatUnitLabel,
-  type YesNoAnswer,
+  type DirectorAddressType,
 } from '../form1/form1DraftStorage';
+import step3Styles from '../form1/Form1Step3.module.scss';
 import step4Styles from '../form1/Form1Step4.module.scss';
 import { getEventValue, isValidEmail } from './form11Focus';
 import { type Form11Director } from './form11DraftStorage';
@@ -23,6 +25,12 @@ const CONSENT_CHECKBOX_REQUIRED =
   'Confirm that this director has given consent to act as first director.';
 const CONSENT_FILE_REQUIRED = 'Upload the completed consent form (PDF).';
 
+const ADDRESS_TYPE_OPTIONS = [
+  { value: 'canadian', label: 'Canadian address' },
+  { value: 'us', label: 'US address' },
+  { value: 'international', label: 'International address' },
+];
+
 export type DirectorFieldKey =
   | 'firstName'
   | 'lastName'
@@ -33,9 +41,11 @@ export type DirectorFieldKey =
   | 'unitType'
   | 'streetNumber'
   | 'streetName'
+  | 'addressLine1'
   | 'cityTown'
   | 'provinceState'
   | 'postalCode'
+  | 'country'
   | 'consent'
   | 'consentFile';
 
@@ -53,13 +63,20 @@ export const DIRECTOR_ERROR_FIELD_ORDER: DirectorFieldKey[] = [
   'unitType',
   'streetNumber',
   'streetName',
+  'addressLine1',
   'cityTown',
   'provinceState',
   'postalCode',
+  'country',
 ];
 
-export function getDirectorFieldAnchor(directorId: string, field: DirectorFieldKey): string {
+export function getDirectorFieldAnchor(
+  directorId: string,
+  field: DirectorFieldKey,
+  addressType: DirectorAddressType | '' = '',
+): string {
   const prefix = `dir-${directorId}`;
+  const isForeign = addressType === 'us' || addressType === 'international';
   switch (field) {
     case 'firstName':
       return `${prefix}-first-name`;
@@ -83,35 +100,28 @@ export function getDirectorFieldAnchor(directorId: string, field: DirectorFieldK
       return `${prefix}-street-number`;
     case 'streetName':
       return `${prefix}-street-name`;
+    case 'addressLine1':
+      return `${prefix}-line1`;
     case 'cityTown':
-      return `${prefix}-city`;
+      return isForeign ? `${prefix}-foreign-city` : `${prefix}-city`;
     case 'provinceState':
-      return `${prefix}-province`;
+      return isForeign ? `${prefix}-state-region` : `${prefix}-province`;
     case 'postalCode':
-      return `${prefix}-postal`;
+      return isForeign ? `${prefix}-zip` : `${prefix}-postal`;
+    case 'country':
+      return `${prefix}-country`;
   }
 }
 
-function clearCanadianAddress(): Form11Director['address'] {
-  return {
-    addressType: 'canadian',
-    postalCodeLookup: '',
-    enterManually: false,
-    selectedAddressId: '',
-    unitType: '',
-    unitNumber: '',
-    streetNumber: '',
-    streetName: '',
-    streetNumberSuffix: '',
-    streetType: '',
-    streetDirection: '',
-    addressLine1: '',
-    addressLine2: '',
-    cityTown: '',
-    provinceState: '',
-    postalCode: '',
-    country: 'Canada',
-  };
+function clearAddressForType(addressType: DirectorAddressType | ''): Form11Director['address'] {
+  const base = { ...EMPTY_DIRECTOR_ADDRESS, addressType };
+  if (addressType === 'canadian') {
+    return { ...base, country: 'Canada' };
+  }
+  if (addressType === 'us') {
+    return { ...base, country: 'United States' };
+  }
+  return base;
 }
 
 export function validateDirector(director: Form11Director): DirectorErrors {
@@ -127,15 +137,30 @@ export function validateDirector(director: Form11Director): DirectorErrors {
   if (director.email.trim() && !isValidEmail(director.email.trim())) {
     next.email = EMAIL_INVALID;
   }
-  if (!director.alsoIncorporator) {
-    next.alsoIncorporator = 'Select whether the director is also an incorporator.';
-  }
-  if (director.address.addressType !== 'canadian') {
+  if (!director.address.addressType) {
     next.addressType = 'Select the type of address.';
   }
 
   if (director.address.addressType === 'canadian') {
     Object.assign(next, validateCanadianAddress(director.address));
+  }
+
+  if (director.address.addressType === 'us' || director.address.addressType === 'international') {
+    if (!director.address.addressLine1.trim()) {
+      next.addressLine1 = 'Enter address line 1.';
+    }
+    if (!director.address.cityTown.trim()) {
+      next.cityTown = 'Enter the city or town.';
+    }
+    if (!director.address.provinceState.trim()) {
+      next.provinceState = 'Enter the state, province or region.';
+    }
+    if (!director.address.postalCode.trim()) {
+      next.postalCode = 'Enter the ZIP or postal code.';
+    }
+    if (director.address.addressType === 'international' && !director.address.country.trim()) {
+      next.country = 'Enter the country.';
+    }
   }
 
   if (needsConsent) {
@@ -159,21 +184,35 @@ export function formatDirectorFullName(director: Form11Director): string {
 
 export function formatDirectorAddressLine(director: Form11Director): string {
   const { address } = director;
-  return (
-    [
-      formatUnitLabel(address.unitType, address.unitNumber),
+  if (address.addressType === 'canadian') {
+    return (
       [
-        address.streetNumber,
-        address.streetNumberSuffix,
-        address.streetName,
-        address.streetType,
-        address.streetDirection,
+        formatUnitLabel(address.unitType, address.unitNumber),
+        [
+          address.streetNumber,
+          address.streetNumberSuffix,
+          address.streetName,
+          address.streetType,
+          address.streetDirection,
+        ]
+          .filter(Boolean)
+          .join(' '),
+        address.cityTown,
+        address.provinceState,
+        address.postalCode,
       ]
         .filter(Boolean)
-        .join(' '),
+        .join(', ') || ''
+    );
+  }
+  return (
+    [
+      address.addressLine1,
+      address.addressLine2,
       address.cityTown,
       address.provinceState,
       address.postalCode,
+      address.country,
     ]
       .filter(Boolean)
       .join(', ') || ''
@@ -182,14 +221,8 @@ export function formatDirectorAddressLine(director: Form11Director): string {
 
 export function formatDirectorListDescription(director: Form11Director) {
   const email = director.email.trim();
-  const incorporator =
-    director.alsoIncorporator === 'yes'
-      ? 'Also an incorporator: Yes'
-      : director.alsoIncorporator === 'no'
-        ? 'Also an incorporator: No'
-        : '';
   return {
-    details: [email, incorporator].filter(Boolean).join(' · ') || 'Director details',
+    details: email || 'Director details',
     address: formatDirectorAddressLine(director),
   };
 }
@@ -211,16 +244,24 @@ export function Form11DirectorEditor({
 }: Form11DirectorEditorProps) {
   const prefix = `dir-${director.id}`;
   const needsConsent = director.alsoIncorporator === 'no';
+  const showManualForeign =
+    director.address.addressType === 'us' || director.address.addressType === 'international';
 
   function patch(partial: Partial<Form11Director>) {
     onChange({ ...director, ...partial });
   }
 
-  function setAlsoIncorporator(value: YesNoAnswer) {
+  function patchAddress(partial: Partial<Form11Director['address']>) {
     onChange({
       ...director,
-      alsoIncorporator: value,
-      ...(value === 'yes' ? { consentConfirmed: false, consentFile: null } : {}),
+      address: { ...director.address, ...partial },
+    });
+  }
+
+  function setAddressType(value: DirectorAddressType) {
+    onChange({
+      ...director,
+      address: clearAddressForType(value),
     });
   }
 
@@ -276,21 +317,6 @@ export function Form11DirectorEditor({
         customOnInput={(event) => patch({ email: getEventValue(event) })}
       />
 
-      <div id={`${prefix}-also-incorporator`}>
-        <OntarioRadioButtons
-          caption="Also an incorporator"
-          name={`${prefix}-also-incorporator`}
-          required
-          value={director.alsoIncorporator}
-          options={[
-            { value: 'yes', elementId: `${prefix}-incorporator-yes`, label: 'Yes' },
-            { value: 'no', elementId: `${prefix}-incorporator-no`, label: 'No' },
-          ]}
-          errorMessage={errors.alsoIncorporator}
-          customOnChange={(event) => setAlsoIncorporator(getEventValue(event) as YesNoAnswer)}
-        />
-      </div>
-
       {needsConsent ? (
         <div className={step4Styles.consentBlock}>
           <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>Director consent</h2>
@@ -344,22 +370,16 @@ export function Form11DirectorEditor({
           caption="Address for service"
           name={`${prefix}-address-type`}
           required
-          hintText="A director’s address for service can be a Canadian address and is not limited to Ontario."
+          hintText="Select Canadian, US, or International. A director’s address for service is not limited to Ontario."
           value={director.address.addressType}
-          options={[
-            {
-              value: 'canadian',
-              elementId: `${prefix}-addr-canadian`,
-              label: 'Canadian address',
-            },
-          ]}
+          options={ADDRESS_TYPE_OPTIONS.map((opt) => ({
+            ...opt,
+            elementId: `${prefix}-addr-${opt.value}`,
+          }))}
           errorMessage={errors.addressType}
-          customOnChange={() => {
-            onChange({
-              ...director,
-              address: clearCanadianAddress(),
-            });
-          }}
+          customOnChange={(event) =>
+            setAddressType(getEventValue(event) as DirectorAddressType)
+          }
         />
       </div>
 
@@ -370,6 +390,83 @@ export function Form11DirectorEditor({
           errors={errors}
           onChange={(address) => onChange({ ...director, address })}
         />
+      ) : null}
+
+      {showManualForeign ? (
+        <div className={step3Styles.addressFields}>
+          <OntarioInput
+            elementId={`${prefix}-line1`}
+            caption="Address line 1"
+            name={`${prefix}-line1`}
+            type="text"
+            required
+            requiredValidationMessage="Enter address line 1."
+            value={director.address.addressLine1}
+            errorMessage={errors.addressLine1}
+            customOnInput={(event) => patchAddress({ addressLine1: getEventValue(event) })}
+          />
+          <OntarioInput
+            elementId={`${prefix}-line2`}
+            caption="Address line 2"
+            name={`${prefix}-line2`}
+            type="text"
+            required={false}
+            requiredValidationMessage=""
+            value={director.address.addressLine2}
+            customOnInput={(event) => patchAddress({ addressLine2: getEventValue(event) })}
+          />
+          <OntarioInput
+            elementId={`${prefix}-foreign-city`}
+            caption="City/Town"
+            name={`${prefix}-foreign-city`}
+            type="text"
+            required
+            requiredValidationMessage="Enter the city or town."
+            value={director.address.cityTown}
+            errorMessage={errors.cityTown}
+            customOnInput={(event) => patchAddress({ cityTown: getEventValue(event) })}
+          />
+          <OntarioInput
+            elementId={`${prefix}-state-region`}
+            caption={director.address.addressType === 'us' ? 'State' : 'Province/Region'}
+            name={`${prefix}-state-region`}
+            type="text"
+            required
+            requiredValidationMessage="Enter the state, province or region."
+            value={director.address.provinceState}
+            errorMessage={errors.provinceState}
+            customOnInput={(event) => patchAddress({ provinceState: getEventValue(event) })}
+          />
+          <OntarioInput
+            elementId={`${prefix}-zip`}
+            caption={director.address.addressType === 'us' ? 'ZIP code' : 'Postal code'}
+            name={`${prefix}-zip`}
+            type="text"
+            required
+            requiredValidationMessage="Enter the ZIP or postal code."
+            value={director.address.postalCode}
+            errorMessage={errors.postalCode}
+            customOnInput={(event) => patchAddress({ postalCode: getEventValue(event) })}
+          />
+          {director.address.addressType === 'us' ? (
+            <div className={step4Styles.readOnlyField}>
+              <h5 className={`ontario-h5 ${step4Styles.readOnlyLabel}`}>Country</h5>
+              <p className={step4Styles.readOnlyValue}>United States</p>
+            </div>
+          ) : (
+            <OntarioInput
+              elementId={`${prefix}-country`}
+              caption="Country"
+              name={`${prefix}-country`}
+              type="text"
+              required
+              requiredValidationMessage="Enter the country."
+              value={director.address.country}
+              errorMessage={errors.country}
+              customOnInput={(event) => patchAddress({ country: getEventValue(event) })}
+            />
+          )}
+        </div>
       ) : null}
 
       <div className={step4Styles.doneActions}>

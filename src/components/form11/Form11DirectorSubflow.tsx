@@ -63,7 +63,13 @@ export function Form11DirectorSubflow() {
     if (!message) {
       return [];
     }
-    return [{ key, message, href: `#${getDirectorFieldAnchor(current.id, key)}` }];
+    return [
+      {
+        key,
+        message,
+        href: `#${getDirectorFieldAnchor(current.id, key, current.address.addressType)}`,
+      },
+    ];
   });
 
   function handleSave() {
