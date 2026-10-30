@@ -25,7 +25,6 @@ const STORAGE_KEY = 'ops-rbac.form11.draft';
 export const FORM11_TOTAL_STEPS = 9;
 export const MIN_AMALGAMATING_NFPS = 2;
 export const MIN_DIRECTORS = 3;
-export const FORM11_RICH_TEXT_MAX_CHARS = 900_000;
 
 export type Form11Step2Data = {
   primaryActivity: string;
@@ -77,7 +76,7 @@ export type Form11Step6Data = {
 };
 
 export type Form11Step7Data = {
-  amalgamationAgreement: string;
+  amalgamationAgreement: UploadedFileMeta | null;
   additionalDocuments: SupportingDocMeta[];
 };
 
@@ -148,7 +147,7 @@ export const EMPTY_STEP6: Form11Step6Data = {
 };
 
 export const EMPTY_STEP7: Form11Step7Data = {
-  amalgamationAgreement: '',
+  amalgamationAgreement: null,
   additionalDocuments: [],
 };
 
@@ -157,10 +156,28 @@ export const EMPTY_STEP8: Form11Step8Data = {
   signedPdf: null,
 };
 
-export const AGREEMENT_EMPTY_ERROR =
-  'Enter the details of the copy of the amalgamation agreement.';
-export const AGREEMENT_MAX_LENGTH_ERROR =
-  'Enter 900,000 characters or fewer.';
+export const AGREEMENT_EMPTY_ERROR = 'Upload a copy of the amalgamation agreement.';
+
+export const SAMPLE_AMALGAMATION_AGREEMENT: UploadedFileMeta = {
+  name: 'amalgamation-agreement.pdf',
+  size: 124_000,
+  type: 'application/pdf',
+};
+
+function normalizeAgreementFile(value: unknown): UploadedFileMeta | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+  const file = value as Partial<UploadedFileMeta>;
+  if (!file.name?.trim()) {
+    return null;
+  }
+  return {
+    name: file.name,
+    size: typeof file.size === 'number' ? file.size : 0,
+    type: file.type || 'application/pdf',
+  };
+}
 
 export function hasForm11DirectorsComplete(step6: Form11Step6Data | undefined) {
   if (!step6) {
@@ -418,6 +435,7 @@ export function readForm11Draft(): Form11Draft | null {
       step7: {
         ...EMPTY_STEP7,
         ...(parsed.step7 ?? {}),
+        amalgamationAgreement: normalizeAgreementFile(parsed.step7?.amalgamationAgreement),
         additionalDocuments: parsed.step7?.additionalDocuments ?? [],
       },
       step8: {
@@ -639,6 +657,5 @@ export function createForm11ConfirmationNumber() {
 }
 
 export function hasForm11Agreement(step7: Form11Step7Data | undefined) {
-  const text = step7?.amalgamationAgreement.trim() ?? '';
-  return Boolean(text) && text.length <= FORM11_RICH_TEXT_MAX_CHARS;
+  return Boolean(step7?.amalgamationAgreement?.name.trim());
 }

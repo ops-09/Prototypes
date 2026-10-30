@@ -4,14 +4,13 @@ import {
   OntarioButton,
   OntarioPageAlert,
   OntarioStepIndicator,
-  OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
+import { FileUpload } from '../form1/FileUpload';
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
 import { emptyNameNuans, type SupportingDocMeta } from '../form7/form7DraftStorage';
-import { focusField, getEventValue } from './form11Focus';
+import { focusField } from './form11Focus';
 import {
   AGREEMENT_EMPTY_ERROR,
-  AGREEMENT_MAX_LENGTH_ERROR,
   createAccountAmalgamatingNfp,
   createEmptyAmalgamatingNfp,
   createSeedDirector,
@@ -19,7 +18,6 @@ import {
   EMPTY_STEP6,
   EMPTY_STEP7,
   EMPTY_STEP8,
-  FORM11_RICH_TEXT_MAX_CHARS,
   FORM11_TOTAL_STEPS,
   hasForm11DirectorsComplete,
   hasForm11HeadOffice,
@@ -34,15 +32,6 @@ import {
 import styles from './Form11Step2.module.scss';
 
 const CURRENT_STEP = 7;
-
-function plainText(value: string) {
-  if (!value.includes('<')) {
-    return value;
-  }
-  const container = document.createElement('div');
-  container.innerHTML = value;
-  return (container.textContent ?? '').replace(/\u00a0/g, ' ');
-}
 
 type FieldKey = 'amalgamationAgreement';
 type FieldErrors = Partial<Record<FieldKey, string>>;
@@ -117,7 +106,7 @@ export function Form11Step7() {
   const [step7, setStep7] = useState<Form11Step7Data>(() => ({
     ...EMPTY_STEP7,
     ...(draft.step7 ?? {}),
-    amalgamationAgreement: plainText(draft.step7?.amalgamationAgreement ?? ''),
+    amalgamationAgreement: draft.step7?.amalgamationAgreement ?? null,
     additionalDocuments: draft.step7?.additionalDocuments ?? [],
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -149,10 +138,7 @@ export function Form11Step7() {
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
-    const text = step7.amalgamationAgreement;
-    if (text.length > FORM11_RICH_TEXT_MAX_CHARS) {
-      next.amalgamationAgreement = AGREEMENT_MAX_LENGTH_ERROR;
-    } else if (!text.trim()) {
+    if (!step7.amalgamationAgreement) {
       next.amalgamationAgreement = AGREEMENT_EMPTY_ERROR;
     }
     return next;
@@ -251,26 +237,21 @@ export function Form11Step7() {
 
           <div className={styles.formStack}>
             <div id="amalgamation-agreement">
-              {/* Same OntarioTextarea pattern as Form 1 / Form 2 membership fields. */}
-              <OntarioTextarea
-                elementId="amalgamation-agreement-input"
-                caption="The following is a copy of the amalgamation agreement duly certified under corporate seal by the secretary of each of the amalgamating corporations:"
-                name="amalgamation-agreement"
+              <FileUpload
+                inputId="form11-amalgamation-agreement"
+                label="Copy of the amalgamation agreement duly certified under corporate seal by the secretary of each of the amalgamating corporations"
                 required
                 value={step7.amalgamationAgreement}
                 errorMessage={errors.amalgamationAgreement}
-                customOnInput={(event) => {
-                  setStep7((prev) => ({
-                    ...prev,
-                    amalgamationAgreement: getEventValue(event),
-                  }));
+                onChange={(file) => {
+                  setStep7((prev) => ({ ...prev, amalgamationAgreement: file }));
                   clearAgreementError();
                 }}
               />
             </div>
 
             <SupportingDocumentsUpload
-              label="Upload any other document to support this application"
+              label="Upload any other document to support this application (optional)"
               hintText="PDF only, maximum 20 MB per file."
               value={step7.additionalDocuments}
               showUploadedAt

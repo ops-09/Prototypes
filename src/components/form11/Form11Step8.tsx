@@ -15,6 +15,7 @@ import {
   createAccountAmalgamatingNfp,
   createEmptyAmalgamatingNfp,
   createSeedDirector,
+  SAMPLE_AMALGAMATION_AGREEMENT,
   SAMPLE_HEAD_OFFICE,
   EMPTY_STEP6,
   EMPTY_STEP7,
@@ -85,8 +86,7 @@ export function ensureStep8Draft(): Form11Draft {
     step7: {
       ...EMPTY_STEP7,
       amalgamationAgreement:
-        existing?.step7.amalgamationAgreement.trim() ||
-        'Certified copy of the amalgamation agreement approved by the members of each amalgamating corporation.',
+        existing?.step7.amalgamationAgreement ?? SAMPLE_AMALGAMATION_AGREEMENT,
       additionalDocuments: existing?.step7.additionalDocuments ?? [],
     },
     step8: existing?.step8 ?? { ...EMPTY_STEP8 },

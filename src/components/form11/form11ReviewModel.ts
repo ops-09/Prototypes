@@ -215,7 +215,10 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
       rows: [
         {
           name: 'Copy of the amalgamation agreement',
-          description: displayOrEmpty(draft.step7.amalgamationAgreement),
+          description: displayOrEmpty(draft.step7.amalgamationAgreement?.name ?? ''),
+          files: draft.step7.amalgamationAgreement
+            ? [draft.step7.amalgamationAgreement]
+            : undefined,
         },
       ],
     },
