@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioPageAlert,
@@ -8,10 +8,15 @@ import {
 import { Form7SummaryList } from '../form7/Form7SummaryList';
 import { GeneratePdfSection } from '../shared/GeneratePdfSection';
 import {
+  EMPTY_NAME_CHANGE,
+  EMPTY_STEP4,
   EMPTY_STEP5,
   FORM3_TOTAL_STEPS,
+  OBR_STEP1_DEFAULTS,
   readForm3Draft,
+  saveForm3Draft,
   upsertForm3Step5,
+  type Form3Draft,
   type Form3Step5Data,
 } from './form3DraftStorage';
 import { generateForm3ReviewPdf } from './form3GeneratePdf';
@@ -34,10 +39,46 @@ export function isStep5Ready() {
   );
 }
 
+export function ensureStep5Draft(): Form3Draft {
+  const existing = readForm3Draft();
+  if (existing && isStep5Ready()) {
+    return existing;
+  }
+
+  const now = new Date().toISOString();
+  const seeded: Form3Draft = {
+    step1: {
+      ...OBR_STEP1_DEFAULTS,
+      ...(existing?.step1 ?? {}),
+      primaryActivity:
+        existing?.step1.primaryActivity.trim() || '4521 - Department stores',
+    },
+    nameChange: {
+      ...EMPTY_NAME_CHANGE,
+      ...(existing?.nameChange ?? {}),
+      changeCorporationName: existing?.nameChange.changeCorporationName || 'no',
+    },
+    step4: {
+      ...EMPTY_STEP4,
+      ...(existing?.step4 ?? {}),
+      resolutionConfirmedDate: existing?.step4.resolutionConfirmedDate || '2026-09-01',
+      requestedProvisions:
+        existing?.step4.requestedProvisions.trim() ||
+        'Amend the objects of the corporation as set out in this application.',
+    },
+    step5: { ...EMPTY_STEP5, ...(existing?.step5 ?? {}) },
+    savedAs: 'continue',
+    savedAt: now,
+    lastCompletedStep: 3,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  saveForm3Draft(seeded);
+  return seeded;
+}
+
 export function Form3Step5() {
   const navigate = useNavigate();
-  const draft = readForm3Draft();
-  const ready = isStep5Ready();
+  const draft = ensureStep5Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const [step5] = useState<Form3Step5Data>(() => ({
@@ -50,17 +91,11 @@ export function Form3Step5() {
   const [pdfBlocked, setPdfBlocked] = useState(false);
   const [pdfGenerated, setPdfGenerated] = useState(false);
 
-  const sections = useMemo(
-    () => (draft && ready ? buildReviewSections(draft) : []),
-    [draft, ready],
-  );
+  const sections = useMemo(() => buildReviewSections(draft), [draft]);
   const incompleteKeys = useMemo(
     () => new Set(sections.filter((section) => !section.complete).map((section) => section.key)),
     [sections],
   );
-  if (!ready || !draft) {
-    return <Navigate to="/form-3/step-4" replace />;
-  }
 
   function validate(): ReviewErrors {
     const next: ReviewErrors = {};
@@ -101,9 +136,6 @@ export function Form3Step5() {
   }
 
   function handleGeneratePdf() {
-    if (!draft) {
-      return;
-    }
     const opened = generateForm3ReviewPdf({ draft });
     setPdfBlocked(!opened);
     if (opened) {

@@ -1,16 +1,15 @@
 import { useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { OntarioCheckboxes } from '@ongov/ontario-design-system-component-library-react';
 import { FileUpload } from '../form1/FileUpload';
 import { FilingSubmitStep } from '../shared/FilingSubmitStep';
-import { isStep4Ready } from './Form10Step4';
+import { ensureReviewDraft } from './Form10Step4';
 import {
   createForm10ConfirmationNumber,
   EMPTY_STEP4,
   FORM10_TOTAL_STEPS,
   OBR_FILER_FIRST_NAME,
   OBR_FILER_LAST_NAME,
-  readForm10Draft,
   upsertForm10Step4,
   type Form10Step4Data,
 } from './form10DraftStorage';
@@ -27,14 +26,13 @@ type SubmitErrors = Partial<{
 
 export function Form10Step5() {
   const navigate = useNavigate();
-  const draft = readForm10Draft();
-  const ready = isStep4Ready();
+  const draft = ensureReviewDraft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const [step4, setStep4] = useState<Form10Step4Data>(() => ({
     ...EMPTY_STEP4,
-    ...(draft?.step4 ?? {}),
-    signedPdf: draft?.step4?.signedPdf ?? null,
+    ...(draft.step4 ?? {}),
+    signedPdf: draft.step4?.signedPdf ?? null,
   }));
   const [errors, setErrors] = useState<SubmitErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
@@ -50,10 +48,6 @@ export function Form10Step5() {
     ],
     [filerName],
   );
-
-  if (!ready || !draft) {
-    return <Navigate to="/form-10/step-6" replace />;
-  }
 
   function clearError(key: keyof SubmitErrors) {
     setErrors((prev) => {

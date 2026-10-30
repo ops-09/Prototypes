@@ -1,16 +1,15 @@
 import { useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { OntarioCheckboxes } from '@ongov/ontario-design-system-component-library-react';
 import { FileUpload } from '../form1/FileUpload';
 import { FilingSubmitStep } from '../shared/FilingSubmitStep';
-import { isStep5Ready } from './Form3Step5';
+import { ensureStep5Draft } from './Form3Step5';
 import {
   createForm3ConfirmationNumber,
   EMPTY_STEP5,
   FORM3_TOTAL_STEPS,
   OBR_FILER_FIRST_NAME,
   OBR_FILER_LAST_NAME,
-  readForm3Draft,
   upsertForm3Step5,
   type Form3Step5Data,
 } from './form3DraftStorage';
@@ -27,14 +26,13 @@ type SubmitErrors = Partial<{
 
 export function Form3Step6() {
   const navigate = useNavigate();
-  const draft = readForm3Draft();
-  const ready = isStep5Ready();
+  const draft = ensureStep5Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const [step5, setStep5] = useState<Form3Step5Data>(() => ({
     ...EMPTY_STEP5,
     ...(draft?.step5 ?? {}),
-    signedPdf: draft?.step5?.signedPdf ?? null,
+    signedPdf: draft.step5?.signedPdf ?? null,
   }));
   const [errors, setErrors] = useState<SubmitErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
@@ -50,10 +48,6 @@ export function Form3Step6() {
     ],
     [filerName],
   );
-
-  if (!ready || !draft) {
-    return <Navigate to="/form-3/step-5" replace />;
-  }
 
   function clearError(key: keyof SubmitErrors) {
     setErrors((prev) => {

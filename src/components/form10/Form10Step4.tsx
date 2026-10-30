@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioPageAlert,
@@ -8,10 +8,17 @@ import {
 import { Form7SummaryList } from '../form7/Form7SummaryList';
 import { GeneratePdfSection } from '../shared/GeneratePdfSection';
 import {
+  createSeedAmalgamatingCooperatives,
+  emptyDocsForCooperatives,
+  EMPTY_NAME_CHANGE,
+  EMPTY_STEP3,
   EMPTY_STEP4,
   FORM10_TOTAL_STEPS,
+  OBR_STEP1_DEFAULTS,
   readForm10Draft,
+  saveForm10Draft,
   upsertForm10Step4,
+  type Form10Draft,
   type Form10Step4Data,
 } from './form10DraftStorage';
 import { generateForm10ReviewPdf } from './form10GeneratePdf';
@@ -35,26 +42,103 @@ export function isStep4Ready() {
   );
 }
 
+export function ensureReviewDraft(): Form10Draft {
+  const existing = readForm10Draft();
+  if (existing && isStep4Ready()) {
+    return existing;
+  }
+
+  const now = new Date().toISOString();
+  const cooperatives =
+    existing?.step2.amalgamatingCooperatives.length &&
+    existing.step2.amalgamatingCooperatives.length >= 2
+      ? existing.step2.amalgamatingCooperatives
+      : createSeedAmalgamatingCooperatives();
+  const seeded: Form10Draft = {
+    step1: {
+      ...OBR_STEP1_DEFAULTS,
+      ...(existing?.step1 ?? {}),
+      primaryActivity:
+        existing?.step1.primaryActivity.trim() || '4521 - Department stores',
+    },
+    step2: {
+      amalgamatingCooperatives: cooperatives,
+      agreementApproved: true,
+    },
+    nameChange: {
+      ...EMPTY_NAME_CHANGE,
+      ...(existing?.nameChange ?? {}),
+      changeCooperativeName: existing?.nameChange.changeCooperativeName || 'no',
+      selectedAmalgamatedCooperativeId:
+        existing?.nameChange.selectedAmalgamatedCooperativeId || cooperatives[0].id,
+    },
+    step3: {
+      ...EMPTY_STEP3,
+      ...(existing?.step3 ?? {}),
+      certifiedAgreement:
+        existing?.step3.certifiedAgreement.length
+          ? existing.step3.certifiedAgreement
+          : [
+              {
+                id: 'seed-agreement',
+                name: 'Amalgamation-Agreement.pdf',
+                size: 184320,
+                type: 'application/pdf',
+                uploadedAt: now,
+              },
+            ],
+      documentsByCooperative: emptyDocsForCooperatives(
+        cooperatives,
+        existing?.step3.documentsByCooperative,
+      ).map((row, index) => ({
+        ...row,
+        affidavits:
+          row.affidavits.length >= 2
+            ? row.affidavits
+            : [
+                {
+                  id: `seed-affidavit-${index}-1`,
+                  name: `Affidavit-of-Solvency-${index + 1}A.pdf`,
+                  size: 102400,
+                  type: 'application/pdf',
+                  uploadedAt: now,
+                },
+                {
+                  id: `seed-affidavit-${index}-2`,
+                  name: `Affidavit-of-Solvency-${index + 1}B.pdf`,
+                  size: 102400,
+                  type: 'application/pdf',
+                  uploadedAt: now,
+                },
+              ],
+      })),
+    },
+    step4: { ...EMPTY_STEP4, ...(existing?.step4 ?? {}) },
+    savedAs: 'continue',
+    savedAt: now,
+    lastCompletedStep: 4,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  saveForm10Draft(seeded);
+  return seeded;
+}
+
 export function Form10Step4() {
   const navigate = useNavigate();
-  const draft = readForm10Draft();
-  const ready = isStep4Ready();
+  const draft = ensureReviewDraft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const [step4] = useState<Form10Step4Data>(() => ({
     ...EMPTY_STEP4,
-    ...(draft?.step4 ?? {}),
-    signedPdf: draft?.step4?.signedPdf ?? null,
+    ...(draft.step4 ?? {}),
+    signedPdf: draft.step4?.signedPdf ?? null,
   }));
   const [errors, setErrors] = useState<ReviewErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
   const [pdfBlocked, setPdfBlocked] = useState(false);
   const [pdfGenerated, setPdfGenerated] = useState(false);
 
-  const sections = useMemo(
-    () => (draft && ready ? buildReviewSections(draft) : []),
-    [draft, ready],
-  );
+  const sections = useMemo(() => buildReviewSections(draft), [draft]);
   const incompleteKeys = useMemo(
     () =>
       new Set(
@@ -62,9 +146,6 @@ export function Form10Step4() {
       ),
     [sections],
   );
-  if (!ready || !draft) {
-    return <Navigate to="/form-10/step-5" replace />;
-  }
 
   function validate(): ReviewErrors {
     const next: ReviewErrors = {};
@@ -107,9 +188,6 @@ export function Form10Step4() {
   }
 
   function handleGeneratePdf() {
-    if (!draft) {
-      return;
-    }
     const opened = generateForm10ReviewPdf({ draft });
     setPdfBlocked(!opened);
     if (opened) {
