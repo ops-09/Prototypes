@@ -16,6 +16,7 @@ import {
   type Form10Step3Data,
   type SupportingDocMeta,
 } from './form10DraftStorage';
+import { FORM10_CERTIFIED_AGREEMENT_CAPTION } from './form10ReviewModel';
 import styles from './Form10Step1.module.scss';
 
 const CURRENT_STEP = 5;
@@ -248,7 +249,7 @@ export function Form10Step3() {
 
             <div id="agreement">
               <SupportingDocumentsUpload
-                label="Certified copy of the amalgamation agreement"
+                label={FORM10_CERTIFIED_AGREEMENT_CAPTION}
                 required
                 maxFiles={1}
                 hintText={AGREEMENT_HINT}

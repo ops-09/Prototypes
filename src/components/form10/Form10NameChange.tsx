@@ -27,6 +27,7 @@ import {
   upsertForm10NameChange,
   type Form10NameChangeData,
 } from './form10DraftStorage';
+import { FORM10_AMALGAMATED_NAME_CAPTION } from './form10ReviewModel';
 import styles from './Form10Step1.module.scss';
 
 const CURRENT_STEP = 4;
@@ -364,7 +365,7 @@ export function Form10NameChange() {
               <div id="amalgamated-cooperative-name">
                 <OntarioDropdownList
                   elementId="amalgamated-cooperative-name"
-                  caption="Please select the name of the amalgamated co-operative"
+                  caption={FORM10_AMALGAMATED_NAME_CAPTION}
                   name="amalgamated-cooperative-name"
                   required
                   isEmptyStartOption
@@ -392,6 +393,7 @@ export function Form10NameChange() {
               <ProposedNameAndNuans
                 idPrefix={ID_PREFIX}
                 nameKind="cooperative"
+                proposedNameCaption={FORM10_AMALGAMATED_NAME_CAPTION}
                 leadText={[
                   'An Ontario NUANS name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report.',
                   'The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the name. The name of the co-operative must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “INC.” or “CORP.”.',

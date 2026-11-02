@@ -2,7 +2,6 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioCheckboxes,
   OntarioIconAdd,
   OntarioIconDelete,
   OntarioPageAlert,
@@ -23,11 +22,15 @@ import {
   upsertForm10Step2,
   type Form10Step2Data,
 } from './form10DraftStorage';
+import {
+  FORM10_AGREEMENT_STATEMENT,
+  FORM10_AMALGAMATING_NAMES_CAPTION,
+} from './form10ReviewModel';
 import styles from './Form10Step1.module.scss';
 
 const CURRENT_STEP = 3;
 
-type FieldKey = 'cooperatives' | 'agreementApproved';
+type FieldKey = 'cooperatives';
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
 function focusField(anchorId: string) {
@@ -89,13 +92,6 @@ export function Form10Step2() {
         href: '#amalgamating-cooperatives',
       });
     }
-    if (errors.agreementApproved) {
-      items.push({
-        key: 'agreementApproved',
-        message: errors.agreementApproved,
-        href: '#agreement-approved',
-      });
-    }
     return items;
   }, [errors]);
 
@@ -148,10 +144,6 @@ export function Form10Step2() {
     if (step2.amalgamatingCooperatives.length < MIN_AMALGAMATING_COOPS) {
       next.cooperatives = `Add at least ${MIN_AMALGAMATING_COOPS} amalgamating co-operatives.`;
     }
-    if (!step2.agreementApproved) {
-      next.agreementApproved =
-        'Confirm that the amalgamation agreement has been duly approved pursuant to section 156 of the Co-operative Corporations Act.';
-    }
     return next;
   }
 
@@ -166,7 +158,7 @@ export function Form10Step2() {
       });
       return;
     }
-    upsertForm10Step2(step2, 'continue', 2);
+    upsertForm10Step2({ ...step2, agreementApproved: true }, 'continue', 2);
     navigate('/form-10/step-4');
   }
 
@@ -223,22 +215,15 @@ export function Form10Step2() {
             </div>
           ) : null}
 
-          <h1 className={`ontario-h1 ${styles.pageTitle}`}>Amalgamation details</h1>
-          <p className={styles.lead}>
-            Add each amalgamating co-operative and confirm that the amalgamation agreement has
-            been duly approved pursuant to section 156 of the Co-operative Corporations Act.
-          </p>
+          <h1 className={`ontario-h1 ${styles.pageTitle}`}>Amalgamating co-operatives</h1>
+          <p className={styles.lead}>{FORM10_AGREEMENT_STATEMENT}</p>
+          <p className={styles.lead}>{FORM10_AMALGAMATING_NAMES_CAPTION}</p>
 
           <div className={styles.formStack}>
             <div id="amalgamating-cooperatives" className={step4Styles.directorsSection}>
-              <div>
-                <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>
-                  Amalgamating co-operatives
-                </h2>
-                <p className={step4Styles.sectionLead}>
-                  Add at least {MIN_AMALGAMATING_COOPS} amalgamating co-operatives.
-                </p>
-              </div>
+              <p className={step4Styles.sectionLead}>
+                Add at least {MIN_AMALGAMATING_COOPS} amalgamating co-operatives.
+              </p>
 
               <FieldErrorMessage message={errors.cooperatives} />
 
@@ -297,35 +282,6 @@ export function Form10Step2() {
                   Add amalgamating co-operative
                 </button>
               </div>
-            </div>
-
-            <div id="agreement-approved">
-              <OntarioCheckboxes
-                caption={{
-                  captionText: 'Confirm amalgamation agreement approval',
-                  captionType: 'default',
-                }}
-                name="agreement-approved"
-                required
-                options={[
-                  {
-                    value: 'approved',
-                    elementId: 'agreement-approved-yes',
-                    label:
-                      'The amalgamation agreement has been duly approved pursuant to section 156 of the Co-operative Corporations Act.',
-                  },
-                ]}
-                value={step2.agreementApproved ? ['approved'] : []}
-                errorMessage={errors.agreementApproved}
-                customOnChange={(event) => {
-                  const target = event.target as HTMLInputElement | null;
-                  setStep2((prev) => ({
-                    ...prev,
-                    agreementApproved: Boolean(target?.checked),
-                  }));
-                  clearError('agreementApproved');
-                }}
-              />
             </div>
           </div>
 

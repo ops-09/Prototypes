@@ -257,14 +257,6 @@ export function Form10CooperativeEditor({
               />
             </div>
           </>
-        ) : cooperative.legalName ? (
-          <div className={styles.selectedCoop}>
-            <h2 className={`ontario-h5 ${styles.selectedCoopLabel}`}>
-              Selected co-operative
-            </h2>
-            <p className={styles.selectedCoopValue}>{cooperative.legalName}</p>
-            <p className={styles.selectedCoopValue}>OCN {cooperative.ocn}</p>
-          </div>
         ) : null}
 
         <div id={dateKey}>

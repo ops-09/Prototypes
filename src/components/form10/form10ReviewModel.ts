@@ -9,6 +9,18 @@ import {
   type SupportingDocMeta,
 } from './form10DraftStorage';
 
+export const FORM10_AMALGAMATED_NAME_CAPTION =
+  'The name of the amalgamated co-operative is: (Set out in Block Capital Letters)';
+export const FORM10_AGREEMENT_STATEMENT =
+  'The amalgamation agreement has been duly approved as required by section 156 of the Co-operative Corporations Act.';
+export const FORM10_AMALGAMATING_NAMES_CAPTION =
+  'The names of the amalgamating co-operatives and the dates on which the amalgamation agreement was approved by the members of each of the amalgamating co-operatives are:';
+export const FORM10_CERTIFIED_AGREEMENT_CAPTION =
+  'The following is a certified copy of the amalgamation agreement:';
+export const FORM10_SIGNATURE_INTRO = [
+  'These articles are executed in duplicate for delivery to the Minister. Names and seals (if applicable) of the amalgamating co-operatives and signatures and descriptions of office of their proper officers.',
+] as const;
+
 export type ReviewRow = {
   name: string;
   description: string;
@@ -53,7 +65,6 @@ function isCoopDetailsComplete(draft: Form10Draft) {
 
 function isAmalgamatingComplete(draft: Form10Draft) {
   return (
-    draft.step2.agreementApproved &&
     draft.step2.amalgamatingCooperatives.length >= MIN_AMALGAMATING_COOPS &&
     draft.step2.amalgamatingCooperatives.every(
       (coop) =>
@@ -70,6 +81,16 @@ function selectedAmalgamatedCooperativeName(draft: Form10Draft) {
       (coop) => coop.id === draft.nameChange.selectedAmalgamatedCooperativeId,
     )?.legalName.trim() ?? ''
   );
+}
+
+export function amalgamatedCooperativeName(draft: Form10Draft) {
+  if (draft.nameChange.changeCooperativeName === 'change') {
+    return draft.nameChange.nameNuans.proposedName.trim();
+  }
+  if (draft.nameChange.changeCooperativeName === 'no') {
+    return selectedAmalgamatedCooperativeName(draft);
+  }
+  return '';
 }
 
 function isNameChangeComplete(draft: Form10Draft) {
@@ -105,10 +126,8 @@ function isSupportingDocsComplete(draft: Form10Draft) {
 export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
   const amalgamatingRows: ReviewRow[] = [
     {
-      name: 'Amalgamation agreement confirmation',
-      description: draft.step2.agreementApproved
-        ? 'The amalgamation agreement has been duly approved as required by section 156 of the Co-operative Corporations Act.'
-        : 'Not confirmed',
+      name: FORM10_AGREEMENT_STATEMENT,
+      description: '',
     },
   ];
 
@@ -132,7 +151,7 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
 
   const supportingRows: ReviewRow[] = [
     {
-      name: 'Certified copy of the amalgamation agreement',
+      name: FORM10_CERTIFIED_AGREEMENT_CAPTION,
       ...docFields(draft.step3.certifiedAgreement, 'Not uploaded'),
     },
   ];
@@ -182,7 +201,7 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     },
     {
       key: 'amalgamatingCooperatives',
-      caption: 'Amalgamating co-operatives',
+      caption: FORM10_AMALGAMATING_NAMES_CAPTION,
       editHref: '/form-10/step-3',
       complete: isAmalgamatingComplete(draft),
       rows: amalgamatingRows,
@@ -190,7 +209,7 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     },
     {
       key: 'nameChange',
-      caption: 'Co-operative name',
+      caption: FORM10_AMALGAMATED_NAME_CAPTION,
       editHref: '/form-10/step-4',
       complete: isNameChangeComplete(draft),
       rows:
@@ -201,7 +220,7 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
                 description: 'Yes',
               },
               {
-                name: 'New co-operative name (proposed)',
+                name: FORM10_AMALGAMATED_NAME_CAPTION,
                 description: displayOrEmpty(draft.nameChange.nameNuans.proposedName),
               },
               ...draft.nameChange.nameNuans.nuansReports.flatMap((report, index, reports) => {
@@ -228,10 +247,8 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
               ...(draft.nameChange.changeCooperativeName === 'no'
                 ? [
                     {
-                      name: 'Amalgamated co-operative name',
-                      description: displayOrEmpty(
-                        selectedAmalgamatedCooperativeName(draft),
-                      ),
+                      name: FORM10_AMALGAMATED_NAME_CAPTION,
+                      description: displayOrEmpty(amalgamatedCooperativeName(draft)),
                     },
                   ]
                 : []),
