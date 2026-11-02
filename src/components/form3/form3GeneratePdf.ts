@@ -24,7 +24,9 @@ function buildItems(draft: Form3Draft): ArticlesPdfItem[] {
     ['Date of incorporation/amalgamation:', valueHtml(formatIsoDateDisplay(step1.incorporationDate))],
     [
       'The resolution authorizing this application was confirmed by the shareholders/members of the corporation on:',
-      valueHtml(formatIsoDateDisplay(step4.resolutionConfirmedDate)),
+      valueHtml(
+        `${formatIsoDateDisplay(step4.resolutionConfirmedDate)} under section 34 or 131 of the Corporations Act.`,
+      ),
     ],
     [
       'The corporation applies for the issue of supplementary letters patent to provide as follows:',
@@ -40,7 +42,7 @@ export function generateForm3ReviewPdf(args: { draft: Form3Draft }) {
     titleLines: ['Application for', 'Supplementary Letters Patent', 'Form 3'],
     actName: 'Corporations Act',
     items: buildItems(draft),
-    signatureIntro: ['This application is executed in duplicate.'],
+    signatureIntro: [],
     signatureCaptions: ['Name of signatory', 'Description of office'],
     signatureRows: [[], []],
   });
