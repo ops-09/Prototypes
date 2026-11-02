@@ -262,15 +262,13 @@ export function Form10Step4() {
                 id={sectionAnchor(section.key)}
                 className={section.groups?.length ? styles.formStack : undefined}
               >
-                {section.rows.length > 0 || !section.groups?.length ? (
-                  <Form7SummaryList
-                    caption={section.caption}
-                    headingLevel="h2"
-                    captionActionLink={{ href: section.editHref, label: 'Change' }}
-                    items={section.rows}
-                    columnRatio="1-2"
-                  />
-                ) : null}
+                <Form7SummaryList
+                  caption={section.caption}
+                  headingLevel="h2"
+                  captionActionLink={{ href: section.editHref, label: 'Change' }}
+                  items={section.rows}
+                  columnRatio="1-2"
+                />
                 {section.groups?.map((group) => (
                   <Form7SummaryList
                     key={group.key}

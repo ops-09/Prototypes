@@ -22,10 +22,7 @@ import {
   upsertForm10Step2,
   type Form10Step2Data,
 } from './form10DraftStorage';
-import {
-  FORM10_AGREEMENT_STATEMENT,
-  FORM10_AMALGAMATING_NAMES_CAPTION,
-} from './form10ReviewModel';
+import { FORM10_AMALGAMATING_NAMES_CAPTION } from './form10ReviewModel';
 import styles from './Form10Step1.module.scss';
 
 const CURRENT_STEP = 3;
@@ -216,7 +213,6 @@ export function Form10Step2() {
           ) : null}
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Amalgamating co-operatives</h1>
-          <p className={styles.lead}>{FORM10_AGREEMENT_STATEMENT}</p>
           <p className={styles.lead}>{FORM10_AMALGAMATING_NAMES_CAPTION}</p>
 
           <div className={styles.formStack}>

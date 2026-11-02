@@ -11,8 +11,6 @@ import {
 
 export const FORM10_AMALGAMATED_NAME_CAPTION =
   'The name of the amalgamated co-operative is: (Set out in Block Capital Letters)';
-export const FORM10_AGREEMENT_STATEMENT =
-  'The amalgamation agreement has been duly approved as required by section 156 of the Co-operative Corporations Act.';
 export const FORM10_AMALGAMATING_NAMES_CAPTION =
   'The names of the amalgamating co-operatives and the dates on which the amalgamation agreement was approved by the members of each of the amalgamating co-operatives are:';
 export const FORM10_CERTIFIED_AGREEMENT_CAPTION =
@@ -124,13 +122,6 @@ function isSupportingDocsComplete(draft: Form10Draft) {
 }
 
 export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
-  const amalgamatingRows: ReviewRow[] = [
-    {
-      name: FORM10_AGREEMENT_STATEMENT,
-      description: '',
-    },
-  ];
-
   const amalgamatingGroups: PersonReviewGroup[] = draft.step2.amalgamatingCooperatives.map(
     (coop, index) => ({
       key: coop.id,
@@ -201,15 +192,15 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     },
     {
       key: 'amalgamatingCooperatives',
-      caption: FORM10_AMALGAMATING_NAMES_CAPTION,
+      caption: 'Amalgamating co-operatives',
       editHref: '/form-10/step-3',
       complete: isAmalgamatingComplete(draft),
-      rows: amalgamatingRows,
+      rows: [],
       groups: amalgamatingGroups,
     },
     {
       key: 'nameChange',
-      caption: FORM10_AMALGAMATED_NAME_CAPTION,
+      caption: 'Co-operative name',
       editHref: '/form-10/step-4',
       complete: isNameChangeComplete(draft),
       rows:
