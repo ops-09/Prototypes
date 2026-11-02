@@ -101,20 +101,20 @@ export function formatMailingAddress(address: DirectorResidentialAddress) {
   return lines.filter(Boolean).join("\n").toUpperCase();
 }
 
-function formatDollars(amount: string) {
+function formatShareAmount(amount: string) {
   const raw = amount.trim().replace(/[$,\s]/g, "");
   const value = Number(raw);
   if (!raw || Number.isNaN(value)) {
     return amount.trim();
   }
   const hasCents = raw.includes(".");
-  return `$${value.toLocaleString("en-CA", {
+  return value.toLocaleString("en-CA", {
     minimumFractionDigits: hasCents ? 2 : 0,
     maximumFractionDigits: 2,
-  })}`;
+  });
 }
 
-/** e.g. "2 shares at $5,000, Class A". */
+/** e.g. "2 shares at 5,000, Class A". */
 export function formatShareSummary(shares: {
   numberOfShares: string;
   amountToBePaid: string;
@@ -125,7 +125,7 @@ export function formatShareSummary(shares: {
     ? `${count} ${count === "1" ? "share" : "shares"}`
     : "";
   const amount = shares.amountToBePaid.trim()
-    ? formatDollars(shares.amountToBePaid)
+    ? formatShareAmount(shares.amountToBePaid)
     : "";
   const className = shares.classDesignation.trim();
   const countAndAmount =
