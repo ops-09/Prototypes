@@ -165,13 +165,15 @@ export function Form11Step8() {
                 id={sectionAnchor(section.key)}
                 className={section.groups?.length ? styles.formStack : undefined}
               >
-                <Form7SummaryList
-                  caption={section.caption}
-                  headingLevel="h2"
-                  captionActionLink={{ href: section.editHref, label: 'Change' }}
-                  items={section.rows}
-                  columnRatio="1-2"
-                />
+                {section.rows.length > 0 || !section.groups?.length ? (
+                  <Form7SummaryList
+                    caption={section.caption}
+                    headingLevel="h2"
+                    captionActionLink={{ href: section.editHref, label: 'Change' }}
+                    items={section.rows}
+                    columnRatio="1-2"
+                  />
+                ) : null}
                 {section.groups?.map((group) => (
                   <Form7SummaryList
                     key={group.key}

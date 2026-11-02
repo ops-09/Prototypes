@@ -16,7 +16,7 @@ export const FORM10_AMALGAMATING_NAMES_CAPTION =
 export const FORM10_CERTIFIED_AGREEMENT_CAPTION =
   'The following is a certified copy of the amalgamation agreement:';
 export const FORM10_SIGNATURE_INTRO = [
-  'These articles are executed in duplicate for delivery to the Minister. Names and seals (if applicable) of the amalgamating co-operatives and signatures and descriptions of office of their proper officers.',
+  'Names and seals (if applicable) of the amalgamating co-operatives and signatures and descriptions of office of their proper officers.',
 ] as const;
 
 export type ReviewRow = {

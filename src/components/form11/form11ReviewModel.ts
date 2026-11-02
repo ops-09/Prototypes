@@ -19,16 +19,24 @@ import {
 
 export const FORM11_AMALGAMATED_NAME_CAPTION =
   'Name of the amalgamated corporation: (Set out in Block Capital Letters)';
+export const FORM11_AGREEMENT_STATEMENT =
+  'The amalgamation agreement has been duly approved as required by section 113(3) of the Corporations Act.';
 export const FORM11_AMALGAMATING_NAMES_CAPTION =
   'The names of the amalgamating corporations and the dates on which the amalgamation agreement was approved by the shareholders/members of each of the amalgamating corporations are:';
 export const FORM11_HEAD_OFFICE_LOCATION_CAPTION = 'The head office is at the:';
 export const FORM11_HEAD_OFFICE_ADDRESS_CAPTION = 'The address of the head office is:';
+export const FORM11_HEAD_OFFICE_CAPTION =
+  'The address of the head office of the amalgamated corporation is:';
 export const FORM11_DIRECTORS_CAPTION =
   'The persons who are to be directors of the amalgamated corporation are:';
+export const FORM11_DIRECTOR_NAME_COLUMN = 'Name in full';
+export const FORM11_DIRECTOR_ADDRESS_COLUMN =
+  'Address for service: giving Street & Number, or R.R. Number or Lot & Concession Number, or Lot & Plan Number, and Postal Code (Post Office Box Number not acceptable)';
 export const FORM11_CERTIFIED_AGREEMENT_CAPTION =
   'The following is a copy of the amalgamation agreement duly certified under corporate seal by the secretary of each of the amalgamating corporations:';
 export const FORM11_SIGNATURE_INTRO = [
-  'This application is executed in duplicate.',
+  'The corporations named below apply jointly for letters patent confirming the agreement and amalgamating the said corporations.',
+  'Names and seals of the amalgamating corporations, full name and signatures and descriptions of office of their proper officers',
 ] as const;
 
 export type ReviewRow = {

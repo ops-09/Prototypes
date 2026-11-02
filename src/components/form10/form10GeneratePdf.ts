@@ -44,7 +44,10 @@ export function generateForm10ReviewPdf(args: { draft: Form10Draft }) {
       [FORM10_AMALGAMATED_NAME_CAPTION, valueHtml(amalgamatedName.toUpperCase())],
       [
         FORM10_AMALGAMATING_NAMES_CAPTION,
-        tableHtml(['Name', 'OCN', 'Date of members’ approval'], coopRows),
+        tableHtml(
+          ['Name', 'Ontario Corporation Number', 'Date of members’ approval'],
+          coopRows,
+        ),
       ],
     ],
     signatureIntro: [...FORM10_SIGNATURE_INTRO],

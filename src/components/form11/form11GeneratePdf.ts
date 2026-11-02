@@ -13,11 +13,13 @@ import {
   type Form11Draft,
 } from './form11DraftStorage';
 import {
+  FORM11_AGREEMENT_STATEMENT,
   FORM11_AMALGAMATED_NAME_CAPTION,
   FORM11_AMALGAMATING_NAMES_CAPTION,
+  FORM11_DIRECTOR_ADDRESS_COLUMN,
+  FORM11_DIRECTOR_NAME_COLUMN,
   FORM11_DIRECTORS_CAPTION,
-  FORM11_HEAD_OFFICE_ADDRESS_CAPTION,
-  FORM11_HEAD_OFFICE_LOCATION_CAPTION,
+  FORM11_HEAD_OFFICE_CAPTION,
   FORM11_SIGNATURE_INTRO,
 } from './form11ReviewModel';
 
@@ -43,6 +45,12 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
       formatMailingAddress(director.address),
     ];
   });
+  const headOfficeAddress = form11HeadOfficeLine(draft.step5).trim();
+  const municipality = formatHeadOfficeLocation(draft.step5).trim();
+  const headOfficeValue = [
+    headOfficeAddress || NOT_PROVIDED,
+    `Name of municipality: ${municipality || NOT_PROVIDED}`,
+  ].join('\n');
   const signatureRows = draft.step3.corporations.flatMap((corp) => {
     const corpName = formatPdfName(corp.legalName);
     const nameValue = corpName === NOT_PROVIDED ? '' : corpName;
@@ -58,24 +66,21 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
     actName: 'Corporations Act',
     items: [
       [FORM11_AMALGAMATED_NAME_CAPTION, valueHtml(amalgamatedName.toUpperCase())],
+      [FORM11_AGREEMENT_STATEMENT, ''],
       [
         FORM11_AMALGAMATING_NAMES_CAPTION,
         tableHtml(
-          ['Name', 'OCN', 'Date of shareholders/members’ approval'],
+          ['Name', 'Ontario Corporation Number', 'Date of shareholders/members’ approval'],
           corpRows,
         ),
       ],
-      [
-        FORM11_HEAD_OFFICE_LOCATION_CAPTION,
-        valueHtml(formatHeadOfficeLocation(draft.step5)),
-      ],
-      [
-        FORM11_HEAD_OFFICE_ADDRESS_CAPTION,
-        valueHtml(form11HeadOfficeLine(draft.step5)),
-      ],
+      [FORM11_HEAD_OFFICE_CAPTION, valueHtml(headOfficeValue)],
       [
         FORM11_DIRECTORS_CAPTION,
-        tableHtml(['Name', 'Address for service'], directorRows),
+        tableHtml(
+          [FORM11_DIRECTOR_NAME_COLUMN, FORM11_DIRECTOR_ADDRESS_COLUMN],
+          directorRows,
+        ),
       ],
     ],
     signatureIntro: [...FORM11_SIGNATURE_INTRO],
