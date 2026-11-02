@@ -8,6 +8,7 @@ import {
 import type { Form10Draft } from './form10DraftStorage';
 import {
   amalgamatedCooperativeName,
+  FORM10_AGREEMENT_STATEMENT,
   FORM10_AMALGAMATED_NAME_CAPTION,
   FORM10_AMALGAMATING_NAMES_CAPTION,
   FORM10_SIGNATURE_INTRO,
@@ -42,6 +43,7 @@ export function generateForm10ReviewPdf(args: { draft: Form10Draft }) {
     titleLines: ['Articles of Amalgamation', 'Form 10'],
     items: [
       [FORM10_AMALGAMATED_NAME_CAPTION, valueHtml(amalgamatedName.toUpperCase())],
+      [FORM10_AGREEMENT_STATEMENT, ''],
       [
         FORM10_AMALGAMATING_NAMES_CAPTION,
         tableHtml(

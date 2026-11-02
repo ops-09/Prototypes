@@ -45,12 +45,12 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
       formatMailingAddress(director.address),
     ];
   });
-  const headOfficeAddress = form11HeadOfficeLine(draft.step5).trim();
-  const municipality = formatHeadOfficeLocation(draft.step5).trim();
   const headOfficeValue = [
-    headOfficeAddress || NOT_PROVIDED,
-    `Name of municipality: ${municipality || NOT_PROVIDED}`,
-  ].join('\n');
+    form11HeadOfficeLine(draft.step5).trim(),
+    formatHeadOfficeLocation(draft.step5).trim(),
+  ]
+    .filter(Boolean)
+    .join('\n');
   const signatureRows = draft.step3.corporations.flatMap((corp) => {
     const corpName = formatPdfName(corp.legalName);
     const nameValue = corpName === NOT_PROVIDED ? '' : corpName;

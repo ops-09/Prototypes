@@ -11,6 +11,8 @@ import {
 
 export const FORM10_AMALGAMATED_NAME_CAPTION =
   'The name of the amalgamated co-operative is: (Set out in Block Capital Letters)';
+export const FORM10_AGREEMENT_STATEMENT =
+  'The amalgamation agreement has been duly approved as required by section 156 of the Co-operative Corporations Act.';
 export const FORM10_AMALGAMATING_NAMES_CAPTION =
   'The names of the amalgamating co-operatives and the dates on which the amalgamation agreement was approved by the members of each of the amalgamating co-operatives are:';
 export const FORM10_CERTIFIED_AGREEMENT_CAPTION =
