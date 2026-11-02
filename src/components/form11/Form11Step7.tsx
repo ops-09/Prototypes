@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioPageAlert,
@@ -7,28 +7,18 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import { FileUpload } from '../form1/FileUpload';
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
-import { emptyNameNuans, type SupportingDocMeta } from '../form7/form7DraftStorage';
+import { type SupportingDocMeta } from '../form7/form7DraftStorage';
 import { focusField } from './form11Focus';
 import {
   AGREEMENT_EMPTY_ERROR,
-  createAccountAmalgamatingNfp,
-  createEmptyAmalgamatingNfp,
-  createSeedDirector,
-  SAMPLE_HEAD_OFFICE,
-  EMPTY_STEP6,
   EMPTY_STEP7,
-  EMPTY_STEP8,
+  ensureForm11PlaygroundDraft,
   FORM11_TOTAL_STEPS,
-  hasForm11DirectorsComplete,
-  hasForm11HeadOffice,
-  MIN_AMALGAMATING_NFPS,
-  OBR_STEP2_DEFAULTS,
   readForm11Draft,
-  saveForm11Draft,
   upsertForm11Step7,
-  type Form11Draft,
   type Form11Step7Data,
 } from './form11DraftStorage';
+import { FORM11_CERTIFIED_AGREEMENT_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
 
 const CURRENT_STEP = 7;
@@ -36,72 +26,10 @@ const CURRENT_STEP = 7;
 type FieldKey = 'amalgamationAgreement';
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
-function hasPriorSteps(draft: Form11Draft | null) {
-  return Boolean(
-    draft?.step2.email.trim() &&
-      draft.step3.corporations.filter((entry) => entry.legalName.trim()).length >=
-        MIN_AMALGAMATING_NFPS &&
-      (draft.step4.changeName === 'yes' || draft.step4.changeName === 'no') &&
-      hasForm11HeadOffice(draft.step5) &&
-      hasForm11DirectorsComplete(draft.step6),
-  );
-}
-
-function ensureStep7Draft(): Form11Draft {
-  const existing = readForm11Draft();
-  if (hasPriorSteps(existing)) {
-    return existing as Form11Draft;
-  }
-
-  const account = createAccountAmalgamatingNfp();
-  const other = {
-    ...createEmptyAmalgamatingNfp(),
-    legalName: 'RIVERDALE COMMUNITY HEALTH CENTRE',
-    ocn: '100009001',
-    membersApprovalDate: '2026-03-01',
-  };
-  const draft: Form11Draft = {
-    step2: { ...OBR_STEP2_DEFAULTS },
-    step3: {
-      corporations: [account, other],
-      agreementApproved: true,
-    },
-    step4: {
-      changeName: 'no',
-      nameNuans: emptyNameNuans(),
-      selectedAmalgamatedCorporationId: account.id,
-    },
-    step5: { ...SAMPLE_HEAD_OFFICE },
-    step6: {
-      ...EMPTY_STEP6,
-      countMode: 'fixed',
-      fixedNumber: '3',
-      directors: [createSeedDirector(0), createSeedDirector(1), createSeedDirector(2)],
-    },
-    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
-    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
-    savedAs: 'continue',
-    savedAt: new Date().toISOString(),
-    lastCompletedStep: 6,
-    confirmationNumber: existing?.confirmationNumber,
-  };
-  saveForm11Draft(draft);
-  return draft;
-}
-
 export function Form11Step7() {
   const navigate = useNavigate();
-  const existing = readForm11Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
-  const [draft] = useState(() => {
-    if (hasPriorSteps(existing)) {
-      return existing as Form11Draft;
-    }
-    if (!existing) {
-      return ensureStep7Draft();
-    }
-    return existing;
-  });
+  const [draft] = useState(() => ensureForm11PlaygroundDraft(7));
 
   const [step7, setStep7] = useState<Form11Step7Data>(() => ({
     ...EMPTY_STEP7,
@@ -176,25 +104,6 @@ export function Form11Step7() {
     focusField(href.replace('#', ''));
   }
 
-  if (!hasPriorSteps(draft)) {
-    if (!draft.step2.email.trim()) {
-      return <Navigate to="/form-11/step-2" replace />;
-    }
-    if (
-      draft.step3.corporations.filter((entry) => entry.legalName.trim()).length <
-      MIN_AMALGAMATING_NFPS
-    ) {
-      return <Navigate to="/form-11/step-3" replace />;
-    }
-    if (draft.step4.changeName !== 'yes' && draft.step4.changeName !== 'no') {
-      return <Navigate to="/form-11/step-4" replace />;
-    }
-    if (!hasForm11HeadOffice(draft.step5)) {
-      return <Navigate to="/form-11/step-5" replace />;
-    }
-    return <Navigate to="/form-11/step-6" replace />;
-  }
-
   return (
     <>
       <div className={styles.stepIndicator}>
@@ -239,7 +148,7 @@ export function Form11Step7() {
             <div id="amalgamation-agreement">
               <FileUpload
                 inputId="form11-amalgamation-agreement"
-                label="Copy of the amalgamation agreement duly certified under corporate seal by the secretary of each of the amalgamating corporations"
+                label={FORM11_CERTIFIED_AGREEMENT_CAPTION}
                 required
                 value={step7.amalgamationAgreement}
                 errorMessage={errors.amalgamationAgreement}

@@ -1,11 +1,10 @@
-import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioPageAlert,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
-import { emptyNameNuans } from '../form7/form7DraftStorage';
 import {
   HEAD_OFFICE_FIELD_ANCHORS,
   HEAD_OFFICE_FIELD_ORDER,
@@ -15,86 +14,26 @@ import {
 } from '../shared/OntarioHeadOfficeAddressFields';
 import { focusField } from './form11Focus';
 import {
-  createAccountAmalgamatingNfp,
-  createEmptyAmalgamatingNfp,
   EMPTY_STEP5,
-  EMPTY_STEP6,
-  EMPTY_STEP7,
-  EMPTY_STEP8,
+  ensureForm11PlaygroundDraft,
   FORM11_TOTAL_STEPS,
   HEAD_OFFICE_INFO,
-  MIN_AMALGAMATING_NFPS,
-  OBR_STEP2_DEFAULTS,
   readForm11Draft,
-  saveForm11Draft,
   upsertForm11Step5,
-  type Form11Draft,
   type Form11Step5Data,
 } from './form11DraftStorage';
+import {
+  FORM11_HEAD_OFFICE_ADDRESS_CAPTION,
+  FORM11_HEAD_OFFICE_LOCATION_CAPTION,
+} from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
 
 const CURRENT_STEP = 5;
 
-function hasPriorSteps(draft: Form11Draft | null) {
-  return Boolean(
-    draft?.step2.email.trim() &&
-      draft.step3.corporations.filter((entry) => entry.legalName.trim()).length >=
-        MIN_AMALGAMATING_NFPS &&
-      (draft.step4.changeName === 'yes' || draft.step4.changeName === 'no'),
-  );
-}
-
-/** Prototype deep-link: seed Steps 2–4 so /form-11/step-5 opens from the playground. */
-function ensureStep5Draft(): Form11Draft {
-  const existing = readForm11Draft();
-  if (hasPriorSteps(existing)) {
-    return existing as Form11Draft;
-  }
-
-  const account = createAccountAmalgamatingNfp();
-  const other = {
-    ...createEmptyAmalgamatingNfp(),
-    legalName: 'RIVERDALE COMMUNITY HEALTH CENTRE',
-    ocn: '100009001',
-    membersApprovalDate: '2026-03-01',
-  };
-  const draft: Form11Draft = {
-    step2: { ...OBR_STEP2_DEFAULTS },
-    step3: {
-      corporations: [account, other],
-      agreementApproved: true,
-    },
-    step4: {
-      changeName: 'no',
-      nameNuans: emptyNameNuans(),
-      selectedAmalgamatedCorporationId: account.id,
-    },
-    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
-    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
-    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
-    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
-    savedAs: 'continue',
-    savedAt: new Date().toISOString(),
-    lastCompletedStep: 4,
-    confirmationNumber: existing?.confirmationNumber,
-  };
-  saveForm11Draft(draft);
-  return draft;
-}
-
 export function Form11Step5() {
   const navigate = useNavigate();
-  const existing = readForm11Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
-  const [draft] = useState(() => {
-    if (hasPriorSteps(existing)) {
-      return existing as Form11Draft;
-    }
-    if (!existing) {
-      return ensureStep5Draft();
-    }
-    return existing;
-  });
+  const [draft] = useState(() => ensureForm11PlaygroundDraft(5));
 
   const [step5, setStep5] = useState<Form11Step5Data>(() => ({
     ...EMPTY_STEP5,
@@ -104,6 +43,14 @@ export function Form11Step5() {
   }));
   const [errors, setErrors] = useState<HeadOfficeErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
+
+  // Leaving by the back link or browser history skips Continue/Save, so edits are kept here.
+  useEffect(() => {
+    const existing = readForm11Draft();
+    const savedAs = existing?.savedAs === 'submitted' ? 'draft' : (existing?.savedAs ?? 'draft');
+    const prior = existing?.lastCompletedStep ?? 0;
+    upsertForm11Step5(step5, savedAs, prior > 4 ? prior : 4);
+  }, [step5]);
 
   const errorSummaryItems = useMemo(
     () =>
@@ -118,7 +65,7 @@ export function Form11Step5() {
   );
 
   function handleAddressChange(next: Form11Step5Data, cleared: (keyof HeadOfficeErrors)[]) {
-    setStep5({ ...next, province: next.province || 'Ontario' });
+    setStep5(next);
     if (cleared.length === 0) {
       return;
     }
@@ -164,19 +111,6 @@ export function Form11Step5() {
     focusField(href.replace('#', ''));
   }
 
-  if (!hasPriorSteps(draft)) {
-    if (!draft.step2.email.trim()) {
-      return <Navigate to="/form-11/step-2" replace />;
-    }
-    if (
-      draft.step3.corporations.filter((entry) => entry.legalName.trim()).length <
-      MIN_AMALGAMATING_NFPS
-    ) {
-      return <Navigate to="/form-11/step-3" replace />;
-    }
-    return <Navigate to="/form-11/step-4" replace />;
-  }
-
   return (
     <>
       <div className={styles.stepIndicator}>
@@ -212,6 +146,7 @@ export function Form11Step5() {
           ) : null}
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Head office address</h1>
+
           <p className={styles.lead}>{HEAD_OFFICE_INFO}</p>
 
           <div className={styles.formStack} id="head-office-address">
@@ -219,6 +154,8 @@ export function Form11Step5() {
               address={step5}
               errors={errors}
               onChange={handleAddressChange}
+              locationHeading={FORM11_HEAD_OFFICE_LOCATION_CAPTION}
+              addressHeading={FORM11_HEAD_OFFICE_ADDRESS_CAPTION}
             />
           </div>
 

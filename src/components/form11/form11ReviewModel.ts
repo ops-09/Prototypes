@@ -9,12 +9,27 @@ import {
   MIN_AMALGAMATING_NFPS,
   type Form11Draft,
 } from './form11DraftStorage';
+import { formatHeadOfficeLocation } from '../shared/headOfficeFormat';
 import {
   displayValue,
   formatMailingAddress,
   formatPersonName,
   type PersonReviewGroup,
 } from '../shared/personReviewRows';
+
+export const FORM11_AMALGAMATED_NAME_CAPTION =
+  'Name of the amalgamated corporation: (Set out in Block Capital Letters)';
+export const FORM11_AMALGAMATING_NAMES_CAPTION =
+  'The names of the amalgamating corporations and the dates on which the amalgamation agreement was approved by the shareholders/members of each of the amalgamating corporations are:';
+export const FORM11_HEAD_OFFICE_LOCATION_CAPTION = 'The head office is at the:';
+export const FORM11_HEAD_OFFICE_ADDRESS_CAPTION = 'The address of the head office is:';
+export const FORM11_DIRECTORS_CAPTION =
+  'The persons who are to be directors of the amalgamated corporation are:';
+export const FORM11_CERTIFIED_AGREEMENT_CAPTION =
+  'The following is a copy of the amalgamation agreement duly certified under corporate seal by the secretary of each of the amalgamating corporations:';
+export const FORM11_SIGNATURE_INTRO = [
+  'This application is executed in duplicate.',
+] as const;
 
 export type ReviewRow = {
   name: string;
@@ -78,7 +93,7 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
   const nameRows: ReviewRow[] = [
     { name: 'Selected naming option', description: namingOption },
     {
-      name: 'Amalgamated corporation name',
+      name: FORM11_AMALGAMATED_NAME_CAPTION,
       description: displayOrEmpty(form11AmalgamatedName(draft)),
     },
   ];
@@ -102,21 +117,12 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
 
   const headOfficeRows: ReviewRow[] = [
     {
-      name: 'Head office address',
+      name: FORM11_HEAD_OFFICE_ADDRESS_CAPTION,
       description: displayOrEmpty(form11HeadOfficeLine(draft.step5)),
     },
     {
-      name: 'Municipality',
-      description:
-        draft.step5.municipalityStatus.trim() && draft.step5.cityTown.trim()
-          ? `${draft.step5.municipalityStatus} of ${draft.step5.cityTown}`
-          : 'Not provided',
-    },
-    {
-      name: 'County / region',
-      description: draft.step5.countyName.trim()
-        ? `${draft.step5.countyStatus} of ${draft.step5.countyName}`.trim()
-        : 'Not provided',
+      name: FORM11_HEAD_OFFICE_LOCATION_CAPTION,
+      description: displayOrEmpty(formatHeadOfficeLocation(draft.step5)),
     },
   ];
 
@@ -194,7 +200,7 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
     },
     {
       key: 'headOffice',
-      caption: 'Registered head office address',
+      caption: 'Head office address',
       editHref: '/form-11/step-5',
       complete: hasForm11HeadOffice(draft.step5),
       rows: headOfficeRows,
@@ -214,7 +220,7 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
       complete: hasForm11Agreement(draft.step7),
       rows: [
         {
-          name: 'Copy of the amalgamation agreement',
+          name: FORM11_CERTIFIED_AGREEMENT_CAPTION,
           description: displayOrEmpty(draft.step7.amalgamationAgreement?.name ?? ''),
           files: draft.step7.amalgamationAgreement
             ? [draft.step7.amalgamationAgreement]

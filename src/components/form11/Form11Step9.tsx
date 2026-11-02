@@ -1,11 +1,11 @@
 import { useMemo, useRef, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { OntarioCheckboxes } from '@ongov/ontario-design-system-component-library-react';
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
 import { type SupportingDocMeta } from '../form7/form7DraftStorage';
 import { SIGNED_IN_INDIVIDUAL } from '../../mock/signedInIndividual';
 import { FilingSubmitStep } from '../shared/FilingSubmitStep';
-import { ensureStep8Draft, hasPriorSteps } from './Form11Step8';
+import { ensureStep8Draft } from './Form11Step8';
 import {
   createForm11ConfirmationNumber,
   EMPTY_STEP8,
@@ -50,10 +50,6 @@ export function Form11Step9() {
     ],
     [filerName],
   );
-
-  if (!hasPriorSteps(draft)) {
-    return <Navigate to="/form-11/step-8" replace />;
-  }
 
   function clearError(key: keyof SubmitErrors) {
     setErrors((prev) => {

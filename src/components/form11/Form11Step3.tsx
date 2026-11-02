@@ -2,7 +2,6 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioCheckboxes,
   OntarioIconAdd,
   OntarioIconDelete,
   OntarioPageAlert,
@@ -24,17 +23,16 @@ import {
   type Form11Step3Data,
 } from './form11DraftStorage';
 import { DUPLICATE_ERROR } from './Form11CorporationEditor';
+import { FORM11_AMALGAMATING_NAMES_CAPTION } from './form11ReviewModel';
 import pageStyles from './Form11Step2.module.scss';
 import styles from './Form11Step3.module.scss';
 
 const CURRENT_STEP = 3;
 const BOUND_CORP_ERROR =
   'Add the corporation associated with your account as one of the amalgamating corporations.';
-const AGREEMENT_ERROR =
-  'Confirm that the amalgamation agreement has been duly approved as required by section 113(3) of the Corporations Act.';
 const MIN_CORPS_ERROR = `Add at least ${MIN_AMALGAMATING_NFPS} amalgamating corporations.`;
 
-type FieldKey = 'corporations' | 'agreementApproved';
+type FieldKey = 'corporations';
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
 function ensureStep2Draft() {
@@ -66,13 +64,6 @@ export function Form11Step3() {
         key: 'corporations',
         message: errors.corporations,
         href: '#amalgamating-corporations',
-      });
-    }
-    if (errors.agreementApproved) {
-      items.push({
-        key: 'agreementApproved',
-        message: errors.agreementApproved,
-        href: '#agreement-approved',
       });
     }
     return items;
@@ -137,9 +128,6 @@ export function Form11Step3() {
     } else if (!step3.corporations.some((entry) => normalizeOcn(entry.ocn) === OBR_OCN)) {
       next.corporations = BOUND_CORP_ERROR;
     }
-    if (!step3.agreementApproved) {
-      next.agreementApproved = AGREEMENT_ERROR;
-    }
     return next;
   }
 
@@ -154,7 +142,7 @@ export function Form11Step3() {
       });
       return;
     }
-    upsertForm11Step3(step3, 'continue');
+    upsertForm11Step3({ ...step3, agreementApproved: true }, 'continue');
     navigate('/form-11/step-4');
   }
 
@@ -209,12 +197,8 @@ export function Form11Step3() {
             </div>
           ) : null}
 
-          <h1 className={`ontario-h1 ${pageStyles.pageTitle}`}>Amalgamation details</h1>
-          <p className={pageStyles.lead}>
-            Identify the amalgamating corporations and confirm that the amalgamation
-            agreement has been duly approved as required by section 113(3) of the
-            Corporations Act.
-          </p>
+          <h1 className={`ontario-h1 ${pageStyles.pageTitle}`}>Amalgamating corporations</h1>
+          <p className={pageStyles.lead}>{FORM11_AMALGAMATING_NAMES_CAPTION}</p>
 
           <div className={pageStyles.formStack}>
             <div id="amalgamating-corporations" className={step4Styles.directorsSection}>
@@ -279,32 +263,6 @@ export function Form11Step3() {
                   Add my Corporation
                 </button>
               </div>
-            </div>
-
-            <div id="agreement-approved">
-              <OntarioCheckboxes
-                caption="Confirm amalgamation agreement approval"
-                name="agreement-approved"
-                required
-                options={[
-                  {
-                    value: 'approved',
-                    elementId: 'agreement-approved-yes',
-                    label:
-                      'The amalgamation agreement has been duly approved as required by section 113(3) of the Corporations Act.',
-                  },
-                ]}
-                value={step3.agreementApproved ? ['approved'] : []}
-                errorMessage={errors.agreementApproved}
-                customOnChange={(event) => {
-                  const target = event.target as HTMLInputElement | null;
-                  setStep3((prev) => ({
-                    ...prev,
-                    agreementApproved: Boolean(target?.checked),
-                  }));
-                  clearError('agreementApproved');
-                }}
-              />
             </div>
           </div>
 

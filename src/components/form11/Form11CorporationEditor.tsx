@@ -105,7 +105,6 @@ export function Form11CorporationEditor({
   const nameKey = `nfp-${corporation.id}-name`;
   const ocnKey = `nfp-${corporation.id}-ocn`;
   const dateKey = `amalgamating-date-${corporation.id}`;
-  const selected = Boolean(corporation.legalName.trim() && corporation.ocn.trim());
 
   function patch(next: Partial<AmalgamatingNfp>) {
     onChange({ ...corporation, ...next });
@@ -267,12 +266,6 @@ export function Form11CorporationEditor({
               />
             </div>
           </>
-        ) : selected ? (
-          <div className={styles.selectedCorp}>
-            <h2 className={`ontario-h5 ${styles.selectedLabel}`}>Selected corporation</h2>
-            <p className={styles.selectedValue}>{corporation.legalName}</p>
-            <p className={styles.selectedValue}>OCN {corporation.ocn}</p>
-          </div>
         ) : null}
 
         <div id={dateKey}>

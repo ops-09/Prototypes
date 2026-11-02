@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioDropdownList,
@@ -18,13 +18,13 @@ import {
 } from '../form7/ProposedNameAndNuans';
 import { focusField, getEventValue } from './form11Focus';
 import {
+  ensureForm11PlaygroundDraft,
   FORM11_TOTAL_STEPS,
-  MIN_AMALGAMATING_NFPS,
-  readForm11Draft,
   upsertForm11Step4,
   type Form11NameChangeChoice,
   type Form11Step4Data,
 } from './form11DraftStorage';
+import { FORM11_AMALGAMATED_NAME_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
 
 const CURRENT_STEP = 4;
@@ -46,19 +46,9 @@ type FieldErrors = NameNuansErrors &
     selectedAmalgamatedCorporationId: string;
   }>;
 
-function isStep4Ready() {
-  const existing = readForm11Draft();
-  return Boolean(
-    existing?.step2.email &&
-      existing.step3.corporations.filter((entry) => entry.legalName.trim()).length >=
-        MIN_AMALGAMATING_NFPS,
-  );
-}
-
 export function Form11Step4() {
   const navigate = useNavigate();
-  const draft = readForm11Draft();
-  const ready = isStep4Ready();
+  const [draft] = useState(() => ensureForm11PlaygroundDraft(4));
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const dateErrorsRef = useRef<FieldErrors>({});
 
@@ -241,10 +231,6 @@ export function Form11Step4() {
     focusField(href.replace('#', ''));
   }
 
-  if (!ready || !draft) {
-    return <Navigate to="/form-11/step-3" replace />;
-  }
-
   return (
     <>
       <div className={styles.stepIndicator}>
@@ -320,7 +306,7 @@ export function Form11Step4() {
               <div id="amalgamated-nfp-name">
                 <OntarioDropdownList
                   elementId="amalgamated-nfp-name"
-                  caption="Please select the name of the amalgamated corporation."
+                  caption={FORM11_AMALGAMATED_NAME_CAPTION}
                   name="amalgamated-nfp-name"
                   required
                   isEmptyStartOption
@@ -347,6 +333,7 @@ export function Form11Step4() {
               <ProposedNameAndNuans
                 idPrefix={ID_PREFIX}
                 nameKind="corporation"
+                proposedNameCaption={FORM11_AMALGAMATED_NAME_CAPTION}
                 leadText="An Ontario NUANS name search report for the proposed name of the corporation. The search report must be submitted with the application within 90 days of the production of the report."
                 value={step4.nameNuans}
                 errors={errors}

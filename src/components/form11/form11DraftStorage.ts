@@ -659,3 +659,135 @@ export function createForm11ConfirmationNumber() {
 export function hasForm11Agreement(step7: Form11Step7Data | undefined) {
   return Boolean(step7?.amalgamationAgreement?.name.trim());
 }
+
+export type Form11PlaygroundStep = 4 | 5 | 6 | 7 | 8;
+
+function namedAmalgamatingCorporations(existing?: AmalgamatingNfp[]) {
+  const named = (existing ?? []).filter((entry) => entry.legalName.trim());
+  if (named.length >= MIN_AMALGAMATING_NFPS) {
+    return named;
+  }
+  const account = createAccountAmalgamatingNfp();
+  const other: AmalgamatingNfp = {
+    ...createEmptyAmalgamatingNfp(),
+    legalName: 'RIVERDALE COMMUNITY HEALTH CENTRE',
+    ocn: '100009001',
+    membersApprovalDate: '2026-03-01',
+  };
+  const seen = new Set(named.map((entry) => normalizeOcn(entry.ocn)));
+  const next = [...named];
+  if (!seen.has(normalizeOcn(account.ocn))) {
+    next.push(account);
+    seen.add(normalizeOcn(account.ocn));
+  }
+  if (next.length < MIN_AMALGAMATING_NFPS && !seen.has(normalizeOcn(other.ocn))) {
+    next.push(other);
+  }
+  return next;
+}
+
+function isReadyForPlaygroundStep(draft: Form11Draft, openStep: Form11PlaygroundStep) {
+  const named = draft.step3.corporations.filter((entry) => entry.legalName.trim());
+  if (!draft.step2.email.trim() || named.length < MIN_AMALGAMATING_NFPS) {
+    return false;
+  }
+  if (openStep === 4) {
+    return true;
+  }
+  if (draft.step4.changeName !== 'yes' && draft.step4.changeName !== 'no') {
+    return false;
+  }
+  if (openStep === 5) {
+    return true;
+  }
+  if (!hasForm11HeadOffice(draft.step5)) {
+    return false;
+  }
+  if (openStep === 6) {
+    return true;
+  }
+  if (!hasForm11DirectorsComplete(draft.step6)) {
+    return false;
+  }
+  if (openStep === 7) {
+    return true;
+  }
+  return hasForm11Agreement(draft.step7);
+}
+
+/**
+ * Fill missing earlier steps so playground deep links (Step 4–9) open the
+ * requested page even when a partial Form 11 draft already exists.
+ */
+export function ensureForm11PlaygroundDraft(openStep: Form11PlaygroundStep): Form11Draft {
+  const existing = readForm11Draft();
+  if (existing && isReadyForPlaygroundStep(existing, openStep)) {
+    return existing;
+  }
+
+  const corporations = namedAmalgamatingCorporations(existing?.step3.corporations);
+  const firstCorpId = corporations[0]?.id ?? '';
+  const seededThrough = (openStep - 1) as Form11Draft['lastCompletedStep'];
+  const priorCompleted = existing?.lastCompletedStep ?? 0;
+  const draft: Form11Draft = {
+    step2: {
+      ...OBR_STEP2_DEFAULTS,
+      ...(existing?.step2 ?? {}),
+      email: existing?.step2.email.trim() || OBR_STEP2_DEFAULTS.email,
+      primaryActivity:
+        existing?.step2.primaryActivity.trim() || OBR_STEP2_DEFAULTS.primaryActivity,
+    },
+    step3: {
+      corporations,
+      agreementApproved: true,
+    },
+    step4: {
+      ...EMPTY_STEP4,
+      ...(existing?.step4 ?? {}),
+      changeName:
+        existing?.step4.changeName === 'yes' || existing?.step4.changeName === 'no'
+          ? existing.step4.changeName
+          : openStep >= 5
+            ? 'no'
+            : existing?.step4.changeName ?? '',
+      selectedAmalgamatedCorporationId:
+        existing?.step4.selectedAmalgamatedCorporationId || firstCorpId,
+      nameNuans: existing?.step4.nameNuans ?? emptyNameNuans(),
+    },
+    step5:
+      hasForm11HeadOffice(existing?.step5)
+        ? existing!.step5
+        : openStep >= 6
+          ? { ...SAMPLE_HEAD_OFFICE }
+          : existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: hasForm11DirectorsComplete(existing?.step6)
+      ? existing!.step6
+      : openStep >= 7
+        ? {
+            ...EMPTY_STEP6,
+            countMode: 'fixed',
+            fixedNumber: '3',
+            directors: [
+              createSeedDirector(0),
+              createSeedDirector(1),
+              createSeedDirector(2),
+            ],
+          }
+        : existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: {
+      ...EMPTY_STEP7,
+      ...(existing?.step7 ?? {}),
+      amalgamationAgreement:
+        existing?.step7.amalgamationAgreement ??
+        (openStep >= 8 ? SAMPLE_AMALGAMATION_AGREEMENT : null),
+      additionalDocuments: existing?.step7.additionalDocuments ?? [],
+    },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
+    savedAs: existing?.savedAs ?? 'continue',
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: priorCompleted > seededThrough ? priorCompleted : seededThrough,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+  saveForm11Draft(draft);
+  return draft;
+}

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioIconAdd,
@@ -11,32 +11,23 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import { FieldErrorMessage } from '../form1/FieldErrorMessage';
 import type { DirectorCountMode } from '../form1/form1DraftStorage';
-import { emptyNameNuans } from '../form7/form7DraftStorage';
 import {
   formatDirectorFullName,
   formatDirectorListDescription,
 } from './Form11DirectorEditor';
 import { focusField, getEventValue } from './form11Focus';
 import {
-  createAccountAmalgamatingNfp,
-  createEmptyAmalgamatingNfp,
-  SAMPLE_HEAD_OFFICE,
   EMPTY_STEP6,
-  EMPTY_STEP7,
-  EMPTY_STEP8,
+  ensureForm11PlaygroundDraft,
   FORM11_TOTAL_STEPS,
   getDirectorLimit,
   getDirectorMinimum,
-  hasForm11HeadOffice,
-  MIN_AMALGAMATING_NFPS,
   MIN_DIRECTORS,
-  OBR_STEP2_DEFAULTS,
   readForm11Draft,
-  saveForm11Draft,
   upsertForm11Step6,
-  type Form11Draft,
   type Form11Step6Data,
 } from './form11DraftStorage';
+import { FORM11_DIRECTORS_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
 import step4Styles from '../form1/Form1Step4.module.scss';
 
@@ -135,66 +126,10 @@ function formatDirectorSelectionSummary(data: Form11Step6Data) {
   return `You selected a minimum of ${data.minimumNumber.trim()} and a maximum of ${data.maximumNumber.trim()} directors.`;
 }
 
-function hasPriorSteps(draft: Form11Draft | null) {
-  return Boolean(
-    draft?.step2.email.trim() &&
-      draft.step3.corporations.filter((entry) => entry.legalName.trim()).length >=
-        MIN_AMALGAMATING_NFPS &&
-      (draft.step4.changeName === 'yes' || draft.step4.changeName === 'no') &&
-      hasForm11HeadOffice(draft.step5),
-  );
-}
-
-function ensureStep6Draft(): Form11Draft {
-  const existing = readForm11Draft();
-  if (hasPriorSteps(existing)) {
-    return existing as Form11Draft;
-  }
-
-  const account = createAccountAmalgamatingNfp();
-  const other = {
-    ...createEmptyAmalgamatingNfp(),
-    legalName: 'RIVERDALE COMMUNITY HEALTH CENTRE',
-    ocn: '100009001',
-    membersApprovalDate: '2026-03-01',
-  };
-  const draft: Form11Draft = {
-    step2: { ...OBR_STEP2_DEFAULTS },
-    step3: {
-      corporations: [account, other],
-      agreementApproved: true,
-    },
-    step4: {
-      changeName: 'no',
-      nameNuans: emptyNameNuans(),
-      selectedAmalgamatedCorporationId: account.id,
-    },
-    step5: { ...SAMPLE_HEAD_OFFICE },
-    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
-    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
-    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
-    savedAs: 'continue',
-    savedAt: new Date().toISOString(),
-    lastCompletedStep: 5,
-    confirmationNumber: existing?.confirmationNumber,
-  };
-  saveForm11Draft(draft);
-  return draft;
-}
-
 export function Form11Step6() {
   const navigate = useNavigate();
-  const existing = readForm11Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
-  const [draft] = useState(() => {
-    if (hasPriorSteps(existing)) {
-      return existing as Form11Draft;
-    }
-    if (!existing) {
-      return ensureStep6Draft();
-    }
-    return existing;
-  });
+  const [draft] = useState(() => ensureForm11PlaygroundDraft(6));
 
   const [step6, setStep6] = useState<Form11Step6Data>(() => ({
     ...EMPTY_STEP6,
@@ -362,22 +297,6 @@ export function Form11Step6() {
     focusField(href.replace('#', ''));
   }
 
-  if (!hasPriorSteps(draft)) {
-    if (!draft.step2.email.trim()) {
-      return <Navigate to="/form-11/step-2" replace />;
-    }
-    if (
-      draft.step3.corporations.filter((entry) => entry.legalName.trim()).length <
-      MIN_AMALGAMATING_NFPS
-    ) {
-      return <Navigate to="/form-11/step-3" replace />;
-    }
-    if (draft.step4.changeName !== 'yes' && draft.step4.changeName !== 'no') {
-      return <Navigate to="/form-11/step-4" replace />;
-    }
-    return <Navigate to="/form-11/step-5" replace />;
-  }
-
   return (
     <>
       <div className={styles.stepIndicator}>
@@ -413,6 +332,7 @@ export function Form11Step6() {
           ) : null}
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Directors</h1>
+          <p className={styles.lead}>{FORM11_DIRECTORS_CAPTION}</p>
           <p className={styles.lead}>
             Provide the first directors of the amalgamated corporation and their addresses
             for service. At least {MIN_DIRECTORS} directors must be added.
