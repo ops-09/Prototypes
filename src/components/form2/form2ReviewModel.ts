@@ -231,7 +231,7 @@ function buildNameRows(step1: Form2Step1Data): ReviewRow[] {
             : 'Not provided',
     },
     {
-      name: 'The name of the co-operative is: (Set out in Block Capital Letters)',
+      name: 'The name of the co-operative is:',
       description: displayOrEmpty(step1.cooperativeName),
     },
   ];
@@ -298,16 +298,9 @@ export function buildReviewSections(draft: Form2Draft): ReviewSection[] {
       ],
     },
     {
-      key: 'cooperativeName',
-      caption: 'Co-operative name',
-      editHref: '/form-2/step-2',
-      complete: isNameStepComplete(draft.step1),
-      rows: buildNameRows(draft.step1),
-    },
-    {
       key: 'typeAndContact',
       caption: 'Co-operative type and official contact',
-      editHref: '/form-2/step-3',
+      editHref: '/form-2/step-2',
       complete: isTypeContactComplete(draft),
       rows: [
         {
@@ -323,6 +316,13 @@ export function buildReviewSections(draft: Form2Draft): ReviewSection[] {
           description: displayOrEmpty(draft.step2.email),
         },
       ],
+    },
+    {
+      key: 'cooperativeName',
+      caption: 'Co-operative name',
+      editHref: '/form-2/step-3',
+      complete: isNameStepComplete(draft.step1),
+      rows: buildNameRows(draft.step1),
     },
     {
       key: 'headOffice',

@@ -219,7 +219,7 @@ function isContactComplete(contact: CoverLetterContact) {
 function buildNameRows(step1: Form1Step1Data): ReviewRow[] {
   const rows: ReviewRow[] = [
     {
-      name: 'The name of the co-operative is: (Set out in Block Capital Letters)',
+      name: 'The name of the co-operative is:',
       description: displayOrEmpty(step1.cooperativeName),
     },
   ];
@@ -286,16 +286,9 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
       ],
     },
     {
-      key: 'cooperativeName',
-      caption: 'Co-operative name',
-      editHref: '/form-1/step-2',
-      complete: isNameStepComplete(draft.step1),
-      rows: buildNameRows(draft.step1),
-    },
-    {
       key: 'typeAndContact',
       caption: 'Co-operative type and official contact',
-      editHref: '/form-1/step-3',
+      editHref: '/form-1/step-2',
       complete: isTypeContactComplete(draft),
       rows: [
         {
@@ -311,6 +304,13 @@ export function buildReviewSections(draft: Form1Draft): ReviewSection[] {
           description: displayOrEmpty(draft.step2.email),
         },
       ],
+    },
+    {
+      key: 'cooperativeName',
+      caption: 'Co-operative name',
+      editHref: '/form-1/step-3',
+      complete: isNameStepComplete(draft.step1),
+      rows: buildNameRows(draft.step1),
     },
     {
       key: 'headOffice',

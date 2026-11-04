@@ -106,7 +106,7 @@ export function formatDirectorCount(step4: DirectorCount) {
 
 export function firstDirectorsTableHtml(directors: PdfDirector[]) {
   return tableHtml(
-    ['Name', 'Address', 'Resident Canadian'],
+    ['Name in full, including all given names', 'Address', 'Resident Canadian'],
     directors.map((director) => [
       formatPdfPersonName(director),
       formatMailingAddress(director.address),
@@ -137,7 +137,7 @@ export function incorporatorAddressesTableHtml(
   directors: PdfDirector[],
 ) {
   return tableHtml(
-    ['Name', 'Residential address'],
+    ['Incorporators full names, including all given names', 'Residential address'],
     incorporators.map((incorporator) => [
       incorporatorName(incorporator, directors),
       formatMailingAddress((linkedDirector(incorporator, directors) ?? incorporator).address),
@@ -150,7 +150,12 @@ export function incorporatorSharesTableHtml(
   directors: PdfDirector[],
 ) {
   return tableHtml(
-    ['Name', 'Number\nof shares', 'Class/\nDesignation', 'Amount to\nbe Paid'],
+    [
+      'Incorporators full names, including all given names',
+      'Number\nof shares',
+      'Class/\nDesignation',
+      'Amount to\nbe Paid',
+    ],
     incorporators.map((incorporator) => [
       incorporatorName(incorporator, directors),
       incorporator.numberOfShares?.trim() || NOT_PROVIDED,
@@ -209,6 +214,11 @@ function signatureRowHtml(values: string[], captions: string[]) {
     </div>`;
 }
 
+const DEFAULT_MINISTRY_LABEL = 'Ministry of Public\nand Business Service Delivery';
+
+/** Header label on Form 1 and Form 2 articles PDFs. */
+export const FORM_1_2_MINISTRY_LABEL = 'Ministry of Government\nand Consumer Services';
+
 /** Ministry-style articles PDF: header, ministry-use block, numbered items, and signatures. */
 export function openArticlesPdf(args: {
   documentTitle: string;
@@ -222,6 +232,14 @@ export function openArticlesPdf(args: {
   actName?: string;
   /** Heading above signature rows. Pass an empty string to omit it. */
   signatureHeading?: string;
+  /** Ministry name under the Ontario logo. A newline becomes a line break. */
+  ministryLabel?: string;
+  /**
+   * When set, the signature block is the next numbered item with this label.
+   * The "Signatures" heading is omitted. Intro copy, when present, sits under
+   * the numbered label and above the signature lines.
+   */
+  signatureItemLabel?: string;
 }) {
   const {
     documentTitle,
@@ -232,6 +250,8 @@ export function openArticlesPdf(args: {
     signatureIntro = [INCORPORATOR_SIGNATURE_INTRO],
     actName = 'Co-operative Corporations Act',
     signatureHeading = 'Signatures',
+    ministryLabel = DEFAULT_MINISTRY_LABEL,
+    signatureItemLabel,
   } = args;
   const logoSrc = `${window.location.origin}${import.meta.env.BASE_URL}assets/ontario-logo--desktop.svg`;
   const itemsHtml = items.map(([label, html], index) => itemHtml(index + 1, label, html)).join('');
@@ -247,6 +267,22 @@ export function openArticlesPdf(args: {
   const signatureSectionClass = signatureHeading
     ? 'signature-section'
     : 'signature-section signature-section--after-execution';
+  const signatureBlockHtml = signatureItemLabel
+    ? itemHtml(
+        items.length + 1,
+        signatureItemLabel,
+        `
+    <div class="signature-section signature-section--after-execution">
+      ${signatureIntroHtml}
+      ${signatureRowsHtml}
+    </div>`,
+      )
+    : `
+  <section class="${signatureSectionClass}">
+    ${signatureHeadingHtml}
+    ${signatureIntroHtml}
+    ${signatureRowsHtml}
+  </section>`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -345,7 +381,9 @@ export function openArticlesPdf(args: {
       color: #1a1a1a;
     }
     .stamp-section {
-      margin: 0 0 2rem;
+      margin: 0 0 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #1a1a1a;
       page-break-inside: avoid;
     }
     .stamp-top {
@@ -381,7 +419,7 @@ export function openArticlesPdf(args: {
 <body>
   <header class="doc-header">
     <img class="doc-logo" src="${escapeHtml(logoSrc)}" alt="Ontario" />
-    <p class="doc-ministry">Ministry of Public<br />and Business Service Delivery</p>
+    <p class="doc-ministry">${escapeHtml(ministryLabel).replace(/\n/g, '<br />')}</p>
     <div>
       <h1 class="doc-title">
 ${titleLines.map((line) => `        <span>${escapeHtml(line)}</span>`).join('\n')}
@@ -400,11 +438,7 @@ ${titleLines.map((line) => `        <span>${escapeHtml(line)}</span>`).join('\n'
     <div class="stamp-box"></div>
   </section>
   ${itemsHtml}
-  <section class="${signatureSectionClass}">
-    ${signatureHeadingHtml}
-    ${signatureIntroHtml}
-    ${signatureRowsHtml}
-  </section>
+  ${signatureBlockHtml}
 </body>
 </html>`;
 

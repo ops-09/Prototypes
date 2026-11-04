@@ -8,12 +8,6 @@
   --search-focus-ring: var(--ontario-global-tokens-radius, 4px);
 }
 
-.autosuggest :global(ontario-hint-text) {
-  display: block;
-  // Spacing to the field comes from .autosuggest gap; avoid ODS hint margin stacking.
-  margin-bottom: 0;
-}
-
 // Keep error + input tight (ODS ontario-error-messaging sits directly above the control).
 .fieldControl {
   display: flex;

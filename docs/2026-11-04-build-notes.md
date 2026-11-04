@@ -2,7 +2,9 @@
 
 GitHub Pages: https://ops-09.github.io/Prototypes/
 
-Commit: `6523d71` — Add Form 14 and Form 15 continuance prototypes and align Form 7 articles copy.
+- `6523d71` — Add Form 14 and Form 15 continuance prototypes and align Form 7 articles copy.
+- `cb4820d` — Simplify Form 7 not-for-profit conversion and add bilingual name examples.
+- Later the same day (not yet pushed): Form 1 and Form 2 step-order and copy updates, and primary-activity example text removed on all forms.
 
 ## Form 14 — Articles of Continuance (with share capital)
 
@@ -40,6 +42,9 @@ Same 10-step flow as Form 14 (`/form-15`), with Step 7 using member-loan / membe
 ### Amendment details (Step 3)
 
 - Convert to not-for-profit no longer shows the number-name radio; a proposed name is always required.
+- Convert to not-for-profit no longer shows the name-language radios; the corporation name and Nuans fields appear immediately.
+- Convert to a business corporation still shows name-language radios when the corporation does not have a number name.
+- Name-field examples: English **GREEN INSTITUTE INC.**; French **Institut Green Inc.**; combined **Green Institute Inc./ Institut Green Inc.**
 - “(Set out in Block Capital Letters)” is removed from Form 7 steps, review, and PDF.
 
 ### Supporting documents (Step 4)
@@ -65,9 +70,30 @@ All articles PDFs now place **This space for ministry use only** under the heade
 
 User-facing **NUANS** → **Nuans** on Forms 1, 2, 3, 7, 10, and 11 (identifiers and URLs unchanged). Shared Before you begin instructions and contact copy apply to forms that use those strings.
 
+## Form 1 and Form 2 — step order
+
+Step 2 and Step 3 are swapped on both forms, including Before you begin, the step indicator, review Change links, and playground cards.
+
+1. Contact information (cover letter).
+2. Co-operative sub-type, primary activity (NAICS), and official email.
+3. Co-operative name and Nuans report (Form 2 also asks whether it is a non-profit organization).
+
+## Form 1 and Form 2 — Before you begin checklist
+
+- Nuans copy is two bullets: the 90-day report requirement, then suppliers / Yellow Pages / **www.nuans.com**.
+- New last bullet links to **Notice – Co-operative Corporations Act – Filings by Co-operative Corporations**.
+
+## Form 1 and Form 2 — name caption
+
+“(Set out in Block Capital Letters)” is removed from the name field, review, and generated articles PDF. The caption is **The name of the co-operative is:**
+
+## Primary activity (all forms)
+
+The **Example: childcare, housing, or manufacturing** hint is removed from the shared NAICS search field. Form 1 and Form 2 also no longer include **Example: 4521 - Department stores** in the primary-activity expander.
+
 ## Playground home
 
-Home page cards and page lists added for Form 14 and Form 15. Existing form cards that mentioned NUANS now say Nuans.
+Home page cards and page lists added for Form 14 and Form 15. Existing form cards that mentioned NUANS now say Nuans. Form 1 and Form 2 Step 2 / Step 3 cards match the swapped order.
 
 ## Not in this build
 

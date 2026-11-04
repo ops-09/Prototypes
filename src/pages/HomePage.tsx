@@ -30,7 +30,7 @@ const PROTOTYPES: PlaygroundCard[] = [
   {
     label: 'Form 1',
     description:
-      'Articles of Incorporation — Before you begin, then cover letter, name and Nuans, and remaining steps.',
+      'Articles of Incorporation — Before you begin, then cover letter, co-operative details, name and Nuans, and remaining steps.',
     href: '/form-1',
     ariaLabelText: 'Open the Form 1 prototype',
   },
@@ -99,15 +99,15 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       },
       {
         label: 'Form 1 — Step 2',
-        description: 'Co-operative name and Nuans report upload.',
+        description: 'Co-operative sub-type, primary activity (NAICS), and official email.',
         href: '/form-1/step-2',
-        ariaLabelText: 'Open Form 1 Step 2 name and Nuans',
+        ariaLabelText: 'Open Form 1 Step 2 type and contact',
       },
       {
         label: 'Form 1 — Step 3',
-        description: 'Co-operative sub-type, primary activity (NAICS), and official email.',
+        description: 'Co-operative name and Nuans report upload.',
         href: '/form-1/step-3',
-        ariaLabelText: 'Open Form 1 Step 3 type and contact',
+        ariaLabelText: 'Open Form 1 Step 3 name and Nuans',
       },
       {
         label: 'Form 1 — Step 4',
@@ -167,15 +167,15 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       },
       {
         label: 'Form 2 — Step 2',
-        description: 'Non-profit question, co-operative name, and Nuans report upload.',
+        description: 'Co-operative sub-type, primary activity (NAICS), and official email.',
         href: '/form-2/step-2',
-        ariaLabelText: 'Open Form 2 Step 2 name and Nuans',
+        ariaLabelText: 'Open Form 2 Step 2 type and contact',
       },
       {
         label: 'Form 2 — Step 3',
-        description: 'Co-operative sub-type, primary activity (NAICS), and official email.',
+        description: 'Non-profit question, co-operative name, and Nuans report upload.',
         href: '/form-2/step-3',
-        ariaLabelText: 'Open Form 2 Step 3 type and contact',
+        ariaLabelText: 'Open Form 2 Step 3 name and Nuans',
       },
       {
         label: 'Form 2 — Step 4',

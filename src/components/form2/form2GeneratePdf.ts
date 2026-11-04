@@ -1,4 +1,5 @@
 import {
+  FORM_1_2_MINISTRY_LABEL,
   NOT_APPLICABLE,
   NOT_PROVIDED,
   firstDirectorsTableHtml,
@@ -20,7 +21,7 @@ function buildItems(draft: Form2Draft): ArticlesPdfItem[] {
 
   return [
     [
-      'The name of the co-operative is: (Set out in Block Capital Letters)',
+      'The name of the co-operative is:',
       valueHtml(step1.cooperativeName.toUpperCase()),
     ],
     ['The head office is at the:', valueHtml(formatHeadOfficeLocation(draft.step3))],
@@ -69,5 +70,7 @@ export function generateForm2ReviewPdf(args: { draft: Form2Draft }) {
     titleLines: ['Articles of Incorporation of a', 'Co-operative without Share Capital', 'Form 2'],
     items: buildItems(draft),
     signatureRows: draft.step7.incorporators.map((entry) => [incorporatorSignatureName(entry)]),
+    signatureItemLabel: 'These articles are executed for delivery to the Minister',
+    ministryLabel: FORM_1_2_MINISTRY_LABEL,
   });
 }

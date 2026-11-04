@@ -105,8 +105,8 @@ function App() {
         <Route path="/form-1" element={<Form1BeforeYouBeginPage />} />
         {/* Cover letter is step 1; Before you begin has no step number. */}
         <Route path="/form-1/step-1" element={<Form1Page />} />
-        <Route path="/form-1/step-2" element={<Form1Step1Page />} />
-        <Route path="/form-1/step-3" element={<Form1Step2Page />} />
+        <Route path="/form-1/step-2" element={<Form1Step2Page />} />
+        <Route path="/form-1/step-3" element={<Form1Step1Page />} />
         <Route path="/form-1/step-4" element={<Form1Step3Page />} />
         <Route path="/form-1/step-5" element={<Form1Step4Page />} />
         <Route
@@ -133,8 +133,8 @@ function App() {
         <Route path="/form-1/draft-summary" element={<Form1DraftSummaryPage />} />
         <Route path="/form-2" element={<Form2BeforeYouBeginPage />} />
         <Route path="/form-2/step-1" element={<Form2Page />} />
-        <Route path="/form-2/step-2" element={<Form2Step1Page />} />
-        <Route path="/form-2/step-3" element={<Form2Step2Page />} />
+        <Route path="/form-2/step-2" element={<Form2Step2Page />} />
+        <Route path="/form-2/step-3" element={<Form2Step1Page />} />
         <Route path="/form-2/step-4" element={<Form2Step3Page />} />
         <Route path="/form-2/step-5" element={<Form2Step4Page />} />
         <Route

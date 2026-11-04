@@ -1,4 +1,4 @@
-import { OntarioHintText, OntarioSearchBox } from '@ongov/ontario-design-system-component-library-react';
+import { OntarioSearchBox } from '@ongov/ontario-design-system-component-library-react';
 import {
   useCallback,
   useEffect,
@@ -391,7 +391,6 @@ export function NaicsSearchAutosuggest({
       ref={containerRef}
       onKeyDownCapture={handleKeyDown}
     >
-      <OntarioHintText hint="Example: childcare, housing, or manufacturing" />
       <div className={styles.fieldControl}>
         <FieldErrorMessage id={errorId} message={errorMessage} />
         <div className={styles.inputClip} ref={clipRef}>

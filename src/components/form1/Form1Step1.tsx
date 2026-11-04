@@ -29,7 +29,7 @@ import { aggregateDateFromEvent } from '../form7/dateErrorSync';
 import { validateNuansDate } from '../form7/nuansValidation';
 import styles from './Form1Step1.module.scss';
 
-const CURRENT_STEP = 2;
+const CURRENT_STEP = 3;
 const TOTAL_STEPS = 10;
 
 type FieldErrors = Partial<{
@@ -274,8 +274,8 @@ export function Form1Step1() {
       return;
     }
 
-    upsertForm1Step1(buildStep1(), 'continue', 1);
-    navigate('/form-1/step-3');
+    upsertForm1Step1(buildStep1(), 'continue', 2);
+    navigate('/form-1/step-4');
   }
 
   function handleSaveAsDraft() {
@@ -302,7 +302,7 @@ export function Form1Step1() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-1/step-1"
+          backButtonUrl="/form-1/step-2"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
@@ -355,7 +355,7 @@ export function Form1Step1() {
           <div className={styles.formStack}>
             <OntarioInput
               elementId="cooperative-name"
-              caption="The name of the co-operative is: (Set out in Block Capital Letters)"
+              caption="The name of the co-operative is:"
               name="cooperative-name"
               required
               requiredValidationMessage={COOPERATIVE_NAME_REQUIRED_ERROR}

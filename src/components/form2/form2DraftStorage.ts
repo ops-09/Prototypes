@@ -855,24 +855,21 @@ export function upsertForm2Step1(
 export function upsertForm2Step2(
   step2: Form2Step2Data,
   mode: Form2Draft['mode'],
-  lastCompletedStep: Form2Draft['lastCompletedStep'] = 2,
-): Form2Draft | null {
+  lastCompletedStep: Form2Draft['lastCompletedStep'] = 1,
+): Form2Draft {
   const existing = readForm2Draft();
-  if (!hasForm2Step1Data(existing?.step1)) {
-    return null;
-  }
   const draft: Form2Draft = {
-    ...existing,
+    step1: existing?.step1 ?? emptyStep1(),
     step2,
-    step3: existing.step3 ?? { ...EMPTY_STEP3 },
-    step4: existing.step4 ?? { ...EMPTY_STEP4 },
-    step5: existing.step5 ?? { ...EMPTY_STEP5 },
-    step6: existing.step6 ?? { ...EMPTY_STEP6 },
-    step7: existing.step7 ?? { ...EMPTY_STEP7 },
-    step8: existing.step8 ?? { ...EMPTY_STEP8 },
+    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
+    step4: existing?.step4 ?? { ...EMPTY_STEP4 },
+    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
+    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
+    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
+    step8: existing?.step8 ?? { ...EMPTY_STEP8 },
     savedAt: new Date().toISOString(),
     mode,
-    lastCompletedStep: maxStep(existing.lastCompletedStep, lastCompletedStep),
+    lastCompletedStep: maxStep(existing?.lastCompletedStep ?? 0, lastCompletedStep),
   };
   saveForm2Draft(draft);
   return draft;

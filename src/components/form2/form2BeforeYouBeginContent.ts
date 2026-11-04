@@ -40,14 +40,14 @@ export const BYB_STEPS: readonly BeforeYouBeginStep[] = [
     description: 'Enter the contact details for the person filing these articles.',
   },
   {
-    title: 'Step 2: Co-operative name',
-    description:
-      'Enter the proposed co-operative name, upload the Nuans report, and provide the Nuans issue date.',
-  },
-  {
-    title: 'Step 3: Co-operative sub-type, primary activity, official email',
+    title: 'Step 2: Co-operative sub-type, primary activity, official email',
     description:
       'Provide the co-operative sub-type, primary activity, and official email.',
+  },
+  {
+    title: 'Step 3: Co-operative name',
+    description:
+      'Enter the proposed co-operative name, upload the Nuans report, and provide the Nuans issue date.',
   },
   {
     title: 'Step 4: Registered office address',
@@ -109,12 +109,20 @@ export const BYB_FORM3_INSTRUCTION =
 export const BYB_FORM3_DOWNLOAD_LABEL = 'Download Form 3';
 
 export const BYB_NUANS_INSTRUCTION =
-  'An Ontario Nuans name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report. Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site.';
+  'An Ontario Nuans name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report.';
 
-export const BYB_NUANS_SITE_URL =
-  'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
+export const BYB_NUANS_SUPPLIERS_BEFORE =
+  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site at ';
 
-export const BYB_NUANS_SITE_LABEL = 'Nuans site';
+export const BYB_NUANS_SITE_URL = 'https://www.nuans.com';
+
+export const BYB_NUANS_SITE_LABEL = 'www.nuans.com';
+
+export const BYB_NUANS_SUPPLIERS_AFTER =
+  ' for a list of registered search houses that can assist you with obtaining a Nuans search report.';
+
+export const NOTICE_CCA_FILINGS_URL =
+  'https://forms.mgcs.gov.on.ca/en/dataset/on00232';
 
 export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   {
@@ -130,9 +138,19 @@ export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
     afterLink: '.',
   },
   {
-    beforeLink: `${BYB_NUANS_INSTRUCTION} `,
+    text: BYB_NUANS_INSTRUCTION,
+  },
+  {
+    beforeLink: BYB_NUANS_SUPPLIERS_BEFORE,
     linkLabel: BYB_NUANS_SITE_LABEL,
     linkHref: BYB_NUANS_SITE_URL,
-    afterLink: '.',
+    afterLink: BYB_NUANS_SUPPLIERS_AFTER,
+  },
+  {
+    beforeLink:
+      'For additional information regarding the required documents, information and other filing requirements, please see the following: ',
+    linkLabel:
+      'Notice – Co-operative Corporations Act – Filings by Co-operative Corporations',
+    linkHref: NOTICE_CCA_FILINGS_URL,
   },
 ];

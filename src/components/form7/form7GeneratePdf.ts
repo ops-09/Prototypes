@@ -1,19 +1,11 @@
 import {
   NOT_PROVIDED,
-  escapeHtml,
   openArticlesPdf,
-  tableHtml,
   valueHtml,
   type ArticlesPdfItem,
 } from '../shared/articlesPdf';
 import type { Form7Draft } from './form7DraftStorage';
 import { formatIsoDateDisplay } from './form7Labels';
-import { buildAmendmentRows } from './form7ReviewModel';
-
-/** Online-flow answers and attachments that are not part of the filed articles. */
-function isArticlesRow(name: string) {
-  return !/nuans/i.test(name) && name !== 'Change co-operative name';
-}
 
 function isChangingCooperativeName(draft: Form7Draft) {
   return (
@@ -28,9 +20,6 @@ function buildItems(draft: Form7Draft): ArticlesPdfItem[] {
   const cooperativeName = changingName
     ? draft.step2.nameNuans.proposedName
     : step1.cooperativeName;
-  const amendmentRows = buildAmendmentRows(draft)
-    .filter((row) => isArticlesRow(row.name))
-    .map((row) => [row.name, row.description]);
 
   const items: ArticlesPdfItem[] = [
     [
@@ -39,13 +28,6 @@ function buildItems(draft: Form7Draft): ArticlesPdfItem[] {
     ],
     ['Date of incorporation/amalgamation:', valueHtml(formatIsoDateDisplay(step1.incorporationDate))],
   ];
-
-  if (!changingName) {
-    items.push([
-      'Amendment details',
-      tableHtml(['Amendment', 'Details'], amendmentRows),
-    ]);
-  }
 
   const resolutionText = step3.certifiedResolutionText?.trim() ?? '';
   items.push([

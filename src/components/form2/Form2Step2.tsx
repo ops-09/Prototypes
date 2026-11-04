@@ -10,25 +10,16 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import { NaicsSearchAutosuggest } from '../form7/NaicsSearchAutosuggest';
 import {
-  createSeedStep1,
   EMPTY_STEP2,
-  EMPTY_STEP3,
-  EMPTY_STEP4,
-  EMPTY_STEP5,
-  EMPTY_STEP6,
-  EMPTY_STEP7,
   FORM2_COOPERATIVE_SUBTYPE_OPTIONS,
-  hasForm2Step1Data,
   OFFICIAL_EMAIL_INFO,
   readForm2Draft,
-  saveForm2Draft,
   upsertForm2Step2,
-  type Form2Draft,
   type Form2Step2Data,
 } from './form2DraftStorage';
 import styles from './Form2Step1.module.scss';
 
-const CURRENT_STEP = 3;
+const CURRENT_STEP = 2;
 const TOTAL_STEPS = 10;
 
 const EMAIL_FORMAT_ERROR = 'Enter a valid email address, like name@example.com.';
@@ -94,38 +85,14 @@ function focusField(anchorId: string) {
   focusable?.focus({ preventScroll: true });
 }
 
-/** Prototype deep-link: seed Step 1 so /form-2/step-3 opens from the playground. */
-function ensureStep2Draft(): Form2Draft {
-  const existing = readForm2Draft();
-  if (hasForm2Step1Data(existing?.step1)) {
-    return existing;
-  }
-
-  const now = new Date().toISOString();
-  const seeded: Form2Draft = {
-    step1: createSeedStep1(),
-    step2: existing?.step2 ?? { ...EMPTY_STEP2 },
-    step3: existing?.step3 ?? { ...EMPTY_STEP3 },
-    step4: existing?.step4 ?? { ...EMPTY_STEP4 },
-    step5: existing?.step5 ?? { ...EMPTY_STEP5 },
-    step6: existing?.step6 ?? { ...EMPTY_STEP6 },
-    step7: existing?.step7 ?? { ...EMPTY_STEP7 },
-    savedAt: now,
-    mode: 'continue',
-    lastCompletedStep: 1,
-  };
-  saveForm2Draft(seeded);
-  return seeded;
-}
-
 export function Form2Step2() {
   const navigate = useNavigate();
-  const draft = ensureStep2Draft();
+  const draft = readForm2Draft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const [step2, setStep2] = useState<Form2Step2Data>(() => ({
     ...EMPTY_STEP2,
-    ...(draft.step2 ?? {}),
+    ...(draft?.step2 ?? {}),
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
@@ -199,12 +166,12 @@ export function Form2Step2() {
       return;
     }
 
-    upsertForm2Step2(step2, 'continue', 2);
-    navigate('/form-2/step-4');
+    upsertForm2Step2(step2, 'continue', 1);
+    navigate('/form-2/step-3');
   }
 
   function handleSaveAsDraft() {
-    upsertForm2Step2(step2, 'draft', draft.lastCompletedStep >= 2 ? 2 : 1);
+    upsertForm2Step2(step2, 'draft', draft?.lastCompletedStep && draft.lastCompletedStep >= 1 ? 1 : 0);
     navigate('/form-2/draft-summary');
   }
 
@@ -227,7 +194,7 @@ export function Form2Step2() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/form-2/step-2"
+          backButtonUrl="/form-2/step-1"
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
@@ -317,7 +284,7 @@ export function Form2Step2() {
                 hint="What is the primary activity?"
                 hintContentType="html"
                 content={
-                  'The primary activity is the main activity of your corporation. Please refer to <a href="https://www.statcan.gc.ca/en/concepts/searchclasscod" target="_blank" rel="noopener noreferrer">North American Industry Classification System (NAICS) Canada</a> for the list of activities. Select the activity that best describes the primary activity carried on by the corporation and provide the activity code from the link in this form. Example: 4521 - Department stores.'
+                  'The primary activity is the main activity of your corporation. Please refer to <a href="https://www.statcan.gc.ca/en/concepts/searchclasscod" target="_blank" rel="noopener noreferrer">North American Industry Classification System (NAICS) Canada</a> for the list of activities. Select the activity that best describes the primary activity carried on by the corporation and provide the activity code from the link in this form.'
                 }
               />
             </div>
