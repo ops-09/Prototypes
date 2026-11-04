@@ -128,7 +128,7 @@ export type Form7Step2Data = {
   nameNuans: NameNuansFields;
   hasNumberName: 'yes' | 'no' | '';
   legalElement: string;
-  /** NFP conversion, not a number name: English / French / combined / separate. */
+  /** BCA conversion without a number name: English / French / combined / separate. */
   nameLanguage: Form7NameLanguage;
   proposedNameFr: string;
   numberNameNuansFile: UploadedFileMeta | null;

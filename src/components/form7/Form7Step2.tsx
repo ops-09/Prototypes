@@ -48,6 +48,10 @@ const COOPERATIVE_NAME_CAPTION =
 const CORPORATION_NAME_CAPTION =
   'The name of the corporation is:';
 const CORPORATION_NAME_CAPTION_FR = `${CORPORATION_NAME_CAPTION} — French`;
+const CORPORATION_NAME_HINT_FR =
+  'Enter the name in block capital letters, as it should appear on the official record. Example: Institut Green Inc.';
+const CORPORATION_NAME_HINT_COMBINED =
+  'Enter the name in block capital letters, as it should appear on the official record. Example: Green Institute Inc./ Institut Green Inc.';
 
 type Step2Errors = NameNuansErrors &
   Partial<{
@@ -385,23 +389,10 @@ export function Form7Step2() {
     }
 
     if (amendmentType === 'convert-not-for-profit') {
-      if (!step2.nameLanguage) {
-        next.nameLanguage = 'Select the language of the corporation name.';
-      } else {
-        Object.assign(
-          next,
-          validateNameNuansFields(step2.nameNuans, 'nfp', validateNfpCorporationName),
-        );
-        if (step2.nameLanguage === 'separate') {
-          const frenchError = validateNfpCorporationName(step2.proposedNameFr);
-          if (frenchError) {
-            next.proposedNameFr =
-              frenchError === 'Enter the not-for-profit corporation name.'
-                ? 'Enter the French not-for-profit corporation name.'
-                : frenchError;
-          }
-        }
-      }
+      Object.assign(
+        next,
+        validateNameNuansFields(step2.nameNuans, 'nfp', validateNfpCorporationName),
+      );
     }
 
     if (amendmentType === 'convert-business-corp') {
@@ -708,11 +699,19 @@ export function Form7Step2() {
                             ? `${CORPORATION_NAME_CAPTION} — English`
                             : CORPORATION_NAME_CAPTION
                         }
+                        proposedNameHint={
+                          step2.nameLanguage === 'french'
+                            ? CORPORATION_NAME_HINT_FR
+                            : step2.nameLanguage === 'combined'
+                              ? CORPORATION_NAME_HINT_COMBINED
+                              : undefined
+                        }
                         secondaryName={
                           step2.nameLanguage === 'separate'
                             ? {
                                 elementId: `${idPrefix}-proposed-name-fr`,
                                 caption: CORPORATION_NAME_CAPTION_FR,
+                                hintText: CORPORATION_NAME_HINT_FR,
                                 value: step2.proposedNameFr,
                                 errorMessage: errors.proposedNameFr,
                                 onInput: (value) => {
@@ -741,63 +740,16 @@ export function Form7Step2() {
                   Every Not-for-Profit corporation must have a name. You need a Nuans
                   report for the proposed name.
                 </p>
-                <div id="name-language">
-                  <OntarioRadioButtons
-                    caption="The corporation will have"
-                    name="name-language"
-                    required
-                    value={step2.nameLanguage}
-                    options={LANGUAGE_OPTIONS}
-                    errorMessage={errors.nameLanguage}
-                    customOnChange={(event) => {
-                      const value = getEventValue(event) as Exclude<
-                        Form7NameLanguage,
-                        ''
-                      >;
-                      patchStep2({
-                        nameLanguage: value,
-                        proposedNameFr:
-                          value === 'separate' ? step2.proposedNameFr : '',
-                        nameNuans: reportsForLanguage(value, step2.nameNuans),
-                      });
-                      clearError('nameLanguage');
-                      if (value !== 'separate') {
-                        clearError('proposedNameFr');
-                      }
-                    }}
-                  />
-                </div>
-                {step2.nameLanguage ? (
-                  <ProposedNameAndNuans
-                    idPrefix={idPrefix}
-                    nameKind="nfp"
-                    proposedNameCaption={
-                      step2.nameLanguage === 'separate'
-                        ? `${CORPORATION_NAME_CAPTION} — English`
-                        : CORPORATION_NAME_CAPTION
-                    }
-                    secondaryName={
-                      step2.nameLanguage === 'separate'
-                        ? {
-                            elementId: `${idPrefix}-proposed-name-fr`,
-                            caption: CORPORATION_NAME_CAPTION_FR,
-                            value: step2.proposedNameFr,
-                            errorMessage: errors.proposedNameFr,
-                            onInput: (value) => {
-                              patchStep2({ proposedNameFr: value });
-                              clearError('proposedNameFr');
-                            },
-                            onBlur: (value) => patchStep2({ proposedNameFr: value }),
-                          }
-                        : undefined
-                    }
-                    value={step2.nameNuans}
-                    errors={errors}
-                    dateValidatorFor={dateValidatorFor}
-                    onChange={setNameNuans}
-                    onClearError={clearError}
-                  />
-                ) : null}
+                <ProposedNameAndNuans
+                  idPrefix={idPrefix}
+                  nameKind="nfp"
+                  proposedNameCaption={CORPORATION_NAME_CAPTION}
+                  value={step2.nameNuans}
+                  errors={errors}
+                  dateValidatorFor={dateValidatorFor}
+                  onChange={setNameNuans}
+                  onClearError={clearError}
+                />
               </div>
             ) : null}
           </div>

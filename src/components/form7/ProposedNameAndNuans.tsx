@@ -40,6 +40,8 @@ type ProposedNameAndNuansProps = {
   leadText?: string | readonly string[];
   /** Overrides the default proposed-name caption. */
   proposedNameCaption?: string;
+  /** Overrides the default proposed-name hint, including the example name. */
+  proposedNameHint?: string;
   /** Optional second proposed-name field (English/French used separately). */
   secondaryName?: {
     elementId: string;
@@ -86,6 +88,7 @@ export function ProposedNameAndNuans({
   nameKind,
   leadText,
   proposedNameCaption,
+  proposedNameHint,
   secondaryName,
   value,
   errors,
@@ -181,7 +184,7 @@ export function ProposedNameAndNuans({
         name={`${idPrefix}-proposed-name`}
         required
         requiredValidationMessage={emptyMessage()}
-        hintText={nameHintText()}
+        hintText={proposedNameHint ?? nameHintText()}
         value={value.proposedName}
         errorMessage={errors.proposedName}
         customOnInput={(event) => {
