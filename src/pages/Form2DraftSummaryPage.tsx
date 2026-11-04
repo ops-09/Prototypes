@@ -71,11 +71,11 @@ export function Form2DraftSummaryPage() {
                   const ordinal = list.length > 1 ? ` ${index + 1}` : '';
                   return [
                     <div key={`${report.id}-file`}>
-                      <dt>NUANS file{ordinal}</dt>
+                      <dt>Nuans file{ordinal}</dt>
                       <dd>{report.file?.name || '—'}</dd>
                     </div>,
                     <div key={`${report.id}-date`}>
-                      <dt>NUANS date{ordinal}</dt>
+                      <dt>Nuans date{ordinal}</dt>
                       <dd>
                         {report.date ? formatIsoDateDisplay(report.date) : '—'}
                       </dd>

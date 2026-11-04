@@ -30,7 +30,7 @@ const PROTOTYPES: PlaygroundCard[] = [
   {
     label: 'Form 1',
     description:
-      'Articles of Incorporation — Before you begin, then cover letter, name and NUANS, and remaining steps.',
+      'Articles of Incorporation — Before you begin, then cover letter, name and Nuans, and remaining steps.',
     href: '/form-1',
     ariaLabelText: 'Open the Form 1 prototype',
   },
@@ -69,6 +69,22 @@ const PROTOTYPES: PlaygroundCard[] = [
     ariaLabelText:
       'Open the Form 11 Application for Letters Patent of Amalgamation prototype',
   },
+  {
+    label: 'Form 14',
+    description:
+      'Articles of Continuance as a Co-operative with Share Capital — instructions, then co-operative details.',
+    href: '/form-14',
+    ariaLabelText:
+      'Open the Form 14 Articles of Continuance with Share Capital prototype',
+  },
+  {
+    label: 'Form 15',
+    description:
+      'Articles of Continuance as a Co-operative without Share Capital — instructions, then co-operative details.',
+    href: '/form-15',
+    ariaLabelText:
+      'Open the Form 15 Articles of Continuance without Share Capital prototype',
+  },
 ];
 
 const PROTOTYPE_PAGES: PageCategory[] = [
@@ -83,9 +99,9 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       },
       {
         label: 'Form 1 — Step 2',
-        description: 'Co-operative name and NUANS report upload.',
+        description: 'Co-operative name and Nuans report upload.',
         href: '/form-1/step-2',
-        ariaLabelText: 'Open Form 1 Step 2 name and NUANS',
+        ariaLabelText: 'Open Form 1 Step 2 name and Nuans',
       },
       {
         label: 'Form 1 — Step 3',
@@ -151,9 +167,9 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       },
       {
         label: 'Form 2 — Step 2',
-        description: 'Non-profit question, co-operative name, and NUANS report upload.',
+        description: 'Non-profit question, co-operative name, and Nuans report upload.',
         href: '/form-2/step-2',
-        ariaLabelText: 'Open Form 2 Step 2 name and NUANS',
+        ariaLabelText: 'Open Form 2 Step 2 name and Nuans',
       },
       {
         label: 'Form 2 — Step 3',
@@ -224,7 +240,7 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       },
       {
         label: 'Form 3 — Step 3',
-        description: 'Corporation name — change the name and upload a NUANS report when required.',
+        description: 'Corporation name — change the name and upload a Nuans report when required.',
         href: '/form-3/step-3',
         ariaLabelText: 'Open Form 3 Step 3 corporation name',
       },
@@ -267,7 +283,7 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       {
         label: 'Form 7 — Step 3',
         description:
-          'Amendment details — type of amendment, name change, and NUANS when required.',
+          'Amendment details — type of amendment, name change, and Nuans when required.',
         href: '/form-7/step-3',
         ariaLabelText: 'Open Form 7 Step 3 amendment details',
       },
@@ -318,7 +334,7 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       {
         label: 'Form 10 — Step 4',
         description:
-          'Co-operative name — change the amalgamated name and upload NUANS if needed.',
+          'Co-operative name — change the amalgamated name and upload Nuans if needed.',
         href: '/form-10/step-4',
         ariaLabelText: 'Open Form 10 Step 4 co-operative name',
       },
@@ -362,7 +378,7 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       {
         label: 'Form 11 — Step 4',
         description:
-          'Amalgamated name — keep an existing amalgamating name or propose a new name with NUANS.',
+          'Amalgamated name — keep an existing amalgamating name or propose a new name with Nuans.',
         href: '/form-11/step-4',
         ariaLabelText: 'Open Form 11 Step 4 amalgamated corporation name',
       },
@@ -398,6 +414,140 @@ const PROTOTYPE_PAGES: PageCategory[] = [
         description: 'Submit — upload the signed PDF, authorize, and submit.',
         href: '/form-11/step-9',
         ariaLabelText: 'Open Form 11 Step 9 submit',
+      },
+    ],
+  },
+  {
+    heading: 'Form 14 pages',
+    cards: [
+      {
+        label: 'Form 14 — Step 2',
+        description:
+          'Co-operative details — sub-type, primary activity (NAICS), and official email.',
+        href: '/form-14/step-2',
+        ariaLabelText: 'Open Form 14 Step 2 co-operative details',
+      },
+      {
+        label: 'Form 14 — Step 3',
+        description:
+          'Current corporation name and proposed co-operative name with Nuans reports.',
+        href: '/form-14/step-3',
+        ariaLabelText: 'Open Form 14 Step 3 co-operative name',
+      },
+      {
+        label: 'Form 14 — Step 4',
+        description:
+          'Original incorporating Act and the corporation’s incorporation or amalgamation date.',
+        href: '/form-14/step-4',
+        ariaLabelText: 'Open Form 14 Step 4 original incorporation',
+      },
+      {
+        label: 'Form 14 — Step 5',
+        description: 'Head office address — postal code lookup and Ontario address fields.',
+        href: '/form-14/step-5',
+        ariaLabelText: 'Open Form 14 Step 5 head office address',
+      },
+      {
+        label: 'Form 14 — Step 6',
+        description:
+          'Director count, multi-stakeholder groups, written consent, and first directors.',
+        href: '/form-14/step-6',
+        ariaLabelText: 'Open Form 14 Step 6 directors',
+      },
+      {
+        label: 'Form 14 — Step 7',
+        description:
+          'Restrictions on business and powers, authorized capital, preference terms, and issued capital continued.',
+        href: '/form-14/step-7',
+        ariaLabelText: 'Open Form 14 Step 7 restrictions and share capital',
+      },
+      {
+        label: 'Form 14 — Step 8',
+        description:
+          'Membership classes and terms, stakeholder groups and terms, and special provisions.',
+        href: '/form-14/step-8',
+        ariaLabelText: 'Open Form 14 Step 8 membership and provisions',
+      },
+      {
+        label: 'Form 14 — Step 9',
+        description:
+          'Declarations, authorizing Act and jurisdiction, and the date continuation was authorized.',
+        href: '/form-14/step-9',
+        ariaLabelText: 'Open Form 14 Step 9 declarations and authorization',
+      },
+      {
+        label: 'Form 14 — Step 10',
+        description:
+          'Review — read-only summary of the filing with Change links back to each step.',
+        href: '/form-14/step-10',
+        ariaLabelText: 'Open Form 14 Step 10 review',
+      },
+    ],
+  },
+  {
+    heading: 'Form 15 pages',
+    cards: [
+      {
+        label: 'Form 15 — Step 2',
+        description:
+          'Co-operative details — sub-type, primary activity (NAICS), and official email.',
+        href: '/form-15/step-2',
+        ariaLabelText: 'Open Form 15 Step 2 co-operative details',
+      },
+      {
+        label: 'Form 15 — Step 3',
+        description:
+          'Current corporation name and proposed co-operative name with Nuans reports.',
+        href: '/form-15/step-3',
+        ariaLabelText: 'Open Form 15 Step 3 co-operative name',
+      },
+      {
+        label: 'Form 15 — Step 4',
+        description:
+          'Original incorporating Act and the corporation’s incorporation or amalgamation date.',
+        href: '/form-15/step-4',
+        ariaLabelText: 'Open Form 15 Step 4 original incorporation',
+      },
+      {
+        label: 'Form 15 — Step 5',
+        description: 'Head office address — postal code lookup and Ontario address fields.',
+        href: '/form-15/step-5',
+        ariaLabelText: 'Open Form 15 Step 5 head office address',
+      },
+      {
+        label: 'Form 15 — Step 6',
+        description:
+          'Director count, multi-stakeholder groups, written consent, and first directors.',
+        href: '/form-15/step-6',
+        ariaLabelText: 'Open Form 15 Step 6 directors',
+      },
+      {
+        label: 'Form 15 — Step 7',
+        description:
+          'Restrictions on business and powers, minimum member loan, loan-transfer restrictions, and membership fee.',
+        href: '/form-15/step-7',
+        ariaLabelText: 'Open Form 15 Step 7 restrictions and member loans',
+      },
+      {
+        label: 'Form 15 — Step 8',
+        description:
+          'Membership classes and terms, stakeholder groups and terms, and special provisions.',
+        href: '/form-15/step-8',
+        ariaLabelText: 'Open Form 15 Step 8 membership and provisions',
+      },
+      {
+        label: 'Form 15 — Step 9',
+        description:
+          'Declarations, authorizing Act and jurisdiction, and the date continuation was authorized.',
+        href: '/form-15/step-9',
+        ariaLabelText: 'Open Form 15 Step 9 declarations and authorization',
+      },
+      {
+        label: 'Form 15 — Step 10',
+        description:
+          'Review — read-only summary of the filing with Change links back to each step.',
+        href: '/form-15/step-10',
+        ariaLabelText: 'Open Form 15 Step 10 review',
       },
     ],
   },

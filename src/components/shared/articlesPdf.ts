@@ -209,7 +209,7 @@ function signatureRowHtml(values: string[], captions: string[]) {
     </div>`;
 }
 
-/** Ministry-style articles PDF: header, numbered items, signatures and ministry use box. */
+/** Ministry-style articles PDF: header, ministry-use block, numbered items, and signatures. */
 export function openArticlesPdf(args: {
   documentTitle: string;
   titleLines: string[];
@@ -220,6 +220,8 @@ export function openArticlesPdf(args: {
   signatureCaptions?: string[];
   signatureIntro?: string[];
   actName?: string;
+  /** Heading above signature rows. Pass an empty string to omit it. */
+  signatureHeading?: string;
 }) {
   const {
     documentTitle,
@@ -229,6 +231,7 @@ export function openArticlesPdf(args: {
     signatureCaptions = [INCORPORATOR_NAME_CAPTION],
     signatureIntro = [INCORPORATOR_SIGNATURE_INTRO],
     actName = 'Co-operative Corporations Act',
+    signatureHeading = 'Signatures',
   } = args;
   const logoSrc = `${window.location.origin}${import.meta.env.BASE_URL}assets/ontario-logo--desktop.svg`;
   const itemsHtml = items.map(([label, html], index) => itemHtml(index + 1, label, html)).join('');
@@ -238,6 +241,12 @@ export function openArticlesPdf(args: {
   const signatureIntroHtml = signatureIntro
     .map((paragraph) => `<p class="signature-intro">${escapeHtml(paragraph)}</p>`)
     .join('\n    ');
+  const signatureHeadingHtml = signatureHeading
+    ? `<h2 class="signature-heading">${escapeHtml(signatureHeading)}</h2>`
+    : '';
+  const signatureSectionClass = signatureHeading
+    ? 'signature-section'
+    : 'signature-section signature-section--after-execution';
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -253,7 +262,7 @@ export function openArticlesPdf(args: {
       gap: 1.5rem;
       align-items: start;
       padding-bottom: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       border-bottom: 2px solid #1a1a1a;
     }
     /* The ODS logo asset is white for the dark app header; invert it for print on white. */
@@ -270,7 +279,33 @@ export function openArticlesPdf(args: {
     th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.75rem 0.5rem 0; border-bottom: 1px solid #ccc; }
     td { white-space: pre-wrap; }
     th { font-weight: 700; border-bottom-color: #1a1a1a; white-space: normal; }
+    .certified-block { margin: 0.5rem 0 0 1.75rem; }
+    .certified-label {
+      margin: 0 0 0.5rem;
+      font-family: "Raleway Modified", "Open Sans", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .certified-name {
+      box-sizing: border-box;
+      min-height: 2.5rem;
+      display: flex;
+      align-items: center;
+      padding: 0.35rem 0.75rem;
+      background-color: #dce6ff;
+      font-weight: 700;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .certified-caption {
+      display: block;
+      margin: 0.25rem 0 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+    .certified-by { margin: 0 0 0.75rem; font-size: 1rem; }
     .signature-section { margin-top: 2.5rem; page-break-inside: avoid; }
+    .signature-section--after-execution { margin-top: 0; margin-left: 1.75rem; }
     .signature-heading { margin: 0 0 0.5rem; font-size: 1rem; }
     .signature-intro { margin: 0 0 1.5rem; }
     .signature-intro + .signature-intro { margin-top: -1.25rem; }
@@ -310,15 +345,22 @@ export function openArticlesPdf(args: {
       color: #1a1a1a;
     }
     .stamp-section {
-      margin-top: 2.5rem;
+      margin: 0 0 2rem;
       page-break-inside: avoid;
     }
+    .stamp-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      align-items: end;
+      margin-bottom: 0.75rem;
+    }
     .stamp-heading {
-      margin: 0 0 0.75rem;
+      margin: 0;
       font-size: 1rem;
       font-weight: 700;
     }
-    .ocn-field { width: 16rem; margin-bottom: 1.25rem; }
+    .ocn-field { width: 16rem; margin: 0; justify-self: end; }
     .ocn-line {
       box-sizing: border-box;
       width: 100%;
@@ -347,20 +389,22 @@ ${titleLines.map((line) => `        <span>${escapeHtml(line)}</span>`).join('\n'
       <p class="doc-act">${escapeHtml(actName)}</p>
     </div>
   </header>
+  <section class="stamp-section" aria-label="This space for ministry use only">
+    <div class="stamp-top">
+      <h2 class="stamp-heading">This space for ministry use only</h2>
+      <div class="ocn-field">
+        <div class="ocn-line"></div>
+        <span class="field-label">Ontario Corporation Number</span>
+      </div>
+    </div>
+    <div class="stamp-box"></div>
+  </section>
   ${itemsHtml}
-  <section class="signature-section">
-    <h2 class="signature-heading">Signatures</h2>
+  <section class="${signatureSectionClass}">
+    ${signatureHeadingHtml}
     ${signatureIntroHtml}
     ${signatureRowsHtml}
   </section>
-  <footer class="stamp-section" aria-label="This space for ministry use only">
-    <h2 class="stamp-heading">This space for ministry use only</h2>
-    <div class="ocn-field">
-      <div class="ocn-line"></div>
-      <span class="field-label">Ontario Corporation Number</span>
-    </div>
-    <div class="stamp-box"></div>
-  </footer>
 </body>
 </html>`;
 

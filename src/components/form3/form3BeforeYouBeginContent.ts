@@ -37,7 +37,7 @@ export const BYB_STEPS: readonly BeforeYouBeginStep[] = [
   {
     title: 'Step 3: Corporation name',
     description:
-      'Indicate whether the application includes a name change, and provide a NUANS report when a new name is proposed.',
+      'Indicate whether the application includes a name change, and provide a Nuans report when a new name is proposed.',
   },
   {
     title: 'Step 4: Supplementary letters patent',
@@ -56,12 +56,12 @@ export const BYB_DOCUMENTS_INTRO =
   'You should have the following information available to complete your submission:';
 
 export const BYB_NUANS_INSTRUCTION =
-  'Suppliers of NUANS reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s NUANS site.';
+  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site.';
 
 export const BYB_NUANS_SITE_URL =
   'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
 
-export const BYB_NUANS_SITE_LABEL = 'NUANS site';
+export const BYB_NUANS_SITE_LABEL = 'Nuans site';
 
 export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   { text: 'The Ontario Corporation Number (OCN) of the corporation.' },
@@ -71,12 +71,12 @@ export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   {
     text: 'Details of the provisions for which Supplementary Letters Patent are being requested.',
   },
-  { text: 'A NUANS Name Search Report is required when the application includes a name change.' },
+  { text: 'A Nuans Name Search Report is required when the application includes a name change.' },
   {
-    text: 'The NUANS Report must be dated within 90 days of the filing date.',
+    text: 'The Nuans Report must be dated within 90 days of the filing date.',
   },
   {
-    text: 'A separate NUANS Report may be required for English and French names that are to be used separately.',
+    text: 'A separate Nuans Report may be required for English and French names that are to be used separately.',
   },
   {
     text: 'If the proposed name of the corporation is similar to the name of an existing corporation, organization, registered business or includes the name of a person, consent to use the name may be requested from the corporation, organization, business or individual.',
@@ -87,7 +87,7 @@ export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   { text: 'Certified copy of the authorizing resolution.' },
   { text: 'Supporting legal documents.' },
   { text: 'Consent documents (if required).' },
-  { text: 'NUANS Report (if a name change is requested).' },
+  { text: 'Nuans Report (if a name change is requested).' },
   {
     beforeLink: `${BYB_NUANS_INSTRUCTION} `,
     linkLabel: BYB_NUANS_SITE_LABEL,

@@ -42,7 +42,7 @@ export const BYB_STEPS: readonly BeforeYouBeginStep[] = [
   {
     title: 'Step 2: Co-operative name',
     description:
-      'Enter the proposed co-operative name, upload the NUANS report, and provide the NUANS issue date.',
+      'Enter the proposed co-operative name, upload the Nuans report, and provide the Nuans issue date.',
   },
   {
     title: 'Step 3: Co-operative sub-type, primary activity, official email',
@@ -107,12 +107,12 @@ export const BYB_FORM3_INSTRUCTION =
 export const BYB_FORM3_DOWNLOAD_LABEL = 'Download Form 3';
 
 export const BYB_NUANS_INSTRUCTION =
-  'An Ontario NUANS name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report. Suppliers of NUANS reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s NUANS site.';
+  'An Ontario Nuans name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report. Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site.';
 
 export const BYB_NUANS_SITE_URL =
   'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
 
-export const BYB_NUANS_SITE_LABEL = 'NUANS site';
+export const BYB_NUANS_SITE_LABEL = 'Nuans site';
 
 export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   {

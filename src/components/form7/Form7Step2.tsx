@@ -44,9 +44,9 @@ import styles from './Form7Step1.module.scss';
 const CURRENT_STEP = 3;
 const TOTAL_STEPS = 6;
 const COOPERATIVE_NAME_CAPTION =
-  'The name of the co-operative is: (Set out in Block Capital Letters)';
+  'The name of the co-operative is:';
 const CORPORATION_NAME_CAPTION =
-  'The name of the corporation is: (Set out in Block Capital Letters)';
+  'The name of the corporation is:';
 const CORPORATION_NAME_CAPTION_FR = `${CORPORATION_NAME_CAPTION} — French`;
 
 type Step2Errors = NameNuansErrors &
@@ -385,25 +385,20 @@ export function Form7Step2() {
     }
 
     if (amendmentType === 'convert-not-for-profit') {
-      if (!step2.hasNumberName) {
-        next.hasNumberName =
-          'Select whether this Not-for-Profit corporation will have a number name.';
-      } else if (step2.hasNumberName === 'no') {
-        if (!step2.nameLanguage) {
-          next.nameLanguage = 'Select the language of the corporation name.';
-        } else {
-          Object.assign(
-            next,
-            validateNameNuansFields(step2.nameNuans, 'nfp', validateNfpCorporationName),
-          );
-          if (step2.nameLanguage === 'separate') {
-            const frenchError = validateNfpCorporationName(step2.proposedNameFr);
-            if (frenchError) {
-              next.proposedNameFr =
-                frenchError === 'Enter the not-for-profit corporation name.'
-                  ? 'Enter the French not-for-profit corporation name.'
-                  : frenchError;
-            }
+      if (!step2.nameLanguage) {
+        next.nameLanguage = 'Select the language of the corporation name.';
+      } else {
+        Object.assign(
+          next,
+          validateNameNuansFields(step2.nameNuans, 'nfp', validateNfpCorporationName),
+        );
+        if (step2.nameLanguage === 'separate') {
+          const frenchError = validateNfpCorporationName(step2.proposedNameFr);
+          if (frenchError) {
+            next.proposedNameFr =
+              frenchError === 'Enter the not-for-profit corporation name.'
+                ? 'Enter the French not-for-profit corporation name.'
+                : frenchError;
           }
         }
       }
@@ -486,7 +481,7 @@ export function Form7Step2() {
     patchStep2({
       amendmentType: nextType,
       changeCooperativeName: '',
-      hasNumberName: '',
+      hasNumberName: nextType === 'convert-not-for-profit' ? 'no' : '',
       legalElement: '',
       nameLanguage: '',
       proposedNameFr: '',
@@ -608,7 +603,7 @@ export function Form7Step2() {
                     nameKind="cooperative"
                     proposedNameCaption={COOPERATIVE_NAME_CAPTION}
                     leadText={[
-                      'An Ontario NUANS name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report.',
+                      'An Ontario Nuans name search report for the proposed name of the co-operative. The search report must be submitted with the application within 90 days of the production of the report.',
                       'The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the name. The name of the co-operative must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “LIMITED”, “LIMITÉE”, “INC.”, “CORP.”, “LTD.” or “LTÉE”.',
                     ]}
                     value={step2.nameNuans}
@@ -742,102 +737,66 @@ export function Form7Step2() {
 
             {amendmentType === 'convert-not-for-profit' ? (
               <div className={styles.formStack}>
-                <div id="corp-has-name">
+                <p className={styles.lead}>
+                  Every Not-for-Profit corporation must have a name. You need a Nuans
+                  report for the proposed name.
+                </p>
+                <div id="name-language">
                   <OntarioRadioButtons
-                    caption={{
-                      captionText:
-                        'Will this Not-for-Profit corporation have a number name?',
-                      captionType: 'default',
-                    }}
-                    name="nfp-has-name"
+                    caption="The corporation will have"
+                    name="name-language"
                     required
-                    value={step2.hasNumberName}
-                    options={hasNameOptions}
-                    errorMessage={errors.hasNumberName}
+                    value={step2.nameLanguage}
+                    options={LANGUAGE_OPTIONS}
+                    errorMessage={errors.nameLanguage}
                     customOnChange={(event) => {
-                      const value = getEventValue(event) as 'yes' | 'no';
+                      const value = getEventValue(event) as Exclude<
+                        Form7NameLanguage,
+                        ''
+                      >;
                       patchStep2({
-                        hasNumberName: value,
-                        legalElement: '',
-                        nameLanguage: value === 'no' ? step2.nameLanguage : '',
-                        proposedNameFr: value === 'no' ? step2.proposedNameFr : '',
-                        numberNameNuansFile: null,
-                        numberNameNuansDate: '',
-                        nameNuans: value === 'no' ? step2.nameNuans : emptyNameNuans(),
+                        nameLanguage: value,
+                        proposedNameFr:
+                          value === 'separate' ? step2.proposedNameFr : '',
+                        nameNuans: reportsForLanguage(value, step2.nameNuans),
                       });
-                      clearError('hasNumberName');
-                      if (value !== 'no') {
-                        clearError('nameLanguage');
+                      clearError('nameLanguage');
+                      if (value !== 'separate') {
                         clearError('proposedNameFr');
                       }
                     }}
                   />
                 </div>
-
-                {step2.hasNumberName === 'no' ? (
-                  <>
-                    <p className={styles.lead}>
-                      Every Not-for-Profit corporation must have a name. You need a NUANS
-                      report for the proposed name.
-                    </p>
-                    <div id="name-language">
-                      <OntarioRadioButtons
-                        caption="The corporation will have"
-                        name="name-language"
-                        required
-                        value={step2.nameLanguage}
-                        options={LANGUAGE_OPTIONS}
-                        errorMessage={errors.nameLanguage}
-                        customOnChange={(event) => {
-                          const value = getEventValue(event) as Exclude<
-                            Form7NameLanguage,
-                            ''
-                          >;
-                          patchStep2({
-                            nameLanguage: value,
-                            proposedNameFr:
-                              value === 'separate' ? step2.proposedNameFr : '',
-                            nameNuans: reportsForLanguage(value, step2.nameNuans),
-                          });
-                          clearError('nameLanguage');
-                          if (value !== 'separate') {
-                            clearError('proposedNameFr');
+                {step2.nameLanguage ? (
+                  <ProposedNameAndNuans
+                    idPrefix={idPrefix}
+                    nameKind="nfp"
+                    proposedNameCaption={
+                      step2.nameLanguage === 'separate'
+                        ? `${CORPORATION_NAME_CAPTION} — English`
+                        : CORPORATION_NAME_CAPTION
+                    }
+                    secondaryName={
+                      step2.nameLanguage === 'separate'
+                        ? {
+                            elementId: `${idPrefix}-proposed-name-fr`,
+                            caption: CORPORATION_NAME_CAPTION_FR,
+                            value: step2.proposedNameFr,
+                            errorMessage: errors.proposedNameFr,
+                            onInput: (value) => {
+                              patchStep2({ proposedNameFr: value });
+                              clearError('proposedNameFr');
+                            },
+                            onBlur: (value) => patchStep2({ proposedNameFr: value }),
                           }
-                        }}
-                      />
-                    </div>
-                    {step2.nameLanguage ? (
-                      <ProposedNameAndNuans
-                        idPrefix={idPrefix}
-                        nameKind="nfp"
-                        proposedNameCaption={
-                          step2.nameLanguage === 'separate'
-                            ? `${CORPORATION_NAME_CAPTION} — English`
-                            : CORPORATION_NAME_CAPTION
-                        }
-                        secondaryName={
-                          step2.nameLanguage === 'separate'
-                            ? {
-                                elementId: `${idPrefix}-proposed-name-fr`,
-                                caption: CORPORATION_NAME_CAPTION_FR,
-                                value: step2.proposedNameFr,
-                                errorMessage: errors.proposedNameFr,
-                                onInput: (value) => {
-                                  patchStep2({ proposedNameFr: value });
-                                  clearError('proposedNameFr');
-                                },
-                                onBlur: (value) => patchStep2({ proposedNameFr: value }),
-                              }
-                            : undefined
-                        }
-                        value={step2.nameNuans}
-                        errors={errors}
-                        dateValidatorFor={dateValidatorFor}
-                        onChange={setNameNuans}
-                        onClearError={clearError}
-                      />
-                    ) : null}
-                  </>
+                        : undefined
+                    }
+                    value={step2.nameNuans}
+                    errors={errors}
+                    dateValidatorFor={dateValidatorFor}
+                    onChange={setNameNuans}
+                    onClearError={clearError}
+                  />
                 ) : null}
               </div>
             ) : null}

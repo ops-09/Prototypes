@@ -240,11 +240,11 @@ function buildNameRows(step1: Form2Step1Data): ReviewRow[] {
   if (reports.length === 0) {
     rows.push(
       {
-        name: 'NUANS report',
+        name: 'Nuans report',
         description: 'Not provided',
       },
       {
-        name: 'NUANS report date',
+        name: 'Nuans report date',
         description: 'Not provided',
       },
     );
@@ -255,12 +255,12 @@ function buildNameRows(step1: Form2Step1Data): ReviewRow[] {
     const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
     rows.push(
       {
-        name: `NUANS report${ordinal}`,
+        name: `Nuans report${ordinal}`,
         description: report.file?.name ?? 'Not provided',
         files: report.file ? [report.file] : undefined,
       },
       {
-        name: `NUANS report${ordinal} date`,
+        name: `Nuans report${ordinal} date`,
         description: formatIsoDateDisplay(report.date),
       },
     );

@@ -51,7 +51,7 @@ export function ensureStep4Draft() {
           {
             ...createEmptyNuansReport(),
             file: {
-              name: 'NUANS-Maple-Leaf.pdf',
+              name: 'Nuans-Maple-Leaf.pdf',
               size: 245760,
               type: 'application/pdf',
             },

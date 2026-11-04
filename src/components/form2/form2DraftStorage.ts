@@ -4,7 +4,7 @@ export const FORM2_DRAFT_STORAGE_KEY = 'ops-rbac.form2.draft';
 /** @deprecated legacy key — migrated on read */
 const LEGACY_STEP1_STORAGE_KEY = 'ops-rbac.form2.step1.draft';
 
-/** Maximum NUANS reports a filer can attach for a proposed name. */
+/** Maximum Nuans reports a filer can attach for a proposed name. */
 export const MAX_NUANS_REPORTS = 5;
 
 export type NuansReportEntry = {
@@ -45,7 +45,7 @@ export function createSeedStep1(): Form2Step1Data {
       {
         ...createEmptyNuansReport(),
         file: {
-          name: 'NUANS-Green-Institute.pdf',
+          name: 'Nuans-Green-Institute.pdf',
           size: 184320,
           type: 'application/pdf',
         },
@@ -73,7 +73,7 @@ type LegacyForm2Step1Data = {
   nuansReports?: NuansReportEntry[];
 };
 
-/** Normalize current or legacy Step 1 shapes into name + NUANS report list. */
+/** Normalize current or legacy Step 1 shapes into name + Nuans report list. */
 export function normalizeStep1(raw: unknown): Form2Step1Data {
   if (!raw || typeof raw !== 'object') {
     return emptyStep1();

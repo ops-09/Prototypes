@@ -334,7 +334,7 @@ export function Form11Step4() {
                 idPrefix={ID_PREFIX}
                 nameKind="corporation"
                 proposedNameCaption={FORM11_AMALGAMATED_NAME_CAPTION}
-                leadText="An Ontario NUANS name search report for the proposed name of the corporation. The search report must be submitted with the application within 90 days of the production of the report."
+                leadText="An Ontario Nuans name search report for the proposed name of the corporation. The search report must be submitted with the application within 90 days of the production of the report."
                 value={step4.nameNuans}
                 errors={errors}
                 dateValidatorFor={dateValidatorFor}

@@ -220,12 +220,12 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
                 const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
                 return [
                   {
-                    name: `NUANS report${ordinal}`,
+                    name: `Nuans report${ordinal}`,
                     description: report.file?.name ?? 'Not uploaded',
                     files: report.file ? [report.file] : undefined,
                   },
                   {
-                    name: `NUANS report${ordinal} date`,
+                    name: `Nuans report${ordinal} date`,
                     description: report.date ? formatIsoDateDisplay(report.date) : 'Not provided',
                   },
                 ];

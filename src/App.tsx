@@ -66,6 +66,30 @@ import { Form11Step6Page } from './pages/Form11Step6Page';
 import { Form11Step7Page } from './pages/Form11Step7Page';
 import { Form11Step8Page } from './pages/Form11Step8Page';
 import { Form11Step9Page } from './pages/Form11Step9Page';
+import { Form14DraftSummaryPage } from './pages/Form14DraftSummaryPage';
+import { Form14InstructionsPage } from './pages/Form14InstructionsPage';
+import { Form14Step2Page } from './pages/Form14Step2Page';
+import { Form14Step3Page } from './pages/Form14Step3Page';
+import { Form14Step4Page } from './pages/Form14Step4Page';
+import { Form14Step5Page } from './pages/Form14Step5Page';
+import { Form14DirectorSubflowPage } from './pages/Form14DirectorSubflowPage';
+import { Form14Step6Page } from './pages/Form14Step6Page';
+import { Form14Step7Page } from './pages/Form14Step7Page';
+import { Form14Step8Page } from './pages/Form14Step8Page';
+import { Form14Step9Page } from './pages/Form14Step9Page';
+import { Form14Step10Page } from './pages/Form14Step10Page';
+import { Form15DraftSummaryPage } from './pages/Form15DraftSummaryPage';
+import { Form15InstructionsPage } from './pages/Form15InstructionsPage';
+import { Form15Step2Page } from './pages/Form15Step2Page';
+import { Form15Step3Page } from './pages/Form15Step3Page';
+import { Form15Step4Page } from './pages/Form15Step4Page';
+import { Form15Step5Page } from './pages/Form15Step5Page';
+import { Form15DirectorSubflowPage } from './pages/Form15DirectorSubflowPage';
+import { Form15Step6Page } from './pages/Form15Step6Page';
+import { Form15Step7Page } from './pages/Form15Step7Page';
+import { Form15Step8Page } from './pages/Form15Step8Page';
+import { Form15Step9Page } from './pages/Form15Step9Page';
+import { Form15Step10Page } from './pages/Form15Step10Page';
 import { HomePage } from './pages/HomePage';
 import { InviteUserPage } from './pages/InviteUserPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
@@ -197,6 +221,34 @@ function App() {
         <Route path="/form-11/step-8" element={<Form11Step8Page />} />
         <Route path="/form-11/step-9" element={<Form11Step9Page />} />
         <Route path="/form-11/draft-summary" element={<Form11DraftSummaryPage />} />
+
+        <Route path="/form-14" element={<Form14InstructionsPage />} />
+        <Route path="/form-14/step-2" element={<Form14Step2Page />} />
+        <Route path="/form-14/step-3" element={<Form14Step3Page />} />
+        <Route path="/form-14/step-4" element={<Form14Step4Page />} />
+        <Route path="/form-14/step-5" element={<Form14Step5Page />} />
+        <Route path="/form-14/step-6" element={<Form14Step6Page />} />
+        <Route path="/form-14/step-6/directors/new" element={<Form14DirectorSubflowPage />} />
+        <Route path="/form-14/step-6/directors/:directorId" element={<Form14DirectorSubflowPage />} />
+        <Route path="/form-14/step-7" element={<Form14Step7Page />} />
+        <Route path="/form-14/step-8" element={<Form14Step8Page />} />
+        <Route path="/form-14/step-9" element={<Form14Step9Page />} />
+        <Route path="/form-14/step-10" element={<Form14Step10Page />} />
+        <Route path="/form-14/draft-summary" element={<Form14DraftSummaryPage />} />
+
+        <Route path="/form-15" element={<Form15InstructionsPage />} />
+        <Route path="/form-15/step-2" element={<Form15Step2Page />} />
+        <Route path="/form-15/step-3" element={<Form15Step3Page />} />
+        <Route path="/form-15/step-4" element={<Form15Step4Page />} />
+        <Route path="/form-15/step-5" element={<Form15Step5Page />} />
+        <Route path="/form-15/step-6" element={<Form15Step6Page />} />
+        <Route path="/form-15/step-6/directors/new" element={<Form15DirectorSubflowPage />} />
+        <Route path="/form-15/step-6/directors/:directorId" element={<Form15DirectorSubflowPage />} />
+        <Route path="/form-15/step-7" element={<Form15Step7Page />} />
+        <Route path="/form-15/step-8" element={<Form15Step8Page />} />
+        <Route path="/form-15/step-9" element={<Form15Step9Page />} />
+        <Route path="/form-15/step-10" element={<Form15Step10Page />} />
+        <Route path="/form-15/draft-summary" element={<Form15DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/user-management/invite" element={<InviteUserPage />} />

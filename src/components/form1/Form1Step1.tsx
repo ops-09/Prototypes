@@ -241,7 +241,7 @@ export function Form1Step1() {
 
     for (const report of reports) {
       if (!report.file) {
-        next[nuansFileErrorKey(report.id)] = 'Upload a NUANS report.';
+        next[nuansFileErrorKey(report.id)] = 'Upload a Nuans report.';
       }
       const dateError = validateNuansDate(report.date);
       if (dateError) {
@@ -335,13 +335,13 @@ export function Form1Step1() {
 
           <p className={styles.lead}>
             Enter the co-operative&apos;s proposed name as it should appear on the official
-            record (in block capital letters), and provide the NUANS report that confirms the
-            name is available. Obtain your NUANS name search report before completing this
+            record (in block capital letters), and provide the Nuans report that confirms the
+            name is available. Obtain your Nuans name search report before completing this
             step.
           </p>
 
           <p className={styles.body}>
-            An Ontario NUANS name search report for the proposed name of the co-operative. The
+            An Ontario Nuans name search report for the proposed name of the co-operative. The
             search report must be submitted with the application within 90 days of the
             production of the report.
           </p>
@@ -383,7 +383,7 @@ export function Form1Step1() {
                       type="button"
                       className={styles.removeLink}
                       onClick={() => removeReport(report.id)}
-                      aria-label={`Remove NUANS report ${index + 1}`}
+                      aria-label={`Remove Nuans report ${index + 1}`}
                     >
                       <OntarioIconDelete colour="inherit" iconWidth={24} isDecorative />
                       Remove
@@ -393,11 +393,11 @@ export function Form1Step1() {
                   <FileUpload
                     label={
                       reports.length > 1
-                        ? `Upload NUANS report${ordinal}`
-                        : 'Upload NUANS report'
+                        ? `Upload Nuans report${ordinal}`
+                        : 'Upload Nuans report'
                     }
                     required
-                    hintText="Upload the NUANS report that confirms the proposed name is available."
+                    hintText="Upload the Nuans report that confirms the proposed name is available."
                     value={report.file}
                     errorMessage={errors[fileKey]}
                     onChange={(meta) => setReportFile(report.id, meta)}
@@ -409,8 +409,8 @@ export function Form1Step1() {
                       elementId={`nuans-date-${report.id}-input`}
                       caption={
                         reports.length > 1
-                          ? `NUANS report${ordinal} date`
-                          : 'NUANS report date'
+                          ? `Nuans report${ordinal} date`
+                          : 'Nuans report date'
                       }
                       required
                       value={report.date || undefined}
@@ -439,12 +439,12 @@ export function Form1Step1() {
               <div className={styles.addActions}>
                 <button type="button" className={styles.addLink} onClick={addReport}>
                   <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
-                  Add another NUANS report
+                  Add another Nuans report
                 </button>
               </div>
             ) : (
               <p className={styles.nuansMaxNote}>
-                You can upload up to {MAX_NUANS_REPORTS} NUANS reports. Remove a report to
+                You can upload up to {MAX_NUANS_REPORTS} Nuans reports. Remove a report to
                 add another.
               </p>
             )}

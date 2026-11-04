@@ -7,6 +7,7 @@ import {
   OntarioDateInput,
   OntarioPageAlert,
   OntarioStepIndicator,
+  OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
 import { isIsoDateComplete } from '../form1/nameValidation';
 import { aggregateDateFromEvent, syncDateFieldByAnchor } from './dateErrorSync';
@@ -30,6 +31,8 @@ const CURRENT_STEP = 4;
 const TOTAL_STEPS = 6;
 
 const MANDATORY_DOCS_ERROR = 'Upload the required supporting documents.';
+const CERTIFIED_RESOLUTION_ERROR =
+  'Enter the certified resolution or upload a certified copy.';
 const SUBSECTIONS_ERROR =
   'Select at least one Co-operative Corporations Act subsection that authorizes the amendment.';
 
@@ -56,6 +59,18 @@ const FIELD_ANCHORS: Record<FieldKey, string> = {
   supportingDocs: 'supporting-docs',
   resolutionConfirmedDate: 'form7-resolution-date',
 };
+
+function getEventValue(event: globalThis.Event) {
+  const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
+  return target?.value ?? '';
+}
+
+function hasCertifiedResolution(step3: Form7Step3Data) {
+  return (
+    step3.certifiedResolution.length > 0 ||
+    Boolean(step3.certifiedResolutionText?.trim())
+  );
+}
 
 function focusField(anchorId: string) {
   const target = document.getElementById(anchorId);
@@ -223,8 +238,8 @@ export function Form7Step3() {
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
-    if (step3.certifiedResolution.length === 0) {
-      next.certifiedResolution = MANDATORY_DOCS_ERROR;
+    if (!hasCertifiedResolution(step3)) {
+      next.certifiedResolution = CERTIFIED_RESOLUTION_ERROR;
     }
     if (step3.authorizationSubsections.length === 0) {
       next.authorizationSubsections = SUBSECTIONS_ERROR;
@@ -344,11 +359,35 @@ export function Form7Step3() {
               <SupportingDocumentsUpload
                 label="The following is a certified copy of the resolution amending the articles of the co-operative:"
                 required
-                hintText="Upload a certified copy of the resolution authorizing the amendment. You can upload more than one file."
+                hintText="Upload or enter the certified resolution or certified special resolution authorizing the amendment. You can upload more than one file."
                 value={step3.certifiedResolution}
                 errorMessage={errors.certifiedResolution}
                 onChange={(files) => patchDocs('certifiedResolution', files, 'certifiedResolution')}
                 inputId="certified-resolution-upload"
+                aboveDropZone={
+                  <>
+                    {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea. */}
+                    <div className={styles.textareaCaptionClip}>
+                    <OntarioTextarea
+                      elementId="certified-resolution-text"
+                      caption={'\u200B'}
+                      name="certified-resolution-text"
+                      value={step3.certifiedResolutionText}
+                      customOnInput={(event) => {
+                        const value = getEventValue(event);
+                        setStep3((prev) => ({
+                          ...prev,
+                          certifiedResolutionText: value,
+                        }));
+                        if (value.trim() || step3.certifiedResolution.length > 0) {
+                          clearError('certifiedResolution');
+                          clearError('supportingDocs');
+                        }
+                      }}
+                    />
+                    </div>
+                  </>
+                }
               />
             </div>
 
@@ -403,7 +442,7 @@ export function Form7Step3() {
             <div id={FIELD_ANCHORS.resolutionConfirmedDate}>
               <p className={styles.resolutionDateLabel}>
                 The resolution authorizing the amendment was confirmed by the members of
-                the co-operative
+                the co-operative on:
                 <span className={styles.requiredFlag}> (required)</span>
               </p>
               {/* DateInput always renders a required flag on its legend; clip that blank caption. */}

@@ -1,10 +1,10 @@
 import { isIsoDateComplete } from '../form1/nameValidation';
 
 export const NUANS_EXPIRED_ERROR =
-  'The NUANS report is more than 90 days old. Upload a NUANS report issued within 90 days of the filing date.';
+  'The Nuans report is more than 90 days old. Upload a Nuans report issued within 90 days of the filing date.';
 
-export const NUANS_REQUIRED_ERROR = 'Upload a NUANS report.';
-export const NUANS_DATE_REQUIRED_ERROR = 'Enter the NUANS report date.';
+export const NUANS_REQUIRED_ERROR = 'Upload a Nuans report.';
+export const NUANS_DATE_REQUIRED_ERROR = 'Enter the Nuans report date.';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -20,8 +20,12 @@ function parseIsoDay(value: string): Date | null {
   return new Date(Date.UTC(y, m - 1, d));
 }
 
-/** Returns an error if the NUANS report date is missing or older than 90 days from today. */
-export function validateNuansDate(value: string, today: Date = new Date()): string | undefined {
+/** Returns an error if the Nuans report date is missing or older than 90 days from today. */
+export function validateNuansDate(
+  value: string,
+  today: Date = new Date(),
+  expiredError: string = NUANS_EXPIRED_ERROR,
+): string | undefined {
   if (!isIsoDateComplete(value)) {
     return NUANS_DATE_REQUIRED_ERROR;
   }
@@ -36,7 +40,7 @@ export function validateNuansDate(value: string, today: Date = new Date()): stri
   );
   const ageDays = Math.floor((todayUtc.getTime() - reportDay.getTime()) / MS_PER_DAY);
   if (ageDays > 90) {
-    return NUANS_EXPIRED_ERROR;
+    return expiredError;
   }
 
   return undefined;

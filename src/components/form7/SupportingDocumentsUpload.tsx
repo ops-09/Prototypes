@@ -3,7 +3,14 @@
  * Composed from OntarioIconUpload, OntarioIconDocument, OntarioIconClose,
  * OntarioButton, OntarioHintText + design tokens.
  */
-import { useId, useRef, useState, type DragEvent, type KeyboardEvent } from 'react';
+import {
+  useId,
+  useRef,
+  useState,
+  type DragEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import {
   OntarioButton,
   OntarioHintText,
@@ -44,6 +51,8 @@ type SupportingDocumentsUploadProps = {
   inputId?: string;
   /** Show the upload date next to file size in the list. */
   showUploadedAt?: boolean;
+  /** Optional content rendered above the drop zone (for example an alternative text field). */
+  aboveDropZone?: ReactNode;
 };
 
 function isAcceptedFile(file: File) {
@@ -90,6 +99,7 @@ export function SupportingDocumentsUpload({
   onChange,
   inputId,
   showUploadedAt = false,
+  aboveDropZone,
 }: SupportingDocumentsUploadProps) {
   const generatedId = useId();
   const id = inputId ?? `supporting-docs-${generatedId}`;
@@ -189,6 +199,8 @@ export function SupportingDocumentsUpload({
       </label>
 
       {hintText ? <OntarioHintText hint={hintText} /> : null}
+
+      {aboveDropZone}
 
       {displayError ? (
         <div id={errorId} className={fileStyles.errorMessaging} role="alert">

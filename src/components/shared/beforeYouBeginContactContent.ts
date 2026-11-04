@@ -3,7 +3,7 @@
 export const BYB_CONTACT_HEADING = 'Contact information';
 
 export const BYB_CONTACT_INTRO =
-  'If you have any questions related to the designation request submission process, please contact:';
+  'If you have any questions related to the submission process, please contact:';
 
 export const BYB_CONTACT_MINISTRY_NAME = 'Ministry name';
 

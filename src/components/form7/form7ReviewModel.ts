@@ -65,11 +65,11 @@ function nuansRows(
   if (reports.length === 0) {
     rows.push(
       {
-        name: `${labelPrefix}NUANS report`.trim(),
+        name: `${labelPrefix}Nuans report`.trim(),
         description: 'Not provided',
       },
       {
-        name: `${labelPrefix}NUANS report date`.trim(),
+        name: `${labelPrefix}Nuans report date`.trim(),
         description: 'Not provided',
       },
     );
@@ -80,12 +80,12 @@ function nuansRows(
     const ordinal = reports.length > 1 ? ` ${index + 1}` : '';
     rows.push(
       {
-        name: `${labelPrefix}NUANS report${ordinal}`.trim(),
+        name: `${labelPrefix}Nuans report${ordinal}`.trim(),
         description: report.file?.name ?? 'Not provided',
         files: report.file ? [report.file] : undefined,
       },
       {
-        name: `${labelPrefix}NUANS report${ordinal} date`.trim(),
+        name: `${labelPrefix}Nuans report${ordinal} date`.trim(),
         description: formatIsoDateDisplay(report.date),
       },
     );
@@ -143,7 +143,7 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
         ...nuansRows(
           step2.nameNuans,
           'Co-operative',
-          'The name of the co-operative is: (Set out in Block Capital Letters)',
+          'The name of the co-operative is:',
         ),
       );
     }
@@ -169,7 +169,7 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
       });
       if (step2.nameLanguage === 'separate') {
         rows.push({
-          name: 'The name of the corporation is: (Set out in Block Capital Letters) — French',
+          name: 'The name of the corporation is: — French',
           description: displayOrEmpty(step2.proposedNameFr),
         });
       }
@@ -177,7 +177,7 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
         ...nuansRows(
           step2.nameNuans,
           'Corporation',
-          'The name of the corporation is: (Set out in Block Capital Letters)',
+          'The name of the corporation is:',
         ),
       );
     }
@@ -186,30 +186,24 @@ export function buildAmendmentRows(draft: Form7Draft): ReviewRow[] {
 
   if (type === 'convert-not-for-profit') {
     rows.push({
-      name: 'Number name',
-      description: yesNo(step2.hasNumberName),
+      name: 'Name language',
+      description: step2.nameLanguage
+        ? LANGUAGE_LABELS[step2.nameLanguage]
+        : 'Not provided',
     });
-    if (step2.hasNumberName === 'no') {
+    if (step2.nameLanguage === 'separate') {
       rows.push({
-        name: 'Name language',
-        description: step2.nameLanguage
-          ? LANGUAGE_LABELS[step2.nameLanguage]
-          : 'Not provided',
+        name: 'The name of the corporation is: — French',
+        description: displayOrEmpty(step2.proposedNameFr),
       });
-      if (step2.nameLanguage === 'separate') {
-        rows.push({
-          name: 'The name of the corporation is: (Set out in Block Capital Letters) — French',
-          description: displayOrEmpty(step2.proposedNameFr),
-        });
-      }
-      rows.push(
-        ...nuansRows(
-          step2.nameNuans,
-          'Not-for-Profit',
-          'The name of the corporation is: (Set out in Block Capital Letters)',
-        ),
-      );
     }
+    rows.push(
+      ...nuansRows(
+        step2.nameNuans,
+        'Not-for-Profit',
+        'The name of the corporation is:',
+      ),
+    );
     return rows;
   }
 
@@ -274,12 +268,6 @@ function isAmendmentComplete(draft: Form7Draft) {
   }
 
   if (type === 'convert-not-for-profit') {
-    if (!step2.hasNumberName) {
-      return false;
-    }
-    if (step2.hasNumberName === 'yes') {
-      return true;
-    }
     if (!step2.nameLanguage) {
       return false;
     }
@@ -313,7 +301,10 @@ function isSupportingDocsComplete(draft: Form7Draft) {
   if (draft.step3.authorizationSubsections.length === 0) {
     return false;
   }
-  if (draft.step3.certifiedResolution.length === 0) {
+  if (
+    draft.step3.certifiedResolution.length === 0 &&
+    !draft.step3.certifiedResolutionText?.trim()
+  ) {
     return false;
   }
   if (needAffidavits && draft.step3.affidavits.length === 0) {
@@ -344,6 +335,14 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
   );
 
   const supportingRows: ReviewRow[] = [
+    ...(draft.step3.certifiedResolutionText?.trim()
+      ? [
+          {
+            name: 'The following is a certified copy of the resolution amending the articles of the co-operative:',
+            description: draft.step3.certifiedResolutionText,
+          },
+        ]
+      : []),
     ...docRows(draft.step3.certifiedResolution, 'The following is a certified copy of the resolution amending the articles of the co-operative:'),
     {
       name: 'The above amendment has been duly authorized as required by subsections 151(1), (2), (2.1), (3) and/or (4) of the Co-operative Corporations Act. Please choose the applicable subsections below:',
@@ -353,7 +352,7 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
           : 'Not provided',
     },
     {
-      name: 'The resolution authorizing the amendment was confirmed by the members of the co-operative',
+      name: 'The resolution authorizing the amendment was confirmed by the members of the co-operative on:',
       description: formatIsoDateDisplay(draft.step3.resolutionConfirmedDate),
     },
   ];
@@ -372,7 +371,7 @@ export function buildReviewSections(draft: Form7Draft): ReviewSection[] {
       complete: isCoopDetailsComplete(draft),
       rows: [
         {
-          name: 'The name of the co-operative is: (Set out in Block Capital Letters)',
+          name: 'The name of the co-operative is:',
           description: displayOrEmpty(draft.step1.cooperativeName),
         },
         {

@@ -5,7 +5,7 @@ const STORAGE_KEY = 'ops-rbac-form7-draft';
 /** Configurable maximum supporting-document size (prototype default 20 MB). */
 export const MAX_SUPPORTING_DOC_BYTES = 20 * 1024 * 1024;
 
-/** Maximum NUANS reports a filer can attach for a proposed name. */
+/** Maximum Nuans reports a filer can attach for a proposed name. */
 export const MAX_NUANS_REPORTS = 5;
 
 export type AmendmentType =
@@ -68,7 +68,7 @@ type LegacyNameNuansFields = {
   nuansReports?: NuansReportEntry[];
 };
 
-/** Normalize current or legacy draft shapes into proposed name + NUANS report list. */
+/** Normalize current or legacy draft shapes into proposed name + Nuans report list. */
 export function normalizeNameNuans(raw: unknown): NameNuansFields {
   if (!raw || typeof raw !== 'object') {
     return emptyNameNuans();
@@ -148,6 +148,8 @@ export type SupportingDocMeta = {
 
 export type Form7Step3Data = {
   certifiedResolution: SupportingDocMeta[];
+  /** Optional typed resolution when the filer does not upload a PDF. */
+  certifiedResolutionText: string;
   affidavits: SupportingDocMeta[];
   additional: SupportingDocMeta[];
   /** CCA s.151 subsections authorizing the amendment. */
@@ -195,6 +197,7 @@ export const EMPTY_STEP2: Form7Step2Data = {
 
 export const EMPTY_STEP3: Form7Step3Data = {
   certifiedResolution: [],
+  certifiedResolutionText: '',
   affidavits: [],
   additional: [],
   authorizationSubsections: [],

@@ -23,7 +23,7 @@ export function Form7RegistryCallout({
   ocn,
   incorporationDate,
   heading = 'Co-operative details',
-  nameLabel = 'The name of the co-operative is: (Set out in Block Capital Letters)',
+  nameLabel = 'The name of the co-operative is:',
 }: Form7RegistryCalloutProps) {
   return (
     <OntarioCallout

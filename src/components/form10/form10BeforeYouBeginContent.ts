@@ -47,7 +47,7 @@ export const BYB_STEPS: readonly BeforeYouBeginStep[] = [
   {
     title: 'Step 4: Co-operative name',
     description:
-      'Enter the amalgamated co-operative’s name and NUANS report details when a new name is proposed.',
+      'Enter the amalgamated co-operative’s name and Nuans report details when a new name is proposed.',
   },
   {
     title: 'Step 5: Supporting documents',
@@ -72,12 +72,12 @@ export const BYB_NAICS_LINK_LABEL =
   'North American Industry Classification System (NAICS) Canada';
 
 export const BYB_NUANS_INSTRUCTION =
-  'Suppliers of NUANS reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s NUANS site.';
+  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site.';
 
 export const BYB_NUANS_SITE_URL =
   'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
 
-export const BYB_NUANS_SITE_LABEL = 'NUANS site';
+export const BYB_NUANS_SITE_LABEL = 'Nuans site';
 
 /** Prototype link — Central Forms Repository search for Affidavit of Solvency. */
 export const AFFIDAVIT_OF_SOLVENCY_AMALGAMATION_URL =
@@ -89,9 +89,9 @@ export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   { text: 'Official email address of the amalgamated co-operative.' },
   { text: 'Primary activity of the amalgamated co-operative.' },
   { text: 'Type of co-operative.' },
-  { text: 'An Ontario NUANS name search report for the proposed name, if the amalgamated co-operative will operate under a new name.' },
+  { text: 'An Ontario Nuans name search report for the proposed name, if the amalgamated co-operative will operate under a new name.' },
   {
-    text: 'The NUANS report must be dated within 90 days of the submission date.',
+    text: 'The Nuans report must be dated within 90 days of the submission date.',
   },
   {
     text: 'A certified copy of the amalgamation agreement approved by each of the amalgamating co-operatives.',

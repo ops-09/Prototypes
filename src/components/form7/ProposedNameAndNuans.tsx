@@ -64,6 +64,12 @@ type ProposedNameAndNuansProps = {
   };
   onChange: (next: NameNuansFields) => void;
   onClearError: (key: keyof NameNuansErrors | string) => void;
+  /** Defaults to Form 7’s maximum of 5 reports. */
+  maxReports?: number;
+  /** Hint under each Nuans report date field. */
+  nuansDateHint?: string;
+  /** Overrides the default empty-name required message. */
+  nameRequiredMessage?: string;
 };
 
 function getEventValue(event: globalThis.Event) {
@@ -86,6 +92,9 @@ export function ProposedNameAndNuans({
   dateValidatorFor,
   onChange,
   onClearError,
+  maxReports = MAX_NUANS_REPORTS,
+  nuansDateHint,
+  nameRequiredMessage,
 }: ProposedNameAndNuansProps) {
   const isCoop = nameKind === 'cooperative';
   const isNfp = nameKind === 'nfp';
@@ -116,7 +125,7 @@ export function ProposedNameAndNuans({
   }
 
   function addReport() {
-    if (reports.length >= MAX_NUANS_REPORTS) {
+    if (reports.length >= maxReports) {
       return;
     }
     patch({ nuansReports: [...reports, createEmptyNuansReport()] });
@@ -132,6 +141,9 @@ export function ProposedNameAndNuans({
   }
 
   function emptyMessage() {
+    if (nameRequiredMessage) {
+      return nameRequiredMessage;
+    }
     if (isCoop) {
       return COOPERATIVE_NAME_REQUIRED_ERROR;
     }
@@ -209,7 +221,7 @@ export function ProposedNameAndNuans({
                 type="button"
                 className={styles.removeLink}
                 onClick={() => removeReport(report.id)}
-                aria-label={`Remove NUANS report ${index + 1}`}
+                aria-label={`Remove Nuans report ${index + 1}`}
               >
                 <OntarioIconDelete colour="inherit" iconWidth={24} isDecorative />
                 Remove
@@ -219,11 +231,11 @@ export function ProposedNameAndNuans({
             <FileUpload
               label={
                 reports.length > 1
-                  ? `Upload NUANS report${ordinal}`
-                  : 'Upload NUANS report'
+                  ? `Upload Nuans report${ordinal}`
+                  : 'Upload Nuans report'
               }
               required
-              hintText="Upload the NUANS report that confirms the proposed name is available."
+              hintText="Upload the Nuans report that confirms the proposed name is available."
               value={report.file}
               errorMessage={errors[fileKey]}
               onChange={(meta) => setReportFile(report.id, meta)}
@@ -235,9 +247,10 @@ export function ProposedNameAndNuans({
                 elementId={`${idPrefix}-nuans-date-${report.id}-input`}
                 caption={
                   reports.length > 1
-                    ? `NUANS report${ordinal} date`
-                    : 'NUANS report date'
+                    ? `Nuans report${ordinal} date`
+                    : 'Nuans report date'
                 }
+                {...(nuansDateHint ? { hintText: nuansDateHint } : {})}
                 required
                 value={report.date || undefined}
                 dateValidator={dateValidatorFor(report.id)}
@@ -261,16 +274,16 @@ export function ProposedNameAndNuans({
         );
       })}
 
-      {reports.length < MAX_NUANS_REPORTS ? (
+      {reports.length < maxReports ? (
         <div className={styles.addActions}>
           <button type="button" className={styles.addLink} onClick={addReport}>
             <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
-            Add another NUANS report
+            Add another Nuans report
           </button>
         </div>
       ) : (
         <p className={styles.nuansMaxNote}>
-          You can upload up to {MAX_NUANS_REPORTS} NUANS reports. Remove a report to
+          You can upload up to {maxReports} Nuans reports. Remove a report to
           add another.
         </p>
       )}
@@ -282,14 +295,19 @@ export function validateNameNuansFields(
   value: NameNuansFields,
   nameKind: 'cooperative' | 'corporation' | 'nfp',
   validateName: (name: string) => string | undefined,
+  options?: {
+    expiredError?: string;
+    emptyNameError?: string;
+  },
 ): NameNuansErrors {
   const next: NameNuansErrors = {};
   const emptySingle =
-    nameKind === 'cooperative'
+    options?.emptyNameError ??
+    (nameKind === 'cooperative'
       ? COOPERATIVE_NAME_REQUIRED_ERROR
       : nameKind === 'nfp'
         ? 'Enter the not-for-profit corporation name.'
-        : 'Enter the corporation name.';
+        : 'Enter the corporation name.');
 
   if (!value.proposedName.trim()) {
     next.proposedName = emptySingle;
@@ -305,9 +323,9 @@ export function validateNameNuansFields(
 
   for (const report of reports) {
     if (!report.file) {
-      next[nuansFileErrorKey(report.id)] = 'Upload a NUANS report.';
+      next[nuansFileErrorKey(report.id)] = 'Upload a Nuans report.';
     }
-    const dateError = validateNuansDate(report.date);
+    const dateError = validateNuansDate(report.date, new Date(), options?.expiredError);
     if (dateError) {
       next[nuansDateErrorKey(report.id)] = dateError;
     }
