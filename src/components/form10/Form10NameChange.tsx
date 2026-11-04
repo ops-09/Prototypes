@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioDropdownList,
@@ -22,8 +22,7 @@ import {
 import {
   EMPTY_NAME_CHANGE,
   FORM10_TOTAL_STEPS,
-  MIN_AMALGAMATING_COOPS,
-  readForm10Draft,
+  ensureForm10NameChangeDraft,
   upsertForm10NameChange,
   type Form10NameChangeData,
 } from './form10DraftStorage';
@@ -74,19 +73,9 @@ function nameNuansErrorHref(key: string, reports: NameNuansFields['nuansReports'
   return firstId ? `#${ID_PREFIX}-nuans-date-${firstId}` : `#${ID_PREFIX}-proposed-name`;
 }
 
-function isNameChangeReady() {
-  const existing = readForm10Draft();
-  return Boolean(
-    existing?.step1.cooperativeName &&
-      existing.step2.amalgamatingCooperatives.length >= MIN_AMALGAMATING_COOPS &&
-      existing.step2.agreementApproved,
-  );
-}
-
 export function Form10NameChange() {
   const navigate = useNavigate();
-  const draft = readForm10Draft();
-  const ready = isNameChangeReady();
+  const draft = ensureForm10NameChangeDraft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const dateErrorsRef = useRef<FieldErrors>({});
 
@@ -285,10 +274,6 @@ export function Form10NameChange() {
   function handleSummaryLinkClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
     event.preventDefault();
     focusField(href.replace('#', ''));
-  }
-
-  if (!ready || !draft) {
-    return <Navigate to="/form-10/step-3" replace />;
   }
 
   return (

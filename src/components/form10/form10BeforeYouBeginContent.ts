@@ -71,40 +71,44 @@ export const BYB_NAICS_URL =
 export const BYB_NAICS_LINK_LABEL =
   'North American Industry Classification System (NAICS) Canada';
 
-export const BYB_NUANS_INSTRUCTION =
-  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site.';
+export const BYB_NUANS_SUPPLIERS_BEFORE =
+  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site at ';
 
-export const BYB_NUANS_SITE_URL =
-  'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
+export const BYB_NUANS_SITE_URL = 'https://www.nuans.com';
 
-export const BYB_NUANS_SITE_LABEL = 'Nuans site';
+export const BYB_NUANS_SITE_LABEL = 'www.nuans.com';
+
+export const BYB_NUANS_SUPPLIERS_AFTER =
+  ' for a list of registered search houses that can assist you with obtaining a Nuans search report.';
 
 /** Prototype link — Central Forms Repository search for Affidavit of Solvency. */
 export const AFFIDAVIT_OF_SOLVENCY_AMALGAMATION_URL =
   'https://www.forms.ssb.gov.on.ca/mbs/ssb/forms/ssbforms.nsf';
 
+export const NOTICE_CCA_FILINGS_URL =
+  'https://forms.mgcs.gov.on.ca/en/dataset/on00232';
+
 export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
-  { text: 'Legal name of each amalgamating co-operative.' },
-  { text: 'Ontario Corporation Number (OCN) for each amalgamating co-operative.' },
-  { text: 'Official email address of the amalgamated co-operative.' },
-  { text: 'Primary activity of the amalgamated co-operative.' },
-  { text: 'Type of co-operative.' },
-  { text: 'An Ontario Nuans name search report for the proposed name, if the amalgamated co-operative will operate under a new name.' },
+  {
+    text: 'A certified copy of the amalgamation agreement approved by each of the amalgamating co-operatives. The effective date of the amalgamation agreement must be within six (6) months of the submission of the Articles of Amalgamation.',
+  },
+  {
+    beforeLink:
+      'Affidavits of Solvency (Amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated. ',
+    linkLabel: 'Affidavit of Solvency (Amalgamation)',
+    linkHref: AFFIDAVIT_OF_SOLVENCY_AMALGAMATION_URL,
+  },
+  {
+    text: 'If the amalgamated co-operative has a new name, an Ontario Nuans report.',
+  },
   {
     text: 'The Nuans report must be dated within 90 days of the submission date.',
   },
   {
-    text: 'A certified copy of the amalgamation agreement approved by each of the amalgamating co-operatives.',
-  },
-  {
-    text: 'The effective date of the amalgamation agreement must be within six (6) months of the submission of the Articles of Amalgamation. If a certified copy of the amalgamation agreement is not set out in the articles, please upload through additional documents.',
-  },
-  {
-    beforeLink:
-      'Affidavits of solvency (amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated. Download the ',
-    linkLabel: 'Affidavit of Solvency form',
-    linkHref: AFFIDAVIT_OF_SOLVENCY_AMALGAMATION_URL,
-    afterLink: '.',
+    beforeLink: BYB_NUANS_SUPPLIERS_BEFORE,
+    linkLabel: BYB_NUANS_SITE_LABEL,
+    linkHref: BYB_NUANS_SITE_URL,
+    afterLink: BYB_NUANS_SUPPLIERS_AFTER,
   },
   {
     beforeLink:
@@ -114,9 +118,10 @@ export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
     afterLink: ' for the list of activities.',
   },
   {
-    beforeLink: `${BYB_NUANS_INSTRUCTION} `,
-    linkLabel: BYB_NUANS_SITE_LABEL,
-    linkHref: BYB_NUANS_SITE_URL,
-    afterLink: '.',
+    beforeLink:
+      'For additional information regarding the required documents, information and other filing requirements, please see the following: ',
+    linkLabel:
+      'Notice – Co-operative Corporations Act – Filings by Co-operative Corporations',
+    linkHref: NOTICE_CCA_FILINGS_URL,
   },
 ];

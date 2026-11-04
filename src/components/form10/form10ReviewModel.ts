@@ -112,7 +112,10 @@ function isNameChangeComplete(draft: Form10Draft) {
 }
 
 function isSupportingDocsComplete(draft: Form10Draft) {
-  if (draft.step3.certifiedAgreement.length !== 1) {
+  const hasAgreement =
+    draft.step3.certifiedAgreement.length === 1 ||
+    Boolean(draft.step3.certifiedAgreementText?.trim());
+  if (!hasAgreement) {
     return false;
   }
   return draft.step2.amalgamatingCooperatives.every((coop) => {
@@ -142,11 +145,24 @@ export function buildReviewSections(draft: Form10Draft): ReviewSection[] {
     }),
   );
 
+  const agreementText = draft.step3.certifiedAgreementText?.trim() ?? '';
   const supportingRows: ReviewRow[] = [
-    {
-      name: FORM10_CERTIFIED_AGREEMENT_CAPTION,
-      ...docFields(draft.step3.certifiedAgreement, 'Not uploaded'),
-    },
+    ...(agreementText
+      ? [
+          {
+            name: FORM10_CERTIFIED_AGREEMENT_CAPTION,
+            description: agreementText,
+          },
+        ]
+      : []),
+    ...(draft.step3.certifiedAgreement.length > 0 || !agreementText
+      ? [
+          {
+            name: FORM10_CERTIFIED_AGREEMENT_CAPTION,
+            ...docFields(draft.step3.certifiedAgreement, 'Not uploaded'),
+          },
+        ]
+      : []),
   ];
   draft.step2.amalgamatingCooperatives.forEach((coop, index) => {
     const row = draft.step3.documentsByCooperative.find(

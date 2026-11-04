@@ -240,6 +240,8 @@ export function openArticlesPdf(args: {
    * the numbered label and above the signature lines.
    */
   signatureItemLabel?: string;
+  /** When true, no signature section is appended. The caller includes it in an item. */
+  omitSignatureSection?: boolean;
 }) {
   const {
     documentTitle,
@@ -252,6 +254,7 @@ export function openArticlesPdf(args: {
     signatureHeading = 'Signatures',
     ministryLabel = DEFAULT_MINISTRY_LABEL,
     signatureItemLabel,
+    omitSignatureSection = false,
   } = args;
   const logoSrc = `${window.location.origin}${import.meta.env.BASE_URL}assets/ontario-logo--desktop.svg`;
   const itemsHtml = items.map(([label, html], index) => itemHtml(index + 1, label, html)).join('');
@@ -267,7 +270,9 @@ export function openArticlesPdf(args: {
   const signatureSectionClass = signatureHeading
     ? 'signature-section'
     : 'signature-section signature-section--after-execution';
-  const signatureBlockHtml = signatureItemLabel
+  const signatureBlockHtml = omitSignatureSection
+    ? ''
+    : signatureItemLabel
     ? itemHtml(
         items.length + 1,
         signatureItemLabel,
@@ -339,6 +344,10 @@ export function openArticlesPdf(args: {
       text-align: center;
       font-size: 0.875rem;
     }
+    .certified-caption--block {
+      text-align: left;
+    }
+    .certified-intro { margin: 0 0 1rem; }
     .certified-by { margin: 0 0 0.75rem; font-size: 1rem; }
     .signature-section { margin-top: 2.5rem; page-break-inside: avoid; }
     .signature-section--after-execution { margin-top: 0; margin-left: 1.75rem; }
@@ -353,6 +362,8 @@ export function openArticlesPdf(args: {
       margin-bottom: 1.75rem;
     }
     .signature-row--wide { grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+    .coop-signature { margin: 1.25rem 0 0.5rem; }
+    .coop-signature > .field-label { margin-bottom: 1.25rem; }
     .signature-col,
     .name-col {
       min-width: 0;

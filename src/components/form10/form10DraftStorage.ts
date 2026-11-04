@@ -57,6 +57,8 @@ export type AmalgamatingCoopDocuments = {
 export type Form10Step3Data = {
   /** One certified amalgamation agreement covering all amalgamating co-operatives. */
   certifiedAgreement: SupportingDocMeta[];
+  /** Typed agreement, used when the filer enters the text instead of uploading a file. */
+  certifiedAgreementText: string;
   documentsByCooperative: AmalgamatingCoopDocuments[];
 };
 
@@ -143,6 +145,7 @@ export const EMPTY_NAME_CHANGE: Form10NameChangeData = {
 
 export const EMPTY_STEP3: Form10Step3Data = {
   certifiedAgreement: [],
+  certifiedAgreementText: '',
   documentsByCooperative: [],
 };
 
@@ -236,6 +239,7 @@ export function readForm10Draft(): Form10Draft | null {
                   | undefined
               )?.find((row) => row.certifiedAgreement?.length)?.certifiedAgreement ??
               [],
+        certifiedAgreementText: step3Existing?.certifiedAgreementText ?? '',
         documentsByCooperative: emptyDocsForCooperatives(
           step2.amalgamatingCooperatives,
           step3Existing?.documentsByCooperative,
@@ -261,6 +265,85 @@ export function readForm10Draft(): Form10Draft | null {
 
 export function clearForm10Draft() {
   sessionStorage.removeItem(STORAGE_KEY);
+}
+
+function withSeededAmalgamation(existing: Form10Draft | null): Form10Draft {
+  const cooperatives =
+    existing && existing.step2.amalgamatingCooperatives.length >= MIN_AMALGAMATING_COOPS
+      ? existing.step2.amalgamatingCooperatives
+      : createSeedAmalgamatingCooperatives();
+  const now = new Date().toISOString();
+  return {
+    step1: {
+      ...OBR_STEP1_DEFAULTS,
+      ...(existing?.step1 ?? {}),
+      primaryActivity: existing?.step1.primaryActivity.trim() || '4521 - Department stores',
+    },
+    step2: {
+      amalgamatingCooperatives: cooperatives,
+      agreementApproved: true,
+    },
+    nameChange: {
+      ...EMPTY_NAME_CHANGE,
+      ...(existing?.nameChange ?? {}),
+      nameNuans: existing?.nameChange.nameNuans ?? emptyNameNuans(),
+    },
+    step3: {
+      certifiedAgreement: existing?.step3.certifiedAgreement ?? [],
+      certifiedAgreementText: existing?.step3.certifiedAgreementText ?? '',
+      documentsByCooperative: emptyDocsForCooperatives(
+        cooperatives,
+        existing?.step3.documentsByCooperative,
+      ),
+    },
+    step4: { ...EMPTY_STEP4, ...(existing?.step4 ?? {}) },
+    savedAs: existing?.savedAs ?? 'continue',
+    savedAt: now,
+    lastCompletedStep:
+      existing?.lastCompletedStep && existing.lastCompletedStep > 2
+        ? existing.lastCompletedStep
+        : 2,
+    confirmationNumber: existing?.confirmationNumber,
+  };
+}
+
+/** Lets the co-operative name page open from the playground without earlier steps. */
+export function ensureForm10NameChangeDraft(): Form10Draft {
+  const existing = readForm10Draft();
+  const ready = Boolean(
+    existing?.step1.cooperativeName &&
+      existing.step2.amalgamatingCooperatives.length >= MIN_AMALGAMATING_COOPS &&
+      existing.step2.agreementApproved,
+  );
+  if (existing && ready) {
+    return existing;
+  }
+  const seeded = withSeededAmalgamation(existing);
+  saveForm10Draft(seeded);
+  return readForm10Draft() ?? seeded;
+}
+
+/** Lets the supporting-documents page open from the playground without earlier steps. */
+export function ensureForm10SupportingDocsDraft(): Form10Draft {
+  const base = ensureForm10NameChangeDraft();
+  if (base.nameChange.changeCooperativeName && base.lastCompletedStep >= 3) {
+    return base;
+  }
+  const seeded: Form10Draft = {
+    ...base,
+    nameChange: {
+      ...base.nameChange,
+      changeCooperativeName: base.nameChange.changeCooperativeName || 'no',
+      selectedAmalgamatedCooperativeId:
+        base.nameChange.selectedAmalgamatedCooperativeId ||
+        base.step2.amalgamatingCooperatives[0]?.id ||
+        '',
+    },
+    savedAt: new Date().toISOString(),
+    lastCompletedStep: base.lastCompletedStep >= 3 ? base.lastCompletedStep : 3,
+  };
+  saveForm10Draft(seeded);
+  return readForm10Draft() ?? seeded;
 }
 
 export function upsertForm10Step1(
@@ -305,6 +388,7 @@ export function upsertForm10Step2(
     },
     step3: {
       certifiedAgreement: existing.step3?.certifiedAgreement ?? [],
+      certifiedAgreementText: existing.step3?.certifiedAgreementText ?? '',
       documentsByCooperative: emptyDocsForCooperatives(
         step2.amalgamatingCooperatives,
         existing.step3?.documentsByCooperative,
@@ -352,6 +436,7 @@ export function upsertForm10Step3(
     ...existing,
     step3: {
       certifiedAgreement: step3.certifiedAgreement ?? [],
+      certifiedAgreementText: step3.certifiedAgreementText ?? '',
       documentsByCooperative: emptyDocsForCooperatives(
         existing.step2.amalgamatingCooperatives,
         step3.documentsByCooperative,

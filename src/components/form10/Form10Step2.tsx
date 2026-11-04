@@ -57,6 +57,7 @@ function ensureStep2Draft() {
     nameChange: { ...EMPTY_NAME_CHANGE },
     step3: {
       certifiedAgreement: [],
+      certifiedAgreementText: '',
       documentsByCooperative: [],
     },
     step4: { ...EMPTY_STEP4 },

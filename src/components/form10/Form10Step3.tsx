@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioCallout,
   OntarioPageAlert,
   OntarioStepIndicator,
+  OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
 import {
   emptyDocsForCooperatives,
   FORM10_TOTAL_STEPS,
-  readForm10Draft,
+  ensureForm10SupportingDocsDraft,
   upsertForm10Step3,
   type AmalgamatingCoopDocuments,
   type Form10Step3Data,
@@ -28,7 +29,7 @@ const AFFIDAVIT_HINT =
   'Affidavits of solvency (amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated.';
 
 const AGREEMENT_REQUIRED_ERROR =
-  'Upload a certified copy of the amalgamation agreement.';
+  'Enter the certified amalgamation agreement or upload a certified copy.';
 
 const AFFIDAVITS_REQUIRED_ERROR =
   'Upload 2 affidavits of solvency for each amalgamating co-operative.';
@@ -51,31 +52,31 @@ function focusField(anchorId: string) {
   focusable?.focus({ preventScroll: true });
 }
 
-function isStep3Ready() {
-  const existing = readForm10Draft();
-  return Boolean(
-    existing?.step1.cooperativeName &&
-      existing.step2.amalgamatingCooperatives.length >= 2 &&
-      existing.step2.agreementApproved &&
-      existing.nameChange.changeCooperativeName &&
-      existing.lastCompletedStep >= 3,
-  );
-}
-
 function toForm7Docs(files: SupportingDocMeta[]) {
   return files;
 }
 
+function getEventValue(event: globalThis.Event) {
+  const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
+  return target?.value ?? '';
+}
+
+function hasCertifiedAgreement(step3: Form10Step3Data) {
+  return (
+    step3.certifiedAgreement.length === 1 || Boolean(step3.certifiedAgreementText?.trim())
+  );
+}
+
 export function Form10Step3() {
   const navigate = useNavigate();
-  const draft = readForm10Draft();
-  const ready = isStep3Ready();
+  const draft = ensureForm10SupportingDocsDraft();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const cooperatives = draft?.step2.amalgamatingCooperatives ?? [];
 
   const [step3, setStep3] = useState<Form10Step3Data>(() => ({
     certifiedAgreement: draft?.step3.certifiedAgreement ?? [],
+    certifiedAgreementText: draft?.step3.certifiedAgreementText ?? '',
     documentsByCooperative: emptyDocsForCooperatives(
       cooperatives,
       draft?.step3.documentsByCooperative,
@@ -87,11 +88,8 @@ export function Form10Step3() {
   const lastCompletedStep = draft?.lastCompletedStep ?? 0;
 
   useEffect(() => {
-    if (!ready) {
-      return;
-    }
     upsertForm10Step3(step3, 'draft', lastCompletedStep >= 4 ? 4 : 3);
-  }, [lastCompletedStep, ready, step3]);
+  }, [lastCompletedStep, step3]);
 
   const errorSummaryItems = useMemo(() => {
     const items: { key: string; message: string; href: string }[] = [];
@@ -114,10 +112,6 @@ export function Form10Step3() {
     });
     return items;
   }, [cooperatives, errors]);
-
-  if (!ready || !draft) {
-    return <Navigate to="/form-10/step-4" replace />;
-  }
 
   function clearError(key: FieldKey) {
     setErrors((prev) => {
@@ -146,7 +140,7 @@ export function Form10Step3() {
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
-    if (step3.certifiedAgreement.length !== 1) {
+    if (!hasCertifiedAgreement(step3)) {
       next.agreement = AGREEMENT_REQUIRED_ERROR;
     }
     cooperatives.forEach((coop) => {
@@ -252,14 +246,39 @@ export function Form10Step3() {
                 label={FORM10_CERTIFIED_AGREEMENT_CAPTION}
                 required
                 maxFiles={1}
-                hintText={AGREEMENT_HINT}
+                hintText={`Upload or enter the certified amalgamation agreement. You can upload one file. ${AGREEMENT_HINT}`}
                 value={toForm7Docs(step3.certifiedAgreement)}
                 errorMessage={errors.agreement}
                 onChange={(files) => {
                   setStep3((prev) => ({ ...prev, certifiedAgreement: files }));
-                  clearError('agreement');
+                  if (files.length === 1 || step3.certifiedAgreementText.trim()) {
+                    clearError('agreement');
+                  }
                 }}
                 inputId="agreement-upload"
+                aboveDropZone={
+                  <>
+                    {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea. */}
+                    <div className={styles.textareaCaptionClip}>
+                      <OntarioTextarea
+                        elementId="certified-agreement-text"
+                        caption={'\u200B'}
+                        name="certified-agreement-text"
+                        value={step3.certifiedAgreementText}
+                        customOnInput={(event) => {
+                          const value = getEventValue(event);
+                          setStep3((prev) => ({
+                            ...prev,
+                            certifiedAgreementText: value,
+                          }));
+                          if (value.trim() || step3.certifiedAgreement.length === 1) {
+                            clearError('agreement');
+                          }
+                        }}
+                      />
+                    </div>
+                  </>
+                }
               />
             </div>
 
