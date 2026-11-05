@@ -219,10 +219,8 @@ function signatureRowHtml(values: string[], captions: string[]) {
     </div>`;
 }
 
-const DEFAULT_MINISTRY_LABEL = 'Ministry of Public\nand Business Service Delivery';
-
-/** Header label on Form 1 and Form 2 articles PDFs. */
-export const FORM_1_2_MINISTRY_LABEL = 'Ministry of Government\nand Consumer Services';
+const DEFAULT_MINISTRY_LABEL =
+  'Ministry of Public\nand Business Service Delivery\nand Procurement';
 
 /** Ministry-style articles PDF: header, ministry-use block, numbered items, and signatures. */
 export function openArticlesPdf(args: {

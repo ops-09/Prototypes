@@ -1,5 +1,4 @@
 import {
-  FORM_1_2_MINISTRY_LABEL,
   NOT_APPLICABLE,
   NOT_PROVIDED,
   firstDirectorsTableHtml,
@@ -79,6 +78,5 @@ export function generateForm1ReviewPdf(args: { draft: Form1Draft }) {
     items: buildItems(draft),
     signatureRows: draft.step7.incorporators.map((entry) => [incorporatorSignatureName(entry)]),
     signatureItemLabel: 'These articles are executed for delivery to the Minister',
-    ministryLabel: FORM_1_2_MINISTRY_LABEL,
   });
 }
