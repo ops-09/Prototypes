@@ -55,6 +55,8 @@ import { Form3Step1Page } from './pages/Form3Step1Page';
 import { Form3Step4Page } from './pages/Form3Step4Page';
 import { Form3Step5Page } from './pages/Form3Step5Page';
 import { Form3Step6Page } from './pages/Form3Step6Page';
+import { Form11BeforeYouBeginPage } from './pages/Form11BeforeYouBeginPage';
+import { Form11Page } from './pages/Form11Page';
 import { Form11CorporationSubflowPage } from './pages/Form11CorporationSubflowPage';
 import { Form11DraftSummaryPage } from './pages/Form11DraftSummaryPage';
 import { Form11Step2Page } from './pages/Form11Step2Page';
@@ -195,7 +197,8 @@ function App() {
         <Route path="/form-10/step-7" element={<Form10Step5Page />} />
         <Route path="/form-10/draft-summary" element={<Form10DraftSummaryPage />} />
 
-        <Route path="/form-11" element={<Navigate to="/form-11/step-2" replace />} />
+        <Route path="/form-11" element={<Form11BeforeYouBeginPage />} />
+        <Route path="/form-11/step-1" element={<Form11Page />} />
         <Route path="/form-11/step-2" element={<Form11Step2Page />} />
         <Route path="/form-11/step-3" element={<Form11Step3Page />} />
         <Route

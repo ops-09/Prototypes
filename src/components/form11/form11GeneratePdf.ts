@@ -28,6 +28,38 @@ function formatPdfName(value: string) {
   return trimmed ? trimmed.toUpperCase() : NOT_PROVIDED;
 }
 
+function signatureRowHtml() {
+  return `
+    <div class="signature-row signature-row--wide">
+      <div class="signature-col">
+        <div class="signature-line"></div>
+        <span class="field-label">Signature</span>
+      </div>
+      <div class="name-col">
+        <div class="name-line"></div>
+        <span class="field-label">Name of signatory</span>
+      </div>
+      <div class="name-col">
+        <div class="name-line"></div>
+        <span class="field-label">Description of office</span>
+      </div>
+    </div>`;
+}
+
+/** Two blank signature rows for each amalgamating corporation, matching Form 7. */
+function corporationSignatureBlocks(corporationCount: number) {
+  const blocks = Math.max(corporationCount, 1);
+  return Array.from({ length: blocks }, () => `
+    <div class="corp-signature-block">
+      <div class="certified-name"></div>
+      <span class="certified-caption">Name of Corporation</span>
+      <p class="certified-by">By:</p>
+      <p class="certified-intro">Signature(s) and full name(s)</p>
+      ${signatureRowHtml()}
+      ${signatureRowHtml()}
+    </div>`).join('');
+}
+
 export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
   const { draft } = args;
   const amalgamatedName = form11AmalgamatedName(draft);
@@ -51,14 +83,6 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
   ]
     .filter(Boolean)
     .join('\n');
-  const signatureRows = draft.step3.corporations.flatMap((corp) => {
-    const corpName = formatPdfName(corp.legalName);
-    const nameValue = corpName === NOT_PROVIDED ? '' : corpName;
-    return [
-      [nameValue, ''],
-      [nameValue, ''],
-    ];
-  });
 
   return openArticlesPdf({
     documentTitle: 'Application for Letters Patent of Amalgamation, Form 11',
@@ -84,10 +108,8 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
       ],
     ],
     signatureIntro: [...FORM11_SIGNATURE_INTRO],
-    signatureCaptions: [
-      'Name of amalgamating corporation',
-      'Description of office',
-    ],
-    signatureRows: signatureRows.length > 0 ? signatureRows : [['', '']],
+    signatureHeading: '',
+    signatureRows: [],
+    signatureBodyHtml: corporationSignatureBlocks(draft.step3.corporations.length),
   });
 }

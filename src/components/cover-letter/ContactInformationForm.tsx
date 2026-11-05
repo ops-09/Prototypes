@@ -19,7 +19,7 @@ import {
 import styles from './ContactInformationForm.module.scss';
 
 const WHY_CONTACT =
-  'Please provide your full name and contact information. We will contact you if we require additional information about this filing. You will receive the official documents resulting from this filing.';
+  'Please provide your full name and contact information. We will contact you if we require additional information about this filing. You will receive the official documents resulting from this filing. This information is collected for administrative purposes and will not appear in the public record.';
 
 const FIELD_ANCHORS: Record<string, string> = {
   firstName: 'cover-letter-first-name',

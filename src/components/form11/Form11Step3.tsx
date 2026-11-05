@@ -222,7 +222,7 @@ export function Form11Step3() {
                             <div>OCN {corp.ocn || '—'}</div>
                             {corp.membersApprovalDate ? (
                               <div>
-                                Members’ approval{' '}
+                                Dates of Shareholders/Members Approval{' '}
                                 {formatIsoDateDisplay(corp.membersApprovalDate)}
                               </div>
                             ) : null}
@@ -250,10 +250,6 @@ export function Form11Step3() {
                     : styles.addActions
                 }
               >
-                <button type="button" className={styles.addLink} onClick={startAddCorporation}>
-                  <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
-                  Add Another Corporation
-                </button>
                 <button
                   type="button"
                   className={styles.addLink}
@@ -261,6 +257,10 @@ export function Form11Step3() {
                 >
                   <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
                   Add my Corporation
+                </button>
+                <button type="button" className={styles.addLink} onClick={startAddCorporation}>
+                  <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
+                  Add Another Corporation
                 </button>
               </div>
             </div>

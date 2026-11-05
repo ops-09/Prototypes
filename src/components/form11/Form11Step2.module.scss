@@ -60,6 +60,22 @@
   margin: 0 0 var(--ontario-spacing-5, 1.5rem);
 }
 
+.statement {
+  margin: var(--ontario-spacing-5, 1.5rem) 0 0;
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  line-height: var(--ontario-font-line-heights-default, 1.6);
+  color: var(--ontario-colour-black, #1a1a1a);
+}
+
 .formStack {
   display: flex;
   flex-direction: column;

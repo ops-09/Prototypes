@@ -14,11 +14,11 @@ function buildItems(draft: Form3Draft): ArticlesPdfItem[] {
 
   return [
     [
-      'Name of the applicant corporation: (Set out in Block Capital Letters)',
+      'Name of the applicant corporation:',
       valueHtml(step1.corporationName.toUpperCase()),
     ],
     [
-      'The name of the corporation is changed to (if applicable): (Set out in Block Capital Letters)',
+      'The name of the corporation is changed to (if applicable):',
       valueHtml(newName.toUpperCase(), NOT_APPLICABLE),
     ],
     ['Date of incorporation/amalgamation:', valueHtml(formatIsoDateDisplay(step1.incorporationDate))],
@@ -32,6 +32,16 @@ function buildItems(draft: Form3Draft): ArticlesPdfItem[] {
       'The corporation applies for the issue of supplementary letters patent to provide as follows:',
       valueHtml(step4.requestedProvisions),
     ],
+    [
+      'This application is executed in duplicate.',
+      `
+    <div class="certified-block">
+      <div class="certified-name"></div>
+      <span class="certified-caption">Current name of corporation</span>
+      <p class="certified-by">By:</p>
+      <p class="certified-intro">Signature(s) and full name(s)</p>
+    </div>`,
+    ],
   ];
 }
 
@@ -43,6 +53,7 @@ export function generateForm3ReviewPdf(args: { draft: Form3Draft }) {
     actName: 'Corporations Act',
     items: buildItems(draft),
     signatureIntro: [],
+    signatureHeading: '',
     signatureCaptions: ['Name of signatory', 'Description of office'],
     signatureRows: [[], []],
   });

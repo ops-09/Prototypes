@@ -24,7 +24,7 @@ import {
   type Form11NameChangeChoice,
   type Form11Step4Data,
 } from './form11DraftStorage';
-import { FORM11_AMALGAMATED_NAME_CAPTION } from './form11ReviewModel';
+import { FORM11_AGREEMENT_STATEMENT, FORM11_AMALGAMATED_NAME_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
 
 const CURRENT_STEP = 4;
@@ -300,6 +300,7 @@ export function Form11Step4() {
                   }
                 }}
               />
+              <p className={styles.statement}>{FORM11_AGREEMENT_STATEMENT}</p>
             </div>
 
             {step4.changeName === 'no' ? (

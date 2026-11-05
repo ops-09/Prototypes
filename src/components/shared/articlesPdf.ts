@@ -185,9 +185,14 @@ export function incorporatorSignatureName(incorporator: PdfIncorporator) {
 function itemHtml(number: number, label: string, html: string) {
   return `
     <section class="item">
-      <h2><span class="item-number">${number}.</span> ${escapeHtml(label)}</h2>
+      <h2><span class="item-number">${number}.</span> ${escapeHtml(withoutBlockCapitalNote(label))}</h2>
       ${html}
     </section>`;
+}
+
+/** Paper-form instruction. It is omitted from every generated articles PDF. */
+function withoutBlockCapitalNote(value: string) {
+  return value.replace(/\s*\(Set out in Block Capital Letters\)/g, '');
 }
 
 const INCORPORATOR_SIGNATURE_INTRO =
@@ -240,6 +245,8 @@ export function openArticlesPdf(args: {
    * the numbered label and above the signature lines.
    */
   signatureItemLabel?: string;
+  /** When set, replaces the generated signature rows. The caller supplies the markup. */
+  signatureBodyHtml?: string;
   /** When true, no signature section is appended. The caller includes it in an item. */
   omitSignatureSection?: boolean;
 }) {
@@ -255,12 +262,15 @@ export function openArticlesPdf(args: {
     ministryLabel = DEFAULT_MINISTRY_LABEL,
     signatureItemLabel,
     omitSignatureSection = false,
+    signatureBodyHtml,
   } = args;
   const logoSrc = `${window.location.origin}${import.meta.env.BASE_URL}assets/ontario-logo--desktop.svg`;
   const itemsHtml = items.map(([label, html], index) => itemHtml(index + 1, label, html)).join('');
-  const signatureRowsHtml = (signatureRows.length > 0 ? signatureRows : [[]])
-    .map((values) => signatureRowHtml(values, signatureCaptions))
-    .join('');
+  const signatureRowsHtml =
+    signatureBodyHtml ??
+    (signatureRows.length > 0 ? signatureRows : [[]])
+      .map((values) => signatureRowHtml(values, signatureCaptions))
+      .join('');
   const signatureIntroHtml = signatureIntro
     .map((paragraph) => `<p class="signature-intro">${escapeHtml(paragraph)}</p>`)
     .join('\n    ');
@@ -289,7 +299,7 @@ export function openArticlesPdf(args: {
     ${signatureRowsHtml}
   </section>`;
 
-  const html = `<!DOCTYPE html>
+  const html = withoutBlockCapitalNote(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -364,6 +374,15 @@ export function openArticlesPdf(args: {
     .signature-row--wide { grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
     .coop-signature { margin: 1.25rem 0 0.5rem; }
     .coop-signature > .field-label { margin-bottom: 1.25rem; }
+    .corp-signature-block {
+      margin: 0 0 1rem;
+      page-break-inside: avoid;
+    }
+    .corp-signature-block + .corp-signature-block {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 2px solid #1a1a1a;
+    }
     .signature-col,
     .name-col {
       min-width: 0;
@@ -438,9 +457,9 @@ ${titleLines.map((line) => `        <span>${escapeHtml(line)}</span>`).join('\n'
       <p class="doc-act">${escapeHtml(actName)}</p>
     </div>
   </header>
-  <section class="stamp-section" aria-label="This space for ministry use only">
+  <section class="stamp-section" aria-label="This space is for Ministry use only">
     <div class="stamp-top">
-      <h2 class="stamp-heading">This space for ministry use only</h2>
+      <h2 class="stamp-heading">This space is for Ministry use only</h2>
       <div class="ocn-field">
         <div class="ocn-line"></div>
         <span class="field-label">Ontario Corporation Number</span>
@@ -451,7 +470,7 @@ ${titleLines.map((line) => `        <span>${escapeHtml(line)}</span>`).join('\n'
   ${itemsHtml}
   ${signatureBlockHtml}
 </body>
-</html>`;
+</html>`);
 
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);

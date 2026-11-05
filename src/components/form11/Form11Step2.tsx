@@ -135,7 +135,7 @@ export function Form11Step2() {
       <div className={styles.stepIndicator}>
         <OntarioStepIndicator
           showBackButton
-          backButtonUrl="/"
+          backButtonUrl="/form-11/step-1"
           currentStep={CURRENT_STEP}
           numberOfSteps={FORM11_TOTAL_STEPS}
         />

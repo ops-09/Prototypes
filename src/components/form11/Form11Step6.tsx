@@ -12,8 +12,8 @@ import {
 import { FieldErrorMessage } from '../form1/FieldErrorMessage';
 import type { DirectorCountMode } from '../form1/form1DraftStorage';
 import {
+  formatDirectorAddressLine,
   formatDirectorFullName,
-  formatDirectorListDescription,
 } from './Form11DirectorEditor';
 import { focusField, getEventValue } from './form11Focus';
 import {
@@ -341,7 +341,7 @@ export function Form11Step6() {
           <div className={styles.formStack}>
             <div id={FIELD_ANCHORS.countMode}>
               <OntarioRadioButtons
-                caption="How is the number of directors specified?"
+                caption="Please specify the number of directors for your corporation"
                 name="director-count-mode"
                 required
                 hintText="The amalgamated corporation must have at least 3 directors."
@@ -454,7 +454,7 @@ export function Form11Step6() {
                   <ul className={step4Styles.summaryList}>
                     {step6.directors.map((director) => {
                       const name = formatDirectorFullName(director) || 'Director';
-                      const description = formatDirectorListDescription(director);
+                      const address = formatDirectorAddressLine(director);
                       return (
                         <li key={director.id} className={step4Styles.summaryItem}>
                           <div className={step4Styles.summaryMain}>
@@ -465,10 +465,11 @@ export function Form11Step6() {
                             >
                               {name}
                             </button>
-                            <div className={step4Styles.summaryDescription}>
-                              <div>{description.details}</div>
-                              {description.address ? <div>{description.address}</div> : null}
-                            </div>
+                            {address ? (
+                              <div className={step4Styles.summaryDescription}>
+                                <div>Address of service: {address}</div>
+                              </div>
+                            ) : null}
                           </div>
                           <button
                             type="button"

@@ -64,7 +64,7 @@ const PROTOTYPES: PlaygroundCard[] = [
   {
     label: 'Form 11',
     description:
-      'Application for Letters Patent of Amalgamation — corporation details through directors, then supporting documents.',
+      'Application for Letters Patent of Amalgamation — Before you begin, then cover letter and filing steps.',
     href: '/form-11',
     ariaLabelText:
       'Open the Form 11 Application for Letters Patent of Amalgamation prototype',
@@ -361,6 +361,12 @@ const PROTOTYPE_PAGES: PageCategory[] = [
   {
     heading: 'Form 11 pages',
     cards: [
+      {
+        label: 'Form 11 — Step 1',
+        description: 'Cover letter — contact information before the filing steps.',
+        href: '/form-11/step-1',
+        ariaLabelText: 'Open Form 11 Step 1 cover letter',
+      },
       {
         label: 'Form 11 — Step 2',
         description:

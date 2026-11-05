@@ -111,7 +111,7 @@ export function Form10Step5() {
           inputId="form10-signed-pdf-upload"
           label="Upload signed PDF"
           required
-          hintText="Upload the signed copy of the generated PDF. PDF only, maximum 20 MB. (required)"
+          hintText="Upload the signed copy of the generated PDF."
           buttonLabel="Upload signed PDF"
           value={step4.signedPdf}
           errorMessage={errors.signedPdf}

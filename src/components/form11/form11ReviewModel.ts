@@ -36,7 +36,7 @@ export const FORM11_CERTIFIED_AGREEMENT_CAPTION =
   'The following is a copy of the amalgamation agreement duly certified under corporate seal by the secretary of each of the amalgamating corporations:';
 export const FORM11_SIGNATURE_INTRO = [
   'The corporations named below apply jointly for letters patent confirming the agreement and amalgamating the said corporations.',
-  'Names and seals of the amalgamating corporations, full name and signatures and descriptions of office of their proper officers',
+  'Names and seals of the amalgamating corporations, full name and signatures and descriptions of office of their proper officers.',
 ] as const;
 
 export type ReviewRow = {

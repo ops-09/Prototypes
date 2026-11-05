@@ -113,7 +113,7 @@ export function Form11Step9() {
           inputId="form11-signed-pdf-upload"
           label="Upload signed PDF"
           required
-          hintText="Upload the signed copy of the generated PDF. PDF only, maximum 20 MB. (required)"
+          hintText="Upload the signed copy of the generated PDF."
           maxFiles={1}
           showUploadedAt
           value={step8.signedPdf ? [step8.signedPdf] : []}
