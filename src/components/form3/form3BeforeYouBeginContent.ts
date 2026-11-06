@@ -55,13 +55,15 @@ export const BYB_DOCUMENTS_HEADING = 'Submission checklist';
 export const BYB_DOCUMENTS_INTRO =
   'You should have the following information available to complete your submission:';
 
-export const BYB_NUANS_INSTRUCTION =
-  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site.';
+export const BYB_NUANS_SUPPLIERS_BEFORE =
+  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site at ';
 
-export const BYB_NUANS_SITE_URL =
-  'https://ised-isde.canada.ca/site/nuans-corporate-name-search/en';
+export const BYB_NUANS_SITE_URL = 'https://www.nuans.com';
 
-export const BYB_NUANS_SITE_LABEL = 'Nuans site';
+export const BYB_NUANS_SITE_LABEL = 'www.nuans.com';
+
+export const BYB_NUANS_SUPPLIERS_AFTER =
+  ' for a list of registered search houses that can assist you with obtaining a Nuans search report.';
 
 export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   { text: 'The Ontario Corporation Number (OCN) of the corporation.' },
@@ -89,10 +91,10 @@ export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   { text: 'Consent documents (if required).' },
   { text: 'Nuans Report (if a name change is requested).' },
   {
-    beforeLink: `${BYB_NUANS_INSTRUCTION} `,
+    beforeLink: BYB_NUANS_SUPPLIERS_BEFORE,
     linkLabel: BYB_NUANS_SITE_LABEL,
     linkHref: BYB_NUANS_SITE_URL,
-    afterLink: '.',
+    afterLink: BYB_NUANS_SUPPLIERS_AFTER,
   },
   { text: 'Uploaded files must be PDF format only.' },
   { text: 'Uploaded files must be 20 MB maximum file size.' },
