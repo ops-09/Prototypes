@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { OntarioButton } from '@ongov/ontario-design-system-component-library-react';
 import { BeforeYouBeginChecklistList } from '../shared/BeforeYouBeginChecklistList';
+import { BeforeYouBeginContactSection } from '../shared/BeforeYouBeginContactSection';
 import { BeforeYouBeginPaymentSection } from '../shared/BeforeYouBeginPaymentSection';
 import { BeforeYouBeginPreamble } from '../shared/BeforeYouBeginPreamble';
 import {
@@ -84,6 +85,8 @@ export function ContinuanceBeforeYouBegin({ formId }: ContinuanceBeforeYouBeginP
               ))}
             </ul>
           </section>
+
+          <BeforeYouBeginContactSection />
 
           <div className={styles.buttonGroup}>
             <OntarioButton
