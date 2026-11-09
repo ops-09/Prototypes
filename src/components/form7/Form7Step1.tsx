@@ -269,7 +269,8 @@ export function Form7Step1() {
 
           <p className={styles.lead}>
             Review the co-operative&apos;s registry details, update NAICS, official email, and
-            type of co-operative as needed, then continue.
+            type of co-operative as needed, then continue. This information is collected for
+            administrative purposes and will not appear in the public record.
           </p>
 
           <div className={styles.alert}>

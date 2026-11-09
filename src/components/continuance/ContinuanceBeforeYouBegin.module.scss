@@ -1,0 +1,47 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-6, 2rem);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.sectionHeading {
+  margin: 0;
+}
+
+.sectionIntro {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.numberedList,
+.bulletList {
+  margin: 0;
+  padding-left: var(--ontario-spacing-5, 1.5rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.numberedList li,
+.bulletList li {
+  margin: 0;
+  padding: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-6, 2rem);
+  margin-top: var(--ontario-spacing-2, 0.5rem);
+}

@@ -72,7 +72,7 @@ const PROTOTYPES: PlaygroundCard[] = [
   {
     label: 'Form 14',
     description:
-      'Articles of Continuance as a Co-operative with Share Capital — instructions, then co-operative details.',
+      'Articles of Continuance as a Co-operative with Share Capital — Before you begin, then cover letter and filing steps.',
     href: '/form-14',
     ariaLabelText:
       'Open the Form 14 Articles of Continuance with Share Capital prototype',
@@ -80,7 +80,7 @@ const PROTOTYPES: PlaygroundCard[] = [
   {
     label: 'Form 15',
     description:
-      'Articles of Continuance as a Co-operative without Share Capital — instructions, then co-operative details.',
+      'Articles of Continuance as a Co-operative without Share Capital — Before you begin, then cover letter and filing steps.',
     href: '/form-15',
     ariaLabelText:
       'Open the Form 15 Articles of Continuance without Share Capital prototype',
@@ -427,6 +427,12 @@ const PROTOTYPE_PAGES: PageCategory[] = [
     heading: 'Form 14 pages',
     cards: [
       {
+        label: 'Form 14 — Step 1',
+        description: 'Cover letter — contact information before the filing steps.',
+        href: '/form-14/step-1',
+        ariaLabelText: 'Open Form 14 Step 1 cover letter',
+      },
+      {
         label: 'Form 14 — Step 2',
         description:
           'Co-operative details — sub-type, primary activity (NAICS), and official email.',
@@ -493,6 +499,12 @@ const PROTOTYPE_PAGES: PageCategory[] = [
   {
     heading: 'Form 15 pages',
     cards: [
+      {
+        label: 'Form 15 — Step 1',
+        description: 'Cover letter — contact information before the filing steps.',
+        href: '/form-15/step-1',
+        ariaLabelText: 'Open Form 15 Step 1 cover letter',
+      },
       {
         label: 'Form 15 — Step 2',
         description:

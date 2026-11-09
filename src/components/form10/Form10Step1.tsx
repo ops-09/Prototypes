@@ -268,7 +268,8 @@ export function Form10Step1() {
 
           <p className={styles.lead}>
             Update the primary activity, official email, and type of co-operative as needed,
-            then continue.
+            then continue. This information is collected for administrative purposes and will
+            not appear in the public record.
           </p>
 
           <div className={styles.formStack}>

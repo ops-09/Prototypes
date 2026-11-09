@@ -96,7 +96,7 @@ export function ContinuanceStep2({ formId }: ContinuanceStep2Props) {
   const draft = ensureContinuanceStep2Draft(formId);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const anchors = fieldAnchors(formId);
-  const instructionsHref = `/form-${formId}`;
+  const instructionsHref = `/form-${formId}/step-1`;
   const continueHref = `/form-${formId}/step-3`;
   const draftSummaryHref = `/form-${formId}/draft-summary`;
 
@@ -234,7 +234,8 @@ export function ContinuanceStep2({ formId }: ContinuanceStep2Props) {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Co-operative details</h1>
           <p className={styles.lead}>
             Select the co-operative’s sub-type, select its primary business activity, and provide
-            its official email address.
+            its official email address. This information is collected for administrative purposes
+            and will not appear in the public record.
           </p>
 
           <div className={styles.formStack}>

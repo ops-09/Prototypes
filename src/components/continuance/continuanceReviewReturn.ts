@@ -21,7 +21,7 @@ export function withReviewReturn(href: string, returnToReview: boolean) {
 }
 
 export function coverLetterReviewHref(formId: ContinuanceFormId) {
-  return `/cover-letter?${REVIEW_RETURN_PARAM}=${encodeURIComponent(continuanceReviewPath(formId))}`;
+  return withReviewReturn(`/form-${formId}/step-1`, true);
 }
 
 export function isCoverLetterReviewReturn(

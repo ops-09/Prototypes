@@ -19,7 +19,8 @@ export function ContinuanceStepPlaceholder({
   currentStep,
 }: ContinuanceStepPlaceholderProps) {
   const navigate = useNavigate();
-  const backHref = currentStep <= 2 ? `/form-${formId}` : `/form-${formId}/step-${currentStep - 1}`;
+  const backHref =
+    currentStep <= 2 ? `/form-${formId}/step-1` : `/form-${formId}/step-${currentStep - 1}`;
 
   function handleCancel() {
     const leave = window.confirm('Leave this filing without saving further changes?');

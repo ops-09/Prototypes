@@ -70,6 +70,7 @@ import { Form11Step8Page } from './pages/Form11Step8Page';
 import { Form11Step9Page } from './pages/Form11Step9Page';
 import { Form14DraftSummaryPage } from './pages/Form14DraftSummaryPage';
 import { Form14InstructionsPage } from './pages/Form14InstructionsPage';
+import { Form14Page } from './pages/Form14Page';
 import { Form14Step2Page } from './pages/Form14Step2Page';
 import { Form14Step3Page } from './pages/Form14Step3Page';
 import { Form14Step4Page } from './pages/Form14Step4Page';
@@ -82,6 +83,7 @@ import { Form14Step9Page } from './pages/Form14Step9Page';
 import { Form14Step10Page } from './pages/Form14Step10Page';
 import { Form15DraftSummaryPage } from './pages/Form15DraftSummaryPage';
 import { Form15InstructionsPage } from './pages/Form15InstructionsPage';
+import { Form15Page } from './pages/Form15Page';
 import { Form15Step2Page } from './pages/Form15Step2Page';
 import { Form15Step3Page } from './pages/Form15Step3Page';
 import { Form15Step4Page } from './pages/Form15Step4Page';
@@ -226,6 +228,7 @@ function App() {
         <Route path="/form-11/draft-summary" element={<Form11DraftSummaryPage />} />
 
         <Route path="/form-14" element={<Form14InstructionsPage />} />
+        <Route path="/form-14/step-1" element={<Form14Page />} />
         <Route path="/form-14/step-2" element={<Form14Step2Page />} />
         <Route path="/form-14/step-3" element={<Form14Step3Page />} />
         <Route path="/form-14/step-4" element={<Form14Step4Page />} />
@@ -240,6 +243,7 @@ function App() {
         <Route path="/form-14/draft-summary" element={<Form14DraftSummaryPage />} />
 
         <Route path="/form-15" element={<Form15InstructionsPage />} />
+        <Route path="/form-15/step-1" element={<Form15Page />} />
         <Route path="/form-15/step-2" element={<Form15Step2Page />} />
         <Route path="/form-15/step-3" element={<Form15Step3Page />} />
         <Route path="/form-15/step-4" element={<Form15Step4Page />} />

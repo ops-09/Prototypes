@@ -230,7 +230,8 @@ export function Form1Step2() {
           <p className={styles.lead}>
             Optionally select the co-operative sub-type, choose the primary business activity
             (NAICS), and provide the official email address where the co-operative will receive
-            official documents and notices.
+            official documents and notices. This information is collected for administrative
+            purposes and will not appear in the public record.
           </p>
 
           {showContinueSuccess ? (

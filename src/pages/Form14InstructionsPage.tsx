@@ -1,8 +1,8 @@
-import { ContinuanceInstructions } from '../components/continuance/ContinuanceInstructions';
+import { ContinuanceBeforeYouBegin } from '../components/continuance/ContinuanceBeforeYouBegin';
 import formStyles from '../components/form2/Form2BeforeYouBegin.module.scss';
 import { PlaygroundShell } from '../components/layout/PlaygroundShell';
 
-/** Form 14 instructions landing (unnumbered). */
+/** Form 14 Before you begin (unnumbered). Continue opens the cover letter. */
 export function Form14InstructionsPage() {
   return (
     <PlaygroundShell
@@ -10,7 +10,7 @@ export function Form14InstructionsPage() {
       serviceHref="/"
       mainClassName={formStyles.formMain}
     >
-      <ContinuanceInstructions formId={14} />
+      <ContinuanceBeforeYouBegin formId={14} />
     </PlaygroundShell>
   );
 }
