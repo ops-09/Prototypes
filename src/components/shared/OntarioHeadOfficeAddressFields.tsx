@@ -83,8 +83,12 @@ export const HEAD_OFFICE_ERRORS = {
     'Enter an Ontario postal code. Ontario postal codes start with K, L, M, N or P.',
 } as const;
 
-export function validateHeadOfficeAddress(address: HeadOfficeAddress): HeadOfficeErrors {
+export function validateHeadOfficeAddress(
+  address: HeadOfficeAddress,
+  options?: { requireMunicipalityCountyStatus?: boolean },
+): HeadOfficeErrors {
   const next: HeadOfficeErrors = {};
+  const requireMunicipalityCountyStatus = options?.requireMunicipalityCountyStatus !== false;
   const unitTypeError = unitTypeRequiredError(address.roomNumber, address.unitType);
   if (unitTypeError) {
     next.unitType = unitTypeError;
@@ -95,10 +99,10 @@ export function validateHeadOfficeAddress(address: HeadOfficeAddress): HeadOffic
   if (!address.streetName.trim()) {
     next.streetName = HEAD_OFFICE_ERRORS.streetName;
   }
-  if (!address.municipalityStatus.trim()) {
+  if (requireMunicipalityCountyStatus && !address.municipalityStatus.trim()) {
     next.municipalityStatus = HEAD_OFFICE_ERRORS.municipalityStatus;
   }
-  if (!address.countyStatus.trim()) {
+  if (requireMunicipalityCountyStatus && !address.countyStatus.trim()) {
     next.countyStatus = HEAD_OFFICE_ERRORS.countyStatus;
   }
   if (!address.countyName.trim()) {
@@ -186,6 +190,8 @@ type OntarioHeadOfficeAddressFieldsProps<T extends HeadOfficeAddress> = {
   locationHeading?: string;
   /** Paper item 3. Shown as an h4 over street address fields when provided. */
   addressHeading?: string;
+  /** When false, municipality and county status dropdowns are omitted. Defaults to true. */
+  showMunicipalityCountyStatus?: boolean;
 };
 
 /** Ontario-only head office address: search, then one field per row. */
@@ -197,6 +203,7 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
   municipalityStatusCaption = 'Status of municipality',
   locationHeading,
   addressHeading,
+  showMunicipalityCountyStatus = true,
 }: OntarioHeadOfficeAddressFieldsProps<T>) {
   function patch(partial: Partial<HeadOfficeAddress>, ...cleared: HeadOfficeFieldKey[]) {
     const next = { ...address, ...partial };
@@ -213,36 +220,40 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
 
   const locationFields = (
     <>
-      <div id={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}>
-        <OntarioDropdownList
-          elementId={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}
-          caption={municipalityStatusCaption}
-          name="municipality-status"
-          required
-          isEmptyStartOption
-          value={address.municipalityStatus}
-          options={[...MUNICIPALITY_STATUS_OPTIONS]}
-          errorMessage={errors.municipalityStatus}
-          customOnChange={(event) =>
-            patch({ municipalityStatus: getEventValue(event) }, 'municipalityStatus')
-          }
-        />
-      </div>
-      <div id={HEAD_OFFICE_FIELD_ANCHORS.countyStatus}>
-        <OntarioDropdownList
-          elementId={HEAD_OFFICE_FIELD_ANCHORS.countyStatus}
-          caption="County, district or regional municipality"
-          name="county-status"
-          required
-          isEmptyStartOption
-          value={address.countyStatus}
-          options={[...COUNTY_STATUS_OPTIONS]}
-          errorMessage={errors.countyStatus}
-          customOnChange={(event) =>
-            patch({ countyStatus: getEventValue(event) }, 'countyStatus')
-          }
-        />
-      </div>
+      {showMunicipalityCountyStatus ? (
+        <>
+          <div id={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}>
+            <OntarioDropdownList
+              elementId={HEAD_OFFICE_FIELD_ANCHORS.municipalityStatus}
+              caption={municipalityStatusCaption}
+              name="municipality-status"
+              required
+              isEmptyStartOption
+              value={address.municipalityStatus}
+              options={[...MUNICIPALITY_STATUS_OPTIONS]}
+              errorMessage={errors.municipalityStatus}
+              customOnChange={(event) =>
+                patch({ municipalityStatus: getEventValue(event) }, 'municipalityStatus')
+              }
+            />
+          </div>
+          <div id={HEAD_OFFICE_FIELD_ANCHORS.countyStatus}>
+            <OntarioDropdownList
+              elementId={HEAD_OFFICE_FIELD_ANCHORS.countyStatus}
+              caption="County, district or regional municipality"
+              name="county-status"
+              required
+              isEmptyStartOption
+              value={address.countyStatus}
+              options={[...COUNTY_STATUS_OPTIONS]}
+              errorMessage={errors.countyStatus}
+              customOnChange={(event) =>
+                patch({ countyStatus: getEventValue(event) }, 'countyStatus')
+              }
+            />
+          </div>
+        </>
+      ) : null}
       <div id={HEAD_OFFICE_FIELD_ANCHORS.countyName}>
         <OntarioInput
           elementId={HEAD_OFFICE_FIELD_ANCHORS.countyName}

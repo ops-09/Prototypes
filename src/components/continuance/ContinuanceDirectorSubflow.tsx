@@ -142,7 +142,7 @@ export function ContinuanceDirectorSubflow({ formId }: ContinuanceDirectorSubflo
           </div>
         ) : null}
 
-        <h1 className={`ontario-h1 ${styles.pageTitle}`}>
+        <h1 className={`ontario-h1 ${styles.subflowPageTitle}`}>
           {isNew ? 'Add a Director' : 'Edit director'}
         </h1>
 

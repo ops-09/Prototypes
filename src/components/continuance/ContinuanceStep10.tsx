@@ -6,7 +6,9 @@ import {
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
 import { Form7SummaryList } from '../form7/Form7SummaryList';
+import { GeneratePdfSection } from '../shared/GeneratePdfSection';
 import { focusField } from './continuanceFocus';
+import { generateContinuanceReviewPdf } from './continuanceGeneratePdf';
 import {
   buildContinuanceReviewSections,
   type ReviewSectionKey,
@@ -47,6 +49,8 @@ export function ContinuanceStep10({ formId }: ContinuanceStep10Props) {
   const draft = ensureContinuanceStep10Draft(formId);
   const [errors, setErrors] = useState<Partial<{ sections: string }>>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
+  const [pdfBlocked, setPdfBlocked] = useState(false);
+  const [pdfGenerated, setPdfGenerated] = useState(false);
 
   const sections = useMemo(
     () => buildContinuanceReviewSections(formId, draft),
@@ -74,6 +78,15 @@ export function ContinuanceStep10({ formId }: ContinuanceStep10Props) {
       return;
     }
     upsertContinuanceReview(formId, 'continue');
+    navigate(`/form-${formId}/step-11`);
+  }
+
+  function handleGeneratePdf() {
+    const opened = generateContinuanceReviewPdf({ formId, draft });
+    setPdfBlocked(!opened);
+    if (opened) {
+      setPdfGenerated(true);
+    }
   }
 
   function handleSaveAsDraft() {
@@ -134,7 +147,8 @@ export function ContinuanceStep10({ formId }: ContinuanceStep10Props) {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Review</h1>
           <p className={styles.lead}>
             Review the information entered for this {CONTINUANCE_FILING_TITLE[formId]} filing.
-            Use Change to update a section. The page shows the latest saved information.
+            Use Change to update a section, then generate a PDF to sign. Continue to the next
+            step to upload the signed copy and authorize the filing.
           </p>
 
           <div className={styles.formStack}>
@@ -165,6 +179,13 @@ export function ContinuanceStep10({ formId }: ContinuanceStep10Props) {
                 ))}
               </div>
             ))}
+
+            <GeneratePdfSection
+              idPrefix={`form${formId}`}
+              pdfBlocked={pdfBlocked}
+              pdfGenerated={pdfGenerated}
+              onGenerate={handleGeneratePdf}
+            />
           </div>
 
           <div className={styles.buttonGroup}>

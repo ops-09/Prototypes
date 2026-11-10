@@ -8,17 +8,18 @@ import {
   type Form1Step3Data,
   type YesNoAnswer,
 } from '../form1/form1DraftStorage';
+import type { UploadedFileMeta } from '../form1/FileUpload';
 import {
   emptyNameNuans,
   normalizeNameNuans,
   type NameNuansFields,
 } from '../form7/form7DraftStorage';
 
-export const CONTINUANCE_TOTAL_STEPS = 10;
+export const CONTINUANCE_TOTAL_STEPS = 11;
 export const CONTINUANCE_MAX_NUANS_REPORTS = 2;
 
 export type ContinuanceFormId = 14 | 15;
-export type ContinuanceLastCompletedStep = 0 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type ContinuanceLastCompletedStep = 0 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 export type ContinuanceStakeholderGroupId = 'A' | 'B' | 'C' | 'D';
 export type ContinuanceOriginalAct = 'bca-ontario' | 'ca-ontario' | 'other' | '';
 
@@ -29,11 +30,14 @@ export type ContinuanceStep2Data = {
   confirmEmail: string;
 };
 
-export type ContinuanceStep3Data = NameNuansFields;
+export type ContinuanceStep3Data = NameNuansFields & {
+  continueUnderName: YesNoAnswer | '';
+};
 
 export type ContinuanceStep4Data = {
   originalAct: ContinuanceOriginalAct;
   otherActJurisdiction: string;
+  incorporationDate: string;
 };
 
 export type ContinuanceStep5Data = Form1Step3Data;
@@ -52,6 +56,8 @@ export type ContinuanceDirector = {
   email: string;
   residentCanadian: YesNoAnswer | '';
   address: DirectorResidentialAddress;
+  consentConfirmed: boolean;
+  consentFile: UploadedFileMeta | null;
   addedFromAccount: boolean;
 };
 
@@ -62,7 +68,6 @@ export type ContinuanceStep6Data = {
   maximumNumber: string;
   multiStakeholder: YesNoAnswer | '';
   groups: Record<ContinuanceStakeholderGroupId, ContinuanceStakeholderGroup>;
-  consentConfirmed: boolean;
   directors: ContinuanceDirector[];
 };
 
@@ -97,6 +102,11 @@ export type ContinuanceStep9Data = {
   authorizationDate: string;
 };
 
+export type ContinuanceStep10Data = {
+  signedPdf: UploadedFileMeta | null;
+  authorizationConfirmed: boolean;
+};
+
 export type ContinuanceDraft = {
   step2: ContinuanceStep2Data;
   step3: ContinuanceStep3Data;
@@ -106,9 +116,11 @@ export type ContinuanceDraft = {
   step7: ContinuanceStep7Data;
   step8: ContinuanceStep8Data;
   step9: ContinuanceStep9Data;
+  step10: ContinuanceStep10Data;
   savedAs: 'draft' | 'continue' | 'submitted';
   savedAt: string;
   lastCompletedStep: ContinuanceLastCompletedStep;
+  confirmationNumber?: string;
 };
 
 const STORAGE_KEYS: Record<ContinuanceFormId, string> = {
@@ -159,6 +171,7 @@ export const EMPTY_STEP2: ContinuanceStep2Data = {
 export const EMPTY_STEP4: ContinuanceStep4Data = {
   originalAct: '',
   otherActJurisdiction: '',
+  incorporationDate: '',
 };
 
 export const EMPTY_STEP5: ContinuanceStep5Data = { ...EMPTY_HEAD_OFFICE };
@@ -195,7 +208,6 @@ export const EMPTY_STEP6: ContinuanceStep6Data = {
   maximumNumber: '',
   multiStakeholder: '',
   groups: emptyStakeholderGroups(),
-  consentConfirmed: false,
   directors: [],
 };
 
@@ -229,6 +241,11 @@ export const EMPTY_STEP9: ContinuanceStep9Data = {
   authorizationDate: '',
 };
 
+export const EMPTY_STEP10: ContinuanceStep10Data = {
+  signedPdf: null,
+  authorizationConfirmed: false,
+};
+
 export const CONTINUANCE_RICH_TEXT_MAX_CHARS = 900_000;
 
 export const CONTINUANCE_ORIGINAL_ACT_OPTIONS = [
@@ -257,6 +274,7 @@ export const AUTHORIZING_ACT_ERROR =
 export const REQUIRED_FIELD_ERROR = 'Required Field.';
 export const INVALID_DATE_ERROR = 'Please enter a valid date.';
 export const FUTURE_AUTHORIZATION_DATE_ERROR = 'The date cannot be in the future.';
+export const FUTURE_INCORPORATION_DATE_ERROR = 'The date cannot be in the future.';
 
 export function originalActLabel(value: ContinuanceOriginalAct): string {
   if (!value) {
@@ -293,16 +311,43 @@ export const CONTINUANCE_PROPOSED_NAME_LEAD = [
   'The name of the co-operative must have “CO-OPERATIVE” or “COOPÉRATIVE” in the name. The name of the co-operative must end with one of the following legal elements: “INCORPORATED”, “INCORPORÉE”, “CORPORATION”, “INC.” or “CORP.”.',
 ] as const;
 
-function capNuansReports(fields: NameNuansFields): ContinuanceStep3Data {
+function normalizeContinueUnderName(
+  value: unknown,
+  proposedName: string,
+): ContinuanceStep3Data['continueUnderName'] {
+  if (value === 'yes' || value === 'no') {
+    return value;
+  }
+  return proposedName.trim() ? 'no' : '';
+}
+
+function normalizeStep3(raw: unknown): ContinuanceStep3Data {
+  const fields = normalizeNameNuans(raw);
+  const continueUnderName = normalizeContinueUnderName(
+    raw && typeof raw === 'object'
+      ? (raw as Partial<ContinuanceStep3Data>).continueUnderName
+      : '',
+    fields.proposedName,
+  );
   const reports = fields.nuansReports.slice(0, CONTINUANCE_MAX_NUANS_REPORTS);
+  if (continueUnderName === 'yes') {
+    return {
+      continueUnderName,
+      ...emptyNameNuans(),
+    };
+  }
   return {
+    continueUnderName,
     proposedName: fields.proposedName,
     nuansReports: reports.length > 0 ? reports : emptyNameNuans().nuansReports,
   };
 }
 
 function emptyStep3(): ContinuanceStep3Data {
-  return capNuansReports(emptyNameNuans());
+  return {
+    continueUnderName: '',
+    ...emptyNameNuans(),
+  };
 }
 
 function emptyStep4(): ContinuanceStep4Data {
@@ -331,6 +376,36 @@ function emptyStep8(): ContinuanceStep8Data {
 
 function emptyStep9(): ContinuanceStep9Data {
   return { ...EMPTY_STEP9 };
+}
+
+function emptyStep10(): ContinuanceStep10Data {
+  return { ...EMPTY_STEP10 };
+}
+
+function normalizeUploadedFile(raw: unknown): UploadedFileMeta | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const value = raw as Partial<UploadedFileMeta>;
+  if (typeof value.name !== 'string' || !value.name.trim()) {
+    return null;
+  }
+  return {
+    name: value.name,
+    size: typeof value.size === 'number' ? value.size : 0,
+    type: typeof value.type === 'string' ? value.type : 'application/pdf',
+  };
+}
+
+function normalizeStep10(raw: unknown): ContinuanceStep10Data {
+  if (!raw || typeof raw !== 'object') {
+    return emptyStep10();
+  }
+  const value = raw as Partial<ContinuanceStep10Data>;
+  return {
+    signedPdf: normalizeUploadedFile(value.signedPdf),
+    authorizationConfirmed: value.authorizationConfirmed === true,
+  };
 }
 
 function newDirectorId() {
@@ -391,6 +466,8 @@ export function createEmptyDirector(id = newDirectorId()): ContinuanceDirector {
     email: '',
     residentCanadian: '',
     address: { ...EMPTY_DIRECTOR_ADDRESS },
+    consentConfirmed: false,
+    consentFile: null,
     addedFromAccount: false,
   };
 }
@@ -419,6 +496,8 @@ function normalizeDirector(raw: unknown): ContinuanceDirector {
     email: typeof value.email === 'string' ? value.email : '',
     residentCanadian: normalizeYesNo(value.residentCanadian),
     address: normalizeDirectorAddress(value.address),
+    consentConfirmed: Boolean(value.consentConfirmed),
+    consentFile: value.consentFile ?? null,
     addedFromAccount: Boolean(value.addedFromAccount),
   };
 }
@@ -469,7 +548,6 @@ function normalizeStep6(raw: unknown): ContinuanceStep6Data {
             D: normalizeStakeholderGroup(groupsSource.D),
           }
         : emptyStakeholderGroups(),
-    consentConfirmed: Boolean(value.consentConfirmed),
     directors: Array.isArray(value.directors) ? value.directors.map(normalizeDirector) : [],
   };
 }
@@ -508,6 +586,7 @@ function emptyDraft(): ContinuanceDraft {
     step7: emptyStep7(),
     step8: emptyStep8(),
     step9: emptyStep9(),
+    step10: emptyStep10(),
     savedAs: 'draft',
     savedAt: new Date().toISOString(),
     lastCompletedStep: 0,
@@ -515,6 +594,9 @@ function emptyDraft(): ContinuanceDraft {
 }
 
 function normalizeLastCompletedStep(value: unknown): ContinuanceLastCompletedStep {
+  if (value === 11) {
+    return 11;
+  }
   if (value === 10) {
     return 10;
   }
@@ -547,7 +629,7 @@ function normalizeLastCompletedStep(value: unknown): ContinuanceLastCompletedSte
 
 function atLeast(
   current: ContinuanceLastCompletedStep,
-  step: 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10,
+  step: 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11,
 ): ContinuanceLastCompletedStep {
   return current >= step ? current : step;
 }
@@ -675,6 +757,7 @@ function normalizeStep4(raw: unknown): ContinuanceStep4Data {
       originalAct === 'other' && typeof value.otherActJurisdiction === 'string'
         ? value.otherActJurisdiction
         : '',
+    incorporationDate: normalizeIsoDate(value.incorporationDate),
   };
 }
 
@@ -690,16 +773,19 @@ export function readContinuanceDraft(formId: ContinuanceFormId): ContinuanceDraf
         ...EMPTY_STEP2,
         ...(parsed.step2 ?? {}),
       },
-      step3: capNuansReports(normalizeNameNuans(parsed.step3)),
+      step3: normalizeStep3(parsed.step3),
       step4: normalizeStep4(parsed.step4),
       step5: normalizeStep5(parsed.step5),
       step6: normalizeStep6(parsed.step6),
       step7: normalizeStep7(parsed.step7),
       step8: normalizeStep8(parsed.step8),
       step9: normalizeStep9(parsed.step9),
+      step10: normalizeStep10(parsed.step10),
       savedAs: parsed.savedAs === 'continue' || parsed.savedAs === 'submitted' ? parsed.savedAs : 'draft',
       savedAt: parsed.savedAt ?? new Date().toISOString(),
       lastCompletedStep: normalizeLastCompletedStep(parsed.lastCompletedStep),
+      confirmationNumber:
+        typeof parsed.confirmationNumber === 'string' ? parsed.confirmationNumber : undefined,
     };
   } catch {
     return null;
@@ -742,7 +828,7 @@ export function upsertContinuanceStep3(
   const existing = readContinuanceDraft(formId) ?? emptyDraft();
   const draft: ContinuanceDraft = {
     ...existing,
-    step3: capNuansReports(step3),
+    step3: normalizeStep3(step3),
     savedAs,
     savedAt: new Date().toISOString(),
     lastCompletedStep:
@@ -904,6 +990,7 @@ function seedContinuanceDraft(): ContinuanceDraft {
     step7: emptyStep7(),
     step8: emptyStep8(),
     step9: emptyStep9(),
+    step10: emptyStep10(),
     savedAs: 'continue',
     savedAt: new Date().toISOString(),
     lastCompletedStep: 0,
@@ -1052,4 +1139,51 @@ export function upsertContinuanceReview(
   };
   saveContinuanceDraft(formId, draft);
   return draft;
+}
+
+/** Playground deep-link: keep prior steps for the submit page. */
+export function ensureContinuanceStep11Draft(formId: ContinuanceFormId): ContinuanceDraft {
+  const existing = readContinuanceDraft(formId);
+  if (existing) {
+    return existing;
+  }
+  const seeded: ContinuanceDraft = {
+    ...seedContinuanceDraft(),
+    lastCompletedStep: 10,
+  };
+  saveContinuanceDraft(formId, seeded);
+  return seeded;
+}
+
+export function upsertContinuanceStep10(
+  formId: ContinuanceFormId,
+  step10: ContinuanceStep10Data,
+  savedAs: ContinuanceDraft['savedAs'],
+  lastCompletedStep?: ContinuanceDraft['lastCompletedStep'],
+  confirmationNumber?: string,
+): ContinuanceDraft {
+  const existing = readContinuanceDraft(formId) ?? emptyDraft();
+  const draft: ContinuanceDraft = {
+    ...existing,
+    step10: normalizeStep10(step10),
+    savedAs,
+    savedAt: new Date().toISOString(),
+    lastCompletedStep:
+      savedAs === 'submitted'
+        ? 11
+        : lastCompletedStep !== undefined
+          ? lastCompletedStep
+          : savedAs === 'continue'
+            ? atLeast(existing.lastCompletedStep, 11)
+            : existing.lastCompletedStep,
+    confirmationNumber: confirmationNumber ?? existing.confirmationNumber,
+  };
+  saveContinuanceDraft(formId, draft);
+  return draft;
+}
+
+export function createContinuanceConfirmationNumber(formId: ContinuanceFormId) {
+  const stamp = Date.now().toString(36).toUpperCase();
+  const rand = Math.floor(Math.random() * 9000 + 1000);
+  return `F${formId}-${stamp}-${rand}`;
 }

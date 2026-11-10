@@ -21,6 +21,9 @@ import {
   BYB_OTHER_JURISDICTION,
   BYB_PAYMENT_ITEMS,
   BYB_PAYMENT_LEAD_TEXT,
+  BYB_STEPS_HEADING,
+  BYB_STEPS_INTRO,
+  continuanceBeforeYouBeginSteps,
   continuanceEligibilityIntro,
 } from './continuanceBeforeYouBeginContent';
 import styles from './ContinuanceBeforeYouBegin.module.scss';
@@ -53,6 +56,26 @@ export function ContinuanceBeforeYouBegin({ formId }: ContinuanceBeforeYouBeginP
         />
 
         <div className={styles.stack}>
+          <section className={styles.section} aria-labelledby="byb-steps-heading">
+            <h2 id="byb-steps-heading" className={`ontario-h2 ${styles.sectionHeading}`}>
+              {BYB_STEPS_HEADING}
+            </h2>
+            <p className={styles.sectionIntro}>{BYB_STEPS_INTRO}</p>
+            <ol className={styles.stepsList}>
+              {continuanceBeforeYouBeginSteps(formId).map((step) => (
+                <li key={step.title} className={styles.stepItem}>
+                  <div className={styles.stepMarker} aria-hidden="true">
+                    <span className={`ontario-h2 ${styles.stepNumber}`} />
+                  </div>
+                  <div className={styles.stepBody}>
+                    <h5 className={`ontario-h5 ${styles.stepTitle}`}>{step.title}</h5>
+                    <p className={styles.stepDescription}>{step.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+
           <section className={styles.section} aria-label="Who can apply">
             <p className={styles.sectionIntro}>{continuanceEligibilityIntro(formId)}</p>
             <p className={styles.sectionIntro}>{BYB_OTHER_JURISDICTION}</p>

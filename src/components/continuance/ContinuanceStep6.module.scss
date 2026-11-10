@@ -12,11 +12,100 @@
 }
 
 .groupBlock {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--ontario-spacing-5, 1.5rem);
+  padding: var(--ontario-spacing-5, 1.5rem);
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
 }
 
 .groupHeading {
   margin: 0;
+}
+
+.groupHeadingWithRemove {
+  padding-right: calc(var(--ontario-spacing-8, 3rem) + var(--ontario-spacing-6, 2rem));
+}
+
+.addActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  align-items: center;
+}
+
+.addLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ontario-colour-link--hover, #00478f);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: var(--ontario-global-tokens-border-size, 4px) solid
+      var(--ontario-colour-focus, #009adb);
+    outline-offset: var(--ontario-global-tokens-border-size, 4px);
+  }
+
+  &:active {
+    color: var(--ontario-colour-link--active, #002142);
+  }
+}
+
+.removeLink {
+  position: absolute;
+  top: var(--ontario-spacing-5, 1.5rem);
+  right: var(--ontario-spacing-5, 1.5rem);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-alert, #cd0000);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-semi-bold, 600);
+  line-height: 1.5;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-focus, #009adb);
+    outline-offset: 2px;
+  }
 }

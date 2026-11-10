@@ -27,6 +27,10 @@ import styles from '../form2/Form2Step1.module.scss';
 
 const CURRENT_STEP = 5;
 
+const CONTINUANCE_HEAD_OFFICE_FIELD_ORDER = HEAD_OFFICE_FIELD_ORDER.filter(
+  (key) => key !== 'municipalityStatus' && key !== 'countyStatus',
+);
+
 function focusField(anchorId: string) {
   const target = document.getElementById(anchorId);
   if (!target) {
@@ -75,7 +79,7 @@ export function ContinuanceStep5({ formId }: ContinuanceStep5Props) {
 
   const errorSummaryItems = useMemo(
     () =>
-      HEAD_OFFICE_FIELD_ORDER.flatMap((key) => {
+      CONTINUANCE_HEAD_OFFICE_FIELD_ORDER.flatMap((key) => {
         const message = errors[key];
         if (!message) {
           return [];
@@ -101,7 +105,9 @@ export function ContinuanceStep5({ formId }: ContinuanceStep5Props) {
   }
 
   function handleContinue() {
-    const nextErrors = validateHeadOfficeAddress(step5);
+    const nextErrors = validateHeadOfficeAddress(step5, {
+      requireMunicipalityCountyStatus: false,
+    });
     setErrors(nextErrors);
     const hasErrors = Object.keys(nextErrors).length > 0;
     setShowErrorSummary(hasErrors);
@@ -177,8 +183,9 @@ export function ContinuanceStep5({ formId }: ContinuanceStep5Props) {
               address={step5}
               errors={errors}
               onChange={handleAddressChange}
-              locationHeading="The head office is at the:"
+              locationHeading="The head office is located in the municipality of:"
               addressHeading="The address of the head office is:"
+              showMunicipalityCountyStatus={false}
             />
           </div>
 

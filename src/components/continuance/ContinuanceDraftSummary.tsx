@@ -13,8 +13,8 @@ import {
   EMPTY_STEP7,
   EMPTY_STEP8,
   EMPTY_STEP9,
+  EMPTY_STEP10,
   OBR_CORPORATION_NAME,
-  OBR_INCORPORATION_DATE,
   originalActLabel,
   readContinuanceDraft,
   stakeholderGroupIsEmpty,
@@ -37,8 +37,11 @@ export function ContinuanceDraftSummary({ formId }: ContinuanceDraftSummaryProps
   const step7 = draft?.step7 ?? EMPTY_STEP7;
   const step8 = draft?.step8 ?? EMPTY_STEP8;
   const step9 = draft?.step9 ?? EMPTY_STEP9;
+  const step10 = draft?.step10 ?? EMPTY_STEP10;
   const continueHref =
-    draft && draft.lastCompletedStep >= 9
+    draft && draft.lastCompletedStep >= 10
+      ? `/form-${formId}/step-11`
+      : draft && draft.lastCompletedStep >= 9
       ? `/form-${formId}/step-10`
       : draft && draft.lastCompletedStep >= 8
       ? `/form-${formId}/step-9`
@@ -78,7 +81,11 @@ export function ContinuanceDraftSummary({ formId }: ContinuanceDraftSummaryProps
           <OntarioPageAlert
             type="success"
             heading={submitted ? 'Submission recorded' : 'Draft saved'}
-            content={`Saved at ${new Date(draft.savedAt).toLocaleString()} (mode: ${draft.savedAs}).`}
+            content={
+              submitted && draft.confirmationNumber
+                ? `Confirmation number ${draft.confirmationNumber}. Saved at ${new Date(draft.savedAt).toLocaleString()}.`
+                : `Saved at ${new Date(draft.savedAt).toLocaleString()} (mode: ${draft.savedAs}).`
+            }
           />
 
           <h2 className="ontario-h3">Step 2 — Co-operative details</h2>
@@ -108,16 +115,30 @@ export function ContinuanceDraftSummary({ formId }: ContinuanceDraftSummaryProps
               <dd>{OBR_CORPORATION_NAME}</dd>
             </div>
             <div>
-              <dt>Proposed co-operative name</dt>
-              <dd>{draft.step3.proposedName.trim() || '—'}</dd>
-            </div>
-            <div>
-              <dt>Nuans reports</dt>
+              <dt>Continued as a co-operative under the name</dt>
               <dd>
-                {draft.step3.nuansReports.filter((report) => report.file || report.date).length ||
-                  '—'}
+                {draft.step3.continueUnderName === 'yes'
+                  ? 'Yes'
+                  : draft.step3.continueUnderName === 'no'
+                    ? 'No'
+                    : '—'}
               </dd>
             </div>
+            {draft.step3.continueUnderName === 'no' ? (
+              <>
+                <div>
+                  <dt>Proposed co-operative name</dt>
+                  <dd>{draft.step3.proposedName.trim() || '—'}</dd>
+                </div>
+                <div>
+                  <dt>Nuans reports</dt>
+                  <dd>
+                    {draft.step3.nuansReports.filter((report) => report.file || report.date)
+                      .length || '—'}
+                  </dd>
+                </div>
+              </>
+            ) : null}
           </dl>
 
           <h2 className="ontario-h3">Step 4 — Original incorporation</h2>
@@ -134,14 +155,18 @@ export function ContinuanceDraftSummary({ formId }: ContinuanceDraftSummaryProps
             ) : null}
             <div>
               <dt>Date of incorporation/amalgamation</dt>
-              <dd>{formatIsoDateDisplay(OBR_INCORPORATION_DATE)}</dd>
+              <dd>
+                {step4.incorporationDate
+                  ? formatIsoDateDisplay(step4.incorporationDate)
+                  : '—'}
+              </dd>
             </div>
           </dl>
 
           <h2 className="ontario-h3">Step 5 — Head office address</h2>
           <dl className={styles.summaryList}>
             <div>
-              <dt>The head office is at the:</dt>
+              <dt>The head office is located in the municipality of:</dt>
               <dd>{formatHeadOfficeLocation(step5) || '—'}</dd>
             </div>
             <div>
@@ -189,10 +214,6 @@ export function ContinuanceDraftSummary({ formId }: ContinuanceDraftSummaryProps
                   );
                 })
               : null}
-            <div>
-              <dt>Written consent for first directors</dt>
-              <dd>{step6.consentConfirmed ? 'Confirmed' : 'Not confirmed'}</dd>
-            </div>
             <div>
               <dt>First directors</dt>
               <dd>
@@ -368,6 +389,24 @@ export function ContinuanceDraftSummary({ formId }: ContinuanceDraftSummaryProps
               <dt>Declaration and attestation</dt>
               <dd>{step9.attestationConfirmed ? 'Confirmed' : 'Not confirmed'}</dd>
             </div>
+          </dl>
+
+          <h2 className="ontario-h3">Step 11 — Submit</h2>
+          <dl className={styles.summaryList}>
+            <div>
+              <dt>Signed PDF</dt>
+              <dd>{step10.signedPdf?.name || '—'}</dd>
+            </div>
+            <div>
+              <dt>Authorization</dt>
+              <dd>{step10.authorizationConfirmed ? 'Confirmed' : 'Not confirmed'}</dd>
+            </div>
+            {draft.confirmationNumber ? (
+              <div>
+                <dt>Confirmation number</dt>
+                <dd>{draft.confirmationNumber}</dd>
+              </div>
+            ) : null}
           </dl>
         </>
       )}

@@ -3,20 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { useContinuanceReviewReturn } from './continuanceReviewReturn';
 import {
   OntarioButton,
+  OntarioDateInput,
   OntarioInput,
   OntarioPageAlert,
   OntarioRadioButtons,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
-import { formatIsoDateDisplay } from '../form7/form7Labels';
+import { isIsoDateComplete } from '../form1/nameValidation';
+import { aggregateDateFromEvent, syncDateFieldByAnchor } from '../form7/dateErrorSync';
+import { focusField, getEventValue } from './continuanceFocus';
 import {
   CONTINUANCE_ORIGINAL_ACT_OPTIONS,
   CONTINUANCE_TOTAL_STEPS,
   EMPTY_STEP4,
   ensureContinuanceStep4Draft,
-  OBR_INCORPORATION_DATE,
+  INVALID_DATE_ERROR,
   ORIGINAL_ACT_ERROR,
   OTHER_ACT_ERROR,
+  FUTURE_INCORPORATION_DATE_ERROR,
+  REQUIRED_FIELD_ERROR,
   readContinuanceDraft,
   upsertContinuanceStep4,
   type ContinuanceFormId,
@@ -27,7 +32,7 @@ import styles from '../form2/Form2Step1.module.scss';
 
 const CURRENT_STEP = 4;
 
-type FieldKey = 'originalAct' | 'otherActJurisdiction';
+type FieldKey = 'originalAct' | 'otherActJurisdiction' | 'incorporationDate';
 type FieldErrors = Partial<Record<FieldKey, string>>;
 
 function fieldAnchors(formId: ContinuanceFormId): Record<FieldKey, string> {
@@ -35,36 +40,95 @@ function fieldAnchors(formId: ContinuanceFormId): Record<FieldKey, string> {
   return {
     originalAct: `${prefix}-original-act`,
     otherActJurisdiction: `${prefix}-other-act-jurisdiction`,
+    incorporationDate: `${prefix}-incorporation-date`,
   };
 }
 
-function getEventValue(event: globalThis.Event) {
-  const target = event.target as HTMLInputElement | null;
-  return target?.value ?? '';
+function readShadowDateParts(anchorId: string) {
+  const host = document
+    .getElementById(anchorId)
+    ?.querySelector<HTMLElement>('ontario-date-input');
+  const root = host?.shadowRoot;
+  if (!root) {
+    return { day: '', month: '', year: '' };
+  }
+  return {
+    year: root.querySelector<HTMLInputElement>('input[id^="year-"]')?.value ?? '',
+    month: root.querySelector<HTMLInputElement>('input[id^="month-"]')?.value ?? '',
+    day: root.querySelector<HTMLInputElement>('input[id^="day-"]')?.value ?? '',
+  };
 }
 
-function focusField(anchorId: string) {
-  const target = document.getElementById(anchorId);
-  if (!target) {
-    return;
+function isRealCalendarDate(year: string, month: string, day: string) {
+  if (!/^\d{4}$/.test(year) || !/^\d{1,2}$/.test(month) || !/^\d{1,2}$/.test(day)) {
+    return false;
   }
-  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const y = Number(year);
+  const m = Number(month);
+  const d = Number(day);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+}
 
-  const nestedHost = target.querySelector<HTMLElement>(
-    'ontario-input, ontario-radio-buttons',
-  );
-  const nestedShadowControl = nestedHost?.shadowRoot?.querySelector<HTMLElement>(
-    'input, select, textarea, button',
-  );
-  if (nestedShadowControl) {
-    nestedShadowControl.focus({ preventScroll: true });
-    return;
+function padDatePart(value: string, size: number) {
+  return value.padStart(size, '0');
+}
+
+function isoFromParts(year: string, month: string, day: string) {
+  return `${padDatePart(year, 4)}-${padDatePart(month, 2)}-${padDatePart(day, 2)}`;
+}
+
+function isFutureIsoDate(value: string, today = new Date()) {
+  if (!isIsoDateComplete(value)) {
+    return false;
+  }
+  const [y, m, d] = value.slice(0, 10).split('-').map(Number);
+  const entered = Date.UTC(y, m - 1, d);
+  const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  return entered > todayUtc;
+}
+
+function isoDateParts(iso: string) {
+  const [year, month, day] = iso.slice(0, 10).split('-');
+  return { year: year ?? '', month: month ?? '', day: day ?? '' };
+}
+
+function validIsoFromInput(iso: string, anchorId: string) {
+  const parts = readShadowDateParts(anchorId);
+  if (isRealCalendarDate(parts.year, parts.month, parts.day)) {
+    return isoFromParts(parts.year, parts.month, parts.day);
+  }
+  if (parts.day || parts.month || parts.year) {
+    return '';
+  }
+  if (isIsoDateComplete(iso)) {
+    const stored = isoDateParts(iso);
+    if (isRealCalendarDate(stored.year, stored.month, stored.day)) {
+      return iso.slice(0, 10);
+    }
+  }
+  return '';
+}
+
+function incorporationDateError(iso: string, anchorId: string) {
+  const parts = readShadowDateParts(anchorId);
+  const typedParts = parts.day || parts.month || parts.year ? parts : isoDateParts(iso);
+  const hasAny = Boolean(typedParts.day || typedParts.month || typedParts.year);
+  const hasAll = Boolean(typedParts.day && typedParts.month && typedParts.year);
+
+  if (!hasAny || !hasAll) {
+    return REQUIRED_FIELD_ERROR;
   }
 
-  const focusable = target.querySelector<HTMLElement>(
-    'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
-  );
-  focusable?.focus({ preventScroll: true });
+  if (!isRealCalendarDate(typedParts.year, typedParts.month, typedParts.day)) {
+    return INVALID_DATE_ERROR;
+  }
+
+  const resolved = isoFromParts(typedParts.year, typedParts.month, typedParts.day);
+  if (isFutureIsoDate(resolved)) {
+    return FUTURE_INCORPORATION_DATE_ERROR;
+  }
+  return undefined;
 }
 
 type ContinuanceStep4Props = {
@@ -76,6 +140,8 @@ export function ContinuanceStep4({ formId }: ContinuanceStep4Props) {
   const { afterSave } = useContinuanceReviewReturn(formId);
   const draft = ensureContinuanceStep4Draft(formId);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const dateErrorsRef = useRef<FieldErrors>({});
+  const currentYear = new Date().getFullYear();
   const anchors = fieldAnchors(formId);
   const backHref = `/form-${formId}/step-3`;
   const continueHref = `/form-${formId}/step-5`;
@@ -87,6 +153,8 @@ export function ContinuanceStep4({ formId }: ContinuanceStep4Props) {
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
+
+  dateErrorsRef.current = errors;
 
   const radioOptions = useMemo(
     () =>
@@ -100,13 +168,15 @@ export function ContinuanceStep4({ formId }: ContinuanceStep4Props) {
 
   const errorSummaryItems = useMemo(
     () =>
-      (['originalAct', 'otherActJurisdiction'] as FieldKey[]).flatMap((key) => {
-        const message = errors[key];
-        if (!message) {
-          return [];
-        }
-        return [{ key, message, href: `#${anchors[key]}` }];
-      }),
+      (['originalAct', 'otherActJurisdiction', 'incorporationDate'] as FieldKey[]).flatMap(
+        (key) => {
+          const message = errors[key];
+          if (!message) {
+            return [];
+          }
+          return [{ key, message, href: `#${anchors[key]}` }];
+        },
+      ),
     [anchors, errors],
   );
 
@@ -121,6 +191,12 @@ export function ContinuanceStep4({ formId }: ContinuanceStep4Props) {
       }
       const next = { ...prev };
       delete next[key];
+      dateErrorsRef.current = next;
+      if (key === 'incorporationDate') {
+        window.requestAnimationFrame(() =>
+          syncDateFieldByAnchor(anchors.incorporationDate, next.incorporationDate),
+        );
+      }
       return next;
     });
   }
@@ -134,23 +210,42 @@ export function ContinuanceStep4({ formId }: ContinuanceStep4Props) {
       next.otherActJurisdiction = OTHER_ACT_ERROR;
     }
 
+    const dateError = incorporationDateError(step4.incorporationDate, anchors.incorporationDate);
+    if (dateError) {
+      next.incorporationDate = dateError;
+    }
+
     return next;
   }
 
   function handleContinue() {
+    const resolvedDate = validIsoFromInput(step4.incorporationDate, anchors.incorporationDate);
+    const toSave: ContinuanceStep4Data = {
+      ...step4,
+      incorporationDate: resolvedDate || step4.incorporationDate,
+      otherActJurisdiction:
+        step4.originalAct === 'other' ? step4.otherActJurisdiction : '',
+    };
+    if (resolvedDate && resolvedDate !== step4.incorporationDate) {
+      patchStep4({ incorporationDate: resolvedDate });
+    }
+
     const nextErrors = validateAll();
+    dateErrorsRef.current = nextErrors;
     setErrors(nextErrors);
     const hasErrors = Object.keys(nextErrors).length > 0;
     setShowErrorSummary(hasErrors);
-
-    if (hasErrors) {
-      window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      syncDateFieldByAnchor(anchors.incorporationDate, nextErrors.incorporationDate);
+      if (hasErrors) {
         errorSummaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      }
+    });
+    if (hasErrors) {
       return;
     }
 
-    upsertContinuanceStep4(formId, step4, 'continue');
+    upsertContinuanceStep4(formId, toSave, 'continue');
     navigate(afterSave(continueHref));
   }
 
@@ -253,12 +348,46 @@ export function ContinuanceStep4({ formId }: ContinuanceStep4Props) {
               </div>
             ) : null}
 
-            {/* ODS Date Input has no readOnly prop — OBR date is composed from tokens. */}
-            <div>
-              <p className={styles.naicsLabel}>Date of incorporation/amalgamation:</p>
-              <p className={styles.naicsSelectedValue}>
-                {formatIsoDateDisplay(OBR_INCORPORATION_DATE)}
-              </p>
+            {/* ODS Date Input has no errorMessage prop — submit injects borders via sync. */}
+            <div id={anchors.incorporationDate}>
+              <OntarioDateInput
+                elementId={`${anchors.incorporationDate}-input`}
+                caption="Date of incorporation/amalgamation:"
+                required
+                maxYear={currentYear}
+                value={step4.incorporationDate || undefined}
+                dateValidator={() => {
+                  const message = dateErrorsRef.current.incorporationDate;
+                  if (message) {
+                    return {
+                      errorMessage: message,
+                      dayInvalid: true,
+                      monthInvalid: true,
+                      yearInvalid: true,
+                    };
+                  }
+                  return {
+                    errorMessage: '',
+                    dayInvalid: false,
+                    monthInvalid: false,
+                    yearInvalid: false,
+                  };
+                }}
+                onInputOnInput={(event) => {
+                  const next = aggregateDateFromEvent(event);
+                  if (next !== null) {
+                    patchStep4({ incorporationDate: next });
+                  }
+                  clearError('incorporationDate');
+                }}
+                onInputOnChange={(event) => {
+                  const next = aggregateDateFromEvent(event);
+                  if (next !== null) {
+                    patchStep4({ incorporationDate: next });
+                  }
+                  clearError('incorporationDate');
+                }}
+              />
             </div>
           </div>
 

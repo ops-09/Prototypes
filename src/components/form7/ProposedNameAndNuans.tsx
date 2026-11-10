@@ -72,6 +72,8 @@ type ProposedNameAndNuansProps = {
   nuansDateHint?: string;
   /** Overrides the default empty-name required message. */
   nameRequiredMessage?: string;
+  /** When false, the name is left as typed. Defaults to true. */
+  convertToBlockCapitals?: boolean;
 };
 
 function getEventValue(event: globalThis.Event) {
@@ -98,6 +100,7 @@ export function ProposedNameAndNuans({
   maxReports = MAX_NUANS_REPORTS,
   nuansDateHint,
   nameRequiredMessage,
+  convertToBlockCapitals = true,
 }: ProposedNameAndNuansProps) {
   const isCoop = nameKind === 'cooperative';
   const isNfp = nameKind === 'nfp';
@@ -191,9 +194,12 @@ export function ProposedNameAndNuans({
           patch({ proposedName: getEventValue(event) });
           onClearError('proposedName');
         }}
-        customOnBlur={(event) =>
-          patch({ proposedName: toBlockCapitals(getEventValue(event)) })
-        }
+        customOnBlur={(event) => {
+          const next = getEventValue(event);
+          patch({
+            proposedName: convertToBlockCapitals ? toBlockCapitals(next) : next,
+          });
+        }}
       />
 
       {secondaryName ? (

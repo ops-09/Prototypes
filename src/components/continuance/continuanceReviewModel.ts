@@ -15,7 +15,6 @@ import { formatDirectorFullName } from './ContinuanceDirectorEditor';
 import {
   CONTINUANCE_STAKEHOLDER_GROUP_IDS,
   OBR_CORPORATION_NAME,
-  OBR_INCORPORATION_DATE,
   originalActLabel,
   stakeholderGroupIsEmpty,
   type ContinuanceDraft,
@@ -76,7 +75,7 @@ function confirmed(value: boolean) {
   return value ? 'Confirmed' : 'Not confirmed';
 }
 
-function resolveCoverLetterContact(): CoverLetterContact {
+export function resolveCoverLetterContact(): CoverLetterContact {
   return readCoverLetterContact() ?? contactFromSignedInProfile();
 }
 
@@ -122,7 +121,11 @@ function isHeadOfficeComplete(step5: ContinuanceStep5Data) {
 }
 
 function isDirectorsComplete(step6: ContinuanceStep6Data) {
-  if (!step6.countMode || !step6.consentConfirmed || step6.directors.length === 0) {
+  if (
+    !step6.countMode ||
+    step6.directors.length === 0 ||
+    step6.directors.some((director) => !director.consentConfirmed || !director.consentFile)
+  ) {
     return false;
   }
   if (step6.multiStakeholder === 'yes') {
@@ -184,16 +187,20 @@ export function buildContinuanceReviewSections(
     .join(' ')
     .trim();
   const proposedName = draft.step3.proposedName.trim();
-  const continuedNameDifferent =
-    proposedName && proposedName.toUpperCase() !== OBR_CORPORATION_NAME.toUpperCase();
-  const nuansReports = draft.step3.nuansReports.filter(
-    (report) => report.file || report.date.trim(),
-  );
+  const continueUnderName = draft.step3.continueUnderName;
+  const nuansReports =
+    continueUnderName === 'no'
+      ? draft.step3.nuansReports.filter((report) => report.file || report.date.trim())
+      : [];
 
   const nameRows: ReviewRow[] = [
     { name: 'Name of the corporation', description: OBR_CORPORATION_NAME },
+    {
+      name: 'The corporation is to be continued as a co-operative under the name',
+      description: yesNo(continueUnderName),
+    },
   ];
-  if (continuedNameDifferent) {
+  if (continueUnderName === 'no' && proposedName) {
     nameRows.push({ name: 'Continued name', description: proposedName });
   }
   nuansReports.forEach((report, index, reports) => {
@@ -259,11 +266,6 @@ export function buildContinuanceReviewSections(
       });
     });
   }
-  directorRows.push({
-    name: 'Written consent for first directors',
-    description: confirmed(draft.step6.consentConfirmed),
-  });
-
   const directorGroups: PersonReviewGroup[] = draft.step6.directors.map((director, index) => ({
     key: director.id,
     caption: `Director ${index + 1}`,
@@ -284,6 +286,19 @@ export function buildContinuanceReviewSections(
         name: 'Resident Canadian',
         description: yesNo(director.residentCanadian),
       },
+      {
+        name: 'Director consent',
+        description: confirmed(director.consentConfirmed),
+      },
+      ...(director.consentFile
+        ? [
+            {
+              name: 'Consent form',
+              description: director.consentFile.name,
+              files: [director.consentFile],
+            },
+          ]
+        : []),
     ],
   }));
 
@@ -407,7 +422,8 @@ export function buildContinuanceReviewSections(
       key: 'cooperativeName',
       caption: 'Co-operative name',
       editHref: stepHref(formId, 3),
-      complete: Boolean(proposedName),
+      complete:
+        continueUnderName === 'yes' || (continueUnderName === 'no' && Boolean(proposedName)),
       rows: nameRows,
     },
     {
@@ -416,7 +432,8 @@ export function buildContinuanceReviewSections(
       editHref: stepHref(formId, 4),
       complete: Boolean(
         draft.step4.originalAct &&
-          (draft.step4.originalAct !== 'other' || draft.step4.otherActJurisdiction.trim()),
+          (draft.step4.originalAct !== 'other' || draft.step4.otherActJurisdiction.trim()) &&
+          draft.step4.incorporationDate,
       ),
       rows: [
         {
@@ -428,7 +445,7 @@ export function buildContinuanceReviewSections(
         },
         {
           name: 'Date of incorporation/amalgamation',
-          description: formatIsoDateDisplay(OBR_INCORPORATION_DATE),
+          description: displayOrEmpty(formatIsoDateDisplay(draft.step4.incorporationDate)),
         },
       ],
     },

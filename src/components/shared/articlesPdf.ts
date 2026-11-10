@@ -104,11 +104,16 @@ export function formatDirectorCount(step4: DirectorCount) {
   return NOT_PROVIDED;
 }
 
-export function firstDirectorsTableHtml(directors: PdfDirector[]) {
+export function firstDirectorsTableHtml(
+  directors: PdfDirector[],
+  options?: { uppercaseNames?: boolean },
+) {
+  const formatName =
+    options?.uppercaseNames === false ? formatPersonName : formatPdfPersonName;
   return tableHtml(
     ['Name in full, including all given names', 'Address', 'Resident Canadian'],
     directors.map((director) => [
-      formatPdfPersonName(director),
+      formatName(director),
       formatMailingAddress(director.address),
       director.residentCanadian === 'yes'
         ? 'Yes'

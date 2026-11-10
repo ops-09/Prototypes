@@ -489,10 +489,15 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       },
       {
         label: 'Form 14 — Step 10',
-        description:
-          'Review — read-only summary of the filing with Change links back to each step.',
+        description: 'Review — summary and generate PDF.',
         href: '/form-14/step-10',
         ariaLabelText: 'Open Form 14 Step 10 review',
+      },
+      {
+        label: 'Form 14 — Step 11',
+        description: 'Submit — upload the signed PDF, authorize, and submit.',
+        href: '/form-14/step-11',
+        ariaLabelText: 'Open Form 14 Step 11 submit',
       },
     ],
   },
@@ -562,10 +567,15 @@ const PROTOTYPE_PAGES: PageCategory[] = [
       },
       {
         label: 'Form 15 — Step 10',
-        description:
-          'Review — read-only summary of the filing with Change links back to each step.',
+        description: 'Review — summary and generate PDF.',
         href: '/form-15/step-10',
         ariaLabelText: 'Open Form 15 Step 10 review',
+      },
+      {
+        label: 'Form 15 — Step 11',
+        description: 'Submit — upload the signed PDF, authorize, and submit.',
+        href: '/form-15/step-11',
+        ariaLabelText: 'Open Form 15 Step 11 submit',
       },
     ],
   },

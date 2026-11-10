@@ -1,0 +1,110 @@
+[
+  {
+    "id": "C01",
+    "name": "Before you begin",
+    "fileName": "C01-before-you-begin.png",
+    "missing": []
+  },
+  {
+    "id": "C02",
+    "name": "Cover letter — contact information",
+    "fileName": "C02-cover-letter-contact-information.png",
+    "missing": []
+  },
+  {
+    "id": "C03",
+    "name": "Co-operative details — type, primary activity, official email",
+    "fileName": "C03-co-operative-details-type-primary-activity-official-email.png",
+    "missing": []
+  },
+  {
+    "id": "C04",
+    "name": "Co-operative name and Nuans report",
+    "fileName": "C04-co-operative-name-and-nuans-report.png",
+    "missing": []
+  },
+  {
+    "id": "C05",
+    "name": "Head office address",
+    "fileName": "C05-head-office-address.png",
+    "missing": []
+  },
+  {
+    "id": "C06",
+    "name": "First directors — count, rules, and list",
+    "fileName": "C06-first-directors-count-rules-and-list.png",
+    "missing": []
+  },
+  {
+    "id": "C07",
+    "name": "Add director — person details",
+    "fileName": "C07-add-director-person-details.png",
+    "missing": []
+  },
+  {
+    "id": "C08",
+    "name": "Incorporators — list",
+    "fileName": "C08-incorporators-list.png",
+    "missing": []
+  },
+  {
+    "id": "C09",
+    "name": "Add incorporator — individual or corporation",
+    "fileName": "C09-add-incorporator-individual-or-corporation.png",
+    "missing": []
+  },
+  {
+    "id": "C10",
+    "name": "Membership and special provisions",
+    "fileName": "C10-membership-and-special-provisions.png",
+    "missing": []
+  },
+  {
+    "id": "C12",
+    "name": "Submit — signed PDF and authorization",
+    "fileName": "C12-submit-signed-pdf-and-authorization.png",
+    "missing": []
+  },
+  {
+    "id": "C13",
+    "name": "Registry details callout (existing entity)",
+    "fileName": "C13-registry-details-callout-existing-entity.png",
+    "missing": []
+  },
+  {
+    "id": "C14",
+    "name": "Amalgamating co-operatives / corporations — list",
+    "fileName": "C14-amalgamating-co-operatives-corporations-list.png",
+    "missing": []
+  },
+  {
+    "id": "C15",
+    "name": "Supporting documents",
+    "fileName": "C15-supporting-documents.png",
+    "missing": []
+  },
+  {
+    "id": "C16",
+    "name": "Add amalgamating co-operative",
+    "fileName": "C16-add-amalgamating-co-operative.png",
+    "missing": []
+  },
+  {
+    "id": "C17",
+    "name": "Amalgamating corporations — list",
+    "fileName": "C17-amalgamating-corporations-list.png",
+    "missing": []
+  },
+  {
+    "id": "C18",
+    "name": "Add my Corporation",
+    "fileName": "C18-add-my-corporation.png",
+    "missing": []
+  },
+  {
+    "id": "C19",
+    "name": "Add Another Corporation",
+    "fileName": "C19-add-another-corporation.png",
+    "missing": []
+  }
+]

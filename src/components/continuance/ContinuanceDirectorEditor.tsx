@@ -1,9 +1,13 @@
 import {
   OntarioButton,
+  OntarioCheckboxes,
   OntarioInput,
+  OntarioPageAlert,
   OntarioRadioButtons,
 } from '@ongov/ontario-design-system-component-library-react';
+import { FileUpload } from '../form1/FileUpload';
 import {
+  DIRECTOR_CONSENT_FORM_URL,
   EMPTY_DIRECTOR_ADDRESS,
   formatUnitLabel,
   type DirectorAddressType,
@@ -18,8 +22,10 @@ import {
 import { getEventValue, isValidEmail } from './continuanceFocus';
 import { type ContinuanceDirector } from './continuanceDraftStorage';
 
-const REQUIRED_FIELD = 'Required Field.';
-const EMAIL_INVALID = 'Please enter a valid email address.';
+const EMAIL_INVALID = 'Enter a valid email address, like name@example.com.';
+const CONSENT_CHECKBOX_REQUIRED =
+  'Confirm that this director has given consent to act as first director.';
+const CONSENT_FILE_REQUIRED = 'Upload the completed consent form (PDF).';
 
 const ADDRESS_TYPE_OPTIONS = [
   { value: 'canadian', label: 'Canadian Address' },
@@ -32,6 +38,8 @@ export type DirectorFieldKey =
   | 'lastName'
   | 'email'
   | 'residentCanadian'
+  | 'consent'
+  | 'consentFile'
   | 'addressType'
   | 'postalCodeLookup'
   | 'unitType'
@@ -50,6 +58,8 @@ export const DIRECTOR_ERROR_FIELD_ORDER: DirectorFieldKey[] = [
   'lastName',
   'email',
   'residentCanadian',
+  'consent',
+  'consentFile',
   'addressType',
   'postalCodeLookup',
   'unitType',
@@ -78,6 +88,10 @@ export function getDirectorFieldAnchor(
       return `${prefix}-email`;
     case 'residentCanadian':
       return `${prefix}-resident-canadian`;
+    case 'consent':
+      return `${prefix}-consent`;
+    case 'consentFile':
+      return `${prefix}-consent-file`;
     case 'addressType':
       return `${prefix}-address-type`;
     case 'postalCodeLookup':
@@ -118,19 +132,25 @@ export function validateDirector(director: ContinuanceDirector): DirectorErrors 
   const next: DirectorErrors = {};
 
   if (!director.firstName.trim()) {
-    next.firstName = REQUIRED_FIELD;
+    next.firstName = 'Enter the first name.';
   }
   if (!director.lastName.trim()) {
-    next.lastName = REQUIRED_FIELD;
+    next.lastName = 'Enter the last name.';
   }
   if (director.email.trim() && !isValidEmail(director.email.trim())) {
     next.email = EMAIL_INVALID;
   }
   if (!director.residentCanadian) {
-    next.residentCanadian = REQUIRED_FIELD;
+    next.residentCanadian = 'Select whether the director is a resident Canadian.';
+  }
+  if (!director.consentConfirmed) {
+    next.consent = CONSENT_CHECKBOX_REQUIRED;
+  }
+  if (!director.consentFile) {
+    next.consentFile = CONSENT_FILE_REQUIRED;
   }
   if (!director.address.addressType) {
-    next.addressType = REQUIRED_FIELD;
+    next.addressType = 'Select the type of address.';
   }
 
   if (director.address.addressType === 'canadian') {
@@ -139,19 +159,19 @@ export function validateDirector(director: ContinuanceDirector): DirectorErrors 
 
   if (director.address.addressType === 'us' || director.address.addressType === 'international') {
     if (!director.address.addressLine1.trim()) {
-      next.addressLine1 = REQUIRED_FIELD;
+      next.addressLine1 = 'Enter address line 1.';
     }
     if (!director.address.cityTown.trim()) {
-      next.cityTown = REQUIRED_FIELD;
+      next.cityTown = 'Enter the city or town.';
     }
     if (!director.address.provinceState.trim()) {
-      next.provinceState = REQUIRED_FIELD;
+      next.provinceState = 'Enter the state, province or region.';
     }
     if (!director.address.postalCode.trim()) {
-      next.postalCode = REQUIRED_FIELD;
+      next.postalCode = 'Enter the ZIP or postal code.';
     }
     if (director.address.addressType === 'international' && !director.address.country.trim()) {
-      next.country = REQUIRED_FIELD;
+      next.country = 'Enter the country.';
     }
   }
 
@@ -265,7 +285,7 @@ export function ContinuanceDirectorEditor({
           name={`${prefix}-first-name`}
           type="text"
           required
-          requiredValidationMessage={REQUIRED_FIELD}
+          requiredValidationMessage="Enter the first name."
           value={director.firstName}
           errorMessage={errors.firstName}
           customOnInput={(event) => patch({ firstName: getEventValue(event) })}
@@ -288,7 +308,7 @@ export function ContinuanceDirectorEditor({
           name={`${prefix}-last-name`}
           type="text"
           required
-          requiredValidationMessage={REQUIRED_FIELD}
+          requiredValidationMessage="Enter the last name."
           value={director.lastName}
           errorMessage={errors.lastName}
           customOnInput={(event) => patch({ lastName: getEventValue(event) })}
@@ -322,6 +342,62 @@ export function ContinuanceDirectorEditor({
             patch({ residentCanadian: getEventValue(event) as YesNoAnswer })
           }
         />
+      </div>
+
+      {director.residentCanadian === 'yes' ? (
+        <div className={step4Styles.residentCanadianAlert}>
+          <OntarioPageAlert
+            type="informational"
+            heading="Resident Canadian requirement"
+            content="The requirement for at least 50 per cent of the directors to be resident Canadian under the Co-operative Corporations Act. Indication of resident Canadian status (yes or no) is still required for all corporation types."
+          />
+        </div>
+      ) : null}
+
+      <div className={step4Styles.consentBlock}>
+        <h2 className={`ontario-h2 ${step4Styles.sectionHeading}`}>Director consent</h2>
+        <div id={`${prefix}-consent`}>
+          <OntarioCheckboxes
+            caption="Director consent"
+            name={`${prefix}-consent`}
+            required
+            hintText="Confirm that consent has been given. You must still upload the completed consent form below."
+            value={director.consentConfirmed ? ['consent'] : []}
+            options={[
+              {
+                value: 'consent',
+                elementId: `${prefix}-consent-given`,
+                label:
+                  'This director has given consent to act as first director in the approved form.',
+              },
+            ]}
+            errorMessage={errors.consent}
+            customOnChange={(event) => {
+              const target = event.target as HTMLInputElement | null;
+              patch({ consentConfirmed: Boolean(target?.checked) });
+            }}
+          />
+        </div>
+        <p className={step4Styles.consentLink}>
+          <a href={DIRECTOR_CONSENT_FORM_URL} target="_blank" rel="noopener noreferrer">
+            Download a copy of the approved form to consent to act as first director
+          </a>
+        </p>
+        <p className={step4Styles.consentNote}>
+          This consent is required to be available for inspection at the head office address
+          in accordance with the Act.
+        </p>
+        <div id={`${prefix}-consent-file`}>
+          <FileUpload
+            inputId={`${prefix}-consent-file-input`}
+            label="Upload consent form (PDF)"
+            required
+            hintText="Upload the completed Consent to Act as a First Director (Form 3). PDF only, maximum 20 MB."
+            value={director.consentFile}
+            errorMessage={errors.consentFile}
+            onChange={(file) => patch({ consentFile: file })}
+          />
+        </div>
       </div>
 
       <div id={`${prefix}-address-type`}>
@@ -359,7 +435,7 @@ export function ContinuanceDirectorEditor({
             name={`${prefix}-line1`}
             type="text"
             required
-            requiredValidationMessage={REQUIRED_FIELD}
+            requiredValidationMessage="Enter address line 1."
             value={director.address.addressLine1}
             errorMessage={errors.addressLine1}
             customOnInput={(event) => patchAddress({ addressLine1: getEventValue(event) })}
@@ -380,7 +456,7 @@ export function ContinuanceDirectorEditor({
             name={`${prefix}-foreign-city`}
             type="text"
             required
-            requiredValidationMessage={REQUIRED_FIELD}
+            requiredValidationMessage="Enter the city or town."
             value={director.address.cityTown}
             errorMessage={errors.cityTown}
             customOnInput={(event) => patchAddress({ cityTown: getEventValue(event) })}
@@ -391,7 +467,7 @@ export function ContinuanceDirectorEditor({
             name={`${prefix}-state-region`}
             type="text"
             required
-            requiredValidationMessage={REQUIRED_FIELD}
+            requiredValidationMessage="Enter the state, province or region."
             value={director.address.provinceState}
             errorMessage={errors.provinceState}
             customOnInput={(event) => patchAddress({ provinceState: getEventValue(event) })}
@@ -402,7 +478,7 @@ export function ContinuanceDirectorEditor({
             name={`${prefix}-zip`}
             type="text"
             required
-            requiredValidationMessage={REQUIRED_FIELD}
+            requiredValidationMessage="Enter the ZIP or postal code."
             value={director.address.postalCode}
             errorMessage={errors.postalCode}
             customOnInput={(event) => patchAddress({ postalCode: getEventValue(event) })}
@@ -419,7 +495,7 @@ export function ContinuanceDirectorEditor({
               name={`${prefix}-country`}
               type="text"
               required
-              requiredValidationMessage={REQUIRED_FIELD}
+              requiredValidationMessage="Enter the country."
               value={director.address.country}
               errorMessage={errors.country}
               customOnInput={(event) => patchAddress({ country: getEventValue(event) })}

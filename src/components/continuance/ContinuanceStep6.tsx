@@ -2,7 +2,6 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
-  OntarioCheckboxes,
   OntarioIconAdd,
   OntarioIconDelete,
   OntarioInput,
@@ -11,7 +10,7 @@ import {
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
 import { FieldErrorMessage } from '../form1/FieldErrorMessage';
-import { DIRECTOR_CONSENT_FORM_URL, type DirectorCountMode, type YesNoAnswer } from '../form1/form1DraftStorage';
+import { type DirectorCountMode, type YesNoAnswer } from '../form1/form1DraftStorage';
 import styles from '../form2/Form2Step1.module.scss';
 import step4Styles from '../form1/Form1Step4.module.scss';
 import {
@@ -23,6 +22,7 @@ import { useContinuanceReviewReturn } from './continuanceReviewReturn';
 import {
   CONTINUANCE_STAKEHOLDER_GROUP_IDS,
   CONTINUANCE_TOTAL_STEPS,
+  EMPTY_STAKEHOLDER_GROUP,
   EMPTY_STEP6,
   emptyStakeholderGroups,
   ensureContinuanceStep6Draft,
@@ -46,7 +46,6 @@ const MIN_MAX_ORDER_ERROR =
 const GROUP_MIN_MAX_ORDER_ERROR =
   'The minimum number of directors a group may elect cannot be greater than the maximum.';
 const TWO_GROUPS_ERROR = 'At least two stakeholder groups must be entered.';
-const CONSENT_ERROR = 'Written consent for the first directors must be confirmed to continue.';
 const FIXED_DIRECTORS_COUNT_ERROR =
   'The number of directors added must match the fixed number of directors.';
 
@@ -68,7 +67,6 @@ type PageFieldKey =
   | 'multiStakeholder'
   | 'groups'
   | GroupFieldKey
-  | 'consent'
   | 'directors';
 type PageErrors = Partial<Record<PageFieldKey, string>>;
 
@@ -91,7 +89,6 @@ const FIELD_ANCHORS: Record<PageFieldKey, string> = {
   groupDName: 'group-d-name',
   groupDMin: 'group-d-minimum',
   groupDMax: 'group-d-maximum',
-  consent: 'written-consent',
   directors: 'first-directors',
 };
 
@@ -114,7 +111,6 @@ const FIELD_ORDER: PageFieldKey[] = [
   'groupDName',
   'groupDMin',
   'groupDMax',
-  'consent',
   'directors',
 ];
 
@@ -127,6 +123,28 @@ const YES_NO_OPTIONS = [
   { value: 'yes', elementId: 'multi-yes', label: 'Yes' },
   { value: 'no', elementId: 'multi-no', label: 'No' },
 ];
+
+const REQUIRED_STAKEHOLDER_GROUPS: ContinuanceStakeholderGroupId[] = ['A', 'B'];
+const OPTIONAL_STAKEHOLDER_GROUPS: ContinuanceStakeholderGroupId[] = ['C', 'D'];
+
+function optionalGroupsFromDraft(
+  groups: ContinuanceStep6Data['groups'],
+): number {
+  if (!stakeholderGroupIsEmpty(groups.D)) {
+    return 2;
+  }
+  if (!stakeholderGroupIsEmpty(groups.C)) {
+    return 1;
+  }
+  return 0;
+}
+
+function visibleStakeholderGroupIds(optionalCount: number): ContinuanceStakeholderGroupId[] {
+  return [
+    ...REQUIRED_STAKEHOLDER_GROUPS,
+    ...OPTIONAL_STAKEHOLDER_GROUPS.slice(0, optionalCount),
+  ];
+}
 
 function groupFieldKeys(id: ContinuanceStakeholderGroupId) {
   return {
@@ -241,6 +259,9 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
   }));
   const [errors, setErrors] = useState<PageErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
+  const [optionalGroupCount, setOptionalGroupCount] = useState(() =>
+    optionalGroupsFromDraft(draft.step6?.groups ?? emptyStakeholderGroups()),
+  );
 
   const errorSummaryItems = useMemo(
     () =>
@@ -295,6 +316,29 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
     clearError('groups');
   }
 
+  function addOptionalGroup() {
+    setOptionalGroupCount((count) => Math.min(OPTIONAL_STAKEHOLDER_GROUPS.length, count + 1));
+    clearError('groups');
+  }
+
+  function removeOptionalGroup(id: ContinuanceStakeholderGroupId) {
+    const extras = OPTIONAL_STAKEHOLDER_GROUPS.slice(0, optionalGroupCount);
+    const index = extras.indexOf(id);
+    if (index < 0) {
+      return;
+    }
+    setStep6((prev) => {
+      const groups = { ...prev.groups };
+      for (let i = index; i < extras.length - 1; i += 1) {
+        groups[extras[i]] = { ...groups[extras[i + 1]] };
+      }
+      groups[extras[extras.length - 1]] = { ...EMPTY_STAKEHOLDER_GROUP };
+      return { ...prev, groups };
+    });
+    extras.slice(index).forEach((groupId) => clearGroupErrors(groupId));
+    setOptionalGroupCount((count) => Math.max(0, count - 1));
+  }
+
   function syncLiveMinMaxCountErrors(data: ContinuanceStep6Data) {
     const minError = wholeNumberError(data.minimumNumber, false);
     if (minError) {
@@ -340,27 +384,19 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
       page.multiStakeholder = REQUIRED_FIELD;
     }
     if (step6.multiStakeholder === 'yes') {
+      const visibleIds = visibleStakeholderGroupIds(optionalGroupCount);
       let missingRequiredGroup = false;
-      for (const id of ['A', 'B'] as const) {
+      for (const id of visibleIds) {
         const group = step6.groups[id];
-        if (stakeholderGroupIsEmpty(group)) {
+        const required = REQUIRED_STAKEHOLDER_GROUPS.includes(id);
+        if (required && stakeholderGroupIsEmpty(group)) {
           missingRequiredGroup = true;
-        }
-        applyGroupErrors(group, id, page, true);
-      }
-      for (const id of ['C', 'D'] as const) {
-        const group = step6.groups[id];
-        if (stakeholderGroupIsEmpty(group)) {
-          continue;
         }
         applyGroupErrors(group, id, page, true);
       }
       if (missingRequiredGroup) {
         page.groups = TWO_GROUPS_ERROR;
       }
-    }
-    if (!step6.consentConfirmed) {
-      page.consent = CONSENT_ERROR;
     }
     const directorsError = getDirectorsCountError(step6);
     if (directorsError) {
@@ -600,6 +636,9 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
                     multiStakeholder: value,
                     ...(value === 'no' ? { groups: emptyStakeholderGroups() } : {}),
                   });
+                  if (value === 'no') {
+                    setOptionalGroupCount(0);
+                  }
                   clearError('multiStakeholder');
                   clearError('groups');
                   for (const id of CONTINUANCE_STAKEHOLDER_GROUP_IDS) {
@@ -618,27 +657,41 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
                     <span className={step4Styles.sectionLabelFlag}>(required)</span>
                   </p>
                   <p className={groupStyles.groupsLead}>
-                    Enter at least Group A and Group B. Group C and Group D are optional.
+                    Enter Group A and Group B. You can add up to two more groups.
                   </p>
                 </div>
                 <FieldErrorMessage message={errors.groups} />
-                {CONTINUANCE_STAKEHOLDER_GROUP_IDS.map((id) => {
+                {visibleStakeholderGroupIds(optionalGroupCount).map((id) => {
                   const group = step6.groups[id];
                   const keys = groupFieldKeys(id);
-                  const optional = id === 'C' || id === 'D';
+                  const removable = OPTIONAL_STAKEHOLDER_GROUPS.includes(id);
                   return (
                     <div key={id} className={groupStyles.groupBlock}>
-                      <h2 className={`ontario-h3 ${groupStyles.groupHeading}`}>Group {id}</h2>
+                      {removable ? (
+                        <button
+                          type="button"
+                          className={groupStyles.removeLink}
+                          onClick={() => removeOptionalGroup(id)}
+                          aria-label={`Remove Group ${id}`}
+                        >
+                          <OntarioIconDelete colour="inherit" iconWidth={24} isDecorative />
+                          Remove
+                        </button>
+                      ) : null}
+                      <h2
+                        className={`ontario-h3 ${groupStyles.groupHeading}${
+                          removable ? ` ${groupStyles.groupHeadingWithRemove}` : ''
+                        }`}
+                      >
+                        Group {id}
+                      </h2>
                       <OntarioInput
                         elementId={FIELD_ANCHORS[keys.name]}
                         caption="Group name"
                         name={`group-${id.toLowerCase()}-name`}
                         type="text"
-                        required={!optional}
+                        required
                         requiredValidationMessage={REQUIRED_FIELD}
-                        hintText={
-                          optional ? 'Optional. Complete this group only if needed.' : undefined
-                        }
                         value={group.name}
                         errorMessage={errors[keys.name]}
                         customOnInput={(event) => {
@@ -652,7 +705,7 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
                         caption="Minimum number of directors"
                         name={`group-${id.toLowerCase()}-minimum`}
                         type="text"
-                        required={!optional}
+                        required
                         requiredValidationMessage={REQUIRED_FIELD}
                         hintText="Enter a whole number greater than 0."
                         inputWidth="5-char-width"
@@ -669,7 +722,7 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
                         caption="Maximum number of directors"
                         name={`group-${id.toLowerCase()}-maximum`}
                         type="text"
-                        required={!optional}
+                        required
                         requiredValidationMessage={REQUIRED_FIELD}
                         hintText="Enter a whole number greater than 0."
                         inputWidth="5-char-width"
@@ -684,36 +737,16 @@ export function ContinuanceStep6({ formId }: ContinuanceStep6Props) {
                     </div>
                   );
                 })}
+                {optionalGroupCount < OPTIONAL_STAKEHOLDER_GROUPS.length ? (
+                  <div className={groupStyles.addActions}>
+                    <button type="button" className={groupStyles.addLink} onClick={addOptionalGroup}>
+                      <OntarioIconAdd colour="blue" iconWidth={24} isDecorative />
+                      Add another group
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ) : null}
-
-            <div id={FIELD_ANCHORS.consent} className={step4Styles.consentBlock}>
-              <OntarioCheckboxes
-                caption="Written consent"
-                name="written-consent"
-                required
-                value={step6.consentConfirmed ? ['consent'] : []}
-                options={[
-                  {
-                    value: 'consent',
-                    elementId: 'written-consent-given',
-                    label:
-                      'Written consent has been received and is available in the corporate records for the first directors.',
-                  },
-                ]}
-                errorMessage={errors.consent}
-                customOnChange={(event) => {
-                  const target = event.target as HTMLInputElement | null;
-                  patchStep6({ consentConfirmed: Boolean(target?.checked) });
-                  clearError('consent');
-                }}
-              />
-              <p className={step4Styles.consentLink}>
-                <a href={DIRECTOR_CONSENT_FORM_URL} target="_blank" rel="noopener noreferrer">
-                  Download a copy of the approved form to consent to act as first director
-                </a>
-              </p>
-            </div>
 
             {showDirectorList ? (
               <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>

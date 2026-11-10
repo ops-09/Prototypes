@@ -81,6 +81,7 @@ import { Form14Step7Page } from './pages/Form14Step7Page';
 import { Form14Step8Page } from './pages/Form14Step8Page';
 import { Form14Step9Page } from './pages/Form14Step9Page';
 import { Form14Step10Page } from './pages/Form14Step10Page';
+import { Form14Step11Page } from './pages/Form14Step11Page';
 import { Form15DraftSummaryPage } from './pages/Form15DraftSummaryPage';
 import { Form15InstructionsPage } from './pages/Form15InstructionsPage';
 import { Form15Page } from './pages/Form15Page';
@@ -94,6 +95,7 @@ import { Form15Step7Page } from './pages/Form15Step7Page';
 import { Form15Step8Page } from './pages/Form15Step8Page';
 import { Form15Step9Page } from './pages/Form15Step9Page';
 import { Form15Step10Page } from './pages/Form15Step10Page';
+import { Form15Step11Page } from './pages/Form15Step11Page';
 import { HomePage } from './pages/HomePage';
 import { InviteUserPage } from './pages/InviteUserPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
@@ -240,6 +242,7 @@ function App() {
         <Route path="/form-14/step-8" element={<Form14Step8Page />} />
         <Route path="/form-14/step-9" element={<Form14Step9Page />} />
         <Route path="/form-14/step-10" element={<Form14Step10Page />} />
+        <Route path="/form-14/step-11" element={<Form14Step11Page />} />
         <Route path="/form-14/draft-summary" element={<Form14DraftSummaryPage />} />
 
         <Route path="/form-15" element={<Form15InstructionsPage />} />
@@ -255,6 +258,7 @@ function App() {
         <Route path="/form-15/step-8" element={<Form15Step8Page />} />
         <Route path="/form-15/step-9" element={<Form15Step9Page />} />
         <Route path="/form-15/step-10" element={<Form15Step10Page />} />
+        <Route path="/form-15/step-11" element={<Form15Step11Page />} />
         <Route path="/form-15/draft-summary" element={<Form15DraftSummaryPage />} />
 
         <Route path="/user-management" element={<UserManagementPage />} />

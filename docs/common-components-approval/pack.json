@@ -1,0 +1,346 @@
+{
+  "title": "Common form components — approval pack",
+  "subtitle": "Co-operative Corporations Act filing prototypes",
+  "date": "6 November 2026",
+  "purpose": "This pack shows the shared UI building blocks used across the filing prototypes. Review each screenshot and the annotation table, then mark Approve, Revise, or Defer. Comments in the Decision column will guide the next prototype iteration.",
+  "forms": [
+    "Form 1 — Articles of Incorporation (with share capital)",
+    "Form 2 — Articles of Incorporation (without share capital)",
+    "Form 3 — Application for Supplementary Letters Patent",
+    "Form 7 — Articles of Amendment",
+    "Form 10 — Articles of Amalgamation",
+    "Form 11 — Application for Letters Patent of Amalgamation",
+    "Form 14 — Articles of Continuance (with share capital)",
+    "Form 15 — Articles of Continuance (without share capital)"
+  ],
+  "components": [
+    {
+      "id": "C01",
+      "name": "Before you begin",
+      "source": "Form 1 — Before you begin",
+      "url": "/form-1",
+      "wait": "h1",
+      "maxHeight": 3600,
+      "forms": "1, 2, 3, 7, 10, 11 (Forms 14 and 15 use an instructions page instead)",
+      "summary": "Landing page before the numbered steps: form name, estimated time, what you will do, documents to gather, payment, instructions, and contact.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Before you begin." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Tells the filer to review the information for this filing before starting." },
+        { "n": 3, "find": { "id": "byb-steps-heading" }, "label": "Steps in this process", "note": "Numbered outline of the filing steps." },
+        { "n": 4, "find": { "id": "byb-documents-heading" }, "label": "Submission checklist", "note": "Documents and information the filer should gather before starting." },
+        { "n": 5, "find": { "id": "byb-payment-heading" }, "fallback": { "text": "Payment" }, "label": "Payment", "note": "Filing fee reminder and payment checklist. Copy differs by form; layout is the same." },
+        { "n": 6, "find": { "id": "byb-instructions-heading" }, "fallback": { "text": "Instructions" }, "label": "Instructions", "note": "Navigation and save-draft guidance while completing the filing." },
+        { "n": 7, "find": { "id": "byb-contact-heading" }, "fallback": { "text": "Contact information" }, "label": "Contact information", "note": "Ministry contact for questions about the submission process." },
+        { "n": 8, "find": { "label": "Continue" }, "fallback": { "text": "Continue" }, "label": "Continue", "note": "Primary action into Step 1 (cover letter)." }
+      ]
+    },
+    {
+      "id": "C02",
+      "name": "Cover letter — contact information",
+      "source": "Form 1 — Step 1",
+      "url": "/form-1/step-1",
+      "wait": "h1",
+      "forms": "1, 2, 3, 7, 10, 11, 14 (standalone Cover letter prototype; Form 15 has no cover letter yet)",
+      "summary": "Filer contact details, pre-filled from the signed-in account. Used if the ministry needs to reach the person filing. Not on the public record.",
+      "targets": [
+        { "n": 1, "find": { "css": "ontario-step-indicator" }, "label": "Step indicator and Back", "note": "Shows current step and returns to Before you begin." },
+        { "n": 2, "find": { "css": "h1" }, "fallback": { "text": "Contact information" }, "label": "Page title", "note": "Contact information. Same heading on every cover letter." },
+        { "n": 3, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Explains why contact is collected, that official documents are sent here, and that it is not on the public record." },
+        { "n": 4, "find": { "id": "cover-letter-first-name" }, "label": "First name", "note": "Required. Pre-filled from the signed-in profile." },
+        { "n": 5, "find": { "id": "cover-letter-middle-name" }, "label": "Middle name(s)", "note": "Optional." },
+        { "n": 6, "find": { "id": "cover-letter-last-name" }, "label": "Last name", "note": "Required. Pre-filled from the signed-in profile." },
+        { "n": 7, "find": { "id": "cover-letter-email" }, "label": "Email", "note": "Required contact email for this filing." },
+        { "n": 8, "find": { "id": "cover-letter-confirm-email" }, "label": "Confirm email address", "note": "Must match Email." },
+        { "n": 9, "find": { "id": "cover-letter-phone-number" }, "label": "Telephone number", "note": "Required, with optional extension." },
+        { "n": 10, "find": { "label": "Continue" }, "fallback": { "text": "Continue" }, "label": "Continue / Cancel", "note": "Cover letter has Continue and Cancel only — no Save as draft." }
+      ]
+    },
+    {
+      "id": "C03",
+      "name": "Co-operative details — type, primary activity, official email",
+      "source": "Form 1 — Step 2",
+      "url": "/form-1/step-2",
+      "wait": "h1",
+      "expandHint": "What is the primary activity?",
+      "forms": "All eight filing forms for primary activity and official email. Co-operative type/sub-type on Forms 1, 2, 7, 10, 14, 15.",
+      "summary": "Administrative details collected on every filing: NAICS primary activity, official email (entered twice), and (on most forms) co-operative type.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Co-operative type and contact (wording differs by form)." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Explains sub-type, NAICS, and official email. Not on the public record." },
+        { "n": 3, "find": { "id": "cooperative-subtype" }, "label": "Co-operative sub-type", "note": "Optional on Form 1/2; required as Type of co-operative on Forms 7, 10, 14, 15." },
+        { "n": 4, "find": { "id": "primary-activity" }, "label": "Primary activity (NAICS)", "note": "Required. Search and select a NAICS Canada activity." },
+        { "n": 5, "find": { "hint": "What is the primary activity?" }, "label": "Primary activity hint", "note": "Expander with NAICS Canada guidance and link." },
+        { "n": 6, "find": { "id": "official-email" }, "label": "Official email", "note": "Required. Where the co-operative receives official documents. Not on the public record." },
+        { "n": 7, "find": { "hint": "What is official email?" }, "label": "Official email hint", "note": "Explains why official email is collected." },
+        { "n": 8, "find": { "id": "confirm-official-email" }, "label": "Confirm official email", "note": "Must match Official email." },
+        { "n": 9, "find": { "label": "Continue" }, "fallback": { "text": "Continue" }, "label": "Continue / Save as draft / Cancel", "note": "Same three actions on every step." }
+      ]
+    },
+    {
+      "id": "C04",
+      "name": "Co-operative name and Nuans report",
+      "source": "Form 1 — Step 3",
+      "url": "/form-1/step-3",
+      "wait": "h1",
+      "forms": "Always on Forms 1, 2, 14, 15. Conditional (name change) on Forms 3, 7, 10, 11.",
+      "summary": "Proposed or current name plus one or more Ontario Nuans reports (PDF and report date). Filers can add another report.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Co-operative name (or keep vs change name on later forms)." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Asks for the proposed name in block capitals and the Nuans report that confirms it is available." },
+        { "n": 3, "find": { "id": "cooperative-name" }, "label": "Name of the co-operative", "note": "Required proposed or current legal name." },
+        { "n": 4, "find": { "text": "Upload Nuans report" }, "label": "Nuans report upload", "note": "PDF of the Nuans report for this name." },
+        { "n": 5, "find": { "css": "ontario-date-input" }, "label": "Nuans report date", "note": "Report must be dated within 90 days of submission." },
+        { "n": 6, "find": { "text": "Add another Nuans report" }, "label": "Add another Nuans report", "note": "Adds another PDF and date pair (up to the form maximum)." }
+      ]
+    },
+    {
+      "id": "C05",
+      "name": "Head office address",
+      "source": "Form 1 — Step 4",
+      "url": "/form-1/step-4",
+      "wait": "h1",
+      "forms": "1, 2, 11, 14, 15",
+      "summary": "Ontario head office: postal-code / street lookup, then municipality, street, city, province, and postal code. Manual entry if lookup does not find the address.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Head office address." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Head office must be in Ontario and set out in full. A post office box alone is not enough." },
+        { "n": 3, "find": { "id": "postal-code-lookup" }, "label": "Search address", "note": "Type a street address or postal code. Ontario-only lookup." },
+        { "n": 4, "find": { "id": "municipality-status" }, "label": "Status of municipality", "note": "City, town, township, and similar." },
+        { "n": 5, "find": { "id": "county-status" }, "label": "County, district or regional municipality", "note": "Upper-tier geography for the head office." },
+        { "n": 6, "find": { "id": "street-number" }, "label": "Street number and name", "note": "Civic address fields after lookup or manual entry." },
+        { "n": 7, "find": { "id": "province-territory" }, "label": "Province or territory", "note": "Ontario head office; province is selected from a list." },
+        { "n": 8, "find": { "id": "postal-code" }, "label": "Postal code", "note": "Canadian postal code, formatted on blur." }
+      ]
+    },
+    {
+      "id": "C06",
+      "name": "First directors — count, rules, and list",
+      "source": "Form 1 — Step 5",
+      "url": "/form-1/step-5",
+      "wait": "h1",
+      "setupUrls": ["/form-1/step-8"],
+      "forms": "1, 2, 11, 14, 15",
+      "summary": "Board size (fixed or min/max), multi-stakeholder rules where they apply, and a summary list of first directors with Add / Edit / Remove.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Directors." },
+        { "n": 2, "find": { "id": "director-count-mode" }, "label": "Number of directors", "note": "Fixed number, or minimum and maximum." },
+        { "n": 3, "find": { "id": "multi-stakeholder" }, "label": "Multi-stakeholder co-operative", "note": "Yes/no. If yes, stakeholder director counts are required (Forms 1, 2, 14, 15)." },
+        { "n": 4, "find": { "id": "first-directors" }, "label": "First directors list", "note": "Summary cards with name, details, and Remove." },
+        { "n": 5, "find": { "text": "Add director" }, "label": "Add director(s)", "note": "Opens the add-director subflow." }
+      ]
+    },
+    {
+      "id": "C07",
+      "name": "Add director — person details",
+      "source": "Form 1 — Step 5 / add director",
+      "url": "/form-1/step-5/directors/new",
+      "wait": "h1",
+      "forms": "1, 2, 11, 14, 15 (field set varies slightly by form)",
+      "summary": "Subflow to add or edit one director: legal name, email, residency, address for service, written consent, and on Forms 1 and 2 whether they are also an incorporator.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Add director (or Edit director)." },
+        { "n": 2, "find": { "caption": "First name" }, "label": "First / middle / last name", "note": "Legal name. First and last required." },
+        { "n": 3, "find": { "caption": "Email address" }, "label": "Email address", "note": "Optional contact for this director." },
+        { "n": 4, "find": { "caption": "Resident Canadian" }, "label": "Resident Canadian", "note": "Required yes/no on Forms 1, 2, 14, 15." },
+        { "n": 5, "find": { "caption": "Also an incorporator" }, "label": "Also an incorporator", "note": "Forms 1 and 2 only. If yes, share details are collected here and carried into incorporators." },
+        { "n": 6, "find": { "caption": "Residential address" }, "label": "Residential address", "note": "Canadian, US, or international address for service." },
+        { "n": 7, "find": { "label": "Save" }, "label": "Save / Cancel", "note": "Returns to the directors list." }
+      ]
+    },
+    {
+      "id": "C08",
+      "name": "Incorporators — list",
+      "source": "Form 1 — Step 8",
+      "url": "/form-1/step-8",
+      "wait": "h1",
+      "forms": "1 and 2 only",
+      "summary": "List of incorporators (individuals or corporations). Directors marked as incorporators appear here automatically. Minimum 3, or 5 for a Worker Co-operative.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Incorporators." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Defines an incorporator as the person who signs or authorizes the articles." },
+        { "n": 3, "find": { "id": "incorporators-list" }, "label": "Incorporators list", "note": "Summary cards. Linked directors cannot be removed here." },
+        { "n": 4, "find": { "text": "Add an Incorporator" }, "label": "Add an Incorporator", "note": "Opens the add-incorporator subflow." }
+      ]
+    },
+    {
+      "id": "C09",
+      "name": "Add incorporator — individual or corporation",
+      "source": "Form 1 — Step 8 / add incorporator",
+      "url": "/form-1/step-8/incorporators/new",
+      "wait": "h1",
+      "forms": "1 and 2 only (Form 1 also collects shares taken)",
+      "summary": "Subflow to add an incorporator as an individual (name, residency, address, shares) or a corporation (name and OCN search, signer, position).",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Add an incorporator (or Edit incorporator)." },
+        { "n": 2, "find": { "caption": "Type of incorporator" }, "label": "Type of incorporator", "note": "Individual or corporation." },
+        { "n": 3, "find": { "caption": "First name" }, "label": "Individual name", "note": "First, middle, last name when type is Individual." },
+        { "n": 4, "find": { "caption": "Resident Canadian" }, "label": "Resident Canadian", "note": "Required for individual incorporators." },
+        { "n": 5, "find": { "caption": "Number of shares" }, "label": "Shares taken", "note": "Form 1 only: number, class, and amount to be paid." },
+        { "n": 6, "find": { "label": "Save" }, "label": "Save / Cancel", "note": "Returns to the incorporators list." }
+      ]
+    },
+    {
+      "id": "C10",
+      "name": "Membership and special provisions",
+      "source": "Form 1 — Step 7",
+      "url": "/form-1/step-7",
+      "wait": "h1",
+      "forms": "1, 2, 14, 15",
+      "summary": "Free-text article fields for membership classes, stakeholder groups, and special provisions. Hint tells filers to enter N/A if a field does not apply.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Membership and provisions." },
+        { "n": 2, "find": { "id": "membership-classes" }, "label": "Classes of membership", "note": "Optional classes; N/A if none." },
+        { "n": 3, "find": { "id": "membership-class-terms" }, "label": "Terms for each class", "note": "Terms and conditions attaching to each class." },
+        { "n": 4, "find": { "id": "stakeholder-groups" }, "label": "Stakeholder groups", "note": "If any; N/A if none." },
+        { "n": 5, "find": { "id": "stakeholder-group-terms" }, "label": "Stakeholder group terms", "note": "Terms for membership in each group." },
+        { "n": 6, "find": { "id": "special-provisions" }, "label": "Special provisions", "note": "Any other articles provisions; N/A if none." }
+      ]
+    },
+    {
+      "id": "C12",
+      "name": "Submit — signed PDF and authorization",
+      "source": "Form 1 — Step 10",
+      "url": "/form-1/step-10",
+      "wait": "h1",
+      "forms": "1, 2, 3, 7, 10, 11 (not yet on 14 or 15)",
+      "summary": "Upload the signed articles PDF, confirm authorization to file, and submit. Same pattern on every form that has a submit step.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Submit." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Upload the signed PDF and confirm authorization to file." },
+        { "n": 3, "find": { "id": "form1-signed-pdf" }, "label": "Upload signed PDF", "note": "Signed copy of the generated articles." },
+        { "n": 4, "find": { "id": "form1-authorization" }, "label": "Authorization", "note": "Checkbox confirming the filer is authorized to submit." },
+        { "n": 5, "find": { "label": "Submit" }, "label": "Submit / Save as draft / Cancel", "note": "Submit replaces Continue on this last step." }
+      ]
+    },
+    {
+      "id": "C13",
+      "name": "Registry details callout (existing entity)",
+      "source": "Form 7 — Step 2",
+      "url": "/form-7/step-2",
+      "wait": "h1",
+      "forms": "3, 7, 10, 11 (filings against an existing corporation / co-operative)",
+      "summary": "Read-only Ontario Business Registry details (legal name, OCN, incorporation date) shown above editable primary activity, official email, and type of co-operative.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Business details." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Review registry details, then update NAICS, official email, and type of co-operative. Not on the public record." },
+        { "n": 3, "find": { "css": "ontario-callout" }, "label": "Co-operative details callout", "note": "Read-only legal name, Ontario corporation number, and incorporation date from the registry." },
+        { "n": 4, "find": { "id": "primary-activity" }, "label": "Primary activity", "note": "Same NAICS field as new-incorporation forms; may be pre-populated." },
+        { "n": 5, "find": { "id": "cooperative-type" }, "label": "Type of co-operative", "note": "Required dropdown on Forms 7 and 10." }
+      ]
+    },
+    {
+      "id": "C14",
+      "name": "Amalgamating co-operatives / corporations — list",
+      "source": "Form 10 — Step 3",
+      "url": "/form-10/step-3",
+      "wait": "h1",
+      "setupUrls": ["/form-10/step-2"],
+      "forms": "10 (Form 11 list and add actions are C17–C19)",
+      "summary": "Same add / edit / remove list pattern as directors and incorporators, used for amalgamating co-operatives. Each row has legal name, OCN, and members’ approval date.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Amalgamating co-operatives." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Asks for each amalgamating co-operative’s name and the date members approved the amalgamation agreement." },
+        { "n": 3, "find": { "id": "amalgamating-cooperatives" }, "label": "Entity list", "note": "Summary cards. At least two amalgamating co-operatives required." },
+        { "n": 4, "find": { "text": "Add amalgamating co-operative" }, "label": "Add amalgamating co-operative", "note": "Opens the add-entity subflow (C16)." }
+      ]
+    },
+    {
+      "id": "C16",
+      "name": "Add amalgamating co-operative",
+      "source": "Form 10 — Step 3 / add amalgamating co-operative",
+      "url": "/form-10/step-3/cooperatives/new",
+      "wait": "h1",
+      "setupUrls": ["/form-10/step-2", "/form-10/step-3"],
+      "checkText": "Enter the co-operative name and OCN manually",
+      "maxHeight": 2400,
+      "forms": "10 (Form 11 add actions are C18 and C19)",
+      "summary": "Subflow to add or edit one amalgamating co-operative: registry search, optional manual name and OCN, and the date members approved the amalgamation agreement.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Add amalgamating co-operative (or Edit)." },
+        { "n": 2, "find": { "css": "ontario-search-box" }, "fallback": { "text": "Ontario Corporation Number search" }, "label": "Ontario Corporation Number search", "note": "Search by OCN or name. Selecting a result fills legal name and OCN." },
+        { "n": 3, "find": { "caption": "Manual co-operative entry" }, "fallback": { "text": "Enter the co-operative name and OCN manually" }, "label": "Enter name and OCN manually", "note": "Shows Legal name and OCN when the co-operative is not in the registry search." },
+        { "n": 4, "find": { "caption": "Legal name" }, "label": "Legal name", "note": "Required when entering manually." },
+        { "n": 5, "find": { "caption": "Ontario Corporation Number (OCN)" }, "label": "Ontario Corporation Number", "note": "Required when entering manually." },
+        { "n": 6, "find": { "css": "ontario-date-input" }, "label": "Date of members’ approval", "note": "Date members of this co-operative approved the amalgamation agreement." },
+        { "n": 7, "find": { "label": "Save" }, "label": "Save / Cancel", "note": "Returns to the amalgamating list." }
+      ]
+    },
+    {
+      "id": "C17",
+      "name": "Amalgamating corporations — list",
+      "source": "Form 11 — Step 3",
+      "url": "/form-11/step-3",
+      "wait": "h1",
+      "setupUrls": ["/form-11/step-4"],
+      "forms": "11 only",
+      "summary": "List of amalgamating corporations with two add actions: the corporation on the signed-in account, or another corporation. At least two are required, and one must be the account corporation.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Amalgamating corporations." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Asks for each amalgamating corporation’s name and the date shareholders or members approved the amalgamation agreement." },
+        { "n": 3, "find": { "id": "amalgamating-corporations" }, "label": "Corporation list", "note": "Summary cards with legal name, OCN, approval date, and Remove. At least two required." },
+        { "n": 4, "find": { "text": "Add my Corporation" }, "label": "Add my Corporation", "note": "Opens the add subflow with the signed-in account’s corporation pre-filled (C18)." },
+        { "n": 5, "find": { "text": "Add Another Corporation" }, "label": "Add Another Corporation", "note": "Opens the empty add subflow to search or enter another corporation (C19)." }
+      ]
+    },
+    {
+      "id": "C18",
+      "name": "Add my Corporation",
+      "source": "Form 11 — Step 3 / Add my Corporation",
+      "url": "/form-11/step-3/corporations/new?fromAccount=1",
+      "wait": "h1",
+      "setupUrls": ["/form-11/step-2", "/form-11/step-3"],
+      "maxHeight": 2400,
+      "forms": "11 only",
+      "summary": "Add the corporation on the signed-in account. Legal name and OCN are pre-filled from the registry; the filer confirms the date of shareholders/members approval.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Add amalgamating corporation (same heading as Add Another Corporation)." },
+        { "n": 2, "find": { "css": "label[for^='form11-ocn-search']" }, "fallback": { "text": "Ontario Corporation Number" }, "label": "Ontario Corporation Number label", "note": "Field label. Required." },
+        { "n": 3, "find": { "css": "ontario-hint-text" }, "label": "Search hint", "note": "Tells the filer to search by Ontario Corporation Number, or use manual entry if the corporation is not found." },
+        { "n": 4, "find": { "css": "ontario-search-box" }, "label": "Ontario Corporation Number search", "note": "Pre-filled with the signed-in account’s OCN and legal name." },
+        { "n": 5, "find": { "caption": "Manual corporation entry" }, "fallback": { "text": "Enter the corporation name and OCN manually" }, "label": "Enter name and OCN manually", "note": "Optional. Same manual-entry path as Add Another Corporation." },
+        { "n": 6, "find": { "css": "ontario-date-input" }, "label": "Date of shareholders/members approval", "note": "Date shareholders or members of this corporation approved the amalgamation agreement. Pre-filled in the prototype." },
+        { "n": 7, "find": { "label": "Save" }, "label": "Save / Cancel", "note": "Returns to the amalgamating corporations list." }
+      ]
+    },
+    {
+      "id": "C19",
+      "name": "Add Another Corporation",
+      "source": "Form 11 — Step 3 / Add Another Corporation",
+      "url": "/form-11/step-3/corporations/new",
+      "wait": "h1",
+      "setupUrls": ["/form-11/step-2", "/form-11/step-3"],
+      "checkText": "Enter the corporation name and OCN manually",
+      "maxHeight": 2400,
+      "forms": "11 only",
+      "summary": "Add a corporation that is not the signed-in account: registry search, optional manual name and OCN, and the date of shareholders/members approval.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Add amalgamating corporation (or Edit)." },
+        { "n": 2, "find": { "css": "ontario-search-box" }, "fallback": { "text": "Ontario Corporation Number" }, "label": "Ontario Corporation Number search", "note": "Search by OCN or name. Selecting a result fills legal name and OCN." },
+        { "n": 3, "find": { "caption": "Manual corporation entry" }, "fallback": { "text": "Enter the corporation name and OCN manually" }, "label": "Enter name and OCN manually", "note": "Shows Legal name and OCN when the corporation is not in the registry search." },
+        { "n": 4, "find": { "caption": "Legal name" }, "label": "Legal name", "note": "Required when entering manually." },
+        { "n": 5, "find": { "caption": "Ontario Corporation Number (OCN)" }, "label": "Ontario Corporation Number", "note": "Required when entering manually." },
+        { "n": 6, "find": { "css": "ontario-date-input" }, "label": "Date of shareholders/members approval", "note": "Date shareholders or members of this corporation approved the amalgamation agreement." },
+        { "n": 7, "find": { "label": "Save" }, "label": "Save / Cancel", "note": "Returns to the amalgamating corporations list." }
+      ]
+    },
+    {
+      "id": "C15",
+      "name": "Supporting documents",
+      "source": "Form 7 — Step 4",
+      "url": "/form-7/step-4",
+      "wait": "h1",
+      "maxHeight": 2800,
+      "forms": "3, 7, 10, 11 (plus director consent PDFs on Forms 1, 2, 11)",
+      "summary": "PDF uploads and optional typed text for certified resolutions, amalgamation agreements, affidavits, and additional documents.",
+      "targets": [
+        { "n": 1, "find": { "css": "h1" }, "label": "Page title", "note": "Supporting documents." },
+        { "n": 2, "find": { "css": "h1 + p" }, "label": "Lead text", "note": "Upload documents required for this filing. Uploads stay in this browser session until the filer clears site data or finishes." },
+        { "n": 3, "find": { "id": "certified-resolution" }, "label": "Certified resolution", "note": "Label for the required document. Filer can type it, upload a PDF, or both." },
+        { "n": 4, "find": { "id": "certified-resolution-text" }, "fallback": { "css": "ontario-textarea" }, "label": "Typed text", "note": "Textarea for the certified resolution. Completes the item without a file, or in addition to a PDF." },
+        { "n": 5, "find": { "id": "authorization-subsections" }, "label": "Authorization subsections", "note": "Form 7: CCA subsections that authorize the amendment." },
+        { "n": 6, "find": { "id": "form7-resolution-date" }, "label": "Resolution confirmed date", "note": "Date members confirmed the resolution." },
+        { "n": 7, "find": { "id": "affidavits" }, "label": "Affidavits of solvency", "note": "Required supporting PDFs when the amendment type needs them." }
+      ]
+    }
+  ]
+}

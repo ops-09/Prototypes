@@ -4,6 +4,7 @@ import { useContinuanceReviewReturn } from './continuanceReviewReturn';
 import {
   OntarioButton,
   OntarioPageAlert,
+  OntarioRadioButtons,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
 import {
@@ -12,12 +13,14 @@ import {
   validateCooperativeName,
 } from '../form2/nameValidation';
 import { syncDateFieldByAnchor } from '../form7/dateErrorSync';
+import { emptyNameNuans } from '../form7/form7DraftStorage';
 import {
   nuansDateErrorKey,
   ProposedNameAndNuans,
   validateNameNuansFields,
   type NameNuansErrors,
 } from '../form7/ProposedNameAndNuans';
+import { focusField, getEventValue } from './continuanceFocus';
 import {
   CONTINUANCE_MAX_NUANS_REPORTS,
   CONTINUANCE_NAME_VALIDATION_ERROR,
@@ -36,7 +39,10 @@ import styles from '../form2/Form2Step1.module.scss';
 
 const CURRENT_STEP = 3;
 
-type FieldErrors = NameNuansErrors;
+type FieldErrors = NameNuansErrors &
+  Partial<{
+    continueUnderName: string;
+  }>;
 
 function validateContinuanceCooperativeName(value: string): string | undefined {
   const error = validateCooperativeName(value);
@@ -54,6 +60,9 @@ function idPrefix(formId: ContinuanceFormId) {
 }
 
 function nameNuansErrorHref(key: string, reports: ContinuanceStep3Data['nuansReports'], prefix: string) {
+  if (key === 'continueUnderName') {
+    return `#${prefix}-continue-under-name`;
+  }
   if (key === 'proposedName') {
     return `#${prefix}-proposed-name`;
   }
@@ -67,20 +76,6 @@ function nameNuansErrorHref(key: string, reports: ContinuanceStep3Data['nuansRep
   }
   const firstId = reports[0]?.id;
   return firstId ? `#${prefix}-nuans-date-${firstId}` : `#${prefix}-proposed-name`;
-}
-
-function focusField(anchorId: string) {
-  const target = document.getElementById(anchorId);
-  if (!target) {
-    return;
-  }
-  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  const focusable = target.matches('input, select, textarea, button, a, [tabindex]')
-    ? target
-    : target.querySelector<HTMLElement>(
-        'input, select, textarea, button, [tabindex]:not([tabindex="-1"])',
-      );
-  focusable?.focus({ preventScroll: true });
 }
 
 type ContinuanceStep3Props = {
@@ -99,14 +94,30 @@ export function ContinuanceStep3({ formId }: ContinuanceStep3Props) {
   const draftSummaryHref = `/form-${formId}/draft-summary`;
 
   const [step3, setStep3] = useState<ContinuanceStep3Data>(() => ({
+    continueUnderName: draft.step3.continueUnderName,
     proposedName: draft.step3.proposedName,
     nuansReports: draft.step3.nuansReports,
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
+  const continueUnderNameOptions = useMemo(
+    () => [
+      { value: 'yes', elementId: `${prefix}-continue-under-name-yes`, label: 'Yes' },
+      { value: 'no', elementId: `${prefix}-continue-under-name-no`, label: 'No' },
+    ],
+    [prefix],
+  );
+
   const errorSummaryItems = useMemo(() => {
     const items: { key: string; message: string; href: string }[] = [];
+    if (errors.continueUnderName) {
+      items.push({
+        key: 'continueUnderName',
+        message: errors.continueUnderName,
+        href: nameNuansErrorHref('continueUnderName', step3.nuansReports, prefix),
+      });
+    }
     if (errors.proposedName) {
       items.push({
         key: 'proposedName',
@@ -177,6 +188,12 @@ export function ContinuanceStep3({ formId }: ContinuanceStep3Props) {
   }
 
   function validateAll(): FieldErrors {
+    if (!step3.continueUnderName) {
+      return { continueUnderName: 'Select Yes or No.' };
+    }
+    if (step3.continueUnderName === 'yes') {
+      return {};
+    }
     return validateNameNuansFields(
       step3,
       'cooperative',
@@ -263,30 +280,49 @@ export function ContinuanceStep3({ formId }: ContinuanceStep3Props) {
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Co-operative name</h1>
 
           <div className={styles.formStack}>
-            {/* ODS has no read-only input — composed from tokens used by Form 2 field labels. */}
-            <div>
-              <p className={styles.naicsLabel}>The name of the corporation is:</p>
-              <p className={styles.naicsSelectedValue}>{OBR_CORPORATION_NAME}</p>
+            <div id={`${prefix}-continue-under-name`}>
+              <OntarioRadioButtons
+                caption="The corporation is to be continued as a co-operative under the name:"
+                hintText={OBR_CORPORATION_NAME}
+                name={`${prefix}-continue-under-name`}
+                required
+                value={step3.continueUnderName}
+                options={continueUnderNameOptions}
+                errorMessage={errors.continueUnderName}
+                customOnChange={(event) => {
+                  const value = getEventValue(event) as ContinuanceStep3Data['continueUnderName'];
+                  setStep3((prev) => ({
+                    ...prev,
+                    continueUnderName: value,
+                    ...(value === 'yes' ? emptyNameNuans() : {}),
+                  }));
+                  clearError('continueUnderName');
+                  if (value === 'yes') {
+                    setErrors({});
+                    dateErrorsRef.current = {};
+                  }
+                }}
+              />
             </div>
 
-            <p className={styles.body}>
-              The corporation is to be continued as a co-operative under the name:
-            </p>
-
-            <ProposedNameAndNuans
-              idPrefix={prefix}
-              nameKind="cooperative"
-              proposedNameCaption="New co-operative name"
-              leadText={[...CONTINUANCE_PROPOSED_NAME_LEAD]}
-              maxReports={CONTINUANCE_MAX_NUANS_REPORTS}
-              nuansDateHint={CONTINUANCE_NUANS_DATE_HINT}
-              nameRequiredMessage={CONTINUANCE_NAME_VALIDATION_ERROR}
-              value={step3}
-              errors={errors}
-              dateValidatorFor={dateValidatorFor}
-              onChange={setStep3}
-              onClearError={clearError}
-            />
+            {step3.continueUnderName === 'no' ? (
+              <ProposedNameAndNuans
+                idPrefix={prefix}
+                nameKind="cooperative"
+                proposedNameCaption="New co-operative name"
+                proposedNameHint="Enter the name as it should appear on the official record. Example: GREEN INSTITUTE CO-OPERATIVE INC."
+                convertToBlockCapitals={false}
+                leadText={[...CONTINUANCE_PROPOSED_NAME_LEAD]}
+                maxReports={CONTINUANCE_MAX_NUANS_REPORTS}
+                nuansDateHint={CONTINUANCE_NUANS_DATE_HINT}
+                nameRequiredMessage={CONTINUANCE_NAME_VALIDATION_ERROR}
+                value={step3}
+                errors={errors}
+                dateValidatorFor={dateValidatorFor}
+                onChange={(next) => setStep3((prev) => ({ ...prev, ...next }))}
+                onClearError={clearError}
+              />
+            ) : null}
           </div>
 
           <div className={styles.buttonGroup}>

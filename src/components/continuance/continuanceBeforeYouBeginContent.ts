@@ -34,6 +34,82 @@ export const BYB_ONTARIO_ACTS = [
   'Corporations Act (Ontario)',
 ] as const;
 
+export const BYB_STEPS_HEADING = 'Steps in this process';
+
+export const BYB_STEPS_INTRO =
+  'Complete the following steps for a successful submission:';
+
+export type BeforeYouBeginStep = {
+  title: string;
+  description: string;
+};
+
+const BYB_STEP_7: Record<ContinuanceFormId, BeforeYouBeginStep> = {
+  14: {
+    title: 'Step 7: Restrictions and share capital',
+    description:
+      'Enter restrictions, authorized capital, preference terms, and issued capital that is continued.',
+  },
+  15: {
+    title: 'Step 7: Restrictions, member loans and membership fee',
+    description:
+      'Enter restrictions, the minimum member loan, loan-transfer restrictions, and the membership fee.',
+  },
+};
+
+export function continuanceBeforeYouBeginSteps(
+  formId: ContinuanceFormId,
+): readonly BeforeYouBeginStep[] {
+  return [
+    {
+      title: 'Step 1: Contact information',
+      description: 'Enter the contact details for the person filing these articles.',
+    },
+    {
+      title: 'Step 2: Co-operative details',
+      description:
+        'Provide the co-operative sub-type, primary activity, and official email.',
+    },
+    {
+      title: 'Step 3: Co-operative name',
+      description:
+        'Choose whether to continue under the current corporation name. If not, enter a new co-operative name and upload the Nuans report.',
+    },
+    {
+      title: 'Step 4: Original incorporation',
+      description:
+        'Identify the original incorporating Act and the date of incorporation or amalgamation.',
+    },
+    {
+      title: 'Step 5: Head office address',
+      description: 'Enter the head office address for the co-operative.',
+    },
+    {
+      title: 'Step 6: Directors',
+      description: 'Set the board size and enter director details.',
+    },
+    BYB_STEP_7[formId],
+    {
+      title: 'Step 8: Membership and provisions',
+      description:
+        'Enter membership classes, stakeholder groups, and special provisions.',
+    },
+    {
+      title: 'Step 9: Declarations and authorization',
+      description:
+        'Complete the declarations and identify the Act and date that authorized the continuation.',
+    },
+    {
+      title: 'Step 10: Review and certify',
+      description: 'Review the filing and generate the PDF.',
+    },
+    {
+      title: 'Step 11: Submit',
+      description: 'Upload the signed PDF, authorize, and submit.',
+    },
+  ];
+}
+
 export const BYB_DOCUMENTS_HEADING = 'Submission checklist';
 
 export const BYB_DOCUMENTS_INTRO =
