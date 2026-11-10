@@ -385,10 +385,6 @@ export function ContinuanceDraftSummary({ formId }: ContinuanceDraftSummaryProps
                   : '—'}
               </dd>
             </div>
-            <div>
-              <dt>Declaration and attestation</dt>
-              <dd>{step9.attestationConfirmed ? 'Confirmed' : 'Not confirmed'}</dd>
-            </div>
           </dl>
 
           <h2 className="ontario-h3">Step 11 — Submit</h2>

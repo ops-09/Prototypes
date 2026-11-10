@@ -42,7 +42,6 @@ type StatementKey =
 
 type FieldKey =
   | StatementKey
-  | 'attestationConfirmed'
   | 'authorizingAct'
   | 'otherActJurisdiction'
   | 'authorizationDate';
@@ -78,7 +77,6 @@ const FIELD_ANCHORS: Record<FieldKey, string> = {
   subsection158Confirmed: 'subsection-158',
   continuedUnderActConfirmed: 'continued-under-act',
   notInsolventConfirmed: 'not-insolvent',
-  attestationConfirmed: 'declaration-attestation',
   authorizingAct: 'authorizing-act',
   otherActJurisdiction: 'authorizing-other-act',
   authorizationDate: DATE_ANCHOR,
@@ -89,7 +87,6 @@ const FIELD_ORDER: FieldKey[] = [
   'authorizingAct',
   'otherActJurisdiction',
   'authorizationDate',
-  'attestationConfirmed',
 ];
 
 function statementOptionValue(key: StatementKey) {
@@ -183,11 +180,6 @@ function authorizationDateError(iso: string, anchorId: string) {
   return undefined;
 }
 
-function attestationText(formId: ContinuanceFormId) {
-  const shareCapital = formId === 14 ? 'with Share Capital' : 'without Share Capital';
-  return `I hereby certify that I am an authorized officer of the Corporation applying to continue as a Co-operative ${shareCapital} under the Co-operative Corporations Act and that the statements made in this application are true, accurate and complete.`;
-}
-
 type ContinuanceStep9Props = {
   formId: ContinuanceFormId;
 };
@@ -273,10 +265,6 @@ export function ContinuanceStep9({ formId }: ContinuanceStep9Props) {
     const dateError = authorizationDateError(step9.authorizationDate, DATE_ANCHOR);
     if (dateError) {
       next.authorizationDate = dateError;
-    }
-
-    if (!step9.attestationConfirmed) {
-      next.attestationConfirmed = STATEMENT_CONFIRM_ERROR;
     }
 
     return next;
@@ -485,30 +473,6 @@ export function ContinuanceStep9({ formId }: ContinuanceStep9Props) {
                     patchStep9({ authorizationDate: next });
                   }
                   clearError('authorizationDate');
-                }}
-              />
-            </div>
-
-            <div id={FIELD_ANCHORS.attestationConfirmed}>
-              <OntarioCheckboxes
-                caption="Declaration and Attestation"
-                name={FIELD_ANCHORS.attestationConfirmed}
-                required
-                options={[
-                  {
-                    value: 'attestationConfirmed',
-                    elementId: `${FIELD_ANCHORS.attestationConfirmed}-confirm`,
-                    label: attestationText(formId),
-                  },
-                ]}
-                value={step9.attestationConfirmed ? ['attestationConfirmed'] : []}
-                errorMessage={errors.attestationConfirmed}
-                customOnChange={(event) => {
-                  const selected = (event.target as HTMLInputElement | null)?.checked;
-                  const nextChecked =
-                    typeof selected === 'boolean' ? selected : !step9.attestationConfirmed;
-                  patchStep9({ attestationConfirmed: nextChecked });
-                  clearError('attestationConfirmed');
                 }}
               />
             </div>

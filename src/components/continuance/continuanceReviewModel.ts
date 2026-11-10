@@ -161,7 +161,6 @@ function isDeclarationsComplete(step9: ContinuanceStep9Data) {
     !step9.subsection158Confirmed ||
     !step9.continuedUnderActConfirmed ||
     !step9.notInsolventConfirmed ||
-    !step9.attestationConfirmed ||
     !step9.authorizingAct ||
     !step9.authorizationDate
   ) {
@@ -377,10 +376,6 @@ export function buildContinuanceReviewSections(
     {
       name: 'Not insolvent',
       description: confirmed(draft.step9.notInsolventConfirmed),
-    },
-    {
-      name: 'Declaration and attestation',
-      description: confirmed(draft.step9.attestationConfirmed),
     },
   );
 
