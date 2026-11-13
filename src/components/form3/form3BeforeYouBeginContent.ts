@@ -77,6 +77,45 @@ export const BYB_NUANS_SITE_LABEL = 'www.nuans.com';
 export const BYB_NUANS_SUPPLIERS_AFTER =
   ' for a list of registered search houses that can assist you with obtaining a Nuans search report.';
 
+export const BYB_NAICS_URL =
+  'https://www.statcan.gc.ca/en/concepts/searchclasscod';
+
+export const BYB_NAICS_LINK_LABEL =
+  'North American Industry Classification System (NAICS)';
+
+export const NOTICE_CCA_FILINGS_URL =
+  'https://forms.mgcs.gov.on.ca/en/dataset/on00232';
+
+export const BYB_FILING_INSTRUCTIONS: readonly BeforeYouBeginChecklistItem[] = [
+  {
+    beforeLink:
+      'The primary activity is the main activity of your corporation. Please refer to the ',
+    linkLabel: BYB_NAICS_LINK_LABEL,
+    linkHref: BYB_NAICS_URL,
+    afterLink:
+      ' for the list of activities. Select the activity that best describes the primary activity carried on by the corporation and provide the activity code from the link in this form. This information will not appear in the public record and is collected for administrative purposes only.',
+  },
+  {
+    text: 'If the application is being made to change the name of the corporation, an Ontario Nuans name search report, dated not more than 90 days before the submission of the application, is required for the proposed name.',
+  },
+  {
+    text: 'If the proposed name of the corporation is similar to the name of an existing corporation, organization, registered business or includes the name of a person, we may require consent to the use of the proposed name from the corporation, organization, business or individual.',
+  },
+  {
+    text: 'Name Change. For a name change request, the Business and Personal Property Branch (BPPB) requires an Ontario Nuans search for the proposed new name. The Nuans name search must be obtained from a private name search company and cannot be dated more than 90 days before the submission of the application. For example, applications submitted on November 28th could be accompanied by a Nuans name search report dated as early as August 30th, but not dated earlier. If the report is dated earlier, a new report will be required. Name search companies are listed in the Yellow Pages under the heading “Searchers of Records”. The name set out in the application must be exactly the same as the name set out in the Nuans name search report. The Ministry will not grant a name that is identical to another corporation or that contravenes the Corporations Act or Regulations. If the proposed name is similar to that of a known corporation, association, partnership, individual or business, or contains the family name of an individual, the consent in writing of the existing corporation, association, partnership, individual or business may be required or BPPB may require that the existing entity dissolve or change its name.',
+  },
+  {
+    text: 'If the application includes a proposed new name, the following statement must be included in item 5, “The corporation is not insolvent within the meaning of subsection 1(3) of the Filings Regulation (O. Reg 393/21) under the Act.”',
+  },
+  {
+    beforeLink:
+      'For additional information regarding the required documents, information and other filing requirements, please see the following: ',
+    linkLabel:
+      'Notice – Co-operative Corporations Act – Filings by Co-operative Corporations',
+    linkHref: NOTICE_CCA_FILINGS_URL,
+  },
+];
+
 export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
   { text: 'The Ontario Corporation Number (OCN) of the corporation.' },
   {

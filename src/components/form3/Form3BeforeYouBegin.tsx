@@ -14,6 +14,7 @@ import {
   BYB_DOCUMENTS_HEADING,
   BYB_DOCUMENTS_INTRO,
   BYB_ESTIMATED_TIME,
+  BYB_FILING_INSTRUCTIONS,
   BYB_FORM_NAME,
   BYB_PAYMENT_ITEMS,
   BYB_PAYMENT_LEAD_TEXT,
@@ -101,11 +102,13 @@ export function Form3BeforeYouBegin() {
               {BYB_INSTRUCTIONS_HEADING}
             </h2>
             <p className={styles.sectionIntro}>{BYB_INSTRUCTIONS_INTRO}</p>
-            <ul className={styles.bulletList}>
-              {BYB_NAVIGATION_INSTRUCTIONS.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            <BeforeYouBeginChecklistList
+              items={[
+                ...BYB_FILING_INSTRUCTIONS,
+                ...BYB_NAVIGATION_INSTRUCTIONS.map((text) => ({ text })),
+              ]}
+              className={styles.bulletList}
+            />
           </section>
 
           <BeforeYouBeginContactSection />
