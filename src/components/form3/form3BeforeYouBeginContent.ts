@@ -67,16 +67,6 @@ export const BYB_PAYMENT_ITEMS: readonly string[] = [
   'The filing fee is $130',
 ];
 
-export const BYB_NUANS_SUPPLIERS_BEFORE =
-  'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site at ';
-
-export const BYB_NUANS_SITE_URL = 'https://www.nuans.com';
-
-export const BYB_NUANS_SITE_LABEL = 'www.nuans.com';
-
-export const BYB_NUANS_SUPPLIERS_AFTER =
-  ' for a list of registered search houses that can assist you with obtaining a Nuans search report.';
-
 export const BYB_NAICS_URL =
   'https://www.statcan.gc.ca/en/concepts/searchclasscod';
 
@@ -116,37 +106,4 @@ export const BYB_FILING_INSTRUCTIONS: readonly BeforeYouBeginChecklistItem[] = [
   },
 ];
 
-export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = [
-  { text: 'The Ontario Corporation Number (OCN) of the corporation.' },
-  {
-    text: 'The date on which the shareholders/members approved the resolution authorizing the application.',
-  },
-  {
-    text: 'Details of the provisions for which Supplementary Letters Patent are being requested.',
-  },
-  { text: 'A Nuans Name Search Report is required when the application includes a name change.' },
-  {
-    text: 'The Nuans Report must be dated within 90 days of the filing date.',
-  },
-  {
-    text: 'A separate Nuans Report may be required for English and French names that are to be used separately.',
-  },
-  {
-    text: 'If the proposed name of the corporation is similar to the name of an existing corporation, organization, registered business or includes the name of a person, consent to use the name may be requested from the corporation, organization, business or individual.',
-  },
-  {
-    text: 'If the application includes a proposed new name, the following statement must be included in item 5, “The corporation is not insolvent within the meaning of subsection 1(3) of the Filings Regulation (O. Reg 393/21) under the Act.”',
-  },
-  { text: 'Certified copy of the authorizing resolution.' },
-  { text: 'Supporting legal documents.' },
-  { text: 'Consent documents (if required).' },
-  { text: 'Nuans Report (if a name change is requested).' },
-  {
-    beforeLink: BYB_NUANS_SUPPLIERS_BEFORE,
-    linkLabel: BYB_NUANS_SITE_LABEL,
-    linkHref: BYB_NUANS_SITE_URL,
-    afterLink: BYB_NUANS_SUPPLIERS_AFTER,
-  },
-  { text: 'Uploaded files must be PDF format only.' },
-  { text: 'Uploaded files must be 20 MB maximum file size.' },
-];
+export const BYB_DOCUMENTS: readonly BeforeYouBeginChecklistItem[] = BYB_FILING_INSTRUCTIONS;
