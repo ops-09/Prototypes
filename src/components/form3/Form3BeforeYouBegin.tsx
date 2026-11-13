@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { OntarioButton } from '@ongov/ontario-design-system-component-library-react';
 import { BeforeYouBeginChecklistList } from '../shared/BeforeYouBeginChecklistList';
 import { BeforeYouBeginContactSection } from '../shared/BeforeYouBeginContactSection';
+import { BeforeYouBeginPaymentSection } from '../shared/BeforeYouBeginPaymentSection';
 import { BeforeYouBeginPreamble } from '../shared/BeforeYouBeginPreamble';
 import {
   BYB_INSTRUCTIONS_HEADING,
@@ -14,6 +15,8 @@ import {
   BYB_DOCUMENTS_INTRO,
   BYB_ESTIMATED_TIME,
   BYB_FORM_NAME,
+  BYB_PAYMENT_ITEMS,
+  BYB_PAYMENT_LEAD_TEXT,
   BYB_STEPS,
   BYB_STEPS_HEADING,
   BYB_STEPS_INTRO,
@@ -81,6 +84,11 @@ export function Form3BeforeYouBegin() {
               className={styles.bulletList}
             />
           </section>
+
+          <BeforeYouBeginPaymentSection
+            lead={BYB_PAYMENT_LEAD_TEXT}
+            items={BYB_PAYMENT_ITEMS}
+          />
 
           <section
             className={styles.section}

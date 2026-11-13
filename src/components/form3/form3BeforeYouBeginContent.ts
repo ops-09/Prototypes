@@ -1,6 +1,10 @@
 /** Copy for Form 3 Before you begin — edit here without changing layout. */
 
 import type { BeforeYouBeginChecklistItem } from '../shared/beforeYouBeginChecklist';
+import {
+  BYB_PAYMENT_LEAD,
+  BYB_PAYMENT_REVIEW_FEES,
+} from '../shared/beforeYouBeginPaymentContent';
 /** Title lines — break early so lines wrap cleanly at form column widths. */
 export const BYB_FORM_TITLE_LINES = [
   'Application for Supplementary Letters Patent Form 3',
@@ -54,6 +58,14 @@ export const BYB_DOCUMENTS_HEADING = 'Submission checklist';
 
 export const BYB_DOCUMENTS_INTRO =
   'You should have the following information available to complete your submission:';
+
+export const BYB_PAYMENT_LEAD_TEXT = BYB_PAYMENT_LEAD;
+
+export const BYB_PAYMENT_ITEMS: readonly string[] = [
+  'A valid payment method available.',
+  BYB_PAYMENT_REVIEW_FEES,
+  'The filing fee is $130',
+];
 
 export const BYB_NUANS_SUPPLIERS_BEFORE =
   'Suppliers of Nuans reports are listed in the Yellow Pages under the heading “Searchers of Records” or visit Innovation, Science and Economic Development Canada’s Nuans site at ';
