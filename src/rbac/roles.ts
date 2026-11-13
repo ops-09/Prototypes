@@ -7,16 +7,16 @@ export const ROLES: RoleDefinition[] = [
     shortDescription:
       'Can manage users, service access, and permissions for assigned services.',
     longDescription:
-      'Can manage users, service access, and permissions for assigned services.',
+      'Secondary admins have full access to Business Profile, User management, and Permits & Licenses. You can proceed directly to Review.',
     skipsServiceAccess: true,
   },
   {
     id: 'delegate',
-    label: 'Authorized Representative',
+    label: 'Representative',
     shortDescription:
       'External consultant or representative with access to selected services and data.',
     longDescription:
-      'External consultant or representative with access to selected services and data.',
+      'Representatives get access to selected services and data based on view or edit permission granted.',
     skipsServiceAccess: false,
   },
   {
@@ -25,7 +25,7 @@ export const ROLES: RoleDefinition[] = [
     shortDescription:
       'Internal business user with access to assigned services and data.',
     longDescription:
-      'Internal business user with access to assigned services and data.',
+      'Members get access to assigned services and data based on view or edit permission granted.',
     skipsServiceAccess: false,
   },
 ];
@@ -43,4 +43,17 @@ export function getRoleOptions() {
     value: role.id,
     label: role.label,
   }));
+}
+
+export function getRoleInfoHeading(roleId: RoleId) {
+  switch (roleId) {
+    case 'secondary_admin':
+      return 'No service configuration needed';
+    case 'delegate':
+      return 'Representative — configure service access in the next step';
+    case 'member':
+      return 'Member — configure service access in the next step';
+    default:
+      return '';
+  }
 }

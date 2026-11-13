@@ -5,13 +5,19 @@ import type { ServiceAccess, ServiceGroupAccess, ServiceGroupId, SubServiceId } 
 import { ServiceGroupCard } from '../ServiceGroupCard';
 import styles from '../InviteUserWizard.module.scss';
 import { formatInviteStepTitle } from '../inviteWizardContent';
+import { INVITE_FIELD_ANCHORS } from '../inviteValidation';
 
 type ServicePermissionsStepProps = {
   serviceAccess: ServiceAccess;
+  serviceAccessError?: string;
   onChange: (serviceAccess: ServiceAccess) => void;
 };
 
-export function ServicePermissionsStep({ serviceAccess, onChange }: ServicePermissionsStepProps) {
+export function ServicePermissionsStep({
+  serviceAccess,
+  serviceAccessError,
+  onChange,
+}: ServicePermissionsStepProps) {
   const enabledSubServiceIds = useMemo(
     () => getEnabledSubServiceIds(serviceAccess),
     [serviceAccess],
@@ -70,7 +76,17 @@ export function ServicePermissionsStep({ serviceAccess, onChange }: ServicePermi
         />
       )}
 
-      <div className={styles.serviceGroupList}>
+      <div
+        id={INVITE_FIELD_ANCHORS.serviceAccess}
+        className={`${styles.serviceGroupList} ${serviceAccessError ? styles.serviceAccessError : ''}`}
+        tabIndex={-1}
+      >
+        {serviceAccessError ? (
+          <p id="invite-service-access-error" className={styles.fieldErrorMessage} role="alert">
+            {serviceAccessError}
+          </p>
+        ) : null}
+
         {visibleGroups.map((group) => (
           <ServiceGroupCard
             key={group.id}

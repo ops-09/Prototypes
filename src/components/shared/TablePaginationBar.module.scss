@@ -1,16 +1,10 @@
 .tablePagination {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--ontario-spacing-4, 1rem);
   margin: var(--ontario-spacing-4, 1rem);
-}
-
-.tablePaginationMain {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ontario-spacing-3, 0.75rem);
-  min-width: 0;
 }
 
 .tablePaginationSummary {
@@ -45,13 +39,14 @@
   font-size: 1rem;
   line-height: 1.6;
   color: var(--ontario-colour-system-link, #0066cc);
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .tablePaginationPageLink:hover {
   color: var(--ontario-colour-system-link-hover, #00478f);
+  text-decoration: underline;
 }
 
 .tablePaginationPageLink:focus {
@@ -68,4 +63,34 @@
   line-height: 1.6;
   font-weight: 700;
   color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.tablePaginationNextLink {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ontario-colour-system-link, #0066cc);
+  text-decoration: none;
+  cursor: pointer;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.tablePaginationNextLink:hover {
+  color: var(--ontario-colour-system-link-hover, #00478f);
+}
+
+.tablePaginationNextLink:focus {
+  outline: none;
+}
+
+.tablePaginationNextLink:focus-visible {
+  outline: 0.25rem solid var(--ontario-colour-system-focus, #009adb);
+  outline-offset: 0.125rem;
+}
+
+.tablePaginationNextLabel {
+  text-decoration: underline;
 }

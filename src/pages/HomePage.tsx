@@ -85,6 +85,32 @@ const PROTOTYPES: PlaygroundCard[] = [
     ariaLabelText:
       'Open the Form 15 Articles of Continuance without Share Capital prototype',
   },
+  {
+    label: 'User management — Invite (V3)',
+    description:
+      'Invite with domain gates for Mining Projects and Permit Applications, then review scopes.',
+    href: '/user-management/invite/step-1',
+    ariaLabelText: 'Open the invite users V3 prototype',
+  },
+  {
+    label: 'User management — Invite (V4)',
+    description:
+      'Dynamic steps: choose domains first, then Mining and/or Permit Applications with New/Existing tabs.',
+    href: '/user-management/invite/step-1',
+    ariaLabelText: 'Open the invite users V4 prototype',
+  },
+  {
+    label: 'CDPS — Create browse',
+    description: 'Runtime create browse filtered by invite create grants (Scenario C).',
+    href: '/cdps/create',
+    ariaLabelText: 'Open CDPS create permit browse',
+  },
+  {
+    label: 'CDPS — Existing applications',
+    description: 'Runtime existing-application browse filtered by view/edit grants (Scenario D).',
+    href: '/cdps/applications',
+    ariaLabelText: 'Open CDPS existing applications browse',
+  },
 ];
 
 const PROTOTYPE_PAGES: PageCategory[] = [

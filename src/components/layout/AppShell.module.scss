@@ -31,6 +31,11 @@
   padding: var(--ontario-spacing-6, 2rem) var(--ontario-spacing-6, 2rem) var(--ontario-spacing-8, 3rem);
 }
 
+/* Match form pages: step indicator sits flush under the header. */
+.mainContentFlushTop {
+  padding-top: 0;
+}
+
 .pageContent {
   display: flex;
   flex-direction: column;

@@ -32,6 +32,22 @@ export function InviteWizardVersionToggle({
       >
         V2
       </button>
+      <button
+        type="button"
+        className={headerStyles.versionTogglerButton}
+        aria-pressed={version === 'v3'}
+        onClick={() => onChange('v3')}
+      >
+        V3
+      </button>
+      <button
+        type="button"
+        className={headerStyles.versionTogglerButton}
+        aria-pressed={version === 'v4'}
+        onClick={() => onChange('v4')}
+      >
+        V4
+      </button>
     </div>
   );
 }

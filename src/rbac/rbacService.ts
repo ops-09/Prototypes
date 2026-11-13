@@ -65,6 +65,9 @@ export function inviteUser(input: InviteUserInput): BusinessUser {
     roleId: input.roleId,
     status: 'invited',
     serviceAccess: input.serviceAccess ?? structuredClone(DEFAULT_SERVICE_ACCESS),
+    permitApplicationAccess: input.permitApplicationAccess
+      ? structuredClone(input.permitApplicationAccess)
+      : undefined,
     invitedAt: new Date().toISOString(),
   };
 
@@ -120,6 +123,8 @@ export function updateUser(userId: string, input: UpdateUserInput): BusinessUser
     email: normalizedEmail,
     roleId: input.roleId,
     serviceAccess: input.serviceAccess ?? users[index].serviceAccess,
+    permitApplicationAccess:
+      input.permitApplicationAccess ?? users[index].permitApplicationAccess,
   };
 
   users[index] = updatedUser;

@@ -1,8 +1,22 @@
+import { useEffect } from 'react';
 import { AppShell } from '../components/layout/AppShell';
 import { PageBoilerplate } from '../components/layout/PageBoilerplate';
 import { UserManagementList } from '../components/user-management/UserManagementList';
+import {
+  InviteWizardVersionProvider,
+  useInviteWizardVersionContext,
+} from '../components/invite/InviteWizardVersionContext';
 
-export function UserManagementPage() {
+function UserManagementPageContent() {
+  const { setToggleVisible } = useInviteWizardVersionContext();
+
+  useEffect(() => {
+    setToggleVisible(true);
+    return () => {
+      setToggleVisible(false);
+    };
+  }, [setToggleVisible]);
+
   return (
     <AppShell>
       <PageBoilerplate
@@ -12,5 +26,13 @@ export function UserManagementPage() {
         <UserManagementList />
       </PageBoilerplate>
     </AppShell>
+  );
+}
+
+export function UserManagementPage() {
+  return (
+    <InviteWizardVersionProvider>
+      <UserManagementPageContent />
+    </InviteWizardVersionProvider>
   );
 }

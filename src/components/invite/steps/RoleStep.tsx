@@ -1,14 +1,17 @@
 import { useRef } from 'react';
 import {
-  OntarioCallout,
+  OntarioPageAlert,
   OntarioRadioButtons,
 } from '@ongov/ontario-design-system-component-library-react';
-import { ROLES, getRoleById } from '../../../rbac/roles';
+import { ROLES, getRoleById, getRoleInfoHeading } from '../../../rbac/roles';
 import type { RoleId } from '../../../rbac/types';
 import styles from '../InviteUserWizard.module.scss';
 import { formatInviteStepTitle } from '../inviteWizardContent';
+import { INVITE_FIELD_ANCHORS } from '../inviteValidation';
+
 type RoleStepProps = {
   selectedRoleId: RoleId | '';
+  roleError?: string;
   onSelectRole: (roleId: RoleId) => void;
 };
 
@@ -17,10 +20,7 @@ function getRadioValue(event: globalThis.Event) {
   return target?.value ?? '';
 }
 
-export function RoleStep({
-  selectedRoleId,
-  onSelectRole,
-}: RoleStepProps) {
+export function RoleStep({ selectedRoleId, roleError, onSelectRole }: RoleStepProps) {
   const radioGroupRef = useRef<HTMLOntarioRadioButtonsElement | null>(null);
   const selectedRole = selectedRoleId ? getRoleById(selectedRoleId) : undefined;
 
@@ -49,18 +49,22 @@ export function RoleStep({
   }
 
   return (
-    <section className={styles.stepPanel} aria-label="Assign a role">
+    <section className={styles.stepPanel} aria-label="Assign role">
       <div className={styles.stepPanelHeader}>
         <h2 id="assign-role-heading" className={styles.stepPanelTitle}>
-          {formatInviteStepTitle('Assign a role')}
+          {formatInviteStepTitle('Assign role')}
         </h2>
       </div>
 
       <div
-        className={styles.roleGrid}
+        id={INVITE_FIELD_ANCHORS.role}
+        className={styles.roleStack}
         role="radiogroup"
         aria-labelledby="assign-role-heading"
         aria-required="true"
+        aria-invalid={roleError ? true : undefined}
+        aria-describedby={roleError ? 'invite-role-error' : undefined}
+        tabIndex={-1}
       >
         {ROLES.map((role) => {
           const isSelected = selectedRoleId === role.id;
@@ -68,7 +72,7 @@ export function RoleStep({
           return (
             <div
               key={role.id}
-              className={`${styles.roleRadioCard} ${isSelected ? styles.roleRadioCardSelected : ''}`}
+              className={`${styles.roleRadioCard} ${isSelected ? styles.roleRadioCardSelected : ''} ${roleError ? styles.roleRadioCardError : ''}`}
               role="radio"
               aria-checked={isSelected}
               tabIndex={getCardTabIndex(role.id)}
@@ -90,13 +94,20 @@ export function RoleStep({
         })}
       </div>
 
+      {roleError ? (
+        <p id="invite-role-error" className={styles.fieldErrorMessage} role="alert">
+          {roleError}
+        </p>
+      ) : null}
+
       <OntarioRadioButtons
         ref={radioGroupRef}
         className={styles.roleRadioGroupOffscreen}
-        caption={{ captionText: 'Assign a role', captionType: 'default' }}
+        caption={{ captionText: 'Assign role', captionType: 'default' }}
         name="invite-user-role"
         value={selectedRoleId}
         required
+        errorMessage={roleError}
         options={ROLES.map((role) => ({
           value: role.id,
           label: role.label,
@@ -106,42 +117,13 @@ export function RoleStep({
         customOnChange={(event) => onSelectRole(getRadioValue(event) as RoleId)}
       />
 
-      {selectedRole?.id === 'secondary_admin' && (
-        <OntarioCallout
-          headingType="h3"
-          headingContent="No service configuration needed"
-          headingContentType="string"
-          highlightColour="blue"
-        >
-          Secondary Admins can manage users, service access, and permissions for assigned
-          services. You can proceed directly to Review.
-        </OntarioCallout>
+      {selectedRole && (
+        <OntarioPageAlert
+          type="informational"
+          heading={getRoleInfoHeading(selectedRole.id)}
+          content={selectedRole.longDescription}
+        />
       )}
-
-      {selectedRole?.id === 'delegate' && (
-        <OntarioCallout
-          headingType="h3"
-          headingContent="Authorized Representative — configure service access in the next step"
-          headingContentType="string"
-          highlightColour="blue"
-        >
-          Authorized Representatives get access to selected services and data based on view or edit
-          permission granted.
-        </OntarioCallout>
-      )}
-
-      {selectedRole?.id === 'member' && (
-        <OntarioCallout
-          headingType="h3"
-          headingContent="Member — configure service access in the next step"
-          headingContentType="string"
-          highlightColour="blue"
-        >
-          Members get access to assigned services and data based on view or edit permission
-          granted.
-        </OntarioCallout>
-      )}
-
     </section>
   );
 }

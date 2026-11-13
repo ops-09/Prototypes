@@ -97,6 +97,8 @@ import { Form15Step9Page } from './pages/Form15Step9Page';
 import { Form15Step10Page } from './pages/Form15Step10Page';
 import { Form15Step11Page } from './pages/Form15Step11Page';
 import { HomePage } from './pages/HomePage';
+import { CdpsCreateBrowsePage } from './pages/CdpsCreateBrowsePage';
+import { CdpsExistingBrowsePage } from './pages/CdpsExistingBrowsePage';
 import { InviteUserPage } from './pages/InviteUserPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { UserManagementPage } from './pages/UserManagementPage';
@@ -263,6 +265,10 @@ function App() {
 
         <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/user-management/invite" element={<InviteUserPage />} />
+        {/* RR7 matches whole segments only — param value is "step-1", not "1". */}
+        <Route path="/user-management/invite/:step" element={<InviteUserPage />} />
+        <Route path="/cdps/create" element={<CdpsCreateBrowsePage />} />
+        <Route path="/cdps/applications" element={<CdpsExistingBrowsePage />} />
         <Route
           path="/dashboard"
           element={

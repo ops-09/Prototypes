@@ -11,6 +11,10 @@ type ProjectPermissionsTableProps = {
   projectPermissions: Record<string, ProjectPermission>;
   onPermissionChange: (projectId: string, permission: ProjectPermission) => void;
   namePrefix: string;
+  /** When false, parent supplies the card header (title + search). */
+  showHeader?: boolean;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
 };
 
 function hasViewPermission(permission: ProjectPermission) {
@@ -26,10 +30,22 @@ export function ProjectPermissionsTable({
   projectPermissions,
   onPermissionChange,
   namePrefix,
+  showHeader = true,
+  searchQuery: controlledSearchQuery,
+  onSearchQueryChange,
 }: ProjectPermissionsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const pageSize = TABLE_PAGE_SIZE;
+  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
+
+  function setSearchQuery(value: string) {
+    if (onSearchQueryChange) {
+      onSearchQueryChange(value);
+      return;
+    }
+    setInternalSearchQuery(value);
+  }
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -54,8 +70,7 @@ export function ProjectPermissionsTable({
   }, [currentPage, totalPages]);
 
   const pageStart = (currentPage - 1) * pageSize;
-  const pageEnd = Math.min(pageStart + pageSize, totalProjects);
-  const visibleProjects = filteredProjects.slice(pageStart, pageEnd);
+  const visibleProjects = filteredProjects.slice(pageStart, pageStart + pageSize);
 
   function updateProjectPermission(projectId: string, permission: ProjectPermission) {
     onPermissionChange(projectId, permission);
@@ -65,10 +80,7 @@ export function ProjectPermissionsTable({
     const current = projectPermissions[projectId] ?? 'none';
 
     if (checked) {
-      updateProjectPermission(
-        projectId,
-        current === 'view_edit' ? 'view_edit' : 'view',
-      );
+      updateProjectPermission(projectId, current === 'view_edit' ? 'view_edit' : 'view');
       return;
     }
 
@@ -88,19 +100,21 @@ export function ProjectPermissionsTable({
 
   return (
     <section className={inviteStyles.projectPermissionsTable} aria-label="Project permissions">
-      <div className={inviteStyles.projectPermissionsCardHeader}>
-        <p className={`ontario-h5 ${inviteStyles.projectPermissionsCount}`}>
-          {totalProjects} projects
-        </p>
-        <div className={inviteStyles.projectPermissionsSearchWrap}>
-          <ProjectSearchAutosuggest
-            projects={projects}
-            value={searchQuery}
-            onChange={setSearchQuery}
-            namePrefix={namePrefix}
-          />
+      {showHeader && (
+        <div className={inviteStyles.projectPermissionsCardHeader}>
+          <p className={`ontario-h5 ${inviteStyles.projectPermissionsCount}`}>
+            {totalProjects} projects
+          </p>
+          <div className={inviteStyles.projectPermissionsSearchWrap}>
+            <ProjectSearchAutosuggest
+              projects={projects}
+              value={searchQuery}
+              onChange={setSearchQuery}
+              namePrefix={namePrefix}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={userTableStyles.tableWrap}>
         <table className={userTableStyles.table}>
@@ -108,7 +122,7 @@ export function ProjectPermissionsTable({
           <thead>
             <tr>
               <th scope="col" className={`ontario-h6 ${userTableStyles.columnHeader}`}>
-                Project
+                Projects
               </th>
               <th
                 scope="col"
@@ -133,36 +147,36 @@ export function ProjectPermissionsTable({
               </tr>
             ) : (
               visibleProjects.map((project) => {
-              const permission = projectPermissions[project.id] ?? 'none';
+                const permission = projectPermissions[project.id] ?? 'none';
 
-              return (
-                <tr key={project.id}>
-                  <td>
-                    <span className={userTableStyles.cellText}>{project.label}</span>
-                  </td>
-                  <td className={userTableStyles.tableCheckboxCell}>
-                    <TablePermissionCheckbox
-                      projectLabel={project.label}
-                      permissionLabel="View"
-                      name={`${namePrefix}-project-view-${project.id}`}
-                      elementId={`${namePrefix}-${project.id}-view`}
-                      checked={hasViewPermission(permission)}
-                      onChange={(checked) => toggleViewPermission(project.id, checked)}
-                    />
-                  </td>
-                  <td className={userTableStyles.tableCheckboxCell}>
-                    <TablePermissionCheckbox
-                      projectLabel={project.label}
-                      permissionLabel="Edit"
-                      name={`${namePrefix}-project-edit-${project.id}`}
-                      elementId={`${namePrefix}-${project.id}-edit`}
-                      checked={hasEditPermission(permission)}
-                      onChange={(checked) => toggleEditPermission(project.id, checked)}
-                    />
-                  </td>
-                </tr>
-              );
-            })
+                return (
+                  <tr key={project.id}>
+                    <td>
+                      <span className={userTableStyles.cellText}>{project.label}</span>
+                    </td>
+                    <td className={userTableStyles.tableCheckboxCell}>
+                      <TablePermissionCheckbox
+                        projectLabel={project.label}
+                        permissionLabel="View"
+                        name={`${namePrefix}-project-view-${project.id}`}
+                        elementId={`${namePrefix}-${project.id}-view`}
+                        checked={hasViewPermission(permission)}
+                        onChange={(checked) => toggleViewPermission(project.id, checked)}
+                      />
+                    </td>
+                    <td className={userTableStyles.tableCheckboxCell}>
+                      <TablePermissionCheckbox
+                        projectLabel={project.label}
+                        permissionLabel="Edit"
+                        name={`${namePrefix}-project-edit-${project.id}`}
+                        elementId={`${namePrefix}-${project.id}-edit`}
+                        checked={hasEditPermission(permission)}
+                        onChange={(checked) => toggleEditPermission(project.id, checked)}
+                      />
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

@@ -99,7 +99,7 @@ export function UserManagementList() {
   }, [pageAlert]);
 
   function inviteMoreWithSameAccess() {
-    navigate('/user-management/invite', {
+    navigate('/user-management/invite/step-1', {
       state: { inviteAnotherSameAccess: inviteAnotherPrefill ?? undefined },
     });
   }
@@ -149,7 +149,7 @@ export function UserManagementList() {
           <OntarioButton
             type="tertiary"
             htmlType="button"
-            href={withBasePath('/user-management/invite')}
+            href={withBasePath('/user-management/invite/step-1')}
           >
             {batchInviteEnabled ? 'Invite users' : 'Invite user'}
           </OntarioButton>

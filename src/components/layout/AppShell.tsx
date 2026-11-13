@@ -9,11 +9,25 @@ import styles from './AppShell.module.scss';
 
 type AppShellProps = {
   children: ReactNode;
+  /** Focused task layouts (e.g. invite V3) hide the left navigation. */
+  hideSideNav?: boolean;
+  /** Let ODS step indicator sit flush under the header, matching form pages. */
+  flushContentTop?: boolean;
 };
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({
+  children,
+  hideSideNav = false,
+  flushContentTop = false,
+}: AppShellProps) {
   const { pathname } = useLocation();
   const { activeItemId, activeChildId } = resolveActiveNav(pathname);
+  const mainClassName = [
+    styles.mainContent,
+    flushContentTop ? styles.mainContentFlushTop : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={styles.appShell}>
@@ -24,11 +38,15 @@ export function AppShell({ children }: AppShellProps) {
       />
 
       <div className={styles.body}>
-        <div className={styles.sidebarColumn}>
-          <SideNavigation activeItemId={activeItemId} activeChildId={activeChildId} />
-        </div>
-        <div className={styles.bodyDivider} aria-hidden="true" data-testid="app-body-divider" />
-        <main className={styles.mainContent}>{children}</main>
+        {!hideSideNav && (
+          <>
+            <div className={styles.sidebarColumn}>
+              <SideNavigation activeItemId={activeItemId} activeChildId={activeChildId} />
+            </div>
+            <div className={styles.bodyDivider} aria-hidden="true" data-testid="app-body-divider" />
+          </>
+        )}
+        <main className={mainClassName}>{children}</main>
       </div>
 
       <div className={styles.footerRegion}>

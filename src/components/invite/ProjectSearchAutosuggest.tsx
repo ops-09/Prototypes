@@ -7,10 +7,13 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
 import type { ProjectDefinition } from '../../rbac/types';
-import styles from './ProjectSearchAutosuggest.module.scss';
+// Match forms OCN / NAICS search chrome and suggestion list.
+import styles from '../form7/NaicsSearchAutosuggest.module.scss';
 
 const MAX_SUGGESTIONS = 8;
 
@@ -21,16 +24,16 @@ type ProjectSearchAutosuggestProps = {
   namePrefix: string;
 };
 
-function getInputValue(event: globalThis.Event) {
-  const target = event.target as HTMLInputElement | null;
-  return target?.value ?? '';
-}
-
 type SuggestionsPosition = {
   top: number;
   left: number;
   width: number;
 };
+
+function getInputValue(event: globalThis.Event) {
+  const target = event.target as HTMLInputElement | null;
+  return target?.value ?? '';
+}
 
 function getScrollableAncestors(element: HTMLElement | null): HTMLElement[] {
   const ancestors: HTMLElement[] = [];
@@ -56,9 +59,63 @@ function syncSearchBoxClipMetrics(
     return false;
   }
 
-  clipEl.style.setProperty('--search-input-offset', `${inputContainer.offsetTop}px`);
-  clipEl.style.setProperty('--search-input-height', `${inputContainer.offsetHeight}px`);
+  const hostRect = searchBoxEl.getBoundingClientRect();
+  const inputRect = inputContainer.getBoundingClientRect();
+  const offset = Math.max(0, inputRect.top - hostRect.top);
+  const height = Math.max(0, inputRect.height);
+
+  clipEl.style.setProperty('--search-input-offset', `${offset}px`);
+  clipEl.style.setProperty('--search-input-height', `${height}px`);
   return true;
+}
+
+function highlightMatch(text: string, query: string): ReactNode {
+  const normalized = query.trim();
+  if (!normalized) {
+    return text;
+  }
+
+  const lowerText = text.toLowerCase();
+  const lowerQuery = normalized.toLowerCase();
+  const nodes: ReactNode[] = [];
+  let start = 0;
+  let matchIndex = lowerText.indexOf(lowerQuery);
+  let key = 0;
+
+  while (matchIndex !== -1) {
+    if (matchIndex > start) {
+      nodes.push(text.slice(start, matchIndex));
+    }
+    nodes.push(
+      <strong key={key} className={styles.match}>
+        {text.slice(matchIndex, matchIndex + lowerQuery.length)}
+      </strong>,
+    );
+    key += 1;
+    start = matchIndex + lowerQuery.length;
+    matchIndex = lowerText.indexOf(lowerQuery, start);
+  }
+
+  if (start < text.length) {
+    nodes.push(text.slice(start));
+  }
+
+  return nodes;
+}
+
+function filterProjects(projects: ProjectDefinition[], query: string): ProjectDefinition[] {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) {
+    return [];
+  }
+
+  return projects
+    .filter((project) => {
+      const label = project.label.toLowerCase();
+      const initials = project.initials.toLowerCase();
+      return label.includes(normalized) || initials.includes(normalized);
+    })
+    .slice(0, MAX_SUGGESTIONS);
 }
 
 export function ProjectSearchAutosuggest({
@@ -72,20 +129,16 @@ export function ProjectSearchAutosuggest({
   const clipRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
   const searchBoxRef = useRef<HTMLOntarioSearchBoxElement>(null);
+  const onChangeRef = useRef(onChange);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const [suggestionsPosition, setSuggestionsPosition] = useState<SuggestionsPosition | null>(null);
+  const [suggestionsPosition, setSuggestionsPosition] = useState<SuggestionsPosition | null>(
+    null,
+  );
 
-  const suggestions = useMemo(() => {
-    const query = value.trim().toLowerCase();
-    if (!query) {
-      return [];
-    }
+  onChangeRef.current = onChange;
 
-    return projects
-      .filter((project) => project.label.toLowerCase().includes(query))
-      .slice(0, MAX_SUGGESTIONS);
-  }, [projects, value]);
+  const suggestions = useMemo(() => filterProjects(projects, value), [projects, value]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -115,6 +168,47 @@ export function ProjectSearchAutosuggest({
     let cancelled = false;
     let frame = 0;
     let observingSearchBox = false;
+    let inputEl: HTMLInputElement | null = null;
+    let formEl: HTMLFormElement | null = null;
+
+    const handleNativeInput = (event: Event) => {
+      onChangeRef.current(getInputValue(event));
+      setIsOpen(true);
+    };
+
+    const handleNativeFocus = () => {
+      setIsOpen(true);
+    };
+
+    // ODS clear control is type="reset" — empties the DOM input without an `input` event.
+    const handleNativeReset = () => {
+      onChangeRef.current('');
+      setIsOpen(false);
+      setActiveIndex(-1);
+    };
+
+    const attachNativeListeners = (searchBoxEl: HTMLOntarioSearchBoxElement) => {
+      const nextInput = searchBoxEl.shadowRoot?.querySelector<HTMLInputElement>(
+        'input.ontario-search__input',
+      );
+      const nextForm = searchBoxEl.shadowRoot?.querySelector<HTMLFormElement>('form');
+
+      if (nextInput && nextInput !== inputEl) {
+        inputEl?.removeEventListener('input', handleNativeInput);
+        inputEl?.removeEventListener('focus', handleNativeFocus);
+        inputEl = nextInput;
+        inputEl.addEventListener('input', handleNativeInput);
+        inputEl.addEventListener('focus', handleNativeFocus);
+      }
+
+      if (nextForm && nextForm !== formEl) {
+        formEl?.removeEventListener('reset', handleNativeReset);
+        formEl = nextForm;
+        formEl.addEventListener('reset', handleNativeReset);
+      }
+
+      return Boolean(nextInput);
+    };
 
     const syncClipMetrics = () => {
       if (cancelled) {
@@ -133,6 +227,8 @@ export function ProjectSearchAutosuggest({
         observingSearchBox = true;
       }
 
+      attachNativeListeners(searchBoxEl);
+
       if (!syncSearchBoxClipMetrics(clipEl, searchBoxEl)) {
         frame = requestAnimationFrame(syncClipMetrics);
       }
@@ -146,6 +242,9 @@ export function ProjectSearchAutosuggest({
       cancelled = true;
       cancelAnimationFrame(frame);
       observer.disconnect();
+      inputEl?.removeEventListener('input', handleNativeInput);
+      inputEl?.removeEventListener('focus', handleNativeFocus);
+      formEl?.removeEventListener('reset', handleNativeReset);
     };
   }, []);
 
@@ -201,8 +300,8 @@ export function ProjectSearchAutosuggest({
     setActiveIndex(-1);
   }
 
-  function selectSuggestion(label: string) {
-    onChange(label);
+  function selectSuggestion(project: ProjectDefinition) {
+    onChange(project.label);
     closeSuggestions();
   }
 
@@ -211,7 +310,7 @@ export function ProjectSearchAutosuggest({
     openSuggestions();
   }
 
-  function handleKeyDown(event: React.KeyboardEvent) {
+  function handleKeyDown(event: KeyboardEvent) {
     if (!isOpen || suggestions.length === 0) {
       return;
     }
@@ -230,7 +329,7 @@ export function ProjectSearchAutosuggest({
 
     if (event.key === 'Enter' && activeIndex >= 0) {
       event.preventDefault();
-      selectSuggestion(suggestions[activeIndex].label);
+      selectSuggestion(suggestions[activeIndex]);
       return;
     }
 
@@ -245,7 +344,7 @@ export function ProjectSearchAutosuggest({
           <ul
             ref={suggestionsRef}
             id={listboxId}
-            className={styles.projectSearchSuggestions}
+            className={styles.suggestions}
             role="listbox"
             aria-label="Project suggestions"
             style={{
@@ -260,11 +359,11 @@ export function ProjectSearchAutosuggest({
                   type="button"
                   role="option"
                   aria-selected={index === activeIndex}
-                  className={styles.projectSearchSuggestion}
+                  className={styles.suggestion}
                   onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => selectSuggestion(project.label)}
+                  onClick={() => selectSuggestion(project)}
                 >
-                  {project.label}
+                  {highlightMatch(project.label, value)}
                 </button>
               </li>
             ))}
@@ -275,27 +374,28 @@ export function ProjectSearchAutosuggest({
 
   return (
     <div
-      className={styles.projectSearchAutosuggest}
+      className={styles.autosuggest}
       ref={containerRef}
       onKeyDownCapture={handleKeyDown}
     >
-      {/* ODS SearchBox includes a visible label and 6-column grid width; clip + offset below. */}
-      <div className={styles.projectSearchInputClip} ref={clipRef}>
-        <OntarioSearchBox
-          ref={searchBoxRef}
-          caption={{
-            captionText: 'Search projects',
-            captionType: 'default',
-          }}
-          elementId={`${namePrefix}-project-search`}
-          value={value}
-          customOnInput={handleInput}
-          customOnFocus={openSuggestions}
-          performSearch={async (nextValue) => {
-            onChange(nextValue ?? '');
-            closeSuggestions();
-          }}
-        />
+      <div className={styles.fieldControl}>
+        <div className={styles.inputClip} ref={clipRef}>
+          <OntarioSearchBox
+            ref={searchBoxRef}
+            elementId={`${namePrefix}-project-search`}
+            caption={{
+              captionText: '\u200B',
+              captionType: 'default',
+            }}
+            value={value}
+            customOnInput={handleInput}
+            customOnFocus={openSuggestions}
+            performSearch={async (nextValue) => {
+              onChange((nextValue ?? '').trim());
+              closeSuggestions();
+            }}
+          />
+        </div>
       </div>
 
       {suggestionsList}

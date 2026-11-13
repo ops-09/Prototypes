@@ -1,8 +1,71 @@
 .wizard {
   display: flex;
   flex-direction: column;
-  gap: var(--ontario-spacing-6, 2rem);
   width: 100%;
+  padding-top: 0;
+}
+
+.pageTitle {
+  margin-top: 0;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-system-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+.lead {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+}
+
+.errorSummary {
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+
+  ul {
+    margin-left: var(--ontario-spacing-5, 1.5rem);
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--ontario-colour-system-focus, #009adb);
+    outline-offset: 2px;
+  }
+}
+
+.errorSummaryLink {
+  color: var(--ontario-colour-alert, #cd0000);
+
+  &:hover,
+  &:focus {
+    color: #6b0000;
+  }
+
+  &:active {
+    color: #4d0000;
+  }
+}
+
+.fieldErrorMessage {
+  margin: 0 0 var(--ontario-spacing-4, 1rem);
+  color: var(--ontario-colour-alert, #cd0000);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.roleRadioCardError {
+  border-color: var(--ontario-colour-alert, #cd0000);
+}
+
+.serviceAccessError {
+  outline: 2px solid var(--ontario-colour-alert, #cd0000);
+  outline-offset: 4px;
 }
 
 .wizardPageHeading {
@@ -38,33 +101,15 @@
   margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
 }
 
-.stepIndicatorHost {
+// ODS step-indicator host defaults to inline-block; force full-width so Back / step label space apart.
+.stepIndicator {
   display: block;
   width: 100%;
-}
 
-.stepIndicatorRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-  padding: 0 var(--ontario-spacing-5, 1.5rem);
-}
-
-.stepIndicatorRowEnd {
-  justify-content: flex-end;
-}
-
-.stepIndicatorLabel {
-  margin: var(--ontario-spacing-5, 1.25rem) 0;
-}
-
-.stepIndicatorDivider {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-bottom: 4px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  :global(ontario-step-indicator) {
+    display: block;
+    width: 100%;
+  }
 }
 
 .progressTrackerHeader {
@@ -108,23 +153,19 @@
 }
 
 .stepPanel {
-  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
-  border-radius: 4px;
-  padding: var(--ontario-spacing-5, 1.5rem);
-  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
 }
 
 .stepPanelHeader {
   display: flex;
   align-items: center;
   gap: var(--ontario-spacing-3, 0.75rem);
-  margin-bottom: var(--ontario-spacing-5, 1.5rem);
 }
 
 .stepPanelTitle {
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 700;
 }
 
 .formStack {
@@ -141,20 +182,18 @@
   font-size: 0.875rem;
 }
 
-.roleGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+.roleStack {
+  display: flex;
+  flex-direction: column;
   gap: var(--ontario-spacing-4, 1rem);
-  margin-bottom: var(--ontario-spacing-4, 1rem);
 }
 
 // Radio card pattern — card is the interactive surface; ODS radio group is offscreen for form semantics.
 .roleRadioCard {
-  border: 0.5px solid var(--ontario-colour-greyscale-greyscale40, #999999);
-  border-radius: 10px;
-  padding: var(--ontario-spacing-5, 1.5rem);
+  border: 1px solid var(--ontario-colour-greyscale-greyscale40, #999999);
+  border-radius: 4px;
+  padding: var(--ontario-spacing-4, 1rem);
   background-color: var(--ontario-colour-greyscale-white, #ffffff);
-  box-shadow: 0 2px 4px rgba(176, 176, 176, 0.25);
   cursor: pointer;
   text-align: left;
 }
@@ -164,15 +203,12 @@
 }
 
 .roleRadioCard:focus-visible {
-  box-shadow:
-    0 0 0 4px var(--ontario-colour-system-focus, #009adb),
-    0 2px 4px rgba(176, 176, 176, 0.25);
+  box-shadow: 0 0 0 4px var(--ontario-colour-system-focus, #009adb);
 }
 
 .roleRadioCardSelected {
-  border-color: var(--ontario-colour-system-focus, #009adb);
-  border-width: 2px;
-  padding: calc(var(--ontario-spacing-5, 1.5rem) - 1.5px);
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+  border-color: var(--ontario-colour-greyscale-greyscale40, #999999);
 }
 
 .roleRadioCardContent {
@@ -292,70 +328,132 @@
 }
 
 .createProjectSection {
+  width: 100%;
   padding: var(--ontario-spacing-4, 1rem) var(--ontario-spacing-5, 1.5rem);
   border-bottom: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
 }
 
-.createProjectCard {
-  display: block;
-  border: 0.5px solid var(--ontario-colour-greyscale-greyscale40, #999999);
-  border-radius: 10px;
-  padding: var(--ontario-spacing-5, 1.5rem);
-  background-color: var(--ontario-colour-greyscale-white, #ffffff);
-  box-shadow: 0 2px 4px rgba(176, 176, 176, 0.25);
-  cursor: pointer;
-}
-
-.createProjectCard:focus-within {
-  outline: none;
-}
-
-.createProjectCard:focus-within:has(:focus-visible) {
-  box-shadow:
-    0 0 0 4px var(--ontario-colour-system-focus, #009adb),
-    0 2px 4px rgba(176, 176, 176, 0.25);
-}
-
-.createProjectCardSelected {
-  border-color: var(--ontario-colour-system-focus, #009adb);
-  border-width: 2px;
-  padding: calc(var(--ontario-spacing-5, 1.5rem) - 1.5px);
-}
-
-.createProjectCardContent {
+.createProjectRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
-  gap: var(--ontario-spacing-3, 0.75rem);
+  justify-content: space-between;
+  gap: var(--ontario-spacing-4, 1rem);
 }
 
-.createProjectCheckboxControl {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex-shrink: 0;
-  margin-top: var(--ontario-spacing-1, 0.25rem);
+.createProjectCopy {
+  flex: 1 1 12rem;
+  min-width: 0;
 }
 
-.createProjectCardText {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ontario-spacing-1, 0.25rem);
-}
-
-.createProjectCardTitle {
-  font-size: 1.125rem;
+.createProjectLabel {
+  margin: 0;
   font-weight: 700;
+  font-size: 1rem;
   line-height: 1.5;
   color: var(--ontario-colour-greyscale-black, #1a1a1a);
 }
 
-.createProjectCardDescription {
+.createProjectHint {
+  margin: var(--ontario-spacing-1, 0.25rem) 0 0;
   font-size: 1rem;
-  line-height: 1.6;
-  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  line-height: 1.5;
+  color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+}
+
+.createProjectRadios {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  margin-left: auto;
+  padding-top: 0.125rem;
+}
+
+.createProjectRadioOption {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.createProjectRadioInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.createProjectRadioControl {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  border-radius: 50%;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+}
+
+.createProjectRadioInput:focus-visible + .createProjectRadioControl {
+  box-shadow: 0 0 0 4px var(--ontario-colour-system-focus, #009adb);
+}
+
+.createProjectRadioInput:checked + .createProjectRadioControl {
+  background-image: radial-gradient(
+    circle,
+    var(--ontario-colour-greyscale-black, #1a1a1a) 0 0.375rem,
+    transparent 0.4rem
+  );
+}
+
+.createProjectRadioText {
+  font-weight: 400;
+}
+
+.miningPermissionsCard {
+  width: 100%;
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  // visible — overflow:hidden was clipping ODS checkbox controls at the card edge
+  overflow: visible;
+}
+
+.miningPermissionsHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
+.miningPermissionsHeaderTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-4, 1rem);
+  padding: var(--ontario-spacing-4, 1rem) var(--ontario-spacing-5, 1.5rem);
+  border-bottom: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
+.miningPermissionsHeader .createProjectSection {
+  border-bottom: 0;
+}
+
+.miningPermissionsTitle {
+  margin: 0;
 }
 
 .subServiceRow {
@@ -549,6 +647,7 @@
 }
 
 .projectPermissionsTable {
+  width: 100%;
   border: 0;
   border-radius: 0;
   background-color: transparent;
@@ -577,42 +676,28 @@
   flex: 1 1 auto;
   min-width: 0;
   max-width: 28rem;
-  height: 3rem;
 }
 
-.reviewSection {
-  margin-bottom: var(--ontario-spacing-5, 1.5rem);
-}
-
-.reviewSectionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ontario-spacing-3, 0.75rem);
-  margin-bottom: var(--ontario-spacing-3, 0.75rem);
-}
-
-.reviewSectionTitle {
+.inviteSummaryBlock {
   margin: 0;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--ontario-colour-greyscale-greyscale60, #666666);
 }
 
-.reviewRow {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--ontario-spacing-4, 1rem);
-  padding: var(--ontario-spacing-3, 0.75rem) 0;
-  border-bottom: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+.inviteSummaryAction {
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+  text-align: right;
+  padding-left: var(--ontario-spacing-4, 1rem);
+
+  button {
+    margin: 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+  }
 }
 
-.reviewLabel {
-  color: var(--ontario-colour-greyscale-greyscale60, #666666);
-}
-
-.reviewValue {
-  font-weight: 600;
+.inviteSummaryAfter {
+  margin-top: var(--ontario-spacing-6, 2rem);
 }
 
 .batchReviewSharedSummary {
@@ -679,5 +764,173 @@
   align-items: flex-end;
   gap: var(--ontario-spacing-3, 0.75rem);
   margin-top: var(--ontario-spacing-3, 0.75rem);
+}
+
+.domainAccessRoot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.domainSectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  padding: var(--ontario-spacing-5, 1.5rem);
+  padding-bottom: var(--ontario-spacing-6, 2rem);
+}
+
+.permitCreateScope,
+.permitExistingScope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  padding-top: var(--ontario-spacing-4, 1rem);
+  border-top: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
+.permitSubsectionTitle {
+  margin: 0;
+}
+
+.permitSubsectionHint {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+}
+
+.ministryScopeList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ministryScopeItem {
+  padding: var(--ontario-spacing-4, 1rem);
+  padding-bottom: var(--ontario-spacing-5, 1.5rem);
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  overflow: visible;
+}
+
+.ministryScopeDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+  margin-top: var(--ontario-spacing-3, 0.75rem);
+}
+
+.permitTypePicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.permitBulkActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.permitSelectionCount {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: 0.875rem;
+}
+
+// Token-composed tabs — ODS has no general Tabs component (header menu tabs only).
+.permitTabBar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+.permitTab {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: var(--ontario-spacing-3, 0.75rem) var(--ontario-spacing-4, 1rem);
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  border-bottom: 0;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.permitTab + .permitTab {
+  margin-left: calc(-1 * 2px);
+}
+
+.permitTabActive {
+  background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  color: var(--ontario-colour-greyscale-white, #ffffff);
+}
+
+.permitTab:focus {
+  outline: none;
+}
+
+.permitTab:focus-visible {
+  outline: 4px solid var(--ontario-colour-system-focus, #009adb);
+  outline-offset: 2px;
+  z-index: 2;
+}
+
+.permitTabBaseline {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 2px;
+  background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.permitSearchLabel {
+  margin: 0;
+  font-weight: 700;
+}
+
+.permitSearchInput {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 28rem;
+  min-height: 3rem;
+  padding: var(--ontario-spacing-2, 0.5rem) var(--ontario-spacing-3, 0.75rem);
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  border-radius: 4px;
+  font: inherit;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+}
+
+.permitSearchInput:focus {
+  outline: 4px solid var(--ontario-colour-system-focus, #009adb);
+  outline-offset: 0;
+}
+
+.projectPermissionsTableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.applicationName {
+  display: block;
+  font-weight: 700;
+}
+
+.applicationMeta {
+  display: block;
+  margin-top: var(--ontario-spacing-1, 0.25rem);
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: 0.875rem;
 }
 

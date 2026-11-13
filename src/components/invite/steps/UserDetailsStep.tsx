@@ -4,6 +4,7 @@ import {
 } from '@ongov/ontario-design-system-component-library-react';
 import styles from '../InviteUserWizard.module.scss';
 import { formatInviteStepTitle } from '../inviteWizardContent';
+import { INVITE_FIELD_ANCHORS } from '../inviteValidation';
 
 type UserDetailsStepProps = {
   email: string;
@@ -39,27 +40,33 @@ export function UserDetailsStep({
       </div>
 
       <div className={styles.formStack}>
-        <OntarioInput
-          caption="Email address"
-          name="invite-email"
-          type="email"
-          required
-          requiredValidationMessage="Enter an email address."
-          value={email}
-          errorMessage={emailError}
-          customOnInput={(event) => onEmailChange(getInputValue(event))}
-        />
-        <OntarioInput
-          caption="Confirm email"
-          name="invite-confirm-email"
-          type="email"
-          required
-          requiredValidationMessage="Confirm the email address."
-          value={confirmEmail}
-          errorMessage={confirmEmailError}
-          customOnInput={(event) => onConfirmEmailChange(getInputValue(event))}
-        />
-        {emailsMatch && (
+        <div id={INVITE_FIELD_ANCHORS.email}>
+          <OntarioInput
+            caption="Email address"
+            name="invite-email"
+            elementId={INVITE_FIELD_ANCHORS.email}
+            type="email"
+            required
+            requiredValidationMessage="Enter an email address."
+            value={email}
+            errorMessage={emailError}
+            customOnInput={(event) => onEmailChange(getInputValue(event))}
+          />
+        </div>
+        <div id={INVITE_FIELD_ANCHORS.confirmEmail}>
+          <OntarioInput
+            caption="Confirm email"
+            name="invite-confirm-email"
+            elementId={INVITE_FIELD_ANCHORS.confirmEmail}
+            type="email"
+            required
+            requiredValidationMessage="Confirm the email address."
+            value={confirmEmail}
+            errorMessage={confirmEmailError}
+            customOnInput={(event) => onConfirmEmailChange(getInputValue(event))}
+          />
+        </div>
+        {emailsMatch && !confirmEmailError && (
           <p className={styles.matchMessage}>
             <OntarioIconAlertSuccess />
             Emails match

@@ -9,7 +9,9 @@ type TablePermissionCheckboxProps = {
   onChange: (checked: boolean) => void;
 };
 
-// ODS OntarioCheckboxes always renders a fieldset legend, which breaks inside table cells.
+// ODS OntarioCheckboxes always renders a fieldset legend + option label, which is too
+// large for table cells. Column headers already name View/Edit; keep a compact control
+// with an accessible name.
 export function TablePermissionCheckbox({
   projectLabel,
   permissionLabel,

@@ -2,7 +2,7 @@ import styles from './TablePaginationBar.module.scss';
 
 const MAX_VISIBLE_PAGES = 10;
 
-export const TABLE_PAGE_SIZE = 5;
+export const TABLE_PAGE_SIZE = 10;
 
 type TablePaginationBarProps = {
   totalItems: number;
@@ -46,53 +46,52 @@ export function TablePaginationBar({
   return (
     // ODS has no pagination component — composed with link-styled controls.
     <div className={styles.tablePagination}>
-      <div className={styles.tablePaginationMain}>
-        <p className={styles.tablePaginationSummary}>
-          Displaying {pageStart} - {pageEnd} of {totalItems} results
-        </p>
+      <p className={styles.tablePaginationSummary}>
+        Displaying {pageStart} - {pageEnd} of {totalItems} results
+      </p>
 
-        {showPageNavigation && (
-          <nav className={styles.tablePaginationNav} aria-label="Pagination">
-            {visiblePages.map((page, index) => (
-              <span key={page} className={styles.tablePaginationPageItem}>
-                {index > 0 && (
-                  <span className={styles.tablePaginationSeparator} aria-hidden="true">
-                    -
-                  </span>
-                )}
-                {page === currentPage ? (
-                  <span className={styles.tablePaginationPageCurrent} aria-current="page">
-                    {page}
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    className={styles.tablePaginationPageLink}
-                    onClick={() => onPageChange(page)}
-                  >
-                    {page}
-                  </button>
-                )}
-              </span>
-            ))}
-
-            {currentPage < totalPages && (
-              <>
+      {showPageNavigation && (
+        <nav className={styles.tablePaginationNav} aria-label="Pagination">
+          {visiblePages.map((page, index) => (
+            <span key={page} className={styles.tablePaginationPageItem}>
+              {index > 0 && (
                 <span className={styles.tablePaginationSeparator} aria-hidden="true">
                   -
                 </span>
+              )}
+              {page === currentPage ? (
+                <span className={styles.tablePaginationPageCurrent} aria-current="page">
+                  {page}
+                </span>
+              ) : (
                 <button
                   type="button"
                   className={styles.tablePaginationPageLink}
-                  onClick={() => onPageChange(currentPage + 1)}
+                  onClick={() => onPageChange(page)}
                 >
-                  Next &gt;
+                  {page}
                 </button>
-              </>
-            )}
-          </nav>
-        )}
-      </div>
+              )}
+            </span>
+          ))}
+
+          {currentPage < totalPages && (
+            <>
+              <span className={styles.tablePaginationSeparator} aria-hidden="true">
+                -
+              </span>
+              <button
+                type="button"
+                className={styles.tablePaginationNextLink}
+                onClick={() => onPageChange(currentPage + 1)}
+              >
+                <span className={styles.tablePaginationNextLabel}>Next</span>
+                {' >>'}
+              </button>
+            </>
+          )}
+        </nav>
+      )}
     </div>
   );
 }

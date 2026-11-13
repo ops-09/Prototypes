@@ -22,6 +22,34 @@ export type ServiceAccess = {
   groups: Partial<Record<ServiceGroupId, ServiceGroupAccess>>;
 };
 
+/** Create-scope grant for one ministry under Permit Applications. */
+export type PermitMinistryCreateScope = {
+  mode: 'all' | 'selected';
+  /** Used when mode === 'selected'. Empty when mode === 'all'. */
+  permitTypeIds: string[];
+};
+
+export type PermitCreateAccess = {
+  enabled: boolean;
+  byMinistry: Partial<Record<string, PermitMinistryCreateScope>>;
+};
+
+export type PermitExistingAccess = {
+  enabled: boolean;
+  applicationIds: string[];
+};
+
+/**
+ * Parallel to ServiceAccess for CDPS Permit Applications (Shape A).
+ * Independent of Mining Projects; both domains default off at invite.
+ */
+export type PermitApplicationAccess = {
+  enabled: boolean;
+  create: PermitCreateAccess;
+  view: PermitExistingAccess;
+  edit: PermitExistingAccess;
+};
+
 export type RoleDefinition = {
   id: RoleId;
   label: string;
@@ -44,6 +72,7 @@ export type BusinessUser = {
   roleId: RoleId;
   status: UserStatus;
   serviceAccess?: ServiceAccess;
+  permitApplicationAccess?: PermitApplicationAccess;
   invitedAt?: string;
   lastActiveAt?: string;
 };
@@ -52,6 +81,7 @@ export type InviteUserInput = {
   email: string;
   roleId: RoleId;
   serviceAccess?: ServiceAccess;
+  permitApplicationAccess?: PermitApplicationAccess;
 };
 
 export type UpdateUserInput = {
@@ -60,6 +90,7 @@ export type UpdateUserInput = {
   email: string;
   roleId: RoleId;
   serviceAccess?: ServiceAccess;
+  permitApplicationAccess?: PermitApplicationAccess;
 };
 
 export type PageAlertState = {
@@ -68,7 +99,7 @@ export type PageAlertState = {
   content: string;
 } | null;
 
-export type InviteStep = 1 | 2 | 3 | 4 | 5;
+export type InviteStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type BatchInviteMode = 'same' | 'custom';
 
@@ -101,6 +132,7 @@ export type AccessTemplate = {
 export type InvitePrefillState = {
   roleId?: RoleId;
   serviceAccess?: ServiceAccess;
+  permitApplicationAccess?: PermitApplicationAccess;
 };
 
 export type InviteLocationState = {

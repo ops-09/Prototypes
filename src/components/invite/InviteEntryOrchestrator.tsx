@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   OntarioButton,
   OntarioIconChevronRight,
@@ -10,6 +10,7 @@ import type { BatchInviteMode, InvitePrefillState } from '../../rbac/types';
 import { InviteBatchWizard } from './InviteBatchWizard';
 import { InviteModeStep, type InviteAudience } from './InviteModeStep';
 import { InviteUserWizard } from './InviteUserWizard';
+import { getInviteStepPath } from './inviteWizardPaths';
 import styles from './InviteUserWizard.module.scss';
 
 type InviteFlow = 'choose' | 'single' | 'batch';
@@ -17,6 +18,9 @@ type InviteFlow = 'choose' | 'single' | 'batch';
 export function InviteEntryOrchestrator() {
   const navigate = useNavigate();
   const location = useLocation();
+  const params = useParams<{ step?: string }>();
+  const stepFromPath = location.pathname.match(/\/invite\/(step-\d+)\/?$/i)?.[1];
+  const stepParam = params.step ?? stepFromPath;
   const [searchParams] = useSearchParams();
   const batchEnabled = isBatchInviteEnabled();
 
@@ -25,6 +29,10 @@ export function InviteEntryOrchestrator() {
 
   const initialFlow = useMemo<InviteFlow>(() => {
     if (!batchEnabled) {
+      return 'single';
+    }
+
+    if (stepParam) {
       return 'single';
     }
 
@@ -40,7 +48,7 @@ export function InviteEntryOrchestrator() {
     }
 
     return 'choose';
-  }, [batchEnabled, prefill, searchParams]);
+  }, [batchEnabled, prefill, searchParams, stepParam]);
 
   const [flow, setFlow] = useState<InviteFlow>(initialFlow);
   const [audience, setAudience] = useState<InviteAudience | ''>(
@@ -51,7 +59,16 @@ export function InviteEntryOrchestrator() {
   );
   const [chooseError, setChooseError] = useState('');
 
-  if (!batchEnabled || flow === 'single') {
+  const canContinue =
+    audience === 'single' || (audience === 'multiple' && batchMode !== '');
+  const isSingleFlow = !batchEnabled || flow === 'single' || Boolean(stepParam);
+
+  // Single-user flow always lives on /invite/step-N (forms-style deep links).
+  if (isSingleFlow && !stepParam) {
+    return <Navigate to={getInviteStepPath(1)} replace state={location.state} />;
+  }
+
+  if (isSingleFlow) {
     return <InviteUserWizard prefill={prefill} />;
   }
 
@@ -68,7 +85,7 @@ export function InviteEntryOrchestrator() {
     setChooseError('');
 
     if (audience === 'single') {
-      setFlow('single');
+      navigate(getInviteStepPath(1), { state: location.state });
       return;
     }
 
@@ -76,9 +93,6 @@ export function InviteEntryOrchestrator() {
       setFlow('batch');
     }
   }
-
-  const canContinue =
-    audience === 'single' || (audience === 'multiple' && batchMode !== '');
 
   return (
     <div className={styles.wizard}>
@@ -117,7 +131,11 @@ export function InviteEntryOrchestrator() {
             Continue
             <OntarioIconChevronRight colour="white" />
           </OntarioButton>
-          <OntarioButton type="tertiary" htmlType="button" onClick={() => navigate('/user-management')}>
+          <OntarioButton
+            type="tertiary"
+            htmlType="button"
+            onClick={() => navigate('/user-management')}
+          >
             Cancel
           </OntarioButton>
         </div>

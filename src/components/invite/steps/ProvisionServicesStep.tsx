@@ -4,13 +4,19 @@ import type { ServiceAccess, ServiceGroupAccess, ServiceGroupId, SubServiceId } 
 import { ServiceGroupCard } from '../ServiceGroupCard';
 import styles from '../InviteUserWizard.module.scss';
 import { formatInviteStepTitle } from '../inviteWizardContent';
+import { INVITE_FIELD_ANCHORS } from '../inviteValidation';
 
 type ProvisionServicesStepProps = {
   serviceAccess: ServiceAccess;
+  serviceAccessError?: string;
   onChange: (serviceAccess: ServiceAccess) => void;
 };
 
-export function ProvisionServicesStep({ serviceAccess, onChange }: ProvisionServicesStepProps) {
+export function ProvisionServicesStep({
+  serviceAccess,
+  serviceAccessError,
+  onChange,
+}: ProvisionServicesStepProps) {
   const [expandedSubServices, setExpandedSubServices] = useState<Record<SubServiceId, boolean>>(
     () => ({
       mining: false,
@@ -53,7 +59,17 @@ export function ProvisionServicesStep({ serviceAccess, onChange }: ProvisionServ
         in the next step.
       </p>
 
-      <div className={styles.serviceGroupList}>
+      <div
+        id={INVITE_FIELD_ANCHORS.serviceAccess}
+        className={`${styles.serviceGroupList} ${serviceAccessError ? styles.serviceAccessError : ''}`}
+        tabIndex={-1}
+      >
+        {serviceAccessError ? (
+          <p id="invite-service-access-error" className={styles.fieldErrorMessage} role="alert">
+            {serviceAccessError}
+          </p>
+        ) : null}
+
         {SERVICE_GROUPS.map((group) => (
           <ServiceGroupCard
             key={group.id}

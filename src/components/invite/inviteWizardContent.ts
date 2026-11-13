@@ -1,35 +1,76 @@
-import type { InviteWizardVersion } from '../../config/inviteWizardVersion';
+import {
+  usesV2InviteSteps,
+  usesV4InviteSteps,
+  type InviteWizardVersion,
+} from '../../config/inviteWizardVersion';
 import { roleSkipsServiceAccess } from '../../rbac/roles';
 import type { InviteStep, RoleId } from '../../rbac/types';
+import {
+  getInviteV4BackStepLabel,
+  getInviteV4NextStepLabel,
+  getInviteV4Path,
+  getInviteV4StepCount,
+  getInviteV4StepTitle,
+  type InviteV4PathOptions,
+} from './inviteV4Path';
 
 export const INVITE_STEP_COUNT_V1 = 4;
 export const INVITE_STEP_COUNT_V2 = 5;
+export const INVITE_STEP_COUNT_V3 = 4;
 export const INVITE_STEP_COUNT = INVITE_STEP_COUNT_V2;
+
+export type InviteStepCountOptions = InviteV4PathOptions;
 
 export function getInviteStepCount(
   version: InviteWizardVersion,
   roleId: RoleId | '' = '',
+  options: InviteStepCountOptions = {},
 ): number {
   if (roleId && roleSkipsServiceAccess(roleId)) {
     return 3;
   }
 
-  return version === 'v1' ? INVITE_STEP_COUNT_V1 : INVITE_STEP_COUNT_V2;
+  if (usesV4InviteSteps(version)) {
+    return getInviteV4StepCount({ ...options, roleId });
+  }
+
+  if (usesV2InviteSteps(version)) {
+    return INVITE_STEP_COUNT_V2;
+  }
+
+  if (version === 'v3') {
+    return INVITE_STEP_COUNT_V3;
+  }
+
+  return INVITE_STEP_COUNT_V1;
 }
 
-export function getInviteReviewStep(version: InviteWizardVersion): InviteStep {
-  return version === 'v1' ? 4 : 5;
+export function getInviteReviewStep(
+  version: InviteWizardVersion,
+  options: InviteStepCountOptions = {},
+): InviteStep {
+  if (usesV4InviteSteps(version)) {
+    return getInviteV4StepCount(options) as InviteStep;
+  }
+
+  return usesV2InviteSteps(version) ? 5 : 4;
 }
 
 export function getInviteDisplayStep(
   currentStep: InviteStep,
   version: InviteWizardVersion,
   roleId: RoleId | '',
+  options: InviteStepCountOptions = {},
 ): number {
-  const reviewStep = getInviteReviewStep(version);
+  const reviewStep = getInviteReviewStep(version, { ...options, roleId });
 
   if (roleId && roleSkipsServiceAccess(roleId) && currentStep === reviewStep) {
     return 3;
+  }
+
+  if (usesV4InviteSteps(version)) {
+    const stepCount = getInviteStepCount(version, roleId, options);
+    return Math.min(Math.max(currentStep, 1), stepCount);
   }
 
   return currentStep;
@@ -54,22 +95,31 @@ export function getInvitePreviousStepTitle(
   currentStep: InviteStep,
   reviewStep: InviteStep,
   roleId: RoleId | '',
+  options: InviteStepCountOptions = {},
 ): string | null {
+  if (usesV4InviteSteps(version)) {
+    const label = getInviteV4BackStepLabel(currentStep, { ...options, roleId });
+    if (!label) {
+      return null;
+    }
+    return label.replace(/^Back:\s*/, '');
+  }
+
   if (currentStep === reviewStep) {
     if (roleId && roleSkipsServiceAccess(roleId)) {
-      return 'Assign a role';
+      return 'Assign role';
     }
 
-    return version === 'v1' ? 'Service access' : 'Service permissions';
+    return usesV2InviteSteps(version) ? 'Service permissions' : 'Service access';
   }
 
   switch (currentStep) {
     case 2:
       return 'User details';
     case 3:
-      return 'Assign a role';
+      return 'Assign role';
     case 4:
-      return version === 'v2' ? 'Provision services' : null;
+      return usesV2InviteSteps(version) ? 'Service access' : null;
     case 5:
       return 'Service permissions';
     default:
@@ -82,8 +132,19 @@ export function getInviteBackStepLabel(
   currentStep: InviteStep,
   reviewStep: InviteStep,
   roleId: RoleId | '',
+  options: InviteStepCountOptions = {},
 ): string | null {
-  const previousStepTitle = getInvitePreviousStepTitle(version, currentStep, reviewStep, roleId);
+  if (usesV4InviteSteps(version)) {
+    return getInviteV4BackStepLabel(currentStep, { ...options, roleId });
+  }
+
+  const previousStepTitle = getInvitePreviousStepTitle(
+    version,
+    currentStep,
+    reviewStep,
+    roleId,
+    options,
+  );
   return previousStepTitle ? formatInviteBackStepLabel(previousStepTitle) : null;
 }
 
@@ -91,28 +152,31 @@ export function getInviteNextStepLabel(
   version: InviteWizardVersion,
   currentStep: InviteStep,
   roleId: RoleId | '',
+  options: InviteStepCountOptions = {},
 ): string | null {
+  if (usesV4InviteSteps(version)) {
+    return getInviteV4NextStepLabel(currentStep, { ...options, roleId });
+  }
+
   switch (currentStep) {
     case 1:
-      return formatInviteNextStepLabel('Assign a role');
+      return formatInviteNextStepLabel('Assign role');
     case 2:
       if (roleId && roleSkipsServiceAccess(roleId)) {
         return formatInviteNextStepLabel('Review');
       }
 
-      if (roleId === 'delegate') {
-        return formatInviteNextStepLabel('Assign permissions');
-      }
-
       return formatInviteNextStepLabel(
-        version === 'v1' ? 'Service access' : 'Provision services',
+        version === 'v3' ? 'Service access' : 'Assign permissions',
       );
     case 3:
       return formatInviteNextStepLabel(
-        version === 'v1' ? INVITE_REVIEW_STEP_TITLE : 'Service permissions',
+        usesV2InviteSteps(version) ? 'Service permissions' : INVITE_REVIEW_STEP_TITLE,
       );
     case 4:
-      return version === 'v2' ? formatInviteNextStepLabel(INVITE_REVIEW_STEP_TITLE) : null;
+      return usesV2InviteSteps(version)
+        ? formatInviteNextStepLabel(INVITE_REVIEW_STEP_TITLE)
+        : null;
     default:
       return null;
   }
@@ -129,4 +193,13 @@ export function getInviteProgressLabel(
   }
 
   return `${completedPercent} percent complete`;
+}
+
+export function getInviteV4CurrentTitle(
+  displayStep: number,
+  options: InviteStepCountOptions = {},
+) {
+  const path = getInviteV4Path(options);
+  const logical = path[Math.min(Math.max(displayStep, 1), path.length) - 1];
+  return logical ? getInviteV4StepTitle(logical) : 'Invite';
 }
