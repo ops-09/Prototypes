@@ -4,7 +4,14 @@ import {
   OntarioPageAlert,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
-import { useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   contactFromSignedInProfile,
@@ -69,6 +76,8 @@ type ContactInformationFormProps = {
   numberOfSteps?: number;
   backButtonUrl?: string;
   primaryButtonLabel?: string;
+  /** Optional filing context shown under the step indicator. */
+  headerCard?: ReactNode;
 };
 
 export function ContactInformationForm({
@@ -77,6 +86,7 @@ export function ContactInformationForm({
   numberOfSteps,
   backButtonUrl = '/',
   primaryButtonLabel = 'Start',
+  headerCard,
 }: ContactInformationFormProps = {}) {
   const navigate = useNavigate();
   const errorSummaryRef = useRef<HTMLDivElement>(null);
@@ -229,6 +239,12 @@ export function ContactInformationForm({
           numberOfSteps={showFilingSteps ? numberOfSteps : undefined}
         />
       </div>
+
+      {headerCard ? (
+        <div className="ontario-row">
+          <div className="ontario-columns ontario-small-12">{headerCard}</div>
+        </div>
+      ) : null}
 
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">

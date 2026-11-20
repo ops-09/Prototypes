@@ -39,6 +39,7 @@ import {
   validateNameNuansFields,
   type NameNuansErrors,
 } from './ProposedNameAndNuans';
+import { Form7HeaderCard } from './Form7HeaderCard';
 import styles from './Form7Step1.module.scss';
 
 const CURRENT_STEP = 3;
@@ -495,6 +496,12 @@ export function Form7Step2() {
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
+      </div>
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <Form7HeaderCard />
+        </div>
       </div>
 
       <div className="ontario-row">

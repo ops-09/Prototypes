@@ -23,6 +23,8 @@ type FilingSubmitStepProps = {
   errorSummaryRef: RefObject<HTMLDivElement | null>;
   signedPdfError?: string;
   authorizationError?: string;
+  /** Optional filing context shown under the step indicator. */
+  headerCard?: ReactNode;
   upload: ReactNode;
   authorization: ReactNode;
   onSubmit: () => void;
@@ -55,6 +57,7 @@ export function FilingSubmitStep({
   errorSummaryRef,
   signedPdfError,
   authorizationError,
+  headerCard,
   upload,
   authorization,
   onSubmit,
@@ -74,6 +77,12 @@ export function FilingSubmitStep({
           numberOfSteps={numberOfSteps}
         />
       </div>
+
+      {headerCard ? (
+        <div className="ontario-row">
+          <div className="ontario-columns ontario-small-12">{headerCard}</div>
+        </div>
+      ) : null}
 
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">

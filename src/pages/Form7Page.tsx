@@ -1,5 +1,6 @@
 import { ContactInformationForm } from '../components/cover-letter/ContactInformationForm';
 import formStyles from '../components/cover-letter/ContactInformationForm.module.scss';
+import { Form7HeaderCard } from '../components/form7/Form7HeaderCard';
 import { PlaygroundShell } from '../components/layout/PlaygroundShell';
 
 /** Form 7 cover letter / contact information (step 1 of 6). */
@@ -16,6 +17,7 @@ export function Form7Page() {
         numberOfSteps={6}
         backButtonUrl="/form-7"
         primaryButtonLabel="Continue"
+        headerCard={<Form7HeaderCard />}
       />
     </PlaygroundShell>
   );

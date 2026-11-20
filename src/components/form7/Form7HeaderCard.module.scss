@@ -1,0 +1,46 @@
+// ODS has no static metadata header card — compose with tokens only.
+// Edge treatment from Figma: inset hairlines + 1px drop (no solid border).
+.card {
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+  padding: var(--ontario-spacing-5, 1.5rem);
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  border: 0;
+  border-radius: var(--ontario-global-tokens-radius, 4px);
+  // Figma effect stack (drop + 4 inset hairlines)
+  box-shadow:
+    0 1px 0 0 rgba(167, 167, 167, 0.01),
+    inset 1px 0 0 0 rgba(0, 0, 0, 0.12),
+    inset -1px 0 0 0 rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 0 rgba(204, 204, 204, 0.5),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ontario-spacing-5, 1.5rem);
+
+  @media screen and (min-width: 40em) {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ontario-spacing-6, 2rem);
+  }
+}
+
+.field {
+  margin: 0;
+  min-width: 0;
+}
+
+.label {
+  margin: 0 0 var(--ontario-spacing-1, 0.25rem);
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-bold, 700);
+  color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+}
+
+.value {
+  margin: 0;
+  font-size: var(--ontario-font-sizes-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+}

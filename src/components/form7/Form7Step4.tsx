@@ -19,6 +19,7 @@ import {
 import { GeneratePdfSection } from '../shared/GeneratePdfSection';
 import { generateForm7ReviewPdf } from './form7GeneratePdf';
 import { buildReviewSections, type ReviewSectionKey } from './form7ReviewModel';
+import { Form7HeaderCard } from './Form7HeaderCard';
 import { Form7SummaryList } from './Form7SummaryList';
 import styles from './Form7Step1.module.scss';
 
@@ -194,6 +195,12 @@ export function Form7Step4() {
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
+      </div>
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <Form7HeaderCard />
+        </div>
       </div>
 
       <div className="ontario-row">

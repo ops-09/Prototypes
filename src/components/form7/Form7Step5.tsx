@@ -14,6 +14,7 @@ import {
   type Form7Step4Data,
 } from './form7DraftStorage';
 import { formatIsoDateDisplay } from './form7Labels';
+import { Form7HeaderCard } from './Form7HeaderCard';
 import styles from './Form7Step1.module.scss';
 
 const CURRENT_STEP = 6;
@@ -117,6 +118,7 @@ export function Form7Step5() {
       errorSummaryRef={errorSummaryRef}
       signedPdfError={errors.signedPdf}
       authorizationError={errors.authorization}
+      headerCard={<Form7HeaderCard />}
       upload={
         <FileUpload
           inputId="form7-signed-pdf-upload"

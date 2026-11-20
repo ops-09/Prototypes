@@ -24,6 +24,7 @@ import {
   type Form7Step3Data,
   type SupportingDocMeta,
 } from './form7DraftStorage';
+import { Form7HeaderCard } from './Form7HeaderCard';
 import { SupportingDocumentsUpload } from './SupportingDocumentsUpload';
 import styles from './Form7Step1.module.scss';
 
@@ -312,6 +313,12 @@ export function Form7Step3() {
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
+      </div>
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <Form7HeaderCard />
+        </div>
       </div>
 
       <div className="ontario-row">
