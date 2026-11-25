@@ -1,6 +1,10 @@
 /** Copy for Form 11 Before you begin — edit here without changing layout. */
 
 import type { BeforeYouBeginChecklistItem } from '../shared/beforeYouBeginChecklist';
+import {
+  BYB_PAYMENT_LEAD,
+  BYB_PAYMENT_REVIEW_FEES,
+} from '../shared/beforeYouBeginPaymentContent';
 
 /** Title lines — break early so lines wrap cleanly at form column widths. */
 export const BYB_FORM_TITLE_LINES = [
@@ -67,6 +71,14 @@ export const BYB_DOCUMENTS_HEADING = 'Submission checklist';
 
 export const BYB_DOCUMENTS_INTRO =
   'You should have the following information available to complete your submission:';
+
+export const BYB_PAYMENT_LEAD_TEXT = BYB_PAYMENT_LEAD;
+
+export const BYB_PAYMENT_ITEMS: readonly string[] = [
+  'A valid payment method available.',
+  BYB_PAYMENT_REVIEW_FEES,
+  'The filing fee is $155',
+];
 
 export const BYB_NAICS_URL =
   'https://www.statcan.gc.ca/en/concepts/searchclasscod';

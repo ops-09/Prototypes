@@ -362,39 +362,43 @@ export function Form7Step3() {
               content={`Required documents: ${requiredList.join('; ')}.`}
             />
 
-            <div id={FIELD_ANCHORS.certifiedResolution}>
+            <div id={FIELD_ANCHORS.certifiedResolution} className={styles.eitherOrGroup}>
+              <p className={styles.naicsLabel}>
+                The following is a certified copy of the resolution amending the articles of
+                the co-operative:
+                <span className={styles.requiredFlag}> (required)</span>
+              </p>
+              {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea. */}
+              <div className={styles.textareaCaptionClip}>
+                <OntarioTextarea
+                  elementId="certified-resolution-text"
+                  caption={'\u200B'}
+                  name="certified-resolution-text"
+                  value={step3.certifiedResolutionText}
+                  errorMessage={errors.certifiedResolution}
+                  customOnInput={(event) => {
+                    const value = getEventValue(event);
+                    setStep3((prev) => ({
+                      ...prev,
+                      certifiedResolutionText: value,
+                    }));
+                    if (value.trim() || step3.certifiedResolution.length > 0) {
+                      clearError('certifiedResolution');
+                      clearError('supportingDocs');
+                    }
+                  }}
+                />
+              </div>
+              <div className={styles.orSeparator} role="separator" aria-hidden="true" />
               <SupportingDocumentsUpload
-                label="The following is a certified copy of the resolution amending the articles of the co-operative:"
-                required
-                hintText="Upload or enter the certified resolution or certified special resolution authorizing the amendment. You can upload more than one file."
+                label="Upload a PDF copy of the certified resolution"
+                hideLabel
+                hideErrorText
+                hintText="Or upload a PDF copy of the certified resolution."
                 value={step3.certifiedResolution}
                 errorMessage={errors.certifiedResolution}
                 onChange={(files) => patchDocs('certifiedResolution', files, 'certifiedResolution')}
                 inputId="certified-resolution-upload"
-                aboveDropZone={
-                  <>
-                    {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea. */}
-                    <div className={styles.textareaCaptionClip}>
-                    <OntarioTextarea
-                      elementId="certified-resolution-text"
-                      caption={'\u200B'}
-                      name="certified-resolution-text"
-                      value={step3.certifiedResolutionText}
-                      customOnInput={(event) => {
-                        const value = getEventValue(event);
-                        setStep3((prev) => ({
-                          ...prev,
-                          certifiedResolutionText: value,
-                        }));
-                        if (value.trim() || step3.certifiedResolution.length > 0) {
-                          clearError('certifiedResolution');
-                          clearError('supportingDocs');
-                        }
-                      }}
-                    />
-                    </div>
-                  </>
-                }
               />
             </div>
 

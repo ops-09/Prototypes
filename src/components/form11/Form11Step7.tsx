@@ -4,27 +4,58 @@ import {
   OntarioButton,
   OntarioPageAlert,
   OntarioStepIndicator,
+  OntarioTextarea,
 } from '@ongov/ontario-design-system-component-library-react';
-import { FileUpload } from '../form1/FileUpload';
+import { type UploadedFileMeta } from '../form1/FileUpload';
 import { SupportingDocumentsUpload } from '../form7/SupportingDocumentsUpload';
 import { type SupportingDocMeta } from '../form7/form7DraftStorage';
-import { focusField } from './form11Focus';
+import { focusField, getEventValue } from './form11Focus';
 import {
   AGREEMENT_EMPTY_ERROR,
   EMPTY_STEP7,
   ensureForm11PlaygroundDraft,
   FORM11_TOTAL_STEPS,
+  hasForm11Agreement,
   readForm11Draft,
   upsertForm11Step7,
   type Form11Step7Data,
 } from './form11DraftStorage';
 import { FORM11_CERTIFIED_AGREEMENT_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 7;
 
 type FieldKey = 'amalgamationAgreement';
 type FieldErrors = Partial<Record<FieldKey, string>>;
+
+function toSupportingDocs(file: UploadedFileMeta | null): SupportingDocMeta[] {
+  if (!file) {
+    return [];
+  }
+  return [
+    {
+      id: `agreement-${file.name}-${file.size}`,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      uploadedAt: new Date().toISOString(),
+    },
+  ];
+}
+
+function fromSupportingDocs(files: SupportingDocMeta[]): UploadedFileMeta | null {
+  const first = files[0];
+  if (!first) {
+    return null;
+  }
+  return {
+    name: first.name,
+    size: first.size,
+    type: first.type,
+  };
+}
 
 export function Form11Step7() {
   const navigate = useNavigate();
@@ -35,6 +66,7 @@ export function Form11Step7() {
     ...EMPTY_STEP7,
     ...(draft.step7 ?? {}),
     amalgamationAgreement: draft.step7?.amalgamationAgreement ?? null,
+    amalgamationAgreementText: draft.step7?.amalgamationAgreementText ?? '',
     additionalDocuments: draft.step7?.additionalDocuments ?? [],
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -66,7 +98,7 @@ export function Form11Step7() {
 
   function validate(): FieldErrors {
     const next: FieldErrors = {};
-    if (!step7.amalgamationAgreement) {
+    if (!hasForm11Agreement(step7)) {
       next.amalgamationAgreement = AGREEMENT_EMPTY_ERROR;
     }
     return next;
@@ -115,6 +147,13 @@ export function Form11Step7() {
         />
       </div>
 
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
+      </div>
+
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
           {showErrorSummary && errorSummaryItems.length > 0 ? (
@@ -140,27 +179,60 @@ export function Form11Step7() {
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Supporting documents</h1>
           <p className={styles.lead}>
-            Upload a copy of the approved amalgamation agreement. You may also attach other
-            documents that support this application.
+            Upload a copy of the approved amalgamation agreement or enter it in the text
+            field. You may also attach other documents that support this application.
           </p>
 
           <div className={styles.formStack}>
-            <div id="amalgamation-agreement">
-              <FileUpload
-                inputId="form11-amalgamation-agreement"
-                label={FORM11_CERTIFIED_AGREEMENT_CAPTION}
-                required
-                value={step7.amalgamationAgreement}
+            <div id="amalgamation-agreement" className={styles.eitherOrGroup}>
+              <p className={styles.naicsLabel}>
+                {FORM11_CERTIFIED_AGREEMENT_CAPTION}
+                <span className={styles.requiredFlag}> (required)</span>
+              </p>
+              {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea. */}
+              <div className={styles.textareaCaptionClip}>
+                <OntarioTextarea
+                  elementId="form11-amalgamation-agreement-text"
+                  caption={'\u200B'}
+                  name="amalgamation-agreement-text"
+                  value={step7.amalgamationAgreementText}
+                  errorMessage={errors.amalgamationAgreement}
+                  customOnInput={(event) => {
+                    const value = getEventValue(event);
+                    setStep7((prev) => ({
+                      ...prev,
+                      amalgamationAgreementText: value,
+                    }));
+                    if (value.trim() || step7.amalgamationAgreement) {
+                      clearAgreementError();
+                    }
+                  }}
+                />
+              </div>
+              <div className={styles.orSeparator} role="separator" aria-hidden="true" />
+              <SupportingDocumentsUpload
+                label="Upload a PDF copy of the amalgamation agreement"
+                hideLabel
+                hideErrorText
+                maxFiles={1}
+                hintText="Or upload a PDF copy of the amalgamation agreement."
+                value={toSupportingDocs(step7.amalgamationAgreement)}
                 errorMessage={errors.amalgamationAgreement}
-                onChange={(file) => {
-                  setStep7((prev) => ({ ...prev, amalgamationAgreement: file }));
-                  clearAgreementError();
+                onChange={(files) => {
+                  setStep7((prev) => ({
+                    ...prev,
+                    amalgamationAgreement: fromSupportingDocs(files),
+                  }));
+                  if (files.length === 1 || step7.amalgamationAgreementText.trim()) {
+                    clearAgreementError();
+                  }
                 }}
+                inputId="form11-amalgamation-agreement"
               />
             </div>
 
             <SupportingDocumentsUpload
-              label="Upload any other document to support this application (optional)"
+              label="Upload any other document to support this application"
               hintText="PDF only, maximum 20 MB per file."
               value={step7.additionalDocuments}
               showUploadedAt

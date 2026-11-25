@@ -17,16 +17,40 @@ import type {
   PermitMinistryCreateScope,
 } from '../../../rbac/types';
 import userTableStyles from '../../user-management/UsersTable.module.scss';
+import { ApplicationSearchAutosuggest } from '../ApplicationSearchAutosuggest';
 import { PermitTabBar, type PermitTabId } from '../PermitTabBar';
 import { TablePermissionCheckbox } from '../TablePermissionCheckbox';
 import styles from '../InviteUserWizard.module.scss';
+import { PermitCreateScopeV5 } from './PermitCreateScopeV5';
+import { PermitCreateScopeV6 } from './PermitCreateScopeV6';
+import { PermitCreateScopeV8 } from './PermitCreateScopeV8';
+import { PermitCreateScopeV9 } from './PermitCreateScopeV9';
+import { PermitCreateScopeV10 } from './PermitCreateScopeV10';
+import { PermitCreateScopeV11 } from './PermitCreateScopeV11';
+import { PermitCreateScopeV12 } from './PermitCreateScopeV12';
 
 type PermitApplicationsSectionProps = {
   access: PermitApplicationAccess;
   onChange: (access: PermitApplicationAccess) => void;
   errorMessage?: string;
-  /** `gated` = V3 action checkboxes; `tabs` = V4 New/Existing tab bar. */
-  variant?: 'gated' | 'tabs';
+  /** `gated` = V3; `tabs` = V4; `tabs-v5`–`tabs-v12` = create-scope variants. */
+  variant?:
+    | 'gated'
+    | 'tabs'
+    | 'tabs-v5'
+    | 'tabs-v6'
+    | 'tabs-v8'
+    | 'tabs-v9'
+    | 'tabs-v10'
+    | 'tabs-v11'
+    | 'tabs-v12';
+  /** When set (e.g. V7–V12 Permissions step), parent owns tabs. */
+  controlledTab?: PermitTabId;
+  hideTabBar?: boolean;
+  /** V12: display step to return to from the permit catalog. */
+  catalogReturnDisplayStep?: number;
+  /** V14: show application filter on the permit catalog page. */
+  catalogShowAccessNeedsFilter?: boolean;
 };
 
 function applyCheckboxToggle(current: string[], event: globalThis.Event): string[] {
@@ -62,6 +86,10 @@ export function PermitApplicationsSection({
   onChange,
   errorMessage,
   variant = 'gated',
+  controlledTab,
+  hideTabBar = false,
+  catalogReturnDisplayStep = 3,
+  catalogShowAccessNeedsFilter = false,
 }: PermitApplicationsSectionProps) {
   const ministries = listMinistriesWithEligiblePermits();
   const applications = listOrgApplications();
@@ -69,13 +97,30 @@ export function PermitApplicationsSection({
     Partial<Record<string, string>>
   >({});
   const [applicationSearch, setApplicationSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<PermitTabId>('create');
+  const [internalTab, setInternalTab] = useState<PermitTabId>('create');
+  const activeTab = controlledTab ?? internalTab;
 
-  const useTabs = variant === 'tabs';
+  const useTabs =
+    variant === 'tabs' ||
+    variant === 'tabs-v5' ||
+    variant === 'tabs-v6' ||
+    variant === 'tabs-v8' ||
+    variant === 'tabs-v9' ||
+    variant === 'tabs-v10' ||
+    variant === 'tabs-v11' ||
+    variant === 'tabs-v12';
+  const useV5Create = variant === 'tabs-v5';
+  const useV6Create = variant === 'tabs-v6';
+  const useV8Create = variant === 'tabs-v8';
+  const useV9Create = variant === 'tabs-v9';
+  const useV10Create = variant === 'tabs-v10';
+  const useV11Create = variant === 'tabs-v11';
+  const useV12Create = variant === 'tabs-v12';
   const existingEnabled = useTabs || access.view.enabled || access.edit.enabled;
   const createEnabled = useTabs || access.create.enabled;
   const showCreatePanel = useTabs ? activeTab === 'create' : createEnabled;
   const showExistingPanel = useTabs ? activeTab === 'existing' : existingEnabled;
+  const showTabBar = useTabs && !hideTabBar;
 
   const actionValues = useMemo(() => {
     const values: string[] = [];
@@ -217,12 +262,22 @@ export function PermitApplicationsSection({
     checked: boolean,
   ) {
     if (kind === 'view') {
+      // Clearing view also clears edit (edit implies view), matching mining projects.
+      const nextViewIds = toggleIdInList(access.view.applicationIds, applicationId, checked);
+      const nextEditIds = checked
+        ? access.edit.applicationIds
+        : toggleIdInList(access.edit.applicationIds, applicationId, false);
+
       patchAccess(
         ensureExistingEnabled({
           ...access,
           view: {
             ...access.view,
-            applicationIds: toggleIdInList(access.view.applicationIds, applicationId, checked),
+            applicationIds: nextViewIds,
+          },
+          edit: {
+            ...access.edit,
+            applicationIds: nextEditIds,
           },
         }),
       );
@@ -253,16 +308,7 @@ export function PermitApplicationsSection({
   const includedMinistryIds = Object.keys(access.create.byMinistry);
 
   return (
-    <div className={styles.miningPermissionsCard}>
-      <div className={styles.miningPermissionsHeader}>
-        <div className={styles.miningPermissionsHeaderTop}>
-          <h3 className={`ontario-h5 ${styles.miningPermissionsTitle}`}>
-            Permit Applications
-          </h3>
-        </div>
-      </div>
-
-      <div className={styles.domainSectionBody}>
+    <div className={styles.permitApplicationsRoot}>
         {!useTabs ? (
           <OntarioPageAlert
             type="informational"
@@ -271,9 +317,11 @@ export function PermitApplicationsSection({
           />
         ) : null}
 
-        {useTabs ? (
-          <PermitTabBar activeTab={activeTab} onChange={setActiveTab} />
-        ) : (
+        {showTabBar ? (
+          <PermitTabBar activeTab={activeTab} onChange={setInternalTab} />
+        ) : null}
+
+        {!useTabs ? (
           <OntarioCheckboxes
             caption="Actions"
             name="permit-application-actions"
@@ -293,7 +341,7 @@ export function PermitApplicationsSection({
             ]}
             customOnChange={handleActionsChange}
           />
-        )}
+        ) : null}
 
         {errorMessage ? (
           <p className={styles.fieldErrorMessage} role="alert">
@@ -308,218 +356,247 @@ export function PermitApplicationsSection({
             id={useTabs ? 'permit-tabpanel-create' : undefined}
             aria-labelledby={useTabs ? 'permit-tab-create' : undefined}
           >
-            {!useTabs ? (
-              <h4 className={`ontario-h5 ${styles.permitSubsectionTitle}`}>
-                Create scope by ministry
-              </h4>
-            ) : null}
-            <p className={styles.permitSubsectionHint}>
-              Choose All permit types or Selected types for each ministry.
-            </p>
-
-            {ministries.length === 0 ? (
-              <OntarioPageAlert
-                type="informational"
-                heading="No eligible permits"
-                content="There are no organization-based permit types available to assign for create access."
+            {useV12Create ? (
+              <PermitCreateScopeV12
+                access={access}
+                onChange={onChange}
+                returnDisplayStep={catalogReturnDisplayStep}
+                catalogShowAccessNeedsFilter={catalogShowAccessNeedsFilter}
               />
+            ) : useV11Create ? (
+              <PermitCreateScopeV11 access={access} onChange={onChange} />
+            ) : useV10Create ? (
+              <PermitCreateScopeV10 access={access} onChange={onChange} />
+            ) : useV9Create ? (
+              <PermitCreateScopeV9 access={access} onChange={onChange} />
+            ) : useV8Create ? (
+              <PermitCreateScopeV8 access={access} onChange={onChange} />
+            ) : useV6Create ? (
+              <PermitCreateScopeV6 access={access} onChange={onChange} />
+            ) : useV5Create ? (
+              <PermitCreateScopeV5 access={access} onChange={onChange} />
             ) : (
-              <ul className={styles.ministryScopeList}>
-                {ministries.map((ministry) => {
-                  const scope = access.create.byMinistry[ministry.ministryId];
-                  const included = Boolean(scope);
-                  const permitTypes = listPermitTypesByMinistry(ministry.ministryId);
-                  const searchQuery =
-                    permitSearchByMinistry[ministry.ministryId]?.trim().toLowerCase() ?? '';
-                  const visibleTypes = permitTypes.filter((permit) => {
-                    if (!searchQuery) {
-                      return true;
-                    }
-                    return permit.permitShortName.toLowerCase().includes(searchQuery);
-                  });
+              <>
+                {!useTabs ? (
+                  <h4 className={`ontario-h5 ${styles.permitSubsectionTitle}`}>
+                    Create scope by ministry
+                  </h4>
+                ) : null}
+                <p className={styles.permitSubsectionHint}>
+                  Choose All permit types or Selected types for each ministry.
+                </p>
 
-                  return (
-                    <li key={ministry.ministryId} className={styles.ministryScopeItem}>
-                      <OntarioCheckboxes
-                        caption={ministry.label}
-                        name={`permit-ministry-include-${ministry.ministryId}`}
-                        value={included ? [ministry.ministryId] : []}
-                        options={[
-                          {
-                            value: ministry.ministryId,
-                            elementId: `permit-ministry-${ministry.ministryId}`,
-                            label: 'Include this ministry for create access',
-                          },
-                        ]}
-                        customOnChange={(event) => {
-                          const values = applyCheckboxToggle(
-                            included ? [ministry.ministryId] : [],
-                            event,
-                          );
-                          setMinistryIncluded(
-                            ministry.ministryId,
-                            values.includes(ministry.ministryId),
-                          );
-                        }}
-                      />
+                {ministries.length === 0 ? (
+                  <OntarioPageAlert
+                    type="informational"
+                    heading="No eligible permits"
+                    content="There are no organization-based permit types available to assign for create access."
+                  />
+                ) : (
+                  <ul className={styles.ministryScopeList}>
+                    {ministries.map((ministry) => {
+                      const scope = access.create.byMinistry[ministry.ministryId];
+                      const included = Boolean(scope);
+                      const permitTypes = listPermitTypesByMinistry(ministry.ministryId);
+                      const searchQuery =
+                        permitSearchByMinistry[ministry.ministryId]?.trim().toLowerCase() ?? '';
+                      const visibleTypes = permitTypes.filter((permit) => {
+                        if (!searchQuery) {
+                          return true;
+                        }
+                        return permit.permitShortName.toLowerCase().includes(searchQuery);
+                      });
 
-                      {included && scope ? (
-                        <div className={styles.ministryScopeDetails}>
-                          <OntarioRadioButtons
-                            caption="Permit types for this ministry"
-                            name={`permit-ministry-mode-${ministry.ministryId}`}
-                            value={scope.mode}
+                      return (
+                        <li key={ministry.ministryId} className={styles.ministryScopeItem}>
+                          <OntarioCheckboxes
+                            caption={ministry.label}
+                            name={`permit-ministry-include-${ministry.ministryId}`}
+                            value={included ? [ministry.ministryId] : []}
                             options={[
                               {
-                                value: 'all',
-                                elementId: `permit-mode-all-${ministry.ministryId}`,
-                                label: 'All permit types',
-                              },
-                              {
-                                value: 'selected',
-                                elementId: `permit-mode-selected-${ministry.ministryId}`,
-                                label: 'Selected permit types',
+                                value: ministry.ministryId,
+                                elementId: `permit-ministry-${ministry.ministryId}`,
+                                label: 'Include this ministry for create access',
                               },
                             ]}
                             customOnChange={(event) => {
-                              const value = getRadioValue(event);
-                              if (value === 'all' || value === 'selected') {
-                                setMinistryMode(ministry.ministryId, value);
-                              }
+                              const values = applyCheckboxToggle(
+                                included ? [ministry.ministryId] : [],
+                                event,
+                              );
+                              setMinistryIncluded(
+                                ministry.ministryId,
+                                values.includes(ministry.ministryId),
+                              );
                             }}
                           />
 
-                          {scope.mode === 'selected' ? (
-                            <div className={styles.permitTypePicker}>
-                              <label
-                                className={styles.permitSearchLabel}
-                                htmlFor={`permit-type-search-${ministry.ministryId}`}
-                              >
-                                Search permit types
-                              </label>
-                              <input
-                                id={`permit-type-search-${ministry.ministryId}`}
-                                className={styles.permitSearchInput}
-                                type="search"
-                                value={permitSearchByMinistry[ministry.ministryId] ?? ''}
-                                onChange={(event) => {
-                                  setPermitSearchByMinistry((current) => ({
-                                    ...current,
-                                    [ministry.ministryId]: event.target.value,
-                                  }));
+                          {included && scope ? (
+                            <div className={styles.ministryScopeDetails}>
+                              <OntarioRadioButtons
+                                caption="Permit types for this ministry"
+                                name={`permit-ministry-mode-${ministry.ministryId}`}
+                                value={scope.mode}
+                                options={[
+                                  {
+                                    value: 'all',
+                                    elementId: `permit-mode-all-${ministry.ministryId}`,
+                                    label: 'All permit types',
+                                  },
+                                  {
+                                    value: 'selected',
+                                    elementId: `permit-mode-selected-${ministry.ministryId}`,
+                                    label: 'Selected permit types',
+                                  },
+                                ]}
+                                customOnChange={(event) => {
+                                  const value = getRadioValue(event);
+                                  if (value === 'all' || value === 'selected') {
+                                    setMinistryMode(ministry.ministryId, value);
+                                  }
                                 }}
                               />
 
-                              {visibleTypes.length === 0 ? (
-                                <p className={styles.subServiceMessage}>
-                                  No permit types match this search.
-                                </p>
-                              ) : (
-                                <OntarioCheckboxes
-                                  caption="Permit types"
-                                  name={`permit-types-${ministry.ministryId}`}
-                                  hintText="Use Select all below when you need most types, then uncheck exceptions."
-                                  value={scope.permitTypeIds}
-                                  options={visibleTypes.map((permit) => ({
-                                    value: permit.permitTypeId,
-                                    elementId: `permit-type-${permit.permitTypeId}`,
-                                    label: permit.permitShortName,
-                                  }))}
-                                  customOnChange={(event) => {
-                                    const visibleIds = new Set(
-                                      visibleTypes.map((permit) => permit.permitTypeId),
-                                    );
-                                    const selectedVisible = applyCheckboxToggle(
-                                      scope.permitTypeIds.filter((id) => visibleIds.has(id)),
-                                      event,
-                                    );
-                                    const keptHidden = scope.permitTypeIds.filter(
-                                      (id) => !visibleIds.has(id),
-                                    );
-                                    setMinistryPermitTypes(ministry.ministryId, [
-                                      ...keptHidden,
-                                      ...selectedVisible,
-                                    ]);
-                                  }}
-                                />
-                              )}
+                              {scope.mode === 'selected' ? (
+                                <div className={styles.permitTypePicker}>
+                                  <label
+                                    className={styles.permitSearchLabel}
+                                    htmlFor={`permit-type-search-${ministry.ministryId}`}
+                                  >
+                                    Search permit types
+                                  </label>
+                                  <input
+                                    id={`permit-type-search-${ministry.ministryId}`}
+                                    className={styles.permitSearchInput}
+                                    type="search"
+                                    value={permitSearchByMinistry[ministry.ministryId] ?? ''}
+                                    onChange={(event) => {
+                                      setPermitSearchByMinistry((current) => ({
+                                        ...current,
+                                        [ministry.ministryId]: event.target.value,
+                                      }));
+                                    }}
+                                  />
 
-                              <div className={styles.permitBulkActions}>
-                                <OntarioButton
-                                  type="tertiary"
-                                  htmlType="button"
-                                  ariaLabelText={
-                                    searchQuery
-                                      ? `Select matching permit types for ${ministry.label}`
-                                      : `Select all permit types for ${ministry.label}`
-                                  }
-                                  onClick={() => {
-                                    const visibleIds = visibleTypes.map(
-                                      (permit) => permit.permitTypeId,
-                                    );
-                                    if (searchQuery) {
-                                      const merged = new Set([
-                                        ...scope.permitTypeIds,
-                                        ...visibleIds,
-                                      ]);
-                                      setMinistryPermitTypes(
-                                        ministry.ministryId,
-                                        Array.from(merged),
-                                      );
-                                      return;
-                                    }
-                                    setMinistryPermitTypes(
-                                      ministry.ministryId,
-                                      permitTypes.map((permit) => permit.permitTypeId),
-                                    );
-                                  }}
-                                >
-                                  {searchQuery ? 'Select matching' : 'Select all'}
-                                </OntarioButton>
-                                <OntarioButton
-                                  type="tertiary"
-                                  htmlType="button"
-                                  ariaLabelText={
-                                    searchQuery
-                                      ? `Clear matching permit types for ${ministry.label}`
-                                      : `Clear all permit types for ${ministry.label}`
-                                  }
-                                  onClick={() => {
-                                    if (searchQuery) {
-                                      const visibleIds = new Set(
-                                        visibleTypes.map((permit) => permit.permitTypeId),
-                                      );
-                                      setMinistryPermitTypes(
-                                        ministry.ministryId,
-                                        scope.permitTypeIds.filter((id) => !visibleIds.has(id)),
-                                      );
-                                      return;
-                                    }
-                                    setMinistryPermitTypes(ministry.ministryId, []);
-                                  }}
-                                >
-                                  {searchQuery ? 'Clear matching' : 'Clear all'}
-                                </OntarioButton>
-                                <p className={styles.permitSelectionCount} aria-live="polite">
-                                  {scope.permitTypeIds.length} of {permitTypes.length} selected
-                                </p>
-                              </div>
+                                  {visibleTypes.length === 0 ? (
+                                    <p className={styles.subServiceMessage}>
+                                      No permit types match this search.
+                                    </p>
+                                  ) : (
+                                    <OntarioCheckboxes
+                                      caption="Permit types"
+                                      name={`permit-types-${ministry.ministryId}`}
+                                      hintText="Use Select all below when you need most types, then uncheck exceptions."
+                                      value={scope.permitTypeIds}
+                                      options={visibleTypes.map((permit) => ({
+                                        value: permit.permitTypeId,
+                                        elementId: `permit-type-${permit.permitTypeId}`,
+                                        label: permit.permitShortName,
+                                      }))}
+                                      customOnChange={(event) => {
+                                        const visibleIds = new Set(
+                                          visibleTypes.map((permit) => permit.permitTypeId),
+                                        );
+                                        const selectedVisible = applyCheckboxToggle(
+                                          scope.permitTypeIds.filter((id) => visibleIds.has(id)),
+                                          event,
+                                        );
+                                        const keptHidden = scope.permitTypeIds.filter(
+                                          (id) => !visibleIds.has(id),
+                                        );
+                                        setMinistryPermitTypes(ministry.ministryId, [
+                                          ...keptHidden,
+                                          ...selectedVisible,
+                                        ]);
+                                      }}
+                                    />
+                                  )}
+
+                                  <div className={styles.permitBulkActions}>
+                                    <OntarioButton
+                                      type="tertiary"
+                                      htmlType="button"
+                                      ariaLabelText={
+                                        searchQuery
+                                          ? `Select matching permit types for ${ministry.label}`
+                                          : `Select all permit types for ${ministry.label}`
+                                      }
+                                      onClick={() => {
+                                        const visibleIds = visibleTypes.map(
+                                          (permit) => permit.permitTypeId,
+                                        );
+                                        if (searchQuery) {
+                                          const merged = new Set([
+                                            ...scope.permitTypeIds,
+                                            ...visibleIds,
+                                          ]);
+                                          setMinistryPermitTypes(
+                                            ministry.ministryId,
+                                            Array.from(merged),
+                                          );
+                                          return;
+                                        }
+                                        setMinistryPermitTypes(
+                                          ministry.ministryId,
+                                          permitTypes.map((permit) => permit.permitTypeId),
+                                        );
+                                      }}
+                                    >
+                                      {searchQuery ? 'Select matching' : 'Select all'}
+                                    </OntarioButton>
+                                    <OntarioButton
+                                      type="tertiary"
+                                      htmlType="button"
+                                      ariaLabelText={
+                                        searchQuery
+                                          ? `Clear matching permit types for ${ministry.label}`
+                                          : `Clear all permit types for ${ministry.label}`
+                                      }
+                                      onClick={() => {
+                                        if (searchQuery) {
+                                          const visibleIds = new Set(
+                                            visibleTypes.map((permit) => permit.permitTypeId),
+                                          );
+                                          setMinistryPermitTypes(
+                                            ministry.ministryId,
+                                            scope.permitTypeIds.filter(
+                                              (id) => !visibleIds.has(id),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        setMinistryPermitTypes(ministry.ministryId, []);
+                                      }}
+                                    >
+                                      {searchQuery ? 'Clear matching' : 'Clear all'}
+                                    </OntarioButton>
+                                    <p
+                                      className={styles.permitSelectionCount}
+                                      aria-live="polite"
+                                    >
+                                      {scope.permitTypeIds.length} of {permitTypes.length}{' '}
+                                      selected
+                                    </p>
+                                  </div>
+                                </div>
+                              ) : null}
                             </div>
                           ) : null}
-                        </div>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
 
-            {createEnabled && includedMinistryIds.length === 0 ? (
-              <p className={styles.fieldErrorMessage} role="status">
-                Include at least one ministry
-                {useTabs ? '.' : ', or turn off Create new.'}
-              </p>
-            ) : null}
+                {createEnabled && includedMinistryIds.length === 0 ? (
+                  <p className={styles.fieldErrorMessage} role="status">
+                    Include at least one ministry
+                    {useTabs ? '.' : ', or turn off Create new.'}
+                  </p>
+                ) : null}
+              </>
+            )}
           </div>
         ) : null}
 
@@ -535,11 +612,6 @@ export function PermitApplicationsSection({
                 Existing applications
               </h4>
             ) : null}
-            <p className={styles.permitSubsectionHint}>
-              Search by name, number, or ministry. Assign view and/or edit on each
-              application.
-            </p>
-
             {applications.length === 0 ? (
               <OntarioPageAlert
                 type="informational"
@@ -548,15 +620,10 @@ export function PermitApplicationsSection({
               />
             ) : (
               <>
-                <label className={styles.permitSearchLabel} htmlFor="permit-app-search">
-                  Search applications
-                </label>
-                <input
-                  id="permit-app-search"
-                  className={styles.permitSearchInput}
-                  type="search"
+                <ApplicationSearchAutosuggest
+                  applications={applications}
                   value={applicationSearch}
-                  onChange={(event) => setApplicationSearch(event.target.value)}
+                  onChange={setApplicationSearch}
                 />
 
                 {filteredApplications.length === 0 ? (
@@ -631,12 +698,9 @@ export function PermitApplicationsSection({
                                   name={`app-view-${app.applicationId}`}
                                   elementId={`app-view-${app.applicationId}`}
                                   checked={viewChecked || editChecked}
-                                  onChange={(checked) => {
-                                    if (editChecked && !checked) {
-                                      return;
-                                    }
-                                    setApplicationGrant(app.applicationId, 'view', checked);
-                                  }}
+                                  onChange={(checked) =>
+                                    setApplicationGrant(app.applicationId, 'view', checked)
+                                  }
                                 />
                               </td>
                               <td className={userTableStyles.tableCheckboxCell}>
@@ -662,7 +726,6 @@ export function PermitApplicationsSection({
             )}
           </div>
         ) : null}
-      </div>
     </div>
   );
 }

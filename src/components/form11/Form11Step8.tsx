@@ -20,6 +20,8 @@ import {
   type Form11Step8Data,
 } from './form11DraftStorage';
 import styles from './Form11Step2.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 8;
 
@@ -124,6 +126,13 @@ export function Form11Step8() {
           currentStep={CURRENT_STEP}
           numberOfSteps={FORM11_TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">

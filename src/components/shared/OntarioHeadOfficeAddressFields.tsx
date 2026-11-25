@@ -85,10 +85,14 @@ export const HEAD_OFFICE_ERRORS = {
 
 export function validateHeadOfficeAddress(
   address: HeadOfficeAddress,
-  options?: { requireMunicipalityCountyStatus?: boolean },
+  options?: {
+    requireMunicipalityCountyStatus?: boolean;
+    requireCountyName?: boolean;
+  },
 ): HeadOfficeErrors {
   const next: HeadOfficeErrors = {};
   const requireMunicipalityCountyStatus = options?.requireMunicipalityCountyStatus !== false;
+  const requireCountyName = options?.requireCountyName !== false;
   const unitTypeError = unitTypeRequiredError(address.roomNumber, address.unitType);
   if (unitTypeError) {
     next.unitType = unitTypeError;
@@ -105,7 +109,7 @@ export function validateHeadOfficeAddress(
   if (requireMunicipalityCountyStatus && !address.countyStatus.trim()) {
     next.countyStatus = HEAD_OFFICE_ERRORS.countyStatus;
   }
-  if (!address.countyName.trim()) {
+  if (requireCountyName && !address.countyName.trim()) {
     next.countyName = HEAD_OFFICE_ERRORS.countyName;
   }
   if (!address.province.trim()) {
@@ -192,6 +196,8 @@ type OntarioHeadOfficeAddressFieldsProps<T extends HeadOfficeAddress> = {
   addressHeading?: string;
   /** When false, municipality and county status dropdowns are omitted. Defaults to true. */
   showMunicipalityCountyStatus?: boolean;
+  /** When false, county name input is omitted. Defaults to true. */
+  showCountyName?: boolean;
 };
 
 /** Ontario-only head office address: search, then one field per row. */
@@ -204,6 +210,7 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
   locationHeading,
   addressHeading,
   showMunicipalityCountyStatus = true,
+  showCountyName = true,
 }: OntarioHeadOfficeAddressFieldsProps<T>) {
   function patch(partial: Partial<HeadOfficeAddress>, ...cleared: HeadOfficeFieldKey[]) {
     const next = { ...address, ...partial };
@@ -254,21 +261,26 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
           </div>
         </>
       ) : null}
-      <div id={HEAD_OFFICE_FIELD_ANCHORS.countyName}>
-        <OntarioInput
-          elementId={HEAD_OFFICE_FIELD_ANCHORS.countyName}
-          caption="Name of county, district or regional municipality"
-          name="county-name"
-          type="text"
-          required
-          requiredValidationMessage={HEAD_OFFICE_ERRORS.countyName}
-          value={address.countyName}
-          errorMessage={errors.countyName}
-          customOnInput={(event) => patch({ countyName: getEventValue(event) }, 'countyName')}
-        />
-      </div>
+      {showCountyName ? (
+        <div id={HEAD_OFFICE_FIELD_ANCHORS.countyName}>
+          <OntarioInput
+            elementId={HEAD_OFFICE_FIELD_ANCHORS.countyName}
+            caption="Name of county, district or regional municipality"
+            name="county-name"
+            type="text"
+            required
+            requiredValidationMessage={HEAD_OFFICE_ERRORS.countyName}
+            value={address.countyName}
+            errorMessage={errors.countyName}
+            customOnInput={(event) => patch({ countyName: getEventValue(event) }, 'countyName')}
+          />
+        </div>
+      ) : null}
     </>
   );
+
+  const showLocationSection =
+    Boolean(locationHeading) || showMunicipalityCountyStatus || showCountyName;
 
   return (
     <div className={addressStyles.fieldGroups}>
@@ -293,12 +305,16 @@ export function OntarioHeadOfficeAddressFields<T extends HeadOfficeAddress>({
         </div>
       </div>
 
-      <div className={addressStyles.section}>
-        {locationHeading ? (
-          <h4 className={`ontario-h4 ${addressStyles.sectionHeading}`}>{locationHeading}</h4>
-        ) : null}
-        <div className={addressStyles.addressStack}>{locationFields}</div>
-      </div>
+      {showLocationSection ? (
+        <div className={addressStyles.section}>
+          {locationHeading ? (
+            <h4 className={`ontario-h4 ${addressStyles.sectionHeading}`}>{locationHeading}</h4>
+          ) : null}
+          {showMunicipalityCountyStatus || showCountyName ? (
+            <div className={addressStyles.addressStack}>{locationFields}</div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className={addressStyles.section}>
         {addressHeading ? (

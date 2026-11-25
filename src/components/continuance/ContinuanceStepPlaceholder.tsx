@@ -8,6 +8,8 @@ import {
   type ContinuanceFormId,
 } from './continuanceDraftStorage';
 import styles from '../form2/Form2Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './continuanceBeforeYouBeginContent';
 
 type ContinuanceStepPlaceholderProps = {
   formId: ContinuanceFormId;
@@ -39,6 +41,13 @@ export function ContinuanceStepPlaceholder({
           numberOfSteps={CONTINUANCE_TOTAL_STEPS}
         />
       </div>
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME[formId]} />
+        </div>
+      </div>
+
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Next step</h1>

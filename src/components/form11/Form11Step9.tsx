@@ -14,6 +14,8 @@ import {
   type Form11Step8Data,
 } from './form11DraftStorage';
 import styles from './Form11Step2.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 9;
 const AUTH_OPTION_VALUE = 'authorized';
@@ -92,6 +94,7 @@ export function Form11Step9() {
 
   return (
     <FilingSubmitStep
+      headerCard={<FormNameCard applicationType={BYB_FORM_NAME} />}
       currentStep={CURRENT_STEP}
       numberOfSteps={FORM11_TOTAL_STEPS}
       backButtonUrl="/form-11/step-8"

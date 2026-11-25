@@ -4,8 +4,8 @@ import {
   OntarioIconChevronRight,
 } from '@ongov/ontario-design-system-component-library-react';
 import {
+  usesDynamicDomainInviteSteps,
   usesV2InviteSteps,
-  usesV4InviteSteps,
   type InviteWizardVersion,
 } from '../../config/inviteWizardVersion';
 import type { InviteStep, RoleId } from '../../rbac/types';
@@ -51,7 +51,7 @@ function getNextHandler(
     | 'onV4Next'
   >,
 ) {
-  if (usesV4InviteSteps(wizardVersion)) {
+  if (usesDynamicDomainInviteSteps(wizardVersion)) {
     return handlers.onV4Next;
   }
 
@@ -83,7 +83,7 @@ function getBackHandler(
     | 'onV4Back'
   >,
 ) {
-  if (usesV4InviteSteps(wizardVersion)) {
+  if (usesDynamicDomainInviteSteps(wizardVersion)) {
     return currentStep > 1 ? handlers.onV4Back : undefined;
   }
 

@@ -21,6 +21,8 @@ import {
   type SupportingDocMeta,
 } from './form3DraftStorage';
 import styles from './Form3Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form3BeforeYouBeginContent';
 
 const CURRENT_STEP = 4;
 const DATE_ANCHOR = 'form3-resolution-date';
@@ -172,6 +174,13 @@ export function Form3Step4() {
           currentStep={CURRENT_STEP}
           numberOfSteps={FORM3_TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">

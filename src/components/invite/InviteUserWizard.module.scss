@@ -22,6 +22,30 @@
   margin: 0 0 var(--ontario-spacing-5, 1.5rem);
 }
 
+.inviteeCallout {
+  display: block;
+  margin: 0 0 var(--ontario-spacing-5, 1.5rem);
+}
+
+.inviteeCalloutBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.inviteeCalloutRow {
+  margin: 0;
+}
+
+.inviteeCalloutLabel {
+  margin: 0 0 var(--ontario-spacing-1, 0.25rem);
+  font-weight: 700;
+}
+
+.inviteeCalloutValue {
+  margin: 0;
+}
+
 .errorSummary {
   margin-bottom: var(--ontario-spacing-5, 1.5rem);
 
@@ -136,7 +160,8 @@
 
 .stepContent {
   width: 100%;
-  padding-bottom: var(--ontario-spacing-2, 0.5rem);
+  // Sticky step actions overlay the scrollport; keep last controls fully visible above them
+  padding-bottom: var(--ontario-spacing-10, 5rem);
 }
 
 .wizardStickyActions {
@@ -229,6 +254,51 @@
 .roleRadioIndicatorSelected {
   background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
   box-shadow: inset 0 0 0 10px var(--ontario-colour-greyscale-white, #ffffff);
+}
+
+// Checkbox card indicator (V13 access needs) — square vs role radio circle.
+.roleCheckboxIndicator {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.125rem;
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.125rem 1.125rem;
+}
+
+.roleCheckboxIndicatorSelected {
+  background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.667 12.616l6.667 6.718 12-12.092-1.88-1.908L9.333 15.53l-4.787-4.8-1.88 1.894z' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+
+.accessNeedIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.125rem;
+}
+
+.accessNeedsFilterBlock {
+  margin-bottom: var(--ontario-spacing-6, 2rem);
+}
+
+.accessNeedsHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+.accessNeedsFilter {
+  margin-bottom: var(--ontario-spacing-5, 1.5rem);
+  max-width: 28rem;
 }
 
 .roleRadioCardText {
@@ -454,6 +524,41 @@
 
 .miningPermissionsTitle {
   margin: 0;
+}
+
+.sortableColumnButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-1, 0.25rem);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sortableColumnButton:focus {
+  outline: none;
+}
+
+.sortableColumnButton:focus-visible {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: 2px;
+}
+
+.sortableColumnButtonActive {
+  font-weight: var(--ontario-font-weights-bold, 700);
+}
+
+.sortableColumnIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: inherit;
 }
 
 .subServiceRow {
@@ -682,6 +787,53 @@
   margin: 0;
 }
 
+.reviewIntro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.reviewIntroText {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.reviewPermissionsTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  margin-top: var(--ontario-spacing-5, 1.5rem);
+}
+
+.reviewPermissionsTableHeader {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-4, 1rem);
+  width: 100%;
+  // No border here — OntarioTable supplies the single black rule under the heading.
+  padding-bottom: var(--ontario-spacing-3, 0.75rem);
+}
+
+.reviewPermissionsTableTitle {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.reviewPermissionsTable :global(ontario-table) {
+  display: block;
+  // ODS .ontario-table-container uses margin 0.5rem 0 2.5rem in shadow DOM.
+  margin-top: calc(-1 * var(--ontario-spacing-2, 0.5rem));
+  margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
+  padding-top: 0;
+}
+
 .inviteSummaryAction {
   flex: 0 0 auto;
   min-width: 4.5rem;
@@ -780,13 +932,98 @@
   padding-bottom: var(--ontario-spacing-6, 2rem);
 }
 
+.permitApplicationsRoot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  width: 100%;
+}
+
 .permitCreateScope,
 .permitExistingScope {
   display: flex;
   flex-direction: column;
   gap: var(--ontario-spacing-3, 0.75rem);
-  padding-top: var(--ontario-spacing-4, 1rem);
-  border-top: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
+.permitCreateScopeV5 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+.permitCreateScopeV6 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+// ontario-page-alert adds outer margin (2rem / 2.5rem) on its inner .ontario-alert
+// inside shadow root; offset on the host so the alert box sits flush (same pattern as
+// Form7 `.flushCallout`). Internal padding is not adjustable without shadow overrides.
+.flushPageAlert {
+  display: block;
+  margin-top: calc(-1 * var(--ontario-spacing-6, 2rem));
+  margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
+}
+
+.permitIndividualLayoutV6 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+  width: 100%;
+}
+
+.permitBrowseToolsV6 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+  width: 100%;
+}
+
+.permitBrowseListV6 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+  width: 100%;
+  overflow: visible;
+}
+
+.permitBrowseListV6 .ministryScopeList {
+  gap: var(--ontario-spacing-7, 2.5rem);
+  // Avoid last flex item bottom padding being clipped in column flex layouts
+  padding-bottom: var(--ontario-spacing-1, 0.25rem);
+}
+
+.permitMinistryChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-2, 0.5rem);
+}
+
+.permitMinistryChip {
+  margin: 0;
+  padding: var(--ontario-spacing-2, 0.5rem) var(--ontario-spacing-3, 0.75rem);
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.permitMinistryChipActive {
+  background-color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  color: var(--ontario-colour-greyscale-white, #ffffff);
+}
+
+.permitMinistryChip:focus {
+  outline: none;
+}
+
+.permitMinistryChip:focus-visible {
+  outline: 4px solid var(--ontario-colour-system-focus, #009adb);
+  outline-offset: 2px;
 }
 
 .permitSubsectionTitle {
@@ -802,18 +1039,127 @@
   display: flex;
   flex-direction: column;
   gap: var(--ontario-spacing-4, 1rem);
+  width: 100%;
   margin: 0;
   padding: 0;
   list-style: none;
+  overflow: visible;
 }
 
 .ministryScopeItem {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: min-content;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
   padding: var(--ontario-spacing-4, 1rem);
-  padding-bottom: var(--ontario-spacing-5, 1.5rem);
+  // Extra bottom space so Hide permits / ODS checkboxes are not clipped at the card edge
+  padding-bottom: var(--ontario-spacing-8, 3rem);
   border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
   border-radius: 4px;
   background-color: var(--ontario-colour-greyscale-white, #ffffff);
   overflow: visible;
+}
+
+// Combined selector beats .ministryScopeItem padding-bottom if module order shifts.
+.ministryScopeItem.ministryScopeItemCollapsed {
+  gap: var(--ontario-spacing-3, 0.75rem);
+  // Shorthand resets expanded bottom padding; extra bottom matches heading optical top space
+  padding: var(--ontario-spacing-4, 1rem);
+  padding-bottom: var(--ontario-spacing-5, 1.5rem);
+}
+
+.ministryScopeList > .ministryScopeItem:last-child {
+  // Flex column can clip end padding of the last item; keep the final card fully painted
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+// Match ontario-hint-expander__button (HintExpander cannot host interactive checkboxes).
+.ministryPermissionsToggle {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 var(--ontario-spacing-1, 0.25rem) 0 0;
+  border: 0;
+  background: none;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ministryPermissionsToggle:hover {
+  color: var(--ontario-colour-link--hover, #00478f);
+}
+
+.ministryPermissionsToggle:active {
+  color: var(--ontario-colour-link--active, #002142);
+}
+
+.ministryPermissionsToggle:focus,
+.ministryPermissionsToggle:active {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: 2px;
+}
+
+.ministryPermissionsToggleIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  margin-right: var(--ontario-spacing-1, 0.25rem);
+  pointer-events: none;
+}
+
+.ministryScopeHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  width: 100%;
+}
+
+.ministryScopeHeader .permitSubsectionTitle {
+  width: 100%;
+}
+
+.ministryScopeTitleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  width: 100%;
+}
+
+.ministryScopeTitleRow .permitSubsectionTitle {
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ministryScopeTitleRow .permitSelectionCount {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.ministryScopeHeaderMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  width: 100%;
 }
 
 .ministryScopeDetails {
@@ -821,25 +1167,127 @@
   flex-direction: column;
   gap: var(--ontario-spacing-4, 1rem);
   margin-top: var(--ontario-spacing-3, 0.75rem);
+  // Keep Hide permits clear of the card border
+  padding-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+.ministryScopeDetails > .ministryPermissionsToggle:last-child {
+  margin-bottom: var(--ontario-spacing-2, 0.5rem);
 }
 
 .permitTypePicker {
   display: flex;
   flex-direction: column;
   gap: var(--ontario-spacing-3, 0.75rem);
+  width: 100%;
+  min-height: min-content;
+  overflow: visible;
+  padding-bottom: var(--ontario-spacing-4, 1rem);
 }
 
 .permitBulkActions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--ontario-spacing-3, 0.75rem);
+  align-items: flex-end;
+  justify-content: flex-start;
+  column-gap: var(--ontario-spacing-2, 0.5rem); // 8px between Select all and Clear all
+  row-gap: var(--ontario-spacing-2, 0.5rem);
+  width: 100%;
+}
+
+.permitBulkActions > ontario-checkboxes {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+}
+
+.permitBulkActions > .ministryPermissionsToggle {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
 }
 
 .permitSelectionCount {
   margin: 0;
   color: var(--ontario-colour-greyscale-greyscale60, #666666);
-  font-size: 0.875rem;
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.permissionsHeading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem); // 16px between title and body
+}
+
+.permissionsIntro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.permissionsIntroText {
+  margin: 0;
+  max-width: 40rem;
+}
+
+.permissionsStep {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.permissionsSummaryV14 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+  padding-top: var(--ontario-spacing-4, 1rem);
+}
+
+.permissionsAccordionV15 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+  padding-top: var(--ontario-spacing-4, 1rem);
+  width: 100%;
+}
+
+// Light-DOM slot content — host styles cannot reach shadow string content.
+.permissionsHintContent {
+  margin: 0;
+  text-wrap: balance;
+  text-wrap: pretty;
+}
+
+.permissionsAccordionV15 .permitTabBar {
+  width: 100%;
+}
+
+.permissionsAccordionV15 [id^='permissions-domain-panel-'] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  align-self: stretch;
+}
+
+.permissionsAccordionV15 .ministryScopeList,
+.permissionsAccordionV15 .ministryScopeItem {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  align-self: stretch;
 }
 
 // Token-composed tabs — ODS has no general Tabs component (header menu tabs only).
@@ -855,6 +1303,7 @@
 .permitTab {
   position: relative;
   z-index: 1;
+  flex: 0 0 auto;
   margin: 0;
   padding: var(--ontario-spacing-3, 0.75rem) var(--ontario-spacing-4, 1rem);
   border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
@@ -917,9 +1366,47 @@
   outline-offset: 0;
 }
 
+.permitAppSearch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  width: 100%;
+  max-width: 28rem;
+}
+
 .projectPermissionsTableWrap {
   width: 100%;
   overflow-x: auto;
+}
+
+.permitEmptyTableState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ontario-spacing-4, 1rem);
+  padding: var(--ontario-spacing-7, 2.5rem) var(--ontario-spacing-5, 1.5rem);
+  border: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  text-align: center;
+}
+
+.permitEmptyTableIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background-color: var(--ontario-colour-greyscale-greyscale5, #f2f2f2);
+}
+
+.permitEmptyTableText {
+  margin: 0;
+  max-width: 32rem;
+  color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
 }
 
 .applicationName {

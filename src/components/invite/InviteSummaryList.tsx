@@ -13,6 +13,8 @@ export type InviteSummaryListItem = {
 type InviteSummaryListProps = {
   caption: string;
   items: InviteSummaryListItem[];
+  /** Optional content under the list (e.g. page alert within this section). */
+  footer?: ReactNode;
 };
 
 /**
@@ -20,7 +22,7 @@ type InviteSummaryListProps = {
  * OntarioSummaryList is not exported in ODS React 8.1.0 — compose the documented structure.
  * @see https://designsystem.ontario.ca/developer-docs/components/ontario-summary-list/
  */
-export function InviteSummaryList({ caption, items }: InviteSummaryListProps) {
+export function InviteSummaryList({ caption, items, footer }: InviteSummaryListProps) {
   return (
     <div className={formStyles.summaryList}>
       <div className={formStyles.headingContainer}>
@@ -69,6 +71,8 @@ export function InviteSummaryList({ caption, items }: InviteSummaryListProps) {
           </div>
         ))}
       </dl>
+
+      {footer ? <div className={styles.inviteSummaryAfter}>{footer}</div> : null}
     </div>
   );
 }

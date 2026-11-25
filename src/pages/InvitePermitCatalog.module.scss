@@ -1,0 +1,343 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+  // 144px sides: ODS has no 9rem token — spacing-10 + spacing-9 (5rem + 4rem).
+  padding: var(--ontario-spacing-5, 1.5rem)
+    calc(var(--ontario-spacing-10, 5rem) + var(--ontario-spacing-9, 4rem))
+    var(--ontario-spacing-9, 4rem);
+  max-width: none;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.pageTitle {
+  margin: 0;
+}
+
+.lead {
+  margin: 0;
+}
+
+.catalogSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-4, 1rem);
+}
+
+// Search → ministry cards: exactly 40px (spacing-7).
+.catalogBrowseLayout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-7, 2.5rem);
+  width: 100%;
+}
+
+.sectionTitle {
+  margin: 0;
+}
+
+.filterRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ontario-spacing-5, 1.5rem);
+  align-items: end;
+
+  @media screen and (max-width: 40em) {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
+.ministryFilter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  min-width: 0;
+  width: 100%;
+}
+
+.ministryFilterLabel {
+  margin: 0;
+}
+
+.selectedMinistryTags {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-2, 0.5rem);
+}
+
+.selectedMinistryTagsHeading {
+  margin: 0;
+}
+
+.selectedMinistryTagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.selectedMinistryTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-1, 0.25rem);
+  margin: 0;
+  padding: var(--ontario-spacing-1, 0.25rem) var(--ontario-spacing-2, 0.5rem);
+  border: 1px solid var(--ontario-colour-link, #0066cc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  color: var(--ontario-colour-link, #0066cc);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.selectedMinistryTagRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.selectedMinistryTagRemove:focus {
+  outline: none;
+}
+
+.selectedMinistryTagRemove:focus-visible {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: 2px;
+}
+
+.permitTypesHeading {
+  margin: 0;
+}
+
+.permitTypesHint {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale70, #4d4d4d);
+}
+
+// Clip ODS legend that always shows (optional)/(required); label lives above.
+.permitTypesCheckboxClip {
+  overflow: hidden;
+
+  :global(ontario-checkboxes) {
+    display: block;
+    margin-top: calc(-1 * var(--ontario-spacing-5, 1.5rem));
+  }
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--ontario-spacing-4, 1rem);
+  margin-top: var(--ontario-spacing-5, 1.5rem);
+  padding: var(--ontario-spacing-4, 1rem) 0;
+  border-top: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+}
+
+.footerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+// ODS has no modal dialog — compose overlay like AccessCustomizeOverlay.
+.selectionsOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--ontario-spacing-6, 2rem) var(--ontario-spacing-4, 1rem);
+  background-color: rgba(0, 0, 0, 0.45);
+  overflow-y: auto;
+}
+
+.selectionsPanel {
+  box-sizing: border-box;
+  width: min(100%, 40rem);
+  max-height: min(90vh, 40rem);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--ontario-spacing-5, 1.5rem);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.selectionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+.selectionsTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.selectionsBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-5, 1.5rem);
+}
+
+.selectionsSuccess {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  box-sizing: border-box;
+  padding: var(--ontario-spacing-5, 1.5rem);
+  border-left: 0.25rem solid var(--ontario-colour-success, #118847);
+  background-color: var(--ontario-colour-success-light, #e5f0e9);
+}
+
+.selectionsSuccessIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.selectionsSuccessText {
+  margin: 0;
+  padding-top: 0.125rem;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.selectionsEmpty {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+}
+
+.selectionsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.selectionsSectionTitle {
+  margin: 0;
+}
+
+.selectionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.selectionsList > li {
+  padding-bottom: var(--ontario-spacing-3, 0.75rem);
+  border-bottom: 1px solid var(--ontario-colour-greyscale-greyscale20, #cccccc);
+}
+
+.selectionsList > li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.selectionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem);
+}
+
+.selectionsItemText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-1, 0.25rem);
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.selectionsItemPrimary {
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  line-height: 1.5;
+}
+
+.selectionsItemMeta {
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+// Match Form7 Nuans remove control, but use ODS link blue instead of alert red.
+.selectionsRemove {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  font-weight: var(--ontario-font-weights-normal, 400);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.selectionsRemove:hover {
+  color: var(--ontario-colour-link--hover, #00478f);
+}
+
+.selectionsRemove:active {
+  color: var(--ontario-colour-link--active, #002142);
+}
+
+.selectionsRemove:focus {
+  outline: none;
+}
+
+.selectionsRemove:focus-visible {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: 2px;
+}
+
+.selectionsActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-top: var(--ontario-spacing-4, 1rem);
+}

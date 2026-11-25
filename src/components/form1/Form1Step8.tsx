@@ -31,6 +31,8 @@ import {
   type ReviewSectionKey,
 } from './form1ReviewModel';
 import styles from './Form1Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form1BeforeYouBeginContent';
 
 const CURRENT_STEP = 9;
 const TOTAL_STEPS = 10;
@@ -237,6 +239,13 @@ export function Form1Step8() {
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">

@@ -10,6 +10,7 @@ export type InviteFieldKey =
   | 'email'
   | 'confirmEmail'
   | 'role'
+  | 'accessNeeds'
   | 'serviceAccess'
   | 'permitAccess';
 
@@ -25,6 +26,7 @@ export const INVITE_FIELD_ANCHORS: Record<InviteFieldKey, string> = {
   email: 'invite-email',
   confirmEmail: 'invite-confirm-email',
   role: 'invite-role',
+  accessNeeds: 'invite-access-needs',
   serviceAccess: 'invite-service-access',
   permitAccess: 'invite-permit-access',
 };
@@ -59,6 +61,14 @@ export function validateInviteRoleStep(roleId: RoleId | ''): InviteFieldErrors {
   }
 
   return { role: 'Select a role.' };
+}
+
+export function validateInviteAccessNeedsStep(accessNeedIds: string[]): InviteFieldErrors {
+  if (accessNeedIds.length > 0) {
+    return {};
+  }
+
+  return { accessNeeds: 'Select at least one option.' };
 }
 
 /** True when any enabled service has view or view & edit on a project. */
@@ -145,7 +155,7 @@ export function validateInviteMiningStep(serviceAccess: ServiceAccess): InviteFi
 }
 
 /**
- * V4 permits detail step (tabs). Require create scope and/or existing grants.
+ * V4/V5 permits detail step (tabs). Require create scope and/or existing grants.
  * Neither create nor existing grants fails.
  */
 export function validateInvitePermitApplicationsStep(
@@ -160,9 +170,30 @@ export function validateInvitePermitApplicationsStep(
     return {};
   }
 
-  // Distinguish empty create vs empty existing when one track was started.
+  const createMode = permitApplicationAccess.create.mode;
+
+  if (permitApplicationAccess.create.enabled && createMode === 'individual' && !hasCreate) {
+    return {
+      permitAccess:
+        'For create access, select at least one permit type, or choose All ministries.',
+    };
+  }
+
   if (
     permitApplicationAccess.create.enabled &&
+    createMode === 'all_ministries' &&
+    !hasCreate
+  ) {
+    // all_ministries with enabled should always be configured; defensive message.
+    return {
+      permitAccess: 'Confirm All ministries create access, or choose Individual permits.',
+    };
+  }
+
+  // Legacy V3/V4: ministry included but incomplete selected list.
+  if (
+    permitApplicationAccess.create.enabled &&
+    !createMode &&
     Object.keys(permitApplicationAccess.create.byMinistry).length > 0 &&
     !hasCreate
   ) {
@@ -178,6 +209,31 @@ export function validateInvitePermitApplicationsStep(
   };
 }
 
+/**
+ * V7 combined Permissions step — leaving all tabs empty (no access) is allowed.
+ * Fail only when Individual create was started without any permit types.
+ */
+export function validateInviteV7PermissionsStep(
+  _serviceAccess: ServiceAccess,
+  permitApplicationAccess: PermitApplicationAccess,
+): InviteFieldErrors {
+  const hasCreate = hasConfiguredCreateScope(permitApplicationAccess);
+  const createMode = permitApplicationAccess.create.mode;
+  const startedIndividual =
+    permitApplicationAccess.create.enabled &&
+    createMode === 'individual' &&
+    Object.keys(permitApplicationAccess.create.byMinistry).length > 0;
+
+  if (startedIndividual && !hasCreate) {
+    return {
+      permitAccess:
+        'For create access, select at least one permit type, or choose All ministries.',
+    };
+  }
+
+  return {};
+}
+
 export function buildInviteErrorSummaryItems(
   errors: InviteFieldErrors,
 ): InviteErrorSummaryItem[] {
@@ -185,6 +241,7 @@ export function buildInviteErrorSummaryItems(
     'email',
     'confirmEmail',
     'role',
+    'accessNeeds',
     'serviceAccess',
     'permitAccess',
   ];

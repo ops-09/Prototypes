@@ -1,10 +1,24 @@
+/**
+ * Ministries that publish business permit/licence service standards on ontario.ca
+ * (https://www.ontario.ca/page/business-service-standards-permits-and-licences).
+ * Filter chips use these 15 ids so every permitting ministry is accounted for.
+ */
 export type CdpsMinistryId =
-  | 'MOS'
-  | 'SO'
+  | 'OMAFA'
+  | 'MCCSS'
+  | 'EDU'
+  | 'MEM'
   | 'MECP'
-  | 'SOLGEN'
   | 'MOF'
-  | 'MPBSDP';
+  | 'MOH'
+  | 'MLITSD'
+  | 'MLTC'
+  | 'MMAH'
+  | 'MNR'
+  | 'MPBSDP'
+  | 'SOLGEN'
+  | 'MOS'
+  | 'MTO';
 
 export type CdpsPermitType = {
   permitTypeId: string;
@@ -31,21 +45,46 @@ export type CdpsApplication = {
 };
 
 const MINISTRY_LABELS: Record<CdpsMinistryId, string> = {
-  MOS: 'Ministry of Sport (MOS)',
-  SO: 'ServiceOntario (SO)',
+  OMAFA: 'Ministry of Agriculture, Food and Agribusiness (OMAFA)',
+  MCCSS: 'Ministry of Children, Community and Social Services (MCCSS)',
+  EDU: 'Ministry of Education (EDU)',
+  MEM: 'Ministry of Energy and Mines (MEM)',
   MECP: 'Ministry of the Environment, Conservation and Parks (MECP)',
-  SOLGEN: 'Ministry of the Solicitor General (SOLGEN)',
   MOF: 'Ministry of Finance (MOF)',
+  MOH: 'Ministry of Health (MOH)',
+  MLITSD: 'Ministry of Labour, Immigration, Training and Skills Development (MLITSD)',
+  MLTC: 'Ministry of Long-Term Care (MLTC)',
+  MMAH: 'Ministry of Municipal Affairs and Housing (MMAH)',
+  MNR: 'Ministry of Natural Resources (MNR)',
   MPBSDP: 'Ministry of Public and Business Service Delivery and Procurement (MPBSDP)',
+  SOLGEN: 'Ministry of the Solicitor General (SOLGEN)',
+  MOS: 'Ministry of Sport (MOS)',
+  MTO: 'Ministry of Transportation (MTO)',
 };
 
-/** Stakeholder permit table (org-based RBAC mocks). */
+/**
+ * Org-based RBAC mock catalog.
+ * Existing stakeholder rows kept; one+ sample permit per ontario.ca ministry so chips appear.
+ */
 const PERMIT_ROWS: Array<{ ministryId: CdpsMinistryId; permitShortName: string }> = [
-  { ministryId: 'MOS', permitShortName: 'Professional Combative Sport Event Permit' },
-  { ministryId: 'MOS', permitShortName: 'Amateur Combative Sport Event Permit' },
-  { ministryId: 'SO', permitShortName: 'OBR Form 7' },
+  // OMAFA
+  { ministryId: 'OMAFA', permitShortName: 'Licence for the Operation of a Dairy Plant' },
+  { ministryId: 'OMAFA', permitShortName: 'Licence to operate a meat plant' },
+  { ministryId: 'OMAFA', permitShortName: 'Licence to sell livestock medicines' },
+  // MCCSS
+  { ministryId: 'MCCSS', permitShortName: "Children's residence licence" },
+  { ministryId: 'MCCSS', permitShortName: 'Foster care licence' },
+  // EDU
+  { ministryId: 'EDU', permitShortName: 'Child Care Licence' },
+  // MEM
+  { ministryId: 'MEM', permitShortName: "Prospectors Licence" },
+  { ministryId: 'MEM', permitShortName: 'Exploration permit' },
+  { ministryId: 'MEM', permitShortName: 'Exploration plan' },
+  // MECP
   { ministryId: 'MECP', permitShortName: 'MECP Wells Contractor Licence' },
-  { ministryId: 'SOLGEN', permitShortName: 'Security Guard / Private Investigator Agency Licence' },
+  { ministryId: 'MECP', permitShortName: 'Environmental Compliance Approval' },
+  { ministryId: 'MECP', permitShortName: 'Permit to Take Water' },
+  // MOF
   { ministryId: 'MOF', permitShortName: "Tobacco Retailer Dealer's Permit" },
   {
     ministryId: 'MOF',
@@ -58,30 +97,63 @@ const PERMIT_ROWS: Array<{ ministryId: CdpsMinistryId; permitShortName: string }
   { ministryId: 'MOF', permitShortName: 'Importer Registration Certificate' },
   { ministryId: 'MOF', permitShortName: 'Exporter Registration Certificate' },
   { ministryId: 'MOF', permitShortName: 'Permit to Purchase and Sell Unmarked Cigarettes' },
-  { ministryId: 'MOF', permitShortName: 'Wholesaler\'s Permit' },
+  { ministryId: 'MOF', permitShortName: "Wholesaler's Permit" },
   { ministryId: 'MOF', permitShortName: 'Vendor Permit (Retail Sales Tax)' },
   { ministryId: 'MOF', permitShortName: 'Fuel Acquisition Permit' },
+  // MOH
+  { ministryId: 'MOH', permitShortName: 'Laboratory Licence' },
+  { ministryId: 'MOH', permitShortName: 'Written Approval for the Installation of an X-Ray machine' },
+  // MLITSD
+  {
+    ministryId: 'MLITSD',
+    permitShortName: 'Temporary help agency or recruiter licence',
+  },
+  // MLTC
+  { ministryId: 'MLTC', permitShortName: 'Long-Term Care Home Licence' },
+  // MMAH
+  { ministryId: 'MMAH', permitShortName: 'Registration for Independent Designers' },
+  { ministryId: 'MMAH', permitShortName: 'Registration for Design Firms' },
+  // MNR
+  { ministryId: 'MNR', permitShortName: 'Aggregate Licence or Permit' },
+  { ministryId: 'MNR', permitShortName: 'Crown Land Work Permit' },
+  { ministryId: 'MNR', permitShortName: 'Land Use Permit' },
+  // MPBSDP (includes former ServiceOntario OBR Form 7 mock)
   {
     ministryId: 'MPBSDP',
     permitShortName: 'Co-operative Corporations Act - Articles of Revival',
   },
   {
     ministryId: 'MPBSDP',
-    permitShortName: 'Co-operative Corporations Act - Articles of Continuance as a Co-operative with Share Capital',
+    permitShortName:
+      'Co-operative Corporations Act - Articles of Continuance as a Co-operative with Share Capital',
   },
   {
     ministryId: 'MPBSDP',
-    permitShortName: 'Co-operative Corporations Act - Articles of Incorporation of a Co-operative with Share Capital',
+    permitShortName:
+      'Co-operative Corporations Act - Articles of Incorporation of a Co-operative with Share Capital',
   },
   {
     ministryId: 'MPBSDP',
     permitShortName: 'Co-operative Corporations Act - Articles of Amalgamation',
   },
   { ministryId: 'MPBSDP', permitShortName: 'Corporations Act - Letters Patent' },
+  { ministryId: 'MPBSDP', permitShortName: 'OBR Form 7' },
   { ministryId: 'MPBSDP', permitShortName: 'Payday Broker' },
   { ministryId: 'MPBSDP', permitShortName: 'Payday lender' },
   { ministryId: 'MPBSDP', permitShortName: 'Collection Agency' },
   { ministryId: 'MPBSDP', permitShortName: 'Bailiff – appointed' },
+  // SOLGEN
+  {
+    ministryId: 'SOLGEN',
+    permitShortName: 'Security Guard / Private Investigator Agency Licence',
+  },
+  // MOS
+  { ministryId: 'MOS', permitShortName: 'Professional Combative Sport Event Permit' },
+  { ministryId: 'MOS', permitShortName: 'Amateur Combative Sport Event Permit' },
+  // MTO
+  { ministryId: 'MTO', permitShortName: 'CVOR Certificate' },
+  { ministryId: 'MTO', permitShortName: 'Oversize/Overweight Single Trip Permit' },
+  { ministryId: 'MTO', permitShortName: 'Entrance Permit - Commercial - Basic' },
 ];
 
 function slugify(value: string) {
@@ -185,12 +257,57 @@ export const CDPS_APPLICATION_FIXTURES: CdpsApplication[] = [
     organizationId: DEMO_ORGANIZATION_ID,
   },
   {
-    applicationId: 'app-so-901',
+    applicationId: 'app-mpbsdp-901',
     applicationNumber: '901',
     displayName: 'OBR Form 7 Application #901',
-    ministryId: 'SO',
-    permitTypeId: permitTypeIdFor('SO', 'OBR Form 7'),
+    ministryId: 'MPBSDP',
+    permitTypeId: permitTypeIdFor('MPBSDP', 'OBR Form 7'),
     status: 'submitted',
+    organizationId: DEMO_ORGANIZATION_ID,
+  },
+  {
+    applicationId: 'app-omafa-5101',
+    applicationNumber: '5101',
+    displayName: 'Licence for the Operation of a Dairy Plant Application #5101',
+    ministryId: 'OMAFA',
+    permitTypeId: permitTypeIdFor('OMAFA', 'Licence for the Operation of a Dairy Plant'),
+    status: 'draft',
+    organizationId: DEMO_ORGANIZATION_ID,
+  },
+  {
+    applicationId: 'app-omafa-5102',
+    applicationNumber: '5102',
+    displayName: 'Licence to operate a meat plant Application #5102',
+    ministryId: 'OMAFA',
+    permitTypeId: permitTypeIdFor('OMAFA', 'Licence to operate a meat plant'),
+    status: 'submitted',
+    organizationId: DEMO_ORGANIZATION_ID,
+  },
+  {
+    applicationId: 'app-edu-6201',
+    applicationNumber: '6201',
+    displayName: 'Child Care Licence Application #6201',
+    ministryId: 'EDU',
+    permitTypeId: permitTypeIdFor('EDU', 'Child Care Licence'),
+    status: 'draft',
+    organizationId: DEMO_ORGANIZATION_ID,
+  },
+  {
+    applicationId: 'app-mnr-7301',
+    applicationNumber: '7301',
+    displayName: 'Aggregate Licence or Permit Application #7301',
+    ministryId: 'MNR',
+    permitTypeId: permitTypeIdFor('MNR', 'Aggregate Licence or Permit'),
+    status: 'submitted',
+    organizationId: DEMO_ORGANIZATION_ID,
+  },
+  {
+    applicationId: 'app-mto-8401',
+    applicationNumber: '8401',
+    displayName: 'CVOR Certificate Application #8401',
+    ministryId: 'MTO',
+    permitTypeId: permitTypeIdFor('MTO', 'CVOR Certificate'),
+    status: 'draft',
     organizationId: DEMO_ORGANIZATION_ID,
   },
 ];
@@ -235,9 +352,11 @@ export function filterPermitTypes(query: string, ministryId?: CdpsMinistryId) {
     if (!normalized) {
       return true;
     }
+    const ministryLabel = getMinistryLabel(permit.ministryId).toLowerCase();
     return (
       permit.permitShortName.toLowerCase().includes(normalized) ||
-      permit.ministryId.toLowerCase().includes(normalized)
+      permit.ministryId.toLowerCase().includes(normalized) ||
+      ministryLabel.includes(normalized)
     );
   });
 }

@@ -15,6 +15,8 @@ export type InviteV4PathOptions = {
   roleId?: RoleId | '';
   miningOn?: boolean;
   permitsOn?: boolean;
+  /** V13: insert “access needs” step after role. */
+  includeAccessNeeds?: boolean;
 };
 
 export function isMiningDomainOn(serviceAccess: ServiceAccess) {

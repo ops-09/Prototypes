@@ -34,6 +34,8 @@ import {
 } from './form2DraftStorage';
 import styles from './Form2Step1.module.scss';
 import step4Styles from './Form2Step4.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form2BeforeYouBeginContent';
 
 const CURRENT_STEP = 8;
 const TOTAL_STEPS = 10;
@@ -300,6 +302,13 @@ export function Form2Step7() {
           currentStep={CURRENT_STEP}
           numberOfSteps={TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">

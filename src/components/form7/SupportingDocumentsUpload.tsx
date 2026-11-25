@@ -9,7 +9,6 @@ import {
   useState,
   type DragEvent,
   type KeyboardEvent,
-  type ReactNode,
 } from 'react';
 import {
   OntarioButton,
@@ -51,8 +50,10 @@ type SupportingDocumentsUploadProps = {
   inputId?: string;
   /** Show the upload date next to file size in the list. */
   showUploadedAt?: boolean;
-  /** Optional content rendered above the drop zone (for example an alternative text field). */
-  aboveDropZone?: ReactNode;
+  /** Hide the visible label when a shared group legend already names this control. */
+  hideLabel?: boolean;
+  /** Apply the error border without rendering the inline error message. */
+  hideErrorText?: boolean;
 };
 
 function isAcceptedFile(file: File) {
@@ -99,7 +100,8 @@ export function SupportingDocumentsUpload({
   onChange,
   inputId,
   showUploadedAt = false,
-  aboveDropZone,
+  hideLabel = false,
+  hideErrorText = false,
 }: SupportingDocumentsUploadProps) {
   const generatedId = useId();
   const id = inputId ?? `supporting-docs-${generatedId}`;
@@ -109,6 +111,7 @@ export function SupportingDocumentsUpload({
   const [localError, setLocalError] = useState<string | undefined>();
 
   const displayError = errorMessage || localError;
+  const showErrorText = Boolean(displayError) && (!hideErrorText || Boolean(localError));
   const atMax = value.length >= maxFiles;
   const maxReachedError = `You can upload up to ${maxFiles} files. Remove a file to upload another.`;
 
@@ -193,16 +196,18 @@ export function SupportingDocumentsUpload({
 
   return (
     <div className={fileStyles.root} id={id}>
-      <label className={fileStyles.label} htmlFor={`${id}-input`}>
-        {label}
-        {required ? <span className={fileStyles.required}> (required)</span> : null}
-      </label>
+      {!hideLabel ? (
+        <label className={fileStyles.label} htmlFor={`${id}-input`}>
+          {label}
+          <span className={fileStyles.required}>
+            {required ? ' (required)' : ' (optional)'}
+          </span>
+        </label>
+      ) : null}
 
       {hintText ? <OntarioHintText hint={hintText} /> : null}
 
-      {aboveDropZone}
-
-      {displayError ? (
+      {showErrorText ? (
         <div id={errorId} className={fileStyles.errorMessaging} role="alert">
           <OntarioIconAlertError iconWidth={24} isDecorative />
           <div className={fileStyles.errorContent}>{displayError}</div>
@@ -215,7 +220,9 @@ export function SupportingDocumentsUpload({
         }`}
         role="button"
         tabIndex={0}
-        aria-describedby={displayError ? errorId : undefined}
+        aria-label={hideLabel ? label : undefined}
+        aria-describedby={showErrorText ? errorId : undefined}
+        aria-invalid={displayError ? true : undefined}
         onKeyDown={onDropZoneKeyDown}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}

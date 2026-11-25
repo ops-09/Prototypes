@@ -1,5 +1,8 @@
 import type { InviteWizardVersion } from '../../config/inviteWizardVersion';
-import { usesV4InviteSteps } from '../../config/inviteWizardVersion';
+import {
+  usesDynamicDomainInviteSteps,
+  usesCombinedPermissionsSteps,
+} from '../../config/inviteWizardVersion';
 import { roleSkipsServiceAccess } from '../../rbac/roles';
 import { createDefaultPermitApplicationAccess } from '../../rbac/permitApplicationAccess';
 import { DEFAULT_SERVICE_ACCESS } from '../../rbac/services';
@@ -16,14 +19,28 @@ import {
   type InviteStepCountOptions,
 } from './inviteWizardContent';
 import { getInviteV4LogicalStep, type InviteV4LogicalStep } from './inviteV4Path';
+import {
+  getInviteV7LogicalStep,
+  type InviteDynamicLogicalStep,
+} from './inviteV7Path';
 
 export const INVITE_BASE_PATH = '/user-management/invite';
+export const INVITE_PERMIT_CATALOG_PATH = `${INVITE_BASE_PATH}/permit-catalog`;
 export const INVITE_DRAFT_STORAGE_KEY = 'ops-rbac:invite-draft';
+
+/** Location state when opening the V12/V14 permit catalog from the invite wizard. */
+export type InvitePermitCatalogLocationState = {
+  returnDisplayStep?: number;
+  /** V14: show application / access-needs filter on the catalog page. */
+  showAccessNeedsFilter?: boolean;
+};
 
 export type InviteWizardDraft = {
   email: string;
   confirmEmail: string;
   roleId: RoleId | '';
+  /** V13: selected “what they need to do” need ids. */
+  accessNeedIds?: string[];
   serviceAccess: ServiceAccess;
   permitApplicationAccess: PermitApplicationAccess;
 };
@@ -67,6 +84,9 @@ export function readInviteWizardDraft(): InviteWizardDraft | null {
       email: typeof parsed.email === 'string' ? parsed.email : '',
       confirmEmail: typeof parsed.confirmEmail === 'string' ? parsed.confirmEmail : '',
       roleId: (parsed.roleId as RoleId | '') || '',
+      accessNeedIds: Array.isArray(parsed.accessNeedIds)
+        ? parsed.accessNeedIds.filter((id): id is string => typeof id === 'string')
+        : [],
       serviceAccess: parsed.serviceAccess
         ? structuredClone(parsed.serviceAccess)
         : structuredClone(DEFAULT_SERVICE_ACCESS),
@@ -129,7 +149,7 @@ export function resolveInviteStepFromUrl(
   internalStep: InviteStep;
   displayStep: number;
   needsUrlSync: boolean;
-  logicalStep: InviteV4LogicalStep | null;
+  logicalStep: InviteDynamicLogicalStep | null;
 } {
   const mergedOptions = { ...options, roleId };
   const stepCount = getInviteStepCount(version, roleId, mergedOptions);
@@ -151,12 +171,19 @@ export function resolveInviteStepFromUrl(
   // Compare numeric steps — route param is "step-1", not "1".
   const needsUrlSync = parsed !== canonicalDisplay;
 
+  let logicalStep: InviteDynamicLogicalStep | null = null;
+  if (usesCombinedPermissionsSteps(version)) {
+    logicalStep = getInviteV7LogicalStep(canonicalDisplay, mergedOptions);
+  } else if (usesDynamicDomainInviteSteps(version)) {
+    logicalStep = getInviteV4LogicalStep(canonicalDisplay, mergedOptions);
+  }
+
   return {
     internalStep,
     displayStep: canonicalDisplay,
     needsUrlSync,
-    logicalStep: usesV4InviteSteps(version)
-      ? getInviteV4LogicalStep(canonicalDisplay, mergedOptions)
-      : null,
+    logicalStep,
   };
 }
+
+export type { InviteV4LogicalStep, InviteDynamicLogicalStep };

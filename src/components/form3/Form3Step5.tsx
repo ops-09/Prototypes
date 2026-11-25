@@ -22,6 +22,8 @@ import {
 import { generateForm3ReviewPdf } from './form3GeneratePdf';
 import { buildReviewSections, type ReviewSectionKey } from './form3ReviewModel';
 import styles from './Form3Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form3BeforeYouBeginContent';
 
 const CURRENT_STEP = 5;
 
@@ -167,6 +169,13 @@ export function Form3Step5() {
           currentStep={CURRENT_STEP}
           numberOfSteps={FORM3_TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">

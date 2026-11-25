@@ -1,6 +1,8 @@
 import { ContactInformationForm } from '../components/cover-letter/ContactInformationForm';
 import formStyles from '../components/cover-letter/ContactInformationForm.module.scss';
 import { PlaygroundShell } from '../components/layout/PlaygroundShell';
+import { FormNameCard } from '../components/shared/FormNameCard';
+import { BYB_FORM_NAME } from '../components/form2/form2BeforeYouBeginContent';
 
 /** Form 2 cover letter / contact information (step 1 of 10). */
 export function Form2Page() {
@@ -11,6 +13,7 @@ export function Form2Page() {
       mainClassName={formStyles.formMain}
     >
       <ContactInformationForm
+        headerCard={<FormNameCard applicationType={BYB_FORM_NAME} />}
         continueHref="/form-2/step-2"
         currentStep={1}
         numberOfSteps={10}

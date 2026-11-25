@@ -22,6 +22,8 @@ import {
   type ContinuanceFormId,
 } from './continuanceDraftStorage';
 import styles from '../form2/Form2Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './continuanceBeforeYouBeginContent';
 
 const CURRENT_STEP = 10;
 const INCOMPLETE_ERROR =
@@ -119,6 +121,13 @@ export function ContinuanceStep10({ formId }: ContinuanceStep10Props) {
           currentStep={CURRENT_STEP}
           numberOfSteps={CONTINUANCE_TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME[formId]} />
+        </div>
       </div>
 
       <div className="ontario-row">

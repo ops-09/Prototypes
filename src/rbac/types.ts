@@ -22,15 +22,24 @@ export type ServiceAccess = {
   groups: Partial<Record<ServiceGroupId, ServiceGroupAccess>>;
 };
 
-/** Create-scope grant for one ministry under Permit Applications. */
+/** Create-scope grant for one ministry under Permit Applications (V3/V4). */
 export type PermitMinistryCreateScope = {
   mode: 'all' | 'selected';
   /** Used when mode === 'selected'. Empty when mode === 'all'. */
   permitTypeIds: string[];
 };
 
+/**
+ * V5 top-level create modes. When unset, V3/V4 per-ministry All | Selected applies.
+ * `all_ministries` = every eligible permit type across all ministries.
+ * `individual` = specific types in `byMinistry` (permitTypeIds only; no per-ministry All).
+ */
+export type PermitCreateMode = 'all_ministries' | 'individual';
+
 export type PermitCreateAccess = {
   enabled: boolean;
+  /** V5 only. Undefined = legacy V3/V4 per-ministry scopes. */
+  mode?: PermitCreateMode;
   byMinistry: Partial<Record<string, PermitMinistryCreateScope>>;
 };
 

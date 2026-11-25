@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   OntarioButton,
+  OntarioCheckboxes,
   OntarioDropdownList,
   OntarioPageAlert,
   OntarioRadioButtons,
@@ -20,15 +21,21 @@ import { focusField, getEventValue } from './form11Focus';
 import {
   ensureForm11PlaygroundDraft,
   FORM11_TOTAL_STEPS,
+  readForm11Draft,
   upsertForm11Step4,
   type Form11NameChangeChoice,
   type Form11Step4Data,
 } from './form11DraftStorage';
 import { FORM11_AGREEMENT_STATEMENT, FORM11_AMALGAMATED_NAME_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 4;
 const ID_PREFIX = 'form11-name';
+const AGREEMENT_OPTION_VALUE = 'approved';
+const AGREEMENT_REQUIRED_ERROR =
+  'Confirm that the amalgamation agreement has been duly approved.';
 const SELECT_NAME_ERROR =
   'Select the name that will be used for the amalgamated corporation.';
 
@@ -44,6 +51,7 @@ type FieldErrors = NameNuansErrors &
   Partial<{
     changeName: string;
     selectedAmalgamatedCorporationId: string;
+    agreementApproved: string;
   }>;
 
 export function Form11Step4() {
@@ -57,6 +65,7 @@ export function Form11Step4() {
     nameNuans: draft?.step4.nameNuans ?? emptyNameNuans(),
     selectedAmalgamatedCorporationId:
       draft?.step4.selectedAmalgamatedCorporationId ?? '',
+    agreementApproved: draft?.step4.agreementApproved ?? false,
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
@@ -67,6 +76,17 @@ export function Form11Step4() {
     () => [
       { value: 'yes', elementId: 'form11-name-change-yes', label: 'Yes' },
       { value: 'no', elementId: 'form11-name-change-no', label: 'No' },
+    ],
+    [],
+  );
+
+  const agreementOptions = useMemo(
+    () => [
+      {
+        value: AGREEMENT_OPTION_VALUE,
+        elementId: 'form11-agreement-approved',
+        label: FORM11_AGREEMENT_STATEMENT,
+      },
     ],
     [],
   );
@@ -89,6 +109,13 @@ export function Form11Step4() {
         key: 'changeName',
         message: errors.changeName,
         href: '#change-nfp-name',
+      });
+    }
+    if (errors.agreementApproved) {
+      items.push({
+        key: 'agreementApproved',
+        message: errors.agreementApproved,
+        href: '#form11-agreement-approval',
       });
     }
     if (errors.selectedAmalgamatedCorporationId) {
@@ -192,6 +219,9 @@ export function Form11Step4() {
         next.selectedAmalgamatedCorporationId = SELECT_NAME_ERROR;
       }
     }
+    if (!step4.agreementApproved) {
+      next.agreementApproved = AGREEMENT_REQUIRED_ERROR;
+    }
     return next;
   }
 
@@ -242,6 +272,13 @@ export function Form11Step4() {
         />
       </div>
 
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
+      </div>
+
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
           {showErrorSummary && errorSummaryItems.length > 0 ? (
@@ -276,7 +313,7 @@ export function Form11Step4() {
           <div className={styles.formStack}>
             <div id="change-nfp-name">
               <OntarioRadioButtons
-                caption="Will there be a name change for the corporation?"
+                caption="Would like to use a new name for the name of the amalgamated corporation?"
                 name="change-nfp-name"
                 required
                 value={step4.changeName}
@@ -300,7 +337,6 @@ export function Form11Step4() {
                   }
                 }}
               />
-              <p className={styles.statement}>{FORM11_AGREEMENT_STATEMENT}</p>
             </div>
 
             {step4.changeName === 'no' ? (
@@ -343,6 +379,29 @@ export function Form11Step4() {
                 onClearError={clearError}
               />
             ) : null}
+
+            <div id="form11-agreement-approval">
+              <OntarioCheckboxes
+                caption={{
+                  captionText: 'Amalgamation agreement approval',
+                  captionType: 'default',
+                }}
+                name="form11-agreement-approval"
+                required
+                options={agreementOptions}
+                value={step4.agreementApproved ? [AGREEMENT_OPTION_VALUE] : []}
+                errorMessage={errors.agreementApproved}
+                customOnChange={(event) => {
+                  const selected = (event.target as HTMLInputElement | null)?.checked;
+                  const nextChecked =
+                    typeof selected === 'boolean'
+                      ? selected
+                      : !step4.agreementApproved;
+                  patchStep4({ agreementApproved: nextChecked });
+                  clearError('agreementApproved');
+                }}
+              />
+            </div>
           </div>
 
           <div className={styles.buttonGroup}>

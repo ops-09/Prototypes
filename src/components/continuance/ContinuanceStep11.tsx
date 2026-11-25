@@ -15,6 +15,8 @@ import {
 } from './continuanceDraftStorage';
 import { resolveCoverLetterContact } from './continuanceReviewModel';
 import styles from '../form2/Form2Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './continuanceBeforeYouBeginContent';
 
 const CURRENT_STEP = 11;
 const AUTH_OPTION_VALUE = 'authorized';
@@ -96,6 +98,7 @@ export function ContinuanceStep11({ formId }: ContinuanceStep11Props) {
 
   return (
     <FilingSubmitStep
+      headerCard={<FormNameCard applicationType={BYB_FORM_NAME[formId]} />}
       currentStep={CURRENT_STEP}
       numberOfSteps={CONTINUANCE_TOTAL_STEPS}
       backButtonUrl={`/form-${formId}/step-10`}

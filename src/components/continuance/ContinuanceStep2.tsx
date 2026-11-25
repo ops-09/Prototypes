@@ -23,6 +23,8 @@ import {
   type ContinuanceStep2Data,
 } from './continuanceDraftStorage';
 import styles from '../form2/Form2Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './continuanceBeforeYouBeginContent';
 
 const CURRENT_STEP = 2;
 const EMAIL_FORMAT_ERROR = 'Enter a valid email address, like name@example.com.';
@@ -206,6 +208,13 @@ export function ContinuanceStep2({ formId }: ContinuanceStep2Props) {
           currentStep={CURRENT_STEP}
           numberOfSteps={CONTINUANCE_TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME[formId]} />
+        </div>
       </div>
 
       <div className="ontario-row">

@@ -1,0 +1,281 @@
+// ODS has no multi-select combo; compose with tokens + OntarioCheckboxes / icons.
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  width: 100%;
+  max-width: 40rem;
+}
+
+.hint {
+  margin: 0;
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ontario-spacing-1, 0.25rem);
+  max-width: 100%;
+  margin: 0;
+  padding: var(--ontario-spacing-1, 0.25rem) var(--ontario-spacing-2, 0.5rem);
+  border: 1px solid var(--ontario-colour-link, #0066cc);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  color: var(--ontario-colour-link, #0066cc);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.tagLabel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tagRemove {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tagRemove:focus {
+  outline: none;
+}
+
+.tagRemove:focus-visible {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: 2px;
+}
+
+.comboShell {
+  position: relative;
+  width: 100%;
+}
+
+.inputRow {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+}
+
+.inputRow:focus-within {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: 0;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: var(--ontario-spacing-3, 0.75rem) var(--ontario-spacing-4, 1rem);
+  border: 0;
+  background: transparent;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  line-height: 1.5;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 var(--ontario-spacing-3, 0.75rem);
+  border: 0;
+  border-left: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  background: transparent;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+  cursor: pointer;
+}
+
+.toggle:focus {
+  outline: none;
+}
+
+.toggle:focus-visible {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: -4px;
+}
+
+.listbox {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + var(--ontario-spacing-1, 0.25rem));
+  left: 0;
+  right: 0;
+  max-height: 18rem;
+  margin: 0;
+  padding: var(--ontario-spacing-2, 0.5rem);
+  overflow-y: auto;
+  border: 2px solid var(--ontario-colour-greyscale-black, #1a1a1a);
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  box-shadow: 0 var(--ontario-spacing-1, 0.25rem) var(--ontario-spacing-2, 0.5rem)
+    rgba(26, 26, 26, 0.12);
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.optionRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ontario-spacing-1, 0.25rem);
+}
+
+.matchHint {
+  margin: 0;
+  padding-left: var(--ontario-spacing-6, 2rem);
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--ontario-spacing-2, 0.5rem) var(--ontario-spacing-3, 0.75rem);
+  color: var(--ontario-colour-greyscale-greyscale60, #666666);
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ontario-spacing-2, 0.5rem);
+}
+
+.viewMore {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ontario-colour-link, #0066cc);
+  font-family: var(
+    --ontario-font-open-sans,
+    'Open Sans',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: var(--ontario-font-size-standard-body-text, 1rem);
+  font-weight: 400;
+  line-height: 1.5;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.viewMore:hover {
+  color: var(--ontario-colour-link--hover, #00478f);
+}
+
+.viewMore:focus {
+  outline: none;
+}
+
+.viewMore:focus-visible {
+  outline: 4px solid var(--ontario-colour-focus, #009adb);
+  outline-offset: 2px;
+}
+
+// ODS has no modal dialog; compose overlay like AccessCustomizeOverlay.
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--ontario-spacing-6, 2rem) var(--ontario-spacing-4, 1rem);
+  background-color: rgba(0, 0, 0, 0.45);
+  overflow-y: auto;
+}
+
+.panel {
+  box-sizing: border-box;
+  width: min(100%, 40rem);
+  max-height: min(90vh, 40rem);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--ontario-spacing-5, 1.5rem);
+  border-radius: 4px;
+  background-color: var(--ontario-colour-greyscale-white, #ffffff);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ontario-spacing-3, 0.75rem);
+  margin-bottom: var(--ontario-spacing-4, 1rem);
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ontario-colour-greyscale-black, #1a1a1a);
+}
+
+.panelBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.panelTagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ontario-spacing-2, 0.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panelActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--ontario-spacing-4, 1rem);
+}

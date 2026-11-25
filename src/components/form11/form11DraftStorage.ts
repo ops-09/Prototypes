@@ -50,6 +50,8 @@ export type Form11Step4Data = {
   changeName: Form11NameChangeChoice;
   nameNuans: NameNuansFields;
   selectedAmalgamatedCorporationId: string;
+  /** Section 113(3) amalgamation agreement approval — required on step 4. */
+  agreementApproved: boolean;
 };
 
 export type Form11Step5Data = HeadOfficeAddress;
@@ -77,6 +79,7 @@ export type Form11Step6Data = {
 
 export type Form11Step7Data = {
   amalgamationAgreement: UploadedFileMeta | null;
+  amalgamationAgreementText: string;
   additionalDocuments: SupportingDocMeta[];
 };
 
@@ -118,6 +121,7 @@ export const EMPTY_STEP4: Form11Step4Data = {
   changeName: '',
   nameNuans: emptyNameNuans(),
   selectedAmalgamatedCorporationId: '',
+  agreementApproved: false,
 };
 
 export const EMPTY_STEP5: Form11Step5Data = { ...EMPTY_HEAD_OFFICE_STEP };
@@ -148,6 +152,7 @@ export const EMPTY_STEP6: Form11Step6Data = {
 
 export const EMPTY_STEP7: Form11Step7Data = {
   amalgamationAgreement: null,
+  amalgamationAgreementText: '',
   additionalDocuments: [],
 };
 
@@ -156,7 +161,8 @@ export const EMPTY_STEP8: Form11Step8Data = {
   signedPdf: null,
 };
 
-export const AGREEMENT_EMPTY_ERROR = 'Upload a copy of the amalgamation agreement.';
+export const AGREEMENT_EMPTY_ERROR =
+  'Enter the amalgamation agreement or upload a certified copy.';
 
 export const SAMPLE_AMALGAMATION_AGREEMENT: UploadedFileMeta = {
   name: 'amalgamation-agreement.pdf',
@@ -233,7 +239,14 @@ export function createSeedDirector(index: number): Form11Director {
 }
 
 export function hasForm11HeadOffice(step5: Form11Step5Data | undefined) {
-  return step5 ? Object.keys(validateHeadOfficeAddress(step5)).length === 0 : false;
+  return step5
+    ? Object.keys(
+        validateHeadOfficeAddress(step5, {
+          requireMunicipalityCountyStatus: false,
+          requireCountyName: false,
+        }),
+      ).length === 0
+    : false;
 }
 
 function newDirectorId() {
@@ -421,6 +434,7 @@ export function readForm11Draft(): Form11Draft | null {
         nameNuans: normalizeNameNuans(parsed.step4?.nameNuans),
         selectedAmalgamatedCorporationId:
           parsed.step4?.selectedAmalgamatedCorporationId ?? '',
+        agreementApproved: Boolean(parsed.step4?.agreementApproved),
       },
       step5: {
         ...EMPTY_STEP5,
@@ -436,6 +450,10 @@ export function readForm11Draft(): Form11Draft | null {
         ...EMPTY_STEP7,
         ...(parsed.step7 ?? {}),
         amalgamationAgreement: normalizeAgreementFile(parsed.step7?.amalgamationAgreement),
+        amalgamationAgreementText:
+          typeof parsed.step7?.amalgamationAgreementText === 'string'
+            ? parsed.step7.amalgamationAgreementText
+            : '',
         additionalDocuments: parsed.step7?.additionalDocuments ?? [],
       },
       step8: {
@@ -657,7 +675,10 @@ export function createForm11ConfirmationNumber() {
 }
 
 export function hasForm11Agreement(step7: Form11Step7Data | undefined) {
-  return Boolean(step7?.amalgamationAgreement?.name.trim());
+  return Boolean(
+    step7?.amalgamationAgreement?.name.trim() ||
+      step7?.amalgamationAgreementText?.trim(),
+  );
 }
 
 export type Form11PlaygroundStep = 4 | 5 | 6 | 7 | 8;
@@ -753,6 +774,8 @@ export function ensureForm11PlaygroundDraft(openStep: Form11PlaygroundStep): For
       selectedAmalgamatedCorporationId:
         existing?.step4.selectedAmalgamatedCorporationId || firstCorpId,
       nameNuans: existing?.step4.nameNuans ?? emptyNameNuans(),
+      agreementApproved:
+        existing?.step4.agreementApproved === true || openStep >= 5,
     },
     step5:
       hasForm11HeadOffice(existing?.step5)

@@ -8,13 +8,19 @@ type PermitApplicationsStepProps = {
   permitApplicationAccess: PermitApplicationAccess;
   permitAccessError?: string;
   onChange: (access: PermitApplicationAccess) => void;
+  /** V4 = per-ministry All|Selected; V5/V6 = All ministries | Individual (V6 adds Selected tray). */
+  createVariant?: 'v4' | 'v5' | 'v6';
 };
 
 export function PermitApplicationsStep({
   permitApplicationAccess,
   permitAccessError,
   onChange,
+  createVariant = 'v4',
 }: PermitApplicationsStepProps) {
+  const sectionVariant =
+    createVariant === 'v6' ? 'tabs-v6' : createVariant === 'v5' ? 'tabs-v5' : 'tabs';
+
   return (
     <section className={styles.stepPanel} aria-label="Permit Applications">
       <div className={styles.stepPanelHeader}>
@@ -28,7 +34,7 @@ export function PermitApplicationsStep({
           access={permitApplicationAccess}
           onChange={onChange}
           errorMessage={permitAccessError}
-          variant="tabs"
+          variant={sectionVariant}
         />
       </div>
     </section>

@@ -14,6 +14,7 @@ import {
 } from './cdpsPermitCatalog';
 import type {
   PermitApplicationAccess,
+  PermitCreateMode,
   PermitMinistryCreateScope,
 } from './types';
 
@@ -37,11 +38,7 @@ export function createDefaultPermitApplicationAccess(): PermitApplicationAccess 
   return structuredClone(DEFAULT_PERMIT_APPLICATION_ACCESS);
 }
 
-export function hasConfiguredCreateScope(access: PermitApplicationAccess): boolean {
-  if (!access.create.enabled) {
-    return false;
-  }
-
+function hasLegacyConfiguredCreateScope(access: PermitApplicationAccess): boolean {
   return Object.values(access.create.byMinistry).some((scope) => {
     if (!scope) {
       return false;
@@ -51,6 +48,28 @@ export function hasConfiguredCreateScope(access: PermitApplicationAccess): boole
     }
     return scope.permitTypeIds.length > 0;
   });
+}
+
+function hasIndividualConfiguredCreateScope(access: PermitApplicationAccess): boolean {
+  return Object.values(access.create.byMinistry).some(
+    (scope) => Boolean(scope && scope.permitTypeIds.length > 0),
+  );
+}
+
+export function hasConfiguredCreateScope(access: PermitApplicationAccess): boolean {
+  if (!access.create.enabled) {
+    return false;
+  }
+
+  if (access.create.mode === 'all_ministries') {
+    return true;
+  }
+
+  if (access.create.mode === 'individual') {
+    return hasIndividualConfiguredCreateScope(access);
+  }
+
+  return hasLegacyConfiguredCreateScope(access);
 }
 
 export function hasConfiguredViewScope(access: PermitApplicationAccess): boolean {
@@ -76,6 +95,92 @@ export function hasConfiguredPermitApplicationAccess(
   );
 }
 
+/** Flatten individual create grants to permit type IDs. */
+export function listSelectedCreatePermitTypeIds(access: PermitApplicationAccess): string[] {
+  const ids = new Set<string>();
+  for (const scope of Object.values(access.create.byMinistry)) {
+    if (!scope) {
+      continue;
+    }
+    for (const id of scope.permitTypeIds) {
+      ids.add(id);
+    }
+  }
+  return [...ids];
+}
+
+/**
+ * Replace individual create grants with the given permit type IDs (grouped by ministry).
+ * Used by V12 catalog → Permissions handoff.
+ */
+export function setIndividualCreatePermitTypeIds(
+  access: PermitApplicationAccess,
+  permitTypeIds: string[],
+): PermitApplicationAccess {
+  const byMinistry: PermitApplicationAccess['create']['byMinistry'] = {};
+
+  for (const permitTypeId of permitTypeIds) {
+    const permit = getPermitTypeById(permitTypeId);
+    if (!permit) {
+      continue;
+    }
+    const existing = byMinistry[permit.ministryId];
+    if (existing) {
+      if (!existing.permitTypeIds.includes(permitTypeId)) {
+        existing.permitTypeIds.push(permitTypeId);
+      }
+    } else {
+      byMinistry[permit.ministryId] = {
+        mode: 'selected',
+        permitTypeIds: [permitTypeId],
+      };
+    }
+  }
+
+  return {
+    ...access,
+    enabled: true,
+    create: {
+      ...access.create,
+      enabled: true,
+      mode: 'individual',
+      byMinistry,
+    },
+  };
+}
+
+export function countSelectedCreatePermitTypes(access: PermitApplicationAccess): number {
+  if (access.create.mode === 'all_ministries') {
+    return listEligiblePermitTypes().length;
+  }
+
+  if (access.create.mode === 'individual') {
+    const ids = new Set<string>();
+    for (const scope of Object.values(access.create.byMinistry)) {
+      if (!scope) {
+        continue;
+      }
+      for (const id of scope.permitTypeIds) {
+        ids.add(id);
+      }
+    }
+    return ids.size;
+  }
+
+  let count = 0;
+  for (const [ministryId, scope] of Object.entries(access.create.byMinistry)) {
+    if (!scope) {
+      continue;
+    }
+    if (scope.mode === 'all') {
+      count += listPermitTypesByMinistry(ministryId as CdpsMinistryId).length;
+    } else {
+      count += scope.permitTypeIds.length;
+    }
+  }
+  return count;
+}
+
 export function summarizePermitApplicationAccess(
   access: PermitApplicationAccess | undefined,
 ): string {
@@ -86,8 +191,14 @@ export function summarizePermitApplicationAccess(
   const parts: string[] = [];
 
   if (hasConfiguredCreateScope(access)) {
-    const ministryCount = Object.keys(access.create.byMinistry).length;
-    parts.push(`Create (${ministryCount} ministries)`);
+    if (access.create.mode === 'all_ministries') {
+      parts.push('Create (all ministries)');
+    } else if (access.create.mode === 'individual') {
+      parts.push(`Create (${countSelectedCreatePermitTypes(access)} types)`);
+    } else {
+      const ministryCount = Object.keys(access.create.byMinistry).length;
+      parts.push(`Create (${ministryCount} ministries)`);
+    }
   }
 
   if (hasConfiguredViewScope(access)) {
@@ -109,9 +220,17 @@ function canCreatePermitType(
     return false;
   }
 
+  if (access.create.mode === 'all_ministries') {
+    return true;
+  }
+
   const scope = access.create.byMinistry[permit.ministryId];
   if (!scope) {
     return false;
+  }
+
+  if (access.create.mode === 'individual') {
+    return scope.permitTypeIds.includes(permit.permitTypeId);
   }
 
   if (scope.mode === 'all') {
@@ -142,10 +261,17 @@ export function listCreateBrowseMinistries(access: PermitApplicationAccess | und
     return [];
   }
 
+  if (access.create.mode === 'all_ministries') {
+    return listMinistriesWithEligiblePermits();
+  }
+
   return listMinistriesWithEligiblePermits().filter((ministry) => {
     const scope = access.create.byMinistry[ministry.ministryId];
     if (!scope) {
       return false;
+    }
+    if (access.create.mode === 'individual') {
+      return scope.permitTypeIds.length > 0;
     }
     if (scope.mode === 'all') {
       return listPermitTypesByMinistry(ministry.ministryId).length > 0;
@@ -245,6 +371,54 @@ export function describeCreateMinistryScope(
   return `${label} — ${names.join('; ')}`;
 }
 
+/** Compressed create summary lines for Review (V5-aware). */
+export function describeCreateAccessLines(
+  access: PermitApplicationAccess,
+  options?: { maxMinistryLines?: number; maxTypeNames?: number },
+): string[] {
+  const maxMinistryLines = options?.maxMinistryLines ?? 6;
+  const maxTypeNames = options?.maxTypeNames ?? 3;
+
+  if (!hasConfiguredCreateScope(access)) {
+    return [];
+  }
+
+  if (access.create.mode === 'all_ministries') {
+    return ['All ministries — every eligible permit type'];
+  }
+
+  const entries = Object.entries(access.create.byMinistry).flatMap(([ministryId, scope]) => {
+    if (!scope) {
+      return [];
+    }
+
+    if (access.create.mode === 'individual') {
+      if (scope.permitTypeIds.length === 0) {
+        return [];
+      }
+      const count = scope.permitTypeIds.length;
+      const label = getMinistryLabel(ministryId as CdpsMinistryId);
+      if (count <= maxTypeNames) {
+        const names = scope.permitTypeIds
+          .map((id) => getPermitTypeById(id)?.permitShortName ?? id)
+          .join('; ');
+        return [`${label} — ${names}`];
+      }
+      return [`${label} — ${count} types`];
+    }
+
+    return [describeCreateMinistryScope(ministryId, scope)];
+  });
+
+  if (entries.length <= maxMinistryLines) {
+    return entries;
+  }
+
+  const visible = entries.slice(0, maxMinistryLines);
+  const remaining = entries.length - maxMinistryLines;
+  return [...visible, `+${remaining} more`];
+}
+
 export function describeApplicationGrant(applicationId: string): string {
   const app = getApplicationById(applicationId);
   if (!app) {
@@ -256,4 +430,8 @@ export function describeApplicationGrant(applicationId: string): string {
 
 export function listAllEligiblePermitTypeIds(): string[] {
   return listEligiblePermitTypes().map((permit) => permit.permitTypeId);
+}
+
+export function isPermitCreateMode(value: string): value is PermitCreateMode {
+  return value === 'all_ministries' || value === 'individual';
 }

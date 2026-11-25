@@ -24,6 +24,8 @@ import {
 import { generateForm10ReviewPdf } from './form10GeneratePdf';
 import { buildReviewSections, type ReviewSectionKey } from './form10ReviewModel';
 import styles from './Form10Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form10BeforeYouBeginContent';
 
 const CURRENT_STEP = 6;
 
@@ -217,6 +219,13 @@ export function Form10Step4() {
           currentStep={CURRENT_STEP}
           numberOfSteps={FORM10_TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">

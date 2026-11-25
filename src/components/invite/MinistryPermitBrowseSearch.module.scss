@@ -1,0 +1,43 @@
+// ODS search box form is ontario-medium-6 / ontario-large-6 (half width) with a
+// medium offset. Scale the host so the field fills this container without clipping
+// the input (do not reuse the Naics absolute inputClip pattern here).
+
+.root {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  overflow-x: hidden;
+}
+
+.root :global(ontario-search-box) {
+  display: block;
+  width: 100%;
+  max-width: none;
+  // ODS .ontario-search__container adds 2.5rem bottom margin in shadow DOM;
+  // offset on the host so parent gap alone controls spacing to the cards.
+  margin-bottom: calc(-1 * var(--ontario-spacing-7, 2.5rem));
+}
+
+// ontario-small-10 (~10/12) → ~120% host fills the container.
+@media screen and (max-width: 40em) {
+  .root :global(ontario-search-box) {
+    width: calc(120% + var(--ontario-spacing-4, 1rem));
+    margin-left: calc(-1 * var(--ontario-spacing-4, 1rem));
+  }
+}
+
+// ontario-medium-offset-3 + ontario-medium-6
+@media screen and (min-width: 40.063em) and (max-width: 73.06249em) {
+  .root :global(ontario-search-box) {
+    width: calc(200% + var(--ontario-spacing-4, 1rem));
+    margin-left: calc(-50% - var(--ontario-spacing-4, 1rem));
+  }
+}
+
+// ontario-large-offset-0 + ontario-large-6
+@media screen and (min-width: 73.063em) {
+  .root :global(ontario-search-box) {
+    width: calc(200% + var(--ontario-spacing-4, 1rem));
+    margin-left: calc(-1 * var(--ontario-spacing-4, 1rem));
+  }
+}

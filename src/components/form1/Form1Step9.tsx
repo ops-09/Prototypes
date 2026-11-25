@@ -13,6 +13,8 @@ import {
 import { ensureStep8Draft } from './Form1Step8';
 import { resolveCoverLetterContact } from './form1ReviewModel';
 import styles from './Form1Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form1BeforeYouBeginContent';
 
 const CURRENT_STEP = 10;
 const TOTAL_STEPS = 10;
@@ -94,6 +96,7 @@ export function Form1Step9() {
 
   return (
     <FilingSubmitStep
+      headerCard={<FormNameCard applicationType={BYB_FORM_NAME} />}
       currentStep={CURRENT_STEP}
       numberOfSteps={TOTAL_STEPS}
       backButtonUrl="/form-1/step-9"

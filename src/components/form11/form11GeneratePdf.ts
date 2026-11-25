@@ -16,6 +16,7 @@ import {
   FORM11_AGREEMENT_STATEMENT,
   FORM11_AMALGAMATED_NAME_CAPTION,
   FORM11_AMALGAMATING_NAMES_CAPTION,
+  FORM11_CERTIFIED_AGREEMENT_CAPTION,
   FORM11_DIRECTOR_ADDRESS_COLUMN,
   FORM11_DIRECTOR_NAME_COLUMN,
   FORM11_DIRECTORS_CAPTION,
@@ -83,6 +84,7 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
   ]
     .filter(Boolean)
     .join('\n');
+  const agreementText = draft.step7.amalgamationAgreementText?.trim() ?? '';
 
   return openArticlesPdf({
     documentTitle: 'Application for Letters Patent of Amalgamation, Form 11',
@@ -90,7 +92,10 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
     actName: 'Corporations Act',
     items: [
       [FORM11_AMALGAMATED_NAME_CAPTION, valueHtml(amalgamatedName.toUpperCase())],
-      [FORM11_AGREEMENT_STATEMENT, ''],
+      [
+        FORM11_AGREEMENT_STATEMENT,
+        valueHtml(draft.step4.agreementApproved ? 'Confirmed' : ''),
+      ],
       [
         FORM11_AMALGAMATING_NAMES_CAPTION,
         tableHtml(
@@ -106,6 +111,7 @@ export function generateForm11ReviewPdf(args: { draft: Form11Draft }) {
           directorRows,
         ),
       ],
+      [FORM11_CERTIFIED_AGREEMENT_CAPTION, valueHtml(agreementText, '')],
     ],
     signatureIntro: [...FORM11_SIGNATURE_INTRO],
     signatureHeading: '',

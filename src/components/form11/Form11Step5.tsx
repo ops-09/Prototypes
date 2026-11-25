@@ -22,11 +22,10 @@ import {
   upsertForm11Step5,
   type Form11Step5Data,
 } from './form11DraftStorage';
-import {
-  FORM11_HEAD_OFFICE_ADDRESS_CAPTION,
-  FORM11_HEAD_OFFICE_LOCATION_CAPTION,
-} from './form11ReviewModel';
+import { FORM11_HEAD_OFFICE_ADDRESS_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 5;
 
@@ -80,7 +79,10 @@ export function Form11Step5() {
   }
 
   function handleContinue() {
-    const nextErrors = validateHeadOfficeAddress(step5);
+    const nextErrors = validateHeadOfficeAddress(step5, {
+      requireMunicipalityCountyStatus: false,
+      requireCountyName: false,
+    });
     const hasErrors = Object.keys(nextErrors).length > 0;
     setErrors(nextErrors);
     setShowErrorSummary(hasErrors);
@@ -122,6 +124,13 @@ export function Form11Step5() {
         />
       </div>
 
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
+      </div>
+
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
           {showErrorSummary && errorSummaryItems.length > 0 ? (
@@ -154,8 +163,9 @@ export function Form11Step5() {
               address={step5}
               errors={errors}
               onChange={handleAddressChange}
-              locationHeading={FORM11_HEAD_OFFICE_LOCATION_CAPTION}
               addressHeading={FORM11_HEAD_OFFICE_ADDRESS_CAPTION}
+              showMunicipalityCountyStatus={false}
+              showCountyName={false}
             />
           </div>
 

@@ -106,7 +106,10 @@ export function Form11DraftSummaryPage() {
                 <div>
                   <dt>Amalgamation agreement</dt>
                   <dd>
-                    {draft.step7.amalgamationAgreement?.name || '—'}
+                    {draft.step7.amalgamationAgreement?.name ||
+                      (draft.step7.amalgamationAgreementText?.trim()
+                        ? 'Entered as text'
+                        : '—')}
                   </dd>
                 </div>
                 <div>

@@ -1,10 +1,25 @@
-import { OntarioLoadingIndicator, OntarioPageAlert } from '@ongov/ontario-design-system-component-library-react';
+import {
+  OntarioLoadingIndicator,
+  OntarioPageAlert,
+} from '@ongov/ontario-design-system-component-library-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
+  usesDynamicDomainInviteSteps,
   usesV2InviteSteps,
   usesV3InviteSteps,
-  usesV4InviteSteps,
+  usesV5InviteSteps,
+  usesCombinedPermissionsSteps,
+  usesV6InviteSteps,
+  usesV8InviteSteps,
+  usesV9InviteSteps,
+  usesV10InviteSteps,
+  usesV11InviteSteps,
+  usesV12InviteSteps,
+  usesV13InviteSteps,
+  usesV14InviteSteps,
+  usesV15InviteSteps,
+  usesAccessNeedsInviteStep,
 } from '../../config/inviteWizardVersion';
 import { roleSkipsServiceAccess } from '../../rbac/roles';
 import { useRbac } from '../../rbac/RbacContext';
@@ -19,6 +34,7 @@ import type {
 import { createDefaultPermitApplicationAccess } from '../../rbac/permitApplicationAccess';
 import { DEFAULT_SERVICE_ACCESS } from '../../rbac/services';
 import { InviteErrorSummary } from './InviteErrorSummary';
+import { InviteeCallout } from './InviteeCallout';
 import styles from './InviteUserWizard.module.scss';
 import {
   getInviteReviewStep,
@@ -30,14 +46,15 @@ import {
   getInviteV4Path,
   isMiningDomainOn,
   isPermitsDomainOn,
-  type InviteV4LogicalStep,
 } from './inviteV4Path';
+import { getInviteV7DisplayStep } from './inviteV7Path';
 import {
   clearInviteWizardDraft,
   getInviteStepPath,
   readInviteWizardDraft,
   resolveInviteStepFromUrl,
   writeInviteWizardDraft,
+  type InviteDynamicLogicalStep,
 } from './inviteWizardPaths';
 import {
   buildInviteErrorSummaryItems,
@@ -47,14 +64,18 @@ import {
   validateInviteEmailStep,
   validateInviteMiningStep,
   validateInvitePermitApplicationsStep,
+  validateInviteAccessNeedsStep,
   validateInviteRoleStep,
   validateInviteServiceAccessStep,
+  validateInviteV7PermissionsStep,
 } from './inviteValidation';
 import { useInviteWizardVersionContext } from './InviteWizardVersionContext';
+import { AccessNeedsStep } from './steps/AccessNeedsStep';
 import { DomainAccessStep } from './steps/DomainAccessStep';
 import { DomainGatesStep } from './steps/DomainGatesStep';
 import { MiningAccessStep } from './steps/MiningAccessStep';
 import { PermitApplicationsStep } from './steps/PermitApplicationsStep';
+import { PermissionsStep } from './steps/PermissionsStep';
 import { ProvisionServicesStep } from './steps/ProvisionServicesStep';
 import { RoleStep } from './steps/RoleStep';
 import { ReviewStep, buildInvitePayload, type ReviewEditTargets } from './steps/ReviewStep';
@@ -74,6 +95,7 @@ function getInitialDraft(prefill?: InvitePrefillState) {
     email: stored?.email ?? '',
     confirmEmail: stored?.confirmEmail ?? '',
     roleId: (prefill?.roleId ?? stored?.roleId ?? '') as RoleId | '',
+    accessNeedIds: stored?.accessNeedIds ?? [],
     serviceAccess: structuredClone(
       prefill?.serviceAccess ?? stored?.serviceAccess ?? DEFAULT_SERVICE_ACCESS,
     ),
@@ -99,6 +121,9 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
   const [email, setEmail] = useState(() => getInitialDraft(prefill).email);
   const [confirmEmail, setConfirmEmail] = useState(() => getInitialDraft(prefill).confirmEmail);
   const [roleId, setRoleId] = useState<RoleId | ''>(() => getInitialDraft(prefill).roleId);
+  const [accessNeedIds, setAccessNeedIds] = useState<string[]>(
+    () => getInitialDraft(prefill).accessNeedIds,
+  );
   const [serviceAccess, setServiceAccess] = useState<ServiceAccess>(
     () => getInitialDraft(prefill).serviceAccess,
   );
@@ -115,8 +140,13 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
   const miningOn = isMiningDomainOn(serviceAccess);
   const permitsOn = isPermitsDomainOn(permitApplicationAccess);
   const pathOptions = useMemo(
-    () => ({ roleId, miningOn, permitsOn }),
-    [miningOn, permitsOn, roleId],
+    () => ({
+      roleId,
+      miningOn,
+      permitsOn,
+      includeAccessNeeds: usesAccessNeedsInviteStep(version),
+    }),
+    [miningOn, permitsOn, roleId, version],
   );
 
   const reviewStep = getInviteReviewStep(version, pathOptions);
@@ -124,11 +154,25 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
   const currentStep = resolved.internalStep;
   const displayStep = resolved.displayStep;
   const stepCount = getInviteStepCount(version, roleId, pathOptions);
-  const logicalStep: InviteV4LogicalStep | null = resolved.logicalStep;
+  const logicalStep: InviteDynamicLogicalStep | null = resolved.logicalStep;
 
   const reviewEditTargets = useMemo<ReviewEditTargets>(() => {
-    if (!usesV4InviteSteps(version)) {
+    if (!usesDynamicDomainInviteSteps(version)) {
       return { email: 1, role: 2, mining: 3, permits: 3, domains: 3 };
+    }
+
+    if (usesCombinedPermissionsSteps(version)) {
+      const permissionsStep = getInviteV7DisplayStep('permissions', pathOptions) as InviteStep;
+      return {
+        email: getInviteV7DisplayStep('email', pathOptions) as InviteStep,
+        role: getInviteV7DisplayStep('role', pathOptions) as InviteStep,
+        domains: permissionsStep,
+        mining: permissionsStep,
+        permits: permissionsStep,
+        accessNeeds: usesAccessNeedsInviteStep(version)
+          ? (getInviteV7DisplayStep('accessNeeds', pathOptions) as InviteStep)
+          : undefined,
+      };
     }
 
     return {
@@ -164,10 +208,11 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
       email,
       confirmEmail,
       roleId,
+      accessNeedIds,
       serviceAccess,
       permitApplicationAccess,
     });
-  }, [confirmEmail, email, permitApplicationAccess, roleId, serviceAccess]);
+  }, [accessNeedIds, confirmEmail, email, permitApplicationAccess, roleId, serviceAccess]);
 
   // Keep URL in the valid 1..N range for the current version/role/path. Do not block jumps.
   useEffect(() => {
@@ -344,8 +389,11 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
   }
 
   function handleV4Next() {
-    const path = getInviteV4Path(pathOptions);
-    const currentLogical = logicalStep ?? getInviteV4Path(pathOptions)[displayStep - 1];
+    const currentLogical =
+      logicalStep ??
+      (usesCombinedPermissionsSteps(version)
+        ? null
+        : getInviteV4Path(pathOptions)[displayStep - 1]);
 
     if (currentLogical === 'email') {
       handleNextFromEmail();
@@ -357,8 +405,31 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
       return;
     }
 
+    if (currentLogical === 'accessNeeds') {
+      const errors = validateInviteAccessNeedsStep(accessNeedIds);
+      if (Object.keys(errors).length > 0) {
+        showStepErrors(errors);
+        return;
+      }
+      goToDisplayStep(displayStep + 1);
+      return;
+    }
+
     if (currentLogical === 'domains') {
       // Neither / mining / permits / both — advance along resolved path.
+      goToDisplayStep(displayStep + 1);
+      return;
+    }
+
+    if (currentLogical === 'permissions') {
+      const errors = validateInviteV7PermissionsStep(
+        serviceAccess,
+        permitApplicationAccess,
+      );
+      if (Object.keys(errors).length > 0) {
+        showStepErrors(errors);
+        return;
+      }
       goToDisplayStep(displayStep + 1);
       return;
     }
@@ -382,9 +453,6 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
       goToDisplayStep(displayStep + 1);
       return;
     }
-
-    // review — no next
-    void path;
   }
 
   function handleV4Back() {
@@ -417,7 +485,7 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
       return;
     }
 
-    if (usesV4InviteSteps(version)) {
+    if (usesDynamicDomainInviteSteps(version)) {
       goToDisplayStep(Math.max(displayStep - 1, 1));
       return;
     }
@@ -431,7 +499,7 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
       return;
     }
 
-    if (usesV4InviteSteps(version)) {
+    if (usesDynamicDomainInviteSteps(version)) {
       handleV4Back();
       return;
     }
@@ -474,20 +542,38 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
     }
 
     if (roleId && !roleSkipsServiceAccess(roleId)) {
-      if (usesV4InviteSteps(version)) {
-        if (miningOn) {
-          const miningErrors = validateInviteMiningStep(serviceAccess);
-          if (Object.keys(miningErrors).length > 0) {
-            goToDisplayStep(getInviteV4DisplayStep('mining', pathOptions));
+      if (usesDynamicDomainInviteSteps(version)) {
+        if (usesCombinedPermissionsSteps(version)) {
+          if (usesAccessNeedsInviteStep(version)) {
+            const accessNeedsErrors = validateInviteAccessNeedsStep(accessNeedIds);
+            if (Object.keys(accessNeedsErrors).length > 0) {
+              goToDisplayStep(getInviteV7DisplayStep('accessNeeds', pathOptions));
+              return;
+            }
+          }
+          const errors = validateInviteV7PermissionsStep(
+            serviceAccess,
+            permitApplicationAccess,
+          );
+          if (Object.keys(errors).length > 0) {
+            goToDisplayStep(getInviteV7DisplayStep('permissions', pathOptions));
             return;
           }
-        }
+        } else {
+          if (miningOn) {
+            const miningErrors = validateInviteMiningStep(serviceAccess);
+            if (Object.keys(miningErrors).length > 0) {
+              goToDisplayStep(getInviteV4DisplayStep('mining', pathOptions));
+              return;
+            }
+          }
 
-        if (permitsOn) {
-          const permitErrors = validateInvitePermitApplicationsStep(permitApplicationAccess);
-          if (Object.keys(permitErrors).length > 0) {
-            goToDisplayStep(getInviteV4DisplayStep('permits', pathOptions));
-            return;
+          if (permitsOn) {
+            const permitErrors = validateInvitePermitApplicationsStep(permitApplicationAccess);
+            if (Object.keys(permitErrors).length > 0) {
+              goToDisplayStep(getInviteV4DisplayStep('permits', pathOptions));
+              return;
+            }
           }
         }
       } else if (usesV3InviteSteps(version)) {
@@ -535,9 +621,13 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
 
   const errorSummaryItems = buildInviteErrorSummaryItems(fieldErrors);
   const useWideColumn =
+    currentStep === reviewStep ||
     (usesV3InviteSteps(version) && currentStep === 3) ||
-    (usesV4InviteSteps(version) &&
-      (logicalStep === 'mining' || logicalStep === 'permits' || logicalStep === 'domains'));
+    (usesDynamicDomainInviteSteps(version) &&
+      (logicalStep === 'mining' ||
+        logicalStep === 'permits' ||
+        logicalStep === 'permissions' ||
+        logicalStep === 'domains'));
 
   return (
     <div className={styles.wizard}>
@@ -577,6 +667,20 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
             Complete each step to configure access for the new user.
           </p>
 
+          {(usesV13InviteSteps(version) ||
+            usesV14InviteSteps(version) ||
+            usesV15InviteSteps(version)) &&
+          (logicalStep === 'role' ||
+            logicalStep === 'accessNeeds' ||
+            logicalStep === 'permissions') ? (
+            <InviteeCallout
+              email={email}
+              roleId={roleId}
+              accessNeedIds={accessNeedIds}
+              logicalStep={logicalStep}
+            />
+          ) : null}
+
           <div className={styles.wizardMain}>
             {pageAlert && (
               <div className={styles.wizardStepError}>
@@ -608,7 +712,18 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
                 />
               )}
 
-              {usesV4InviteSteps(version) && logicalStep === 'domains' && (
+              {usesCombinedPermissionsSteps(version) && logicalStep === 'accessNeeds' && (
+                <AccessNeedsStep
+                  selectedIds={accessNeedIds}
+                  errorMessage={fieldErrors.accessNeeds}
+                  onChange={(nextIds) => {
+                    setAccessNeedIds(nextIds);
+                    clearFieldError('accessNeeds');
+                  }}
+                />
+              )}
+
+              {usesDynamicDomainInviteSteps(version) && logicalStep === 'domains' && (
                 <DomainGatesStep
                   serviceAccess={serviceAccess}
                   permitApplicationAccess={permitApplicationAccess}
@@ -617,21 +732,67 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
                 />
               )}
 
-              {usesV4InviteSteps(version) && logicalStep === 'mining' && (
-                <MiningAccessStep
+              {usesCombinedPermissionsSteps(version) && logicalStep === 'permissions' && (
+                <PermissionsStep
                   serviceAccess={serviceAccess}
+                  permitApplicationAccess={permitApplicationAccess}
+                  accessNeedIds={accessNeedIds}
                   serviceAccessError={fieldErrors.serviceAccess}
-                  onChange={handleServiceAccessChange}
+                  permitAccessError={fieldErrors.permitAccess}
+                  onServiceAccessChange={handleServiceAccessChange}
+                  onPermitApplicationAccessChange={handlePermitApplicationAccessChange}
+                  onAccessNeedIdsChange={(nextIds) => {
+                    setAccessNeedIds(nextIds);
+                    clearFieldError('accessNeeds');
+                  }}
+                  createVariant={
+                    usesV15InviteSteps(version) ||
+                    usesV14InviteSteps(version) ||
+                    usesV13InviteSteps(version) ||
+                    usesV12InviteSteps(version)
+                      ? 'v12'
+                      : usesV11InviteSteps(version)
+                        ? 'v11'
+                        : usesV10InviteSteps(version)
+                          ? 'v10'
+                          : usesV9InviteSteps(version)
+                            ? 'v9'
+                            : usesV8InviteSteps(version)
+                              ? 'v8'
+                              : 'v6'
+                  }
+                  catalogReturnDisplayStep={displayStep}
+                  catalogShowAccessNeedsFilter={usesV14InviteSteps(version)}
+                  useAccordionSections={usesV15InviteSteps(version)}
                 />
               )}
 
-              {usesV4InviteSteps(version) && logicalStep === 'permits' && (
-                <PermitApplicationsStep
-                  permitApplicationAccess={permitApplicationAccess}
-                  permitAccessError={fieldErrors.permitAccess}
-                  onChange={handlePermitApplicationAccessChange}
-                />
-              )}
+              {!usesCombinedPermissionsSteps(version) &&
+                usesDynamicDomainInviteSteps(version) &&
+                logicalStep === 'mining' && (
+                  <MiningAccessStep
+                    serviceAccess={serviceAccess}
+                    serviceAccessError={fieldErrors.serviceAccess}
+                    onChange={handleServiceAccessChange}
+                  />
+                )}
+
+              {!usesCombinedPermissionsSteps(version) &&
+                usesDynamicDomainInviteSteps(version) &&
+                logicalStep === 'permits' && (
+                  <PermitApplicationsStep
+                    permitApplicationAccess={permitApplicationAccess}
+                    permitAccessError={fieldErrors.permitAccess}
+                    onChange={handlePermitApplicationAccessChange}
+                    createVariant={
+                      usesV6InviteSteps(version)
+                        ? 'v6'
+                        : usesV5InviteSteps(version)
+                          ? 'v5'
+                          : 'v4'
+                    }
+                  />
+                )}
 
               {usesV3InviteSteps(version) && currentStep === 3 && (
                 <DomainAccessStep
@@ -671,6 +832,7 @@ export function InviteUserWizard({ prefill }: InviteUserWizardProps) {
               {currentStep === reviewStep && draft && (
                 <ReviewStep
                   draft={draft}
+                  accessNeedIds={accessNeedIds}
                   onEditStep={goToStep}
                   editTargets={reviewEditTargets}
                 />

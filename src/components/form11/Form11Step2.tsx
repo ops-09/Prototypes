@@ -17,6 +17,8 @@ import {
   upsertForm11Step2,
 } from './form11DraftStorage';
 import styles from './Form11Step2.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 2;
 const EMAIL_MISMATCH_ERROR =
@@ -141,6 +143,13 @@ export function Form11Step2() {
         />
       </div>
 
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
+      </div>
+
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
           {showErrorSummary && errorSummaryItems.length > 0 ? (
@@ -166,7 +175,8 @@ export function Form11Step2() {
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Corporation details</h1>
           <p className={styles.lead}>
-            Review primary activity and official email, then continue.
+            Review primary activity and official email, then continue. The information
+            collected on this step becomes part of the application record.
           </p>
 
           <div className={styles.formStack}>

@@ -19,11 +19,10 @@ import {
 } from './form10DraftStorage';
 import { FORM10_CERTIFIED_AGREEMENT_CAPTION } from './form10ReviewModel';
 import styles from './Form10Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form10BeforeYouBeginContent';
 
 const CURRENT_STEP = 5;
-
-const AGREEMENT_HINT =
-  'A certified copy of the amalgamation agreement approved by each of the amalgamating co-operatives. The effective date of the amalgamation agreement must be within six (6) months of the submission of the Articles of Amalgamation.';
 
 const AFFIDAVIT_HINT =
   'Affidavits of solvency (amalgamation) of two officers or of one officer and one director for each of the co-operative corporations that are being amalgamated.';
@@ -203,6 +202,13 @@ export function Form10Step3() {
         />
       </div>
 
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
+      </div>
+
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
           {showErrorSummary && errorSummaryItems.length > 0 ? (
@@ -241,12 +247,38 @@ export function Form10Step3() {
               />
             </div>
 
-            <div id="agreement">
+            <div id="agreement" className={styles.eitherOrGroup}>
+              <p className={styles.naicsLabel}>
+                {FORM10_CERTIFIED_AGREEMENT_CAPTION}
+                <span className={styles.requiredFlag}> (required)</span>
+              </p>
+              {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea. */}
+              <div className={styles.textareaCaptionClip}>
+                <OntarioTextarea
+                  elementId="certified-agreement-text"
+                  caption={'\u200B'}
+                  name="certified-agreement-text"
+                  value={step3.certifiedAgreementText}
+                  errorMessage={errors.agreement}
+                  customOnInput={(event) => {
+                    const value = getEventValue(event);
+                    setStep3((prev) => ({
+                      ...prev,
+                      certifiedAgreementText: value,
+                    }));
+                    if (value.trim() || step3.certifiedAgreement.length === 1) {
+                      clearError('agreement');
+                    }
+                  }}
+                />
+              </div>
+              <div className={styles.orSeparator} role="separator" aria-hidden="true" />
               <SupportingDocumentsUpload
-                label={FORM10_CERTIFIED_AGREEMENT_CAPTION}
-                required
+                label="Upload a PDF copy of the certified amalgamation agreement"
+                hideLabel
+                hideErrorText
                 maxFiles={1}
-                hintText={`Upload or enter the certified amalgamation agreement. You can upload one file. ${AGREEMENT_HINT}`}
+                hintText="Or upload a PDF copy of the certified amalgamation agreement."
                 value={toForm7Docs(step3.certifiedAgreement)}
                 errorMessage={errors.agreement}
                 onChange={(files) => {
@@ -256,29 +288,6 @@ export function Form10Step3() {
                   }
                 }}
                 inputId="agreement-upload"
-                aboveDropZone={
-                  <>
-                    {/* ODS gap: no rich-text WC in v8.1.0 — compose with OntarioTextarea. */}
-                    <div className={styles.textareaCaptionClip}>
-                      <OntarioTextarea
-                        elementId="certified-agreement-text"
-                        caption={'\u200B'}
-                        name="certified-agreement-text"
-                        value={step3.certifiedAgreementText}
-                        customOnInput={(event) => {
-                          const value = getEventValue(event);
-                          setStep3((prev) => ({
-                            ...prev,
-                            certifiedAgreementText: value,
-                          }));
-                          if (value.trim() || step3.certifiedAgreement.length === 1) {
-                            clearError('agreement');
-                          }
-                        }}
-                      />
-                    </div>
-                  </>
-                }
               />
             </div>
 

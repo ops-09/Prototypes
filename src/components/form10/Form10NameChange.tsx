@@ -28,6 +28,8 @@ import {
 } from './form10DraftStorage';
 import { FORM10_AMALGAMATED_NAME_CAPTION } from './form10ReviewModel';
 import styles from './Form10Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form10BeforeYouBeginContent';
 
 const CURRENT_STEP = 4;
 const ID_PREFIX = 'form10-name';
@@ -285,6 +287,13 @@ export function Form10NameChange() {
           currentStep={CURRENT_STEP}
           numberOfSteps={FORM10_TOTAL_STEPS}
         />
+      </div>
+
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">

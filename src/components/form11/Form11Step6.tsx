@@ -6,11 +6,9 @@ import {
   OntarioIconDelete,
   OntarioInput,
   OntarioPageAlert,
-  OntarioRadioButtons,
   OntarioStepIndicator,
 } from '@ongov/ontario-design-system-component-library-react';
 import { FieldErrorMessage } from '../form1/FieldErrorMessage';
-import type { DirectorCountMode } from '../form1/form1DraftStorage';
 import {
   formatDirectorAddressLine,
   formatDirectorFullName,
@@ -21,50 +19,30 @@ import {
   ensureForm11PlaygroundDraft,
   FORM11_TOTAL_STEPS,
   getDirectorLimit,
-  getDirectorMinimum,
   MIN_DIRECTORS,
   readForm11Draft,
   upsertForm11Step6,
   type Form11Step6Data,
 } from './form11DraftStorage';
-import { FORM11_DIRECTORS_CAPTION } from './form11ReviewModel';
 import styles from './Form11Step2.module.scss';
 import step4Styles from '../form1/Form1Step4.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 6;
 const DIRECTORS_AT_LEAST_THREE_ERROR = 'The number of directors must be at least 3.';
-const MIN_MAX_ORDER_ERROR =
-  'The minimum number of directors cannot be greater than the maximum.';
 const FIXED_DIRECTORS_COUNT_ERROR =
   'The number of directors added must match the fixed number of directors.';
 
-function minDirectorsCountError(minimum: number) {
-  return `At least ${minimum} directors must be added.`;
-}
-
-type PageFieldKey = 'countMode' | 'fixedNumber' | 'minimumNumber' | 'maximumNumber' | 'directors';
+type PageFieldKey = 'fixedNumber' | 'directors';
 type PageErrors = Partial<Record<PageFieldKey, string>>;
 
 const FIELD_ANCHORS: Record<PageFieldKey, string> = {
-  countMode: 'director-count-mode',
   fixedNumber: 'fixed-number-of-directors',
-  minimumNumber: 'minimum-number-of-directors',
-  maximumNumber: 'maximum-number-of-directors',
   directors: 'first-directors',
 };
 
-const FIELD_ORDER: PageFieldKey[] = [
-  'countMode',
-  'fixedNumber',
-  'minimumNumber',
-  'maximumNumber',
-  'directors',
-];
-
-const COUNT_MODE_OPTIONS = [
-  { value: 'fixed', elementId: 'count-fixed', label: 'Fixed number' },
-  { value: 'minMax', elementId: 'count-min-max', label: 'Minimum/Maximum' },
-];
+const FIELD_ORDER: PageFieldKey[] = ['fixedNumber', 'directors'];
 
 function digitsOnly(value: string) {
   return value.replace(/\D/g, '');
@@ -78,17 +56,19 @@ function parseDirectorCount(value: string) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+/** Form 11 directors use fixed count only (minimum 3). */
+function toFixedOnlyStep6(data: Form11Step6Data): Form11Step6Data {
+  return {
+    ...data,
+    countMode: 'fixed',
+    minimumNumber: '',
+    maximumNumber: '',
+  };
+}
+
 function areDirectorCountFieldsValid(data: Form11Step6Data) {
-  if (data.countMode === 'fixed') {
-    const fixed = parseDirectorCount(data.fixedNumber);
-    return fixed !== null && fixed >= MIN_DIRECTORS;
-  }
-  if (data.countMode === 'minMax') {
-    const min = parseDirectorCount(data.minimumNumber);
-    const max = parseDirectorCount(data.maximumNumber);
-    return min !== null && max !== null && min >= MIN_DIRECTORS && min <= max;
-  }
-  return false;
+  const fixed = parseDirectorCount(data.fixedNumber);
+  return fixed !== null && fixed >= MIN_DIRECTORS;
 }
 
 function directorCountFieldError(value: string): string | undefined {
@@ -104,26 +84,15 @@ function directorCountFieldError(value: string): string | undefined {
 
 function getDirectorsCountError(data: Form11Step6Data): string | undefined {
   const addedCount = data.directors.length;
-  const minimum = getDirectorMinimum(data);
-  const maximum = getDirectorLimit(data);
-
-  if (data.countMode === 'fixed' && minimum !== null && addedCount !== minimum) {
+  const fixed = parseDirectorCount(data.fixedNumber);
+  if (fixed !== null && addedCount !== fixed) {
     return FIXED_DIRECTORS_COUNT_ERROR;
-  }
-  if (data.countMode === 'minMax' && minimum !== null && addedCount < minimum) {
-    return minDirectorsCountError(minimum);
-  }
-  if (data.countMode === 'minMax' && maximum !== null && addedCount > maximum) {
-    return `No more than ${maximum} directors may be added.`;
   }
   return undefined;
 }
 
 function formatDirectorSelectionSummary(data: Form11Step6Data) {
-  if (data.countMode === 'fixed') {
-    return `You selected a fixed number of ${data.fixedNumber.trim()} directors.`;
-  }
-  return `You selected a minimum of ${data.minimumNumber.trim()} and a maximum of ${data.maximumNumber.trim()} directors.`;
+  return `You selected a fixed number of ${data.fixedNumber.trim()} directors.`;
 }
 
 export function Form11Step6() {
@@ -131,11 +100,13 @@ export function Form11Step6() {
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const [draft] = useState(() => ensureForm11PlaygroundDraft(6));
 
-  const [step6, setStep6] = useState<Form11Step6Data>(() => ({
-    ...EMPTY_STEP6,
-    ...(draft.step6 ?? {}),
-    directors: draft.step6?.directors ?? [],
-  }));
+  const [step6, setStep6] = useState<Form11Step6Data>(() =>
+    toFixedOnlyStep6({
+      ...EMPTY_STEP6,
+      ...(draft.step6 ?? {}),
+      directors: draft.step6?.directors ?? [],
+    }),
+  );
   const [errors, setErrors] = useState<PageErrors>({});
   const [showErrorSummary, setShowErrorSummary] = useState(false);
 
@@ -157,7 +128,7 @@ export function Form11Step6() {
   const showDirectorList = areDirectorCountFieldsValid(step6);
 
   function patchStep6(partial: Partial<Form11Step6Data>) {
-    setStep6((prev) => ({ ...prev, ...partial }));
+    setStep6((prev) => toFixedOnlyStep6({ ...prev, ...partial }));
   }
 
   function clearError(key: PageFieldKey) {
@@ -171,59 +142,14 @@ export function Form11Step6() {
     });
   }
 
-  function syncLiveMinMaxCountErrors(data: Form11Step6Data) {
-    const countError = directorCountFieldError(data.minimumNumber);
-    if (countError) {
-      setErrors((prev) => ({ ...prev, minimumNumber: countError }));
-      return;
-    }
-    const min = parseDirectorCount(data.minimumNumber);
-    const max = parseDirectorCount(data.maximumNumber);
-    if (min !== null && max !== null && min > max) {
-      setErrors((prev) => ({ ...prev, minimumNumber: MIN_MAX_ORDER_ERROR }));
-      return;
-    }
-    clearError('minimumNumber');
-  }
-
   function validatePage(): PageErrors {
     const page: PageErrors = {};
-    if (!step6.countMode) {
-      page.countMode = 'Select how the number of directors is specified.';
-    }
-    if (step6.countMode === 'fixed') {
-      if (!step6.fixedNumber.trim()) {
-        page.fixedNumber = 'Enter the fixed number of directors.';
-      } else {
-        const fixed = Number.parseInt(step6.fixedNumber, 10);
-        if (!Number.isFinite(fixed) || fixed < MIN_DIRECTORS) {
-          page.fixedNumber = DIRECTORS_AT_LEAST_THREE_ERROR;
-        }
-      }
-    }
-    if (step6.countMode === 'minMax') {
-      if (!step6.minimumNumber.trim()) {
-        page.minimumNumber = 'Enter the minimum number of directors.';
-      } else {
-        const min = Number.parseInt(step6.minimumNumber, 10);
-        if (!Number.isFinite(min) || min < MIN_DIRECTORS) {
-          page.minimumNumber = DIRECTORS_AT_LEAST_THREE_ERROR;
-        }
-      }
-      if (!step6.maximumNumber.trim()) {
-        page.maximumNumber = 'Enter the maximum number of directors.';
-      }
-      const min = Number.parseInt(step6.minimumNumber, 10);
-      const max = Number.parseInt(step6.maximumNumber, 10);
-      if (
-        step6.minimumNumber.trim() &&
-        step6.maximumNumber.trim() &&
-        Number.isFinite(min) &&
-        Number.isFinite(max) &&
-        min >= MIN_DIRECTORS &&
-        min > max
-      ) {
-        page.minimumNumber = MIN_MAX_ORDER_ERROR;
+    if (!step6.fixedNumber.trim()) {
+      page.fixedNumber = 'Enter the fixed number of directors.';
+    } else {
+      const fixed = Number.parseInt(step6.fixedNumber, 10);
+      if (!Number.isFinite(fixed) || fixed < MIN_DIRECTORS) {
+        page.fixedNumber = DIRECTORS_AT_LEAST_THREE_ERROR;
       }
     }
     const directorsError = getDirectorsCountError(step6);
@@ -234,7 +160,7 @@ export function Form11Step6() {
   }
 
   function persistStep6(next: Form11Step6Data) {
-    upsertForm11Step6(next, 'draft', readForm11Draft()?.lastCompletedStep ?? 5);
+    upsertForm11Step6(toFixedOnlyStep6(next), 'draft', readForm11Draft()?.lastCompletedStep ?? 5);
   }
 
   function handleContinue() {
@@ -248,12 +174,12 @@ export function Form11Step6() {
       });
       return;
     }
-    upsertForm11Step6(step6, 'continue');
+    upsertForm11Step6(toFixedOnlyStep6(step6), 'continue');
     navigate('/form-11/step-7');
   }
 
   function handleSaveAsDraft() {
-    upsertForm11Step6(step6, 'draft', readForm11Draft()?.lastCompletedStep ?? 5);
+    upsertForm11Step6(toFixedOnlyStep6(step6), 'draft', readForm11Draft()?.lastCompletedStep ?? 5);
     navigate('/form-11/draft-summary');
   }
 
@@ -308,6 +234,13 @@ export function Form11Step6() {
         />
       </div>
 
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
+      </div>
+
       <div className="ontario-row">
         <div className="ontario-columns ontario-small-12 ontario-medium-8">
           {showErrorSummary && errorSummaryItems.length > 0 ? (
@@ -332,114 +265,37 @@ export function Form11Step6() {
           ) : null}
 
           <h1 className={`ontario-h1 ${styles.pageTitle}`}>Directors</h1>
-          <p className={styles.lead}>{FORM11_DIRECTORS_CAPTION}</p>
           <p className={styles.lead}>
             Provide the first directors of the amalgamated corporation and their addresses
             for service. At least {MIN_DIRECTORS} directors must be added.
           </p>
 
           <div className={styles.formStack}>
-            <div id={FIELD_ANCHORS.countMode}>
-              <OntarioRadioButtons
-                caption="Please specify the number of directors for your corporation"
-                name="director-count-mode"
+            <div id={FIELD_ANCHORS.fixedNumber} className={step4Styles.countFields}>
+              <OntarioInput
+                elementId={FIELD_ANCHORS.fixedNumber}
+                caption="Fixed number of directors"
+                name="fixed-number-of-directors"
+                type="text"
                 required
-                hintText="The amalgamated corporation must have at least 3 directors."
-                value={step6.countMode}
-                options={COUNT_MODE_OPTIONS}
-                errorMessage={errors.countMode}
-                customOnChange={(event) => {
-                  const value = getEventValue(event) as DirectorCountMode;
-                  patchStep6({
-                    countMode: value,
-                    ...(value === 'fixed'
-                      ? { minimumNumber: '', maximumNumber: '' }
-                      : { fixedNumber: '' }),
-                  });
-                  clearError('countMode');
-                  clearError('fixedNumber');
-                  clearError('minimumNumber');
-                  clearError('maximumNumber');
+                requiredValidationMessage="Enter the fixed number of directors."
+                hintText="Enter the fixed number of directors. The number must be at least 3."
+                inputWidth="5-char-width"
+                value={step6.fixedNumber}
+                errorMessage={errors.fixedNumber}
+                customOnInput={(event) => {
+                  const fixedNumber = digitsOnly(getEventValue(event));
+                  patchStep6({ fixedNumber });
                   clearError('directors');
+                  const countError = directorCountFieldError(fixedNumber);
+                  if (countError) {
+                    setErrors((prev) => ({ ...prev, fixedNumber: countError }));
+                  } else {
+                    clearError('fixedNumber');
+                  }
                 }}
               />
             </div>
-
-            {step6.countMode === 'fixed' ? (
-              <div id={FIELD_ANCHORS.fixedNumber} className={step4Styles.countFields}>
-                <OntarioInput
-                  elementId={FIELD_ANCHORS.fixedNumber}
-                  caption="Fixed number of directors"
-                  name="fixed-number-of-directors"
-                  type="text"
-                  required
-                  requiredValidationMessage="Enter the fixed number of directors."
-                  hintText="Enter the fixed number of directors. The number must be at least 3."
-                  inputWidth="5-char-width"
-                  value={step6.fixedNumber}
-                  errorMessage={errors.fixedNumber}
-                  customOnInput={(event) => {
-                    const fixedNumber = digitsOnly(getEventValue(event));
-                    patchStep6({ fixedNumber });
-                    clearError('directors');
-                    const countError = directorCountFieldError(fixedNumber);
-                    if (countError) {
-                      setErrors((prev) => ({ ...prev, fixedNumber: countError }));
-                    } else {
-                      clearError('fixedNumber');
-                    }
-                  }}
-                />
-              </div>
-            ) : null}
-
-            {step6.countMode === 'minMax' ? (
-              <div className={step4Styles.countFields}>
-                <div id={FIELD_ANCHORS.minimumNumber}>
-                  <OntarioInput
-                    elementId={FIELD_ANCHORS.minimumNumber}
-                    caption="Minimum number of directors"
-                    name="minimum-number-of-directors"
-                    type="text"
-                    required
-                    requiredValidationMessage="Enter the minimum number of directors."
-                    hintText="Enter the minimum number of directors. The number must be at least 3."
-                    inputWidth="5-char-width"
-                    value={step6.minimumNumber}
-                    errorMessage={errors.minimumNumber}
-                    customOnInput={(event) => {
-                      const minimumNumber = digitsOnly(getEventValue(event));
-                      const next = { ...step6, minimumNumber };
-                      patchStep6({ minimumNumber });
-                      clearError('directors');
-                      syncLiveMinMaxCountErrors(next);
-                    }}
-                  />
-                </div>
-                <div id={FIELD_ANCHORS.maximumNumber}>
-                  <OntarioInput
-                    elementId={FIELD_ANCHORS.maximumNumber}
-                    caption="Maximum number of directors"
-                    name="maximum-number-of-directors"
-                    type="text"
-                    required
-                    requiredValidationMessage="Enter the maximum number of directors."
-                    hintText="Please enter the maximum number of directors."
-                    inputWidth="5-char-width"
-                    value={step6.maximumNumber}
-                    errorMessage={errors.maximumNumber}
-                    customOnInput={(event) => {
-                      const maximumNumber = digitsOnly(getEventValue(event));
-                      const next = { ...step6, maximumNumber };
-                      patchStep6({ maximumNumber });
-                      clearError('maximumNumber');
-                      clearError('directors');
-                      syncLiveMinMaxCountErrors(next);
-                    }}
-                  />
-                </div>
-              </div>
-            ) : null}
 
             {showDirectorList ? (
               <div id={FIELD_ANCHORS.directors} className={step4Styles.directorsSection}>

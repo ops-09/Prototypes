@@ -14,6 +14,8 @@ import {
   type Form3Step5Data,
 } from './form3DraftStorage';
 import styles from './Form3Step1.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form3BeforeYouBeginContent';
 
 const CURRENT_STEP = 6;
 const AUTH_OPTION_VALUE = 'authorized';
@@ -90,6 +92,7 @@ export function Form3Step6() {
 
   return (
     <FilingSubmitStep
+      headerCard={<FormNameCard applicationType={BYB_FORM_NAME} />}
       currentStep={CURRENT_STEP}
       numberOfSteps={FORM3_TOTAL_STEPS}
       backButtonUrl="/form-3/step-5"

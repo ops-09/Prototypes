@@ -26,18 +26,20 @@
 }
 
 .tableCheckboxCell {
+  position: relative;
   text-align: center;
   vertical-align: middle;
   width: 6rem;
+  // Label fills the cell; padding lives on the control so the whole cell toggles
+  padding: 0;
 }
 
 .tableCheckbox {
-  position: relative;
-  display: inline-flex;
+  position: absolute;
+  inset: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
   margin: 0;
   cursor: pointer;
 }

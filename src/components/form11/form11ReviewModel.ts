@@ -78,6 +78,9 @@ function isAmalgamatingComplete(draft: Form11Draft) {
 }
 
 function isNameComplete(draft: Form11Draft) {
+  if (!draft.step4.agreementApproved) {
+    return false;
+  }
   if (draft.step4.changeName === 'no') {
     return Boolean(form11AmalgamatedName(draft));
   }
@@ -101,8 +104,12 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
   const nameRows: ReviewRow[] = [
     { name: 'Selected naming option', description: namingOption },
     {
-      name: FORM11_AMALGAMATED_NAME_CAPTION,
+      name: 'New name of the amalgamated corporation',
       description: displayOrEmpty(form11AmalgamatedName(draft)),
+    },
+    {
+      name: FORM11_AGREEMENT_STATEMENT,
+      description: draft.step4.agreementApproved ? 'Confirmed' : 'Not provided',
     },
   ];
 
@@ -226,15 +233,32 @@ export function buildReviewSections(draft: Form11Draft): ReviewSection[] {
       caption: 'Amalgamation agreement',
       editHref: '/form-11/step-7',
       complete: hasForm11Agreement(draft.step7),
-      rows: [
-        {
-          name: FORM11_CERTIFIED_AGREEMENT_CAPTION,
-          description: displayOrEmpty(draft.step7.amalgamationAgreement?.name ?? ''),
-          files: draft.step7.amalgamationAgreement
-            ? [draft.step7.amalgamationAgreement]
-            : undefined,
-        },
-      ],
+      rows: (() => {
+        const agreementText = draft.step7.amalgamationAgreementText?.trim() ?? '';
+        return [
+          ...(agreementText
+            ? [
+                {
+                  name: FORM11_CERTIFIED_AGREEMENT_CAPTION,
+                  description: agreementText,
+                },
+              ]
+            : []),
+          ...(draft.step7.amalgamationAgreement || !agreementText
+            ? [
+                {
+                  name: FORM11_CERTIFIED_AGREEMENT_CAPTION,
+                  description: displayOrEmpty(
+                    draft.step7.amalgamationAgreement?.name ?? '',
+                  ),
+                  files: draft.step7.amalgamationAgreement
+                    ? [draft.step7.amalgamationAgreement]
+                    : undefined,
+                },
+              ]
+            : []),
+        ];
+      })(),
     },
   ];
 

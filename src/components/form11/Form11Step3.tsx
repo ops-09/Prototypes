@@ -26,6 +26,8 @@ import { DUPLICATE_ERROR } from './Form11CorporationEditor';
 import { FORM11_AMALGAMATING_NAMES_CAPTION } from './form11ReviewModel';
 import pageStyles from './Form11Step2.module.scss';
 import styles from './Form11Step3.module.scss';
+import { FormNameCard } from '../shared/FormNameCard';
+import { BYB_FORM_NAME } from './form11BeforeYouBeginContent';
 
 const CURRENT_STEP = 3;
 const BOUND_CORP_ERROR =
@@ -172,6 +174,12 @@ export function Form11Step3() {
           currentStep={CURRENT_STEP}
           numberOfSteps={FORM11_TOTAL_STEPS}
         />
+      </div>
+
+      <div className="ontario-row">
+        <div className="ontario-columns ontario-small-12">
+          <FormNameCard applicationType={BYB_FORM_NAME} />
+        </div>
       </div>
 
       <div className="ontario-row">
